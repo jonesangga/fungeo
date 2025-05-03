@@ -1,2 +1,3 @@
-"use strict";
-console.log("real");
+import { repl } from "./ui/repl.js";
+console.log(repl);
+repl.place(100, 100);

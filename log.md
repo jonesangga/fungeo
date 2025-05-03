@@ -2,6 +2,13 @@
 
 #### 03-05-25
 
+- add repl
+    - create replDiv element
+    - append to body
+    - etc
+- restart index.html
+- change tsconfig to use module
+- add package.json
 - Restart again
 
 #### 02-05-25
