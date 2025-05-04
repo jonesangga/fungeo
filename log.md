@@ -2,6 +2,12 @@
 
 #### 04-05-25
 
+- remove Clear
+- clean up TokenT, group like keyword, operator, etc
+- create objs TokenTName containing string version of enum TokenT item.
+- rename TokenType to TokenT
+- scanner.all_string() method
+- add scanner.ts
 - add server deps
 - add history
 

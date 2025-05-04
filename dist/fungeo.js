@@ -1,3 +1,7 @@
 import { repl } from "./ui/repl.js";
-console.log(repl);
+import { scanner } from "./scanner.js";
 repl.place(100, 100);
+let source = "a = 2\nprint a\nl = L 100 100 200 200; draw l";
+scanner.init(source);
+let result = scanner.all_string();
+console.log(result);
