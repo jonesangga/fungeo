@@ -8,7 +8,7 @@
   "main": "fungeo.js",
   "scripts": {
     "start": "http-server -c-1 -p 9999",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

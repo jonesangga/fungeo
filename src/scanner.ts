@@ -1,6 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
 // TODO: Parse negative number instead of TokenT.Minus + TokenT.Number.
+//       Support comment.
 
 const enum TokenT {
     // Single character.
@@ -18,28 +19,28 @@ const enum TokenT {
 };
 
 const TokenTName: { [key in TokenT]: string } = {
-    [TokenT.Comma]: "Comma",
-    [TokenT.LParen]: "LParen",
-    [TokenT.RParen]: "RParen",
-    [TokenT.LBracket]: "LBracket",
-    [TokenT.RBracket]: "RBracket",
-    [TokenT.Minus]: "Minus",
-    [TokenT.Plus]: "Plus",
-    [TokenT.Slash]: "Slash",
-    [TokenT.Star]: "Star",
-    [TokenT.Dollar]: "Dollar",
-    [TokenT.Colon]: "Colon",
     [TokenT.Bang]: "Bang",
+    [TokenT.Colon]: "Colon",
+    [TokenT.ColonEq]: "ColonEq",
+    [TokenT.Comma]: "Comma",
+    [TokenT.Dollar]: "Dollar",
+    [TokenT.EOF]: "EOF",
     [TokenT.Eq]: "Eq",
+    [TokenT.Error]: "Error",
+    [TokenT.False]: "False",
+    [TokenT.LBracket]: "LBracket",
+    [TokenT.LParen]: "LParen",
+    [TokenT.Minus]: "Minus",
     [TokenT.Name]: "Name",
     [TokenT.Number]: "Number",
-    [TokenT.ColonEq]: "ColonEq",
-    [TokenT.String]: "String",
-    [TokenT.False]: "False",
-    [TokenT.True]: "True",
+    [TokenT.Plus]: "Plus",
+    [TokenT.RBracket]: "RBracket",
+    [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
-    [TokenT.EOF]: "EOF",
-    [TokenT.Error]: "Error",
+    [TokenT.Slash]: "Slash",
+    [TokenT.Star]: "Star",
+    [TokenT.String]: "String",
+    [TokenT.True]: "True",
 };
 
 interface Token {
@@ -94,7 +95,7 @@ function make_token(kind: TokenT): Token {
 }
 
 function error_token(errorMessage: string): Token {
-    return { kind: TokenT.Error, start, end: 0, line, errorMessage };
+    return { kind: TokenT.Error, start, end: current, line, errorMessage };
 }
 
 function name_type(): TokenT {
@@ -134,7 +135,7 @@ function string_(): Token {
     }
 
     if (is_at_end())
-        return error_token("Unterminated string");
+        return error_token("unterminated string");
 
     advance();          // Consume the closing quote.
     return make_token(TokenT.String);
@@ -196,7 +197,7 @@ const scanner = {
             case '"': return string_();
         }
      
-        return error_token("Unexpected character");
+        return error_token("unexpected character");
     },
 
     all(): Token[] {

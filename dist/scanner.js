@@ -1,27 +1,52 @@
+var TokenT;
+(function (TokenT) {
+    TokenT[TokenT["Comma"] = 0] = "Comma";
+    TokenT[TokenT["Dollar"] = 1] = "Dollar";
+    TokenT[TokenT["Semicolon"] = 2] = "Semicolon";
+    TokenT[TokenT["LParen"] = 3] = "LParen";
+    TokenT[TokenT["RParen"] = 4] = "RParen";
+    TokenT[TokenT["LBracket"] = 5] = "LBracket";
+    TokenT[TokenT["RBracket"] = 6] = "RBracket";
+    TokenT[TokenT["Minus"] = 7] = "Minus";
+    TokenT[TokenT["Plus"] = 8] = "Plus";
+    TokenT[TokenT["Slash"] = 9] = "Slash";
+    TokenT[TokenT["Star"] = 10] = "Star";
+    TokenT[TokenT["Bang"] = 11] = "Bang";
+    TokenT[TokenT["Colon"] = 12] = "Colon";
+    TokenT[TokenT["ColonEq"] = 13] = "ColonEq";
+    TokenT[TokenT["Eq"] = 14] = "Eq";
+    TokenT[TokenT["Name"] = 15] = "Name";
+    TokenT[TokenT["Number"] = 16] = "Number";
+    TokenT[TokenT["String"] = 17] = "String";
+    TokenT[TokenT["True"] = 18] = "True";
+    TokenT[TokenT["False"] = 19] = "False";
+    TokenT[TokenT["EOF"] = 20] = "EOF";
+    TokenT[TokenT["Error"] = 21] = "Error";
+})(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
-    [0]: "Comma",
-    [3]: "LParen",
-    [4]: "RParen",
-    [5]: "LBracket",
-    [6]: "RBracket",
-    [7]: "Minus",
-    [8]: "Plus",
-    [9]: "Slash",
-    [10]: "Star",
-    [1]: "Dollar",
-    [12]: "Colon",
     [11]: "Bang",
+    [12]: "Colon",
+    [13]: "ColonEq",
+    [0]: "Comma",
+    [1]: "Dollar",
+    [20]: "EOF",
     [14]: "Eq",
+    [21]: "Error",
+    [19]: "False",
+    [5]: "LBracket",
+    [3]: "LParen",
+    [7]: "Minus",
     [15]: "Name",
     [16]: "Number",
-    [13]: "ColonEq",
-    [17]: "String",
-    [19]: "False",
-    [18]: "True",
+    [8]: "Plus",
+    [6]: "RBracket",
+    [4]: "RParen",
     [2]: "Semicolon",
-    [20]: "EOF",
-    [21]: "Error",
+    [9]: "Slash",
+    [10]: "Star",
+    [17]: "String",
+    [18]: "True",
 };
 let source = "";
 let start = 0;
@@ -60,7 +85,7 @@ function make_token(kind) {
     return { kind, start, end: current, line };
 }
 function error_token(errorMessage) {
-    return { kind: 21, start, end: 0, line, errorMessage };
+    return { kind: 21, start, end: current, line, errorMessage };
 }
 function name_type() {
     switch (source.slice(start, current)) {
@@ -91,7 +116,7 @@ function string_() {
         advance();
     }
     if (is_at_end())
-        return error_token("Unterminated string");
+        return error_token("unterminated string");
     advance();
     return make_token(17);
 }
@@ -147,7 +172,7 @@ const scanner = {
             case '=': return make_token(14);
             case '"': return string_();
         }
-        return error_token("Unexpected character");
+        return error_token("unexpected character");
     },
     all() {
         let result = [];
@@ -182,4 +207,4 @@ function pad9(str) {
 function pad4(n) {
     return ('   ' + n).slice(-4);
 }
-export { TokenTName, scanner };
+export { TokenT, TokenTName, scanner };
