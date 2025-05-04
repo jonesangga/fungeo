@@ -1,10 +1,11 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
-//  container:  Contains three components below.
+//  container:  Contains four components below.
 //  holder:     Drag it to move container.
 //  input:      Textarea to input code.
+//  terminal:   List all histories, outputs and errors. Hidden by default.
 //  output:     A small console for displaying the executed code output (if any),
-//              and also error message. Hidden by default.
+//              and also error message when terminal is hidden. Hidden by default.
 
 const container = document.createElement("div");
 document.body.appendChild(container);
@@ -51,7 +52,7 @@ const colorOk   = "#70d196"; // Soft green.
 const colorFail = "#e85b5b"; // Soft red.
 let offsetX = 0;
 let offsetY = 0;
-let history: string[] = [""];
+let history: { code: string, output?: string }[] = [{ code: "" }];
 let historyViewIdx    = 1;
 let savedLine         = ""; // Save line when going to view history.
 
@@ -105,7 +106,7 @@ function input_binding(e: any): void {
                 savedLine = input.value;
             }
             historyViewIdx--;
-            input.value = history[historyViewIdx];
+            input.value = history[historyViewIdx].code;
             input_resize();
         }
         e.preventDefault(); // To prevent cursor moves to beginning of text.
@@ -113,7 +114,7 @@ function input_binding(e: any): void {
     else if (e.key === "ArrowDown" && !e.repeat) {
         if (historyViewIdx < history.length - 1) {
             historyViewIdx++;
-            input.value = history[historyViewIdx];
+            input.value = history[historyViewIdx].code;
         } else if (historyViewIdx === history.length - 1) {
             historyViewIdx++;
             input.value = savedLine;
@@ -125,6 +126,14 @@ function input_binding(e: any): void {
         let source = input.value.trim();
         if (source !== "") {
             input.value = "";
+            input_reset();
+
+            source = source.replaceAll("\n", "\n| ");
+
+            if (history[history.length - 1].code !== source) {
+                history.push({ code: source });
+            }
+            historyViewIdx = history.length;
 
             // For testing. Delete later.
             if (source.length < 5)
@@ -132,13 +141,7 @@ function input_binding(e: any): void {
             else
                 repl.ok("nice");
             // main(source);
-
-            if (history[history.length - 1] !== source) {
-                history.push(source);
-            }
-            // replHistory.add(source);
-            historyViewIdx = history.length;
-            input_reset();
+            terminal_update();
         }
         e.preventDefault();
     }
@@ -156,22 +159,60 @@ const repl = {
     },
 
     ok(message: string): void {
+        history[history.length - 1].output = message;
         holder.style.background = colorOk;
-        if (message === "") {
-            output.style.visibility  = "hidden";
-        } else {
-            output.style.visibility  = "visible";
-            output.style.borderColor = colorOk;
-            output.innerHTML = message;
+
+        if (!terminalShow) {
+            if (message === "") {
+                output.style.visibility  = "hidden";
+            } else {
+                output.style.visibility  = "visible";
+                output.style.borderColor = colorOk;
+                output.innerHTML = message;
+            }
         }
     },
  
     error(message: string): void {
+        history[history.length - 1].output = message;
         holder.style.background  = colorFail;
-        output.style.visibility  = "visible";
-        output.style.borderColor = colorFail;
-        output.innerHTML = message;
+
+        if (!terminalShow) {
+            output.style.visibility  = "visible";
+            output.style.borderColor = colorFail;
+            output.innerHTML = message;
+        }
     }
+}
+
+//--------------------------------------------------------------------
+// Termninal
+//
+// TODO: Add <span> for coloring error message.
+//       Change it to be an object and add its name in names object.
+
+const terminal = document.createElement("pre");
+container.appendChild(terminal);
+terminal.style.position   = "absolute";
+terminal.style.top        = "-100px";
+terminal.style.left       = "15px";
+terminal.style.width      = "220px";
+terminal.style.height     = "90px";
+terminal.style.border     = "1px solid #000";
+terminal.style.fontSize   = "11px";
+terminal.style.background = "#eee";
+terminal.style.overflow   = "scroll";
+// terminal.style.visibility = "hidden";
+
+let terminalShow = true;
+
+function terminal_update() {
+    let item = history[history.length - 1];
+    terminal.innerHTML += `> ${ item.code }\n`;
+    if (Object.hasOwn(item, "output")) {
+        terminal.innerHTML += `${ item.output }\n`;
+    }
+    terminal.scrollTop = terminal.scrollHeight;
 }
 
 export { repl };

@@ -39,7 +39,7 @@ const colorOk = "#70d196";
 const colorFail = "#e85b5b";
 let offsetX = 0;
 let offsetY = 0;
-let history = [""];
+let history = [{ code: "" }];
 let historyViewIdx = 1;
 let savedLine = "";
 holder.addEventListener("mousedown", mousedown_cb);
@@ -86,7 +86,7 @@ function input_binding(e) {
                 savedLine = input.value;
             }
             historyViewIdx--;
-            input.value = history[historyViewIdx];
+            input.value = history[historyViewIdx].code;
             input_resize();
         }
         e.preventDefault();
@@ -94,7 +94,7 @@ function input_binding(e) {
     else if (e.key === "ArrowDown" && !e.repeat) {
         if (historyViewIdx < history.length - 1) {
             historyViewIdx++;
-            input.value = history[historyViewIdx];
+            input.value = history[historyViewIdx].code;
         }
         else if (historyViewIdx === history.length - 1) {
             historyViewIdx++;
@@ -106,15 +106,17 @@ function input_binding(e) {
         let source = input.value.trim();
         if (source !== "") {
             input.value = "";
+            input_reset();
+            source = source.replaceAll("\n", "\n| ");
+            if (history[history.length - 1].code !== source) {
+                history.push({ code: source });
+            }
+            historyViewIdx = history.length;
             if (source.length < 5)
                 repl.error("too small alkja a la aj ak a aj aj lajflkajfajelajelakf awej aejfa lejf");
             else
                 repl.ok("nice");
-            if (history[history.length - 1] !== source) {
-                history.push(source);
-            }
-            historyViewIdx = history.length;
-            input_reset();
+            terminal_update();
         }
         e.preventDefault();
     }
@@ -129,21 +131,47 @@ const repl = {
         container.style.top = y + "px";
     },
     ok(message) {
+        history[history.length - 1].output = message;
         holder.style.background = colorOk;
-        if (message === "") {
-            output.style.visibility = "hidden";
-        }
-        else {
-            output.style.visibility = "visible";
-            output.style.borderColor = colorOk;
-            output.innerHTML = message;
+        if (!terminalShow) {
+            if (message === "") {
+                output.style.visibility = "hidden";
+            }
+            else {
+                output.style.visibility = "visible";
+                output.style.borderColor = colorOk;
+                output.innerHTML = message;
+            }
         }
     },
     error(message) {
+        history[history.length - 1].output = message;
         holder.style.background = colorFail;
-        output.style.visibility = "visible";
-        output.style.borderColor = colorFail;
-        output.innerHTML = message;
+        if (!terminalShow) {
+            output.style.visibility = "visible";
+            output.style.borderColor = colorFail;
+            output.innerHTML = message;
+        }
     }
 };
+const terminal = document.createElement("pre");
+container.appendChild(terminal);
+terminal.style.position = "absolute";
+terminal.style.top = "-100px";
+terminal.style.left = "15px";
+terminal.style.width = "220px";
+terminal.style.height = "90px";
+terminal.style.border = "1px solid #000";
+terminal.style.fontSize = "11px";
+terminal.style.background = "#eee";
+terminal.style.overflow = "scroll";
+let terminalShow = true;
+function terminal_update() {
+    let item = history[history.length - 1];
+    terminal.innerHTML += `> ${item.code}\n`;
+    if (Object.hasOwn(item, "output")) {
+        terminal.innerHTML += `${item.output}\n`;
+    }
+    terminal.scrollTop = terminal.scrollHeight;
+}
 export { repl };
