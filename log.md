@@ -1,5 +1,10 @@
 # Log
 
+#### 04-05-25
+
+- add server deps
+- add history
+
 #### 03-05-25
 
 - add repl
