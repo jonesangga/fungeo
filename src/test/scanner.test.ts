@@ -5,7 +5,7 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { TokenT, scanner } from "../dist/scanner.js"
+import { TokenT, scanner } from "../scanner.js"
 
 describe("scanner", () => {
 

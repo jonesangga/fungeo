@@ -2,6 +2,14 @@
 
 #### 05-05-25
 
+- change test script in package.json
+- remove test dir in root
+- use
+    "module": "nodenext"
+    "moduleResolution": "nodenext"
+- test move test to src
+- test nodeNext module
+- add dev-dependencies @types/node
 - use import type
 - add names.ts
 - remoove interface for Lit*, make them into class

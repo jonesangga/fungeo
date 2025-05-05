@@ -8,9 +8,10 @@
   "main": "fungeo.js",
   "scripts": {
     "start": "http-server -c-1 -p 9999",
-    "test": "node --test"
+    "test": "node --test ./dist/test/*"
   },
   "devDependencies": {
+    "@types/node": "^22.15.3",
     "typescript": "^5.8.3"
   },
   "dependencies": {
