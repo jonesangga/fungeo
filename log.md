@@ -1,7 +1,18 @@
 # Log
 
+#### 05-05-25
+
+- add names.ts
+- remoove interface for Lit*, make them into class
+
 #### 04-05-25
 
+- make OpName object
+- change OpCode to Op
+- add types.ts
+- add value.ts
+- add chunk.ts
+- add compiler.ts
 - remove Clear
 - clean up TokenT, group like keyword, operator, etc
 - create objs TokenTName containing string version of enum TokenT item.

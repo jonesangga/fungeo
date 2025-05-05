@@ -239,4 +239,4 @@ function pad4(n: number): string {
     return ('   '+n).slice(-4);
 }
 
-export { TokenT, TokenTName, scanner };
+export { TokenT, TokenTName, Token, scanner };
