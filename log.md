@@ -2,6 +2,7 @@
 
 #### 05-05-25
 
+- test value.ts
 - change Op.Const to Op.Load
 - change chunk.add_constants to chunk.add_value
 - change chunk.constants to chunk.values

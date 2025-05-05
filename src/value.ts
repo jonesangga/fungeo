@@ -29,7 +29,7 @@ export class FGBoolean {
 export class FGCallable {
     kind: Kind.Callable = Kind.Callable;
     constructor(public value: (n: number) => void) {}
-    to_str(): string { return this.value.toString(); }
+    to_str(): string { return "fn(n: number): void"; }
 }
 
 export class FGNumber {

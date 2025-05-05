@@ -32,7 +32,7 @@ export class FGCallable {
     constructor(value) {
         this.value = value;
     }
-    to_str() { return this.value.toString(); }
+    to_str() { return "fn(n: number): void"; }
 }
 export class FGNumber {
     value;
