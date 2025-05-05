@@ -1,8 +1,7 @@
 import { repl } from "./ui/repl.js";
-import { compiler } from "./compiler.js";
-import { Chunk } from "./chunk.js";
+import { scanner } from "./scanner.js";
 repl.place(100, 100);
-let chunk = new Chunk("testing");
-let source = "a = 2";
-let compilerResult = compiler.compile(source, chunk);
-console.log(chunk.debug());
+let source = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true `;
+scanner.init(source);
+let result = scanner.all_string();
+console.log(result);

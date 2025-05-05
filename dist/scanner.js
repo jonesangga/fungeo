@@ -81,11 +81,19 @@ function match(expected) {
     current++;
     return true;
 }
-function make_token(kind) {
-    return { kind, start, end: current, line };
+function token_no_lexeme(kind) {
+    return { kind, line };
 }
-function error_token(errorMessage) {
-    return { kind: 21, start, end: current, line, errorMessage };
+function token_lexeme(kind) {
+    let lexeme = source.slice(start, current);
+    return { kind, lexeme, line };
+}
+function token_string(kind) {
+    let lexeme = source.slice(start + 1, current - 1);
+    return { kind, lexeme, line };
+}
+function token_error(errorMessage) {
+    return { kind: 21, errorMessage, line };
 }
 function name_type() {
     switch (source.slice(start, current)) {
@@ -97,7 +105,7 @@ function name_type() {
 function name() {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
-    return make_token(name_type());
+    return token_lexeme(name_type());
 }
 function number_() {
     while (is_digit(peek()))
@@ -107,7 +115,7 @@ function number_() {
         while (is_digit(peek()))
             advance();
     }
-    return make_token(16);
+    return token_lexeme(16);
 }
 function string_() {
     while (peek() != '"' && !is_at_end()) {
@@ -116,9 +124,9 @@ function string_() {
         advance();
     }
     if (is_at_end())
-        return error_token("unterminated string");
+        return token_error("unterminated string");
     advance();
-    return make_token(17);
+    return token_string(17);
 }
 function skip_whitespace() {
     for (;;) {
@@ -149,30 +157,30 @@ const scanner = {
         skip_whitespace();
         start = current;
         if (is_at_end())
-            return make_token(20);
+            return token_no_lexeme(20);
         let c = advance();
         if (is_digit(c))
             return number_();
         if (is_alpha(c))
             return name();
         switch (c) {
-            case '(': return make_token(3);
-            case ')': return make_token(4);
-            case '[': return make_token(5);
-            case ']': return make_token(6);
-            case '$': return make_token(1);
-            case ';': return make_token(2);
-            case ':': return make_token(match('=') ? 13 : 12);
-            case ',': return make_token(0);
-            case '-': return make_token(7);
-            case '+': return make_token(8);
-            case '/': return make_token(9);
-            case '*': return make_token(10);
-            case '!': return make_token(11);
-            case '=': return make_token(14);
+            case '(': return token_no_lexeme(3);
+            case ')': return token_no_lexeme(4);
+            case '[': return token_no_lexeme(5);
+            case ']': return token_no_lexeme(6);
+            case '$': return token_no_lexeme(1);
+            case ';': return token_no_lexeme(2);
+            case ':': return token_no_lexeme(match('=') ? 13 : 12);
+            case ',': return token_no_lexeme(0);
+            case '-': return token_no_lexeme(7);
+            case '+': return token_no_lexeme(8);
+            case '/': return token_no_lexeme(9);
+            case '*': return token_no_lexeme(10);
+            case '!': return token_no_lexeme(11);
+            case '=': return token_no_lexeme(14);
             case '"': return string_();
         }
-        return error_token("unexpected character");
+        return token_error("unexpected character");
     },
     all() {
         let result = [];
@@ -194,7 +202,7 @@ const scanner = {
             else {
                 result += "   | ";
             }
-            result += `${pad9(TokenTName[token.kind])} '${source.slice(token.start, token.end)}'\n`;
+            result += `${pad9(TokenTName[token.kind])} '${Object.hasOwn(token, "lexeme") ? token.lexeme : ""}'\n`;
             if (token.kind === 20)
                 break;
         }

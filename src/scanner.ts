@@ -45,9 +45,8 @@ const TokenTName: { [key in TokenT]: string } = {
 
 interface Token {
     kind:          TokenT;
-    start:         number;
-    end:           number;
     line:          number;
+    lexeme?:       string;
     errorMessage?: string;
 }
 
@@ -90,12 +89,22 @@ function match(expected: string): boolean {
     return true;
 }
 
-function make_token(kind: TokenT): Token {
-    return { kind, start, end: current, line };
+function token_no_lexeme(kind: TokenT): Token {
+    return { kind, line };
 }
 
-function error_token(errorMessage: string): Token {
-    return { kind: TokenT.Error, start, end: current, line, errorMessage };
+function token_lexeme(kind: TokenT): Token {
+    let lexeme = source.slice(start, current);
+    return { kind, lexeme, line };
+}
+
+function token_string(kind: TokenT): Token {
+    let lexeme = source.slice(start + 1, current - 1);
+    return { kind, lexeme, line };
+}
+
+function token_error(errorMessage: string): Token {
+    return { kind: TokenT.Error, errorMessage, line };
 }
 
 function name_type(): TokenT {
@@ -110,7 +119,7 @@ function name_type(): TokenT {
 function name(): Token {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
-    return make_token(name_type());
+    return token_lexeme(name_type());
 }
 
 function number_(): Token {
@@ -124,7 +133,7 @@ function number_(): Token {
             advance();
     }
 
-    return make_token(TokenT.Number);
+    return token_lexeme(TokenT.Number);
 }
 
 function string_(): Token {
@@ -135,10 +144,10 @@ function string_(): Token {
     }
 
     if (is_at_end())
-        return error_token("unterminated string");
+        return token_error("unterminated string");
 
     advance();          // Consume the closing quote.
-    return make_token(TokenT.String);
+    return token_string(TokenT.String);
 }
 
 function skip_whitespace(): void {
@@ -172,32 +181,32 @@ const scanner = {
         skip_whitespace();
         start = current;
 
-        if (is_at_end()) return make_token(TokenT.EOF);
+        if (is_at_end()) return token_no_lexeme(TokenT.EOF);
 
         let c = advance();
         if (is_digit(c)) return number_();
         if (is_alpha(c)) return name();
         
         switch (c) {
-            case '(': return make_token(TokenT.LParen);
-            case ')': return make_token(TokenT.RParen);
-            case '[': return make_token(TokenT.LBracket);
-            case ']': return make_token(TokenT.RBracket);
-            case '$': return make_token(TokenT.Dollar);
-            case ';': return make_token(TokenT.Semicolon);
-            case ':': return make_token(
+            case '(': return token_no_lexeme(TokenT.LParen);
+            case ')': return token_no_lexeme(TokenT.RParen);
+            case '[': return token_no_lexeme(TokenT.LBracket);
+            case ']': return token_no_lexeme(TokenT.RBracket);
+            case '$': return token_no_lexeme(TokenT.Dollar);
+            case ';': return token_no_lexeme(TokenT.Semicolon);
+            case ':': return token_no_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
-            case ',': return make_token(TokenT.Comma);
-            case '-': return make_token(TokenT.Minus);
-            case '+': return make_token(TokenT.Plus);
-            case '/': return make_token(TokenT.Slash);
-            case '*': return make_token(TokenT.Star);
-            case '!': return make_token(TokenT.Bang);
-            case '=': return make_token(TokenT.Eq);
+            case ',': return token_no_lexeme(TokenT.Comma);
+            case '-': return token_no_lexeme(TokenT.Minus);
+            case '+': return token_no_lexeme(TokenT.Plus);
+            case '/': return token_no_lexeme(TokenT.Slash);
+            case '*': return token_no_lexeme(TokenT.Star);
+            case '!': return token_no_lexeme(TokenT.Bang);
+            case '=': return token_no_lexeme(TokenT.Eq);
             case '"': return string_();
         }
      
-        return error_token("unexpected character");
+        return token_error("unexpected character");
     },
 
     all(): Token[] {
@@ -222,7 +231,7 @@ const scanner = {
             } else {
                 result += "   | ";
             }
-            result += `${ pad9(TokenTName[token.kind]) } '${ source.slice(token.start, token.end) }'\n`;
+            result += `${ pad9(TokenTName[token.kind]) } '${ Object.hasOwn(token, "lexeme") ? token.lexeme : "" }'\n`;
 
             if (token.kind === TokenT.EOF) break;
         }

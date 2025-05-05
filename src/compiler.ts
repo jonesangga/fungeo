@@ -29,8 +29,8 @@ interface ParseRule {
 }
 
 let parser: { current: Token, previous: Token } = {
-    current:  {kind: TokenT.EOF, start: 0, end: 0, line: 0},
-    previous: {kind: TokenT.EOF, start: 0, end: 0, line: 0},
+    current:  {kind: TokenT.EOF, line: 0},
+    previous: {kind: TokenT.EOF, line: 0},
 };
 
 let compilingChunk: Chunk;
@@ -66,7 +66,7 @@ function errorAt(token: Token, message: string): void {
     } else if (token.kind === TokenT.Error) {
         // Nothing.
     } else {
-        result += ` at '${ source.slice(token.start, token.end)  }'`;
+        result += ` at '${ token.errorMessage  }'`;
     }
 
     result += `: ${ message }\n`;
@@ -105,7 +105,6 @@ function advance(): void {
 }
 
 function emitByte(byte: number): void {
-    // writeChunk(currentChunk(), byte, parser.previous.line);
     currentChunk().write(byte, parser.previous.line);
 }
 
@@ -152,14 +151,13 @@ function literal(): void {
 }
 
 function parse_number(): void {
-    let value = Number(source.slice(parser.previous.start, parser.previous.end));
+    let value = Number(parser.previous.lexeme);
     emitConstant(new FGNumber(value));
     lastType = numberType;
 }
 
 function parsestring(): void {
-    emitConstant(new FGString(source.slice(parser.previous.start + 1,
-                                              parser.previous.end - 1)));
+    emitConstant(new FGString(parser.previous.lexeme as string));
     lastType = {kind: Kind.String};
 }
 
@@ -175,7 +173,7 @@ let tempNames: TempNames = {
 };
 
 function parse_name(): void {
-    let name = source.slice(parser.previous.start, parser.previous.end);
+    let name = parser.previous.lexeme as string;
 
     if (Object.hasOwn(names, name)) {
         canAssign = false;
@@ -387,11 +385,10 @@ function expression(): void {
 }
 
 function identifierConstant(name: Token): number {
-    return makeConstant(new FGString(source.slice(name.start, name.end)));
+    return makeConstant(new FGString(name.lexeme as string));
 }
 
 function call(name: string): void {
-    // let constant = addConstant(currentChunk(), newString(name));
     let constant = currentChunk().add_constant(new FGString(name));
 
     let argCount = 0;
@@ -401,19 +398,6 @@ function call(name: string): void {
     } while (!match(TokenT.EOF));
     emitBytes(Op.Call, constant);
     emitByte(argCount);
-}
-
-// The string is at parser.current.
-function parse_string(): void {
-    if (!match(TokenT.String)) {
-        errorAtCurrent("Expect string for color");
-        return;
-    }
-    let name = source.slice(parser.previous.start + 1,
-                                    parser.previous.end - 1);
-    console.log(name);
-    let index = makeConstant(new FGString(name));
-    emitBytes(Op.Constant, index);
 }
 
 function prev() {

@@ -18,8 +18,8 @@ var Precedence;
     Precedence[Precedence["PREC_PRIMARY"] = 6] = "PREC_PRIMARY";
 })(Precedence || (Precedence = {}));
 let parser = {
-    current: { kind: 20, start: 0, end: 0, line: 0 },
-    previous: { kind: 20, start: 0, end: 0, line: 0 },
+    current: { kind: 20, line: 0 },
+    previous: { kind: 20, line: 0 },
 };
 let compilingChunk;
 function currentChunk() {
@@ -46,7 +46,7 @@ function errorAt(token, message) {
     else if (token.kind === 21) {
     }
     else {
-        result += ` at '${source.slice(token.start, token.end)}'`;
+        result += ` at '${token.errorMessage}'`;
     }
     result += `: ${message}\n`;
     throw new CompileError(message);
@@ -127,17 +127,17 @@ function literal() {
     }
 }
 function parse_number() {
-    let value = Number(source.slice(parser.previous.start, parser.previous.end));
+    let value = Number(parser.previous.lexeme);
     emitConstant(new FGNumber(value));
     lastType = numberType;
 }
 function parsestring() {
-    emitConstant(new FGString(source.slice(parser.previous.start + 1, parser.previous.end - 1)));
+    emitConstant(new FGString(parser.previous.lexeme));
     lastType = { kind: 5 };
 }
 let tempNames = {};
 function parse_name() {
-    let name = source.slice(parser.previous.start, parser.previous.end);
+    let name = parser.previous.lexeme;
     if (Object.hasOwn(names, name)) {
         canAssign = false;
         if (check(14)) {
@@ -316,7 +316,7 @@ function expression() {
     parsePrecedence(1);
 }
 function identifierConstant(name) {
-    return makeConstant(new FGString(source.slice(name.start, name.end)));
+    return makeConstant(new FGString(name.lexeme));
 }
 function call(name) {
     let constant = currentChunk().add_constant(new FGString(name));
@@ -327,16 +327,6 @@ function call(name) {
     } while (!match(20));
     emitBytes(3, constant);
     emitByte(argCount);
-}
-function parse_string() {
-    if (!match(17)) {
-        errorAtCurrent("Expect string for color");
-        return;
-    }
-    let name = source.slice(parser.previous.start + 1, parser.previous.end - 1);
-    console.log(name);
-    let index = makeConstant(new FGString(name));
-    emitBytes(4, index);
 }
 function prev() {
     console.log(parser.previous.kind);

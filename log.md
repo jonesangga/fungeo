@@ -2,6 +2,7 @@
 
 #### 05-05-25
 
+- make optional flag for lexeme
 - change test script in package.json
 - remove test dir in root
 - use
