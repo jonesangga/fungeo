@@ -2,6 +2,7 @@
 
 #### 05-05-25
 
+- use import type
 - add names.ts
 - remoove interface for Lit*, make them into class
 

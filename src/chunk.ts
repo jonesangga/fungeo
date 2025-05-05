@@ -1,6 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind, KindName, Value } from "./value.js"
+import { Kind, KindName, type Value } from "./value.js"
 
 const enum Op {
     Add,

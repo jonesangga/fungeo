@@ -2,7 +2,7 @@
 //
 // TODO: Clean up this.
 
-import { Kind, Value } from "./value.js"
+import { Kind, type Value } from "./value.js"
 
 export interface Types {
     kind:     Kind;

@@ -1,9 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { TokenT, Token, scanner } from "./scanner.js"
+import { TokenT, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGNumber, FGString, FGCallable, Value } from "./value.js"
-import { Types, Version, names } from "./names.js"
+import { Kind, KindName, FGNumber, FGString, FGCallable, type Value } from "./value.js"
+import { type Types, type Version, names } from "./names.js"
 
 let source = "";
 let invalidType: Types = {kind: Kind.Nothing};
