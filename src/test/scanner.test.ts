@@ -1,4 +1,4 @@
-// @jonesangga, 05-04-2025, MIT License.
+// @jonesangga, 04-05-2025, MIT License.
 //
 // TODO: Test scanner.all().
 //       Test scanner.all_string().

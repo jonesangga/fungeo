@@ -41,7 +41,7 @@ function currentChunk(): Chunk {
 
 
 function emitReturn(): void {
-    emitByte(Op.Return);
+    emitByte(Op.Ret);
 }
 
 function endCompiler(): void {
@@ -114,12 +114,11 @@ function emitBytes(byte1: number, byte2: number): void {
 }
 
 function makeConstant(value: Value) {
-    let constant = currentChunk().add_constant(value);
-    return constant;
+    return currentChunk().add_value(value);
 }
 
 function emitConstant(value: Value): void {
-    emitBytes(Op.Constant, makeConstant(value));
+    emitBytes(Op.Load, makeConstant(value));
 }
 
 function grouping(): void {
@@ -320,7 +319,7 @@ function parse_definition(name: string): void {
     // if (isGeoKind(lastType.kind)) {
         // emitBytes(Op.AssignGObj, index);
     // } else {
-        emitBytes(Op.Assign, index);
+        emitBytes(Op.Set, index);
     // }
     emitByte(lastType.kind);
     tempNames[name] = {kind: lastType.kind};
@@ -337,7 +336,7 @@ function parse_reassignment(name: string): void {
     // if (isGeoKind(lastType.kind)) {
         // emitBytes(Op.AssignGObj, index);
     // } else {
-        emitBytes(Op.Assign, index);
+        emitBytes(Op.Set, index);
     // }
     emitByte(lastType.kind);
 }
@@ -389,7 +388,7 @@ function identifierConstant(name: Token): number {
 }
 
 function call(name: string): void {
-    let constant = currentChunk().add_constant(new FGString(name));
+    let constant = currentChunk().add_value(new FGString(name));
 
     let argCount = 0;
     do {

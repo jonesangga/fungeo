@@ -4,40 +4,38 @@ import { Kind, KindName, type Value } from "./value.js"
 
 const enum Op {
     Add,
-    Assign,
-    AssignGObj,
     Call,
-    Constant,
     Div,
     False,
     Get,
     Index,
     List,
+    Load,
     Mul,
     Negate,
     Not,
     Pop,
-    Return,
+    Ret,
+    Set,
     Sub,
     True,
 };
 
 const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
-    [Op.Assign]: "Assign",
-    [Op.AssignGObj]: "AssignGObj",
     [Op.Call]: "Call",
-    [Op.Constant]: "Constant",
     [Op.Div]: "Div",
     [Op.False]: "False",
     [Op.Get]: "Get",
     [Op.Index]: "Index",
     [Op.List]: "List",
+    [Op.Load]: "Load",
     [Op.Mul]: "Mul",
     [Op.Negate]: "Negate",
     [Op.Not]: "Not",
     [Op.Pop]: "Pop",
-    [Op.Return]: "Return",
+    [Op.Ret]: "Ret",
+    [Op.Set]: "Set",
     [Op.Sub]: "Sub",
     [Op.True]: "True",
 };
@@ -45,7 +43,7 @@ const OpName: { [key in Op]: string } = {
 class Chunk {
     code: number[] = [];
     lines: number[] = [];
-    constants: Value[] = [];
+    values: Value[] = [];
 
     constructor(public name: string) {}
 
@@ -54,73 +52,72 @@ class Chunk {
         this.lines.push(line);
     }
 
-    add_constant(value: Value): number {
-        this.constants.push(value);
-        return this.constants.length - 1;
+    add_value(value: Value): number {
+        this.values.push(value);
+        return this.values.length - 1;
     }
 
-    debug(): string {
+    disassemble(): string {
         let result = `== ${ this.name } ==\n`;
 
         let res = "";
         for (let offset = 0; offset < this.code.length;) {
-            [res, offset] = this.debug_ints(offset);
+            [res, offset] = this.disassemble_instr(offset);
             result += res;
         }
         return result;
     }
 
-    debug_ints(offset: number): [string, number] {
-        let result = "";
-        result += zpad4(offset);
+    disassemble_instr(offset: number): [string, number] {
+        let result = zpad4(offset) + " ";
 
-        if (offset > 0 && 
-            this.lines[offset] === this.lines[offset - 1]) {
+        if (offset > 0 && this.lines[offset] === this.lines[offset - 1]) {
             result += "   | ";
         } else {
-            result += pad4(this.lines[offset]) + " ";
+            result += padl4(this.lines[offset]) + " ";
         }
 
         let instruction = this.code[offset];
         let name = OpName[instruction as Op];
         switch (instruction) {
-            case Op.Constant:
+            case Op.Load:
                 let index = this.code[offset + 1];
-                result += `${ pad16(name) } ${ pad4(index) } '`;
-                result += this.constants[index as Op].to_str();
-                result += "'\n";
+                result += `${ padr6(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
                 return [result, offset + 2];
 
-            case Op.Assign:
-                let nameId     = this.code[offset + 1];
-                let kind: Kind = this.code[offset + 2];
-
-                result += `${ pad16(name) } ${ pad4(nameId) } '`;
-                result += this.constants[nameId].to_str();
-                result += `: ${ KindName[kind] }'\n`;
-                return [result, offset + 3];
-
-            case Op.Return:
+            case Op.Ret:
                 result += name + "\n";
                 return [result, offset + 1];
 
+            case Op.Set:
+                let nameId     = this.code[offset + 1];
+                let kind: Kind = this.code[offset + 2];
+
+                result += `${ padr6(name) } ${ padl4(nameId) } '`;
+                result += this.values[nameId].to_str();
+                result += `: ${ KindName[kind] }'\n`;
+                return [result, offset + 3];
+
             default:
-                result += `Unknown opcode ${ instruction }\n`;
+                result += `Unknown code ${ instruction }\n`;
                 return [result, offset + 1];
         }
     }
 }
 
+// Padding left with zero 4 characters.
 function zpad4(n: number): string {
     return ('000'+n).slice(-4);
 }
 
-function pad4(n: number): string {
+// Padding left 4 characters.
+function padl4(n: number): string {
     return ('   '+n).slice(-4);
 }
 
-function pad16(s: string): string {
-    return (s+'                ').slice(0,16);
+// Padding right 6 characters.
+function padr6(s: string): string {
+    return (s+'      ').slice(0, 6);
 }
 
-export { Chunk, Op, OpName };
+export { Op, OpName, Chunk };

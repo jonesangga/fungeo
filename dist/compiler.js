@@ -26,7 +26,7 @@ function currentChunk() {
     return compilingChunk;
 }
 function emitReturn() {
-    emitByte(14);
+    emitByte(12);
 }
 function endCompiler() {
     emitReturn();
@@ -84,11 +84,10 @@ function emitBytes(byte1, byte2) {
     emitByte(byte2);
 }
 function makeConstant(value) {
-    let constant = currentChunk().add_constant(value);
-    return constant;
+    return currentChunk().add_value(value);
 }
 function emitConstant(value) {
-    emitBytes(4, makeConstant(value));
+    emitBytes(7, makeConstant(value));
 }
 function grouping() {
     canParseArgument = true;
@@ -104,13 +103,13 @@ function binary() {
             emitByte(0);
             break;
         case 7:
-            emitByte(15);
+            emitByte(14);
             break;
         case 10:
-            emitByte(10);
+            emitByte(8);
             break;
         case 9:
-            emitByte(5);
+            emitByte(2);
             break;
         default: return;
     }
@@ -118,10 +117,10 @@ function binary() {
 function literal() {
     switch (parser.previous.kind) {
         case 19:
-            emitByte(6);
+            emitByte(3);
             break;
         case 18:
-            emitByte(16);
+            emitByte(15);
             break;
         default: return;
     }
@@ -246,7 +245,7 @@ function parse_callable(name_) {
         else
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j])}], got ${KindName[gotTypes[j]]}`);
     }
-    emitBytes(3, i);
+    emitBytes(1, i);
     emitConstant(new FGCallable(name.call));
     if (version[i].output === 0) {
         lastType = invalidType;
@@ -257,7 +256,7 @@ function parse_callable(name_) {
 }
 function parse_non_callable(table, name) {
     let index = makeConstant(new FGString(name));
-    emitBytes(7, index);
+    emitBytes(4, index);
     lastType = { kind: table[name].kind };
     console.log("in parse_non_callable() lastType = ", lastType);
 }
@@ -267,7 +266,7 @@ function parse_definition(name) {
     lastType = invalidType;
     canParseArgument = true;
     expression();
-    emitBytes(1, index);
+    emitBytes(13, index);
     emitByte(lastType.kind);
     tempNames[name] = { kind: lastType.kind };
     lastType = invalidType;
@@ -277,7 +276,7 @@ function parse_reassignment(name) {
     lastType = invalidType;
     canParseArgument = true;
     expression();
-    emitBytes(1, index);
+    emitBytes(13, index);
     emitByte(lastType.kind);
 }
 function unary() {
@@ -285,10 +284,10 @@ function unary() {
     parsePrecedence(4);
     switch (operatorType) {
         case 11:
-            emitByte(12);
+            emitByte(10);
             break;
         case 7:
-            emitByte(11);
+            emitByte(9);
             break;
         default: return;
     }
@@ -319,13 +318,13 @@ function identifierConstant(name) {
     return makeConstant(new FGString(name.lexeme));
 }
 function call(name) {
-    let constant = currentChunk().add_constant(new FGString(name));
+    let constant = currentChunk().add_value(new FGString(name));
     let argCount = 0;
     do {
         expression();
         argCount++;
     } while (!match(20));
-    emitBytes(3, constant);
+    emitBytes(1, constant);
     emitByte(argCount);
 }
 function prev() {

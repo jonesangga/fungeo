@@ -2,6 +2,11 @@
 
 #### 05-05-25
 
+- change Op.Const to Op.Load
+- change chunk.add_constants to chunk.add_value
+- change chunk.constants to chunk.values
+- minimize padding for Op name in chunk.disassemble_instr() to 10
+- write test for chunk
 - make optional flag for lexeme
 - change test script in package.json
 - remove test dir in root
