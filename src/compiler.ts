@@ -5,8 +5,8 @@ import { Op, Chunk } from "./chunk.js"
 import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
 import { type Types, type Version, names } from "./names.js"
 
-let invalidType: Types = {kind: Kind.Nothing};
-let numberType: Types = {kind: Kind.Number};
+let invalidType: Types = { kind: Kind.Nothing };
+let numberType: Types = { kind: Kind.Number };
 let lastType: Types = invalidType;
 
 // To distinguish function as argument vs function call.
@@ -29,6 +29,27 @@ interface ParseRule {
     infix:  (() => void) | null;
     precedence: Precedence;
 }
+
+let rules: ParseRule[] = [];
+rules[TokenT.Bang]      = {prefix: unary,           infix: null,    precedence: Precedence.None};
+rules[TokenT.Colon]     = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.ColonEq]   = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Comma]     = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.EOF]       = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.False]     = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
+// rules[TokenT.LBracket]    = {prefix: parse_list,  infix: indexlist,    precedence: Precedence.Call};
+rules[TokenT.LParen]    = {prefix: grouping,        infix: null,    precedence: Precedence.None};
+rules[TokenT.Minus]     = {prefix: unary,           infix: binary,  precedence: Precedence.Term};
+rules[TokenT.Name]      = {prefix: parse_name,      infix: null,    precedence: Precedence.None};
+rules[TokenT.Number]    = {prefix: parse_number,    infix: null,    precedence: Precedence.None};
+rules[TokenT.Plus]      = {prefix: null,            infix: binary,  precedence: Precedence.Term};
+rules[TokenT.RBracket]  = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.RParen]    = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Semicolon] = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Slash]     = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
+rules[TokenT.Star]      = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
+rules[TokenT.String]    = {prefix: parse_string,    infix: null,    precedence: Precedence.None};
+rules[TokenT.True]      = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
 
 let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
 
@@ -171,7 +192,7 @@ function binary(): void {
     }
 
     let operatorType = parser.previous.kind;
-    let rule = getRule(operatorType);
+    let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
 
     if (lastType.kind !== Kind.Number) {
@@ -370,7 +391,7 @@ function parsePrecedence(precedence: Precedence): void {
     // prev();
     // curr();
     advance();
-    let prefixRule = getRule(parser.previous.kind).prefix;
+    let prefixRule = rules[parser.previous.kind].prefix;
     if (prefixRule === null) {
         error("expect expression");
         return;
@@ -378,9 +399,9 @@ function parsePrecedence(precedence: Precedence): void {
 
     prefixRule();
 
-    while (precedence <= getRule(parser.current.kind).precedence) {
+    while (precedence <= rules[parser.current.kind].precedence) {
         advance();
-        let infixRule = getRule(parser.previous.kind).infix;
+        let infixRule = rules[parser.previous.kind].infix;
         if (infixRule === null) {
             error("expect infix operator");
             return;
@@ -416,33 +437,6 @@ function curr() {
     console.log(TokenTName[parser.current.kind]);
 }
 
-class CompileError extends Error {}
-
-let rules: ParseRule[] = [];
-rules[TokenT.Bang]      = {prefix: unary,           infix: null,    precedence: Precedence.None};
-rules[TokenT.Colon]     = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.ColonEq]   = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Comma]     = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.EOF]       = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.False]     = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
-// rules[TokenT.LBracket]    = {prefix: parse_list,  infix: indexlist,    precedence: Precedence.Call};
-rules[TokenT.LParen]    = {prefix: grouping,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Minus]     = {prefix: unary,           infix: binary,  precedence: Precedence.Term};
-rules[TokenT.Name]      = {prefix: parse_name,      infix: null,    precedence: Precedence.None};
-rules[TokenT.Number]    = {prefix: parse_number,    infix: null,    precedence: Precedence.None};
-rules[TokenT.Plus]      = {prefix: null,            infix: binary,  precedence: Precedence.Term};
-rules[TokenT.RBracket]  = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.RParen]    = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Semicolon] = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Slash]     = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.Star]      = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.String]    = {prefix: parse_string,    infix: null,    precedence: Precedence.None};
-rules[TokenT.True]      = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
-
-function getRule(kind: TokenT): ParseRule {
-    return rules[kind];
-}
-
 function declaration(): void {
     statement();
 }
@@ -467,6 +461,8 @@ interface CompilerResult {
     success: boolean;
     message?: string;
 }
+
+class CompileError extends Error {}
 
 const compiler = {
     compile(source: string, chunk: Chunk): CompilerResult {

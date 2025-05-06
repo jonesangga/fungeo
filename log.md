@@ -2,6 +2,7 @@
 
 #### 06-05-25
 
+- remove getRule just index the array directly
 - update chunk.test
 - add grouping test
 - fix grouping
