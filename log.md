@@ -2,6 +2,7 @@
 
 #### 06-05-25
 
+- update chunk.test
 - add grouping test
 - fix grouping
 - search how to skip test
