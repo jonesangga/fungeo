@@ -1,5 +1,30 @@
 # Log
 
+#### 06-05-25
+
+- test invalid unary operator
+    `-` only for number
+    '!' only for boolean
+- test invalid binary operator
+- note we don't need to set lastType to number in binaryop
+  it is already from the right operand
+- test binary op with vairable
+- lastType check in binaryop
+- test multiple unary
+- test multiple binary
+- test unary ! -
+- test binary + - * /
+- update scanner.test.ts
+- make lexeme property not optional
+- for now only immutable variable
+- change literal() to boolean in compiler.ts
+- test compiler: CompileError
+    - undefined variable
+    - scanner error
+- bug: when error happen in advance() before try catch: solved
+- test compiler: success
+- test compiler: assignment
+
 #### 05-05-25
 
 - test value.ts

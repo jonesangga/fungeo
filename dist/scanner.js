@@ -81,9 +81,6 @@ function match(expected) {
     current++;
     return true;
 }
-function token_no_lexeme(kind) {
-    return { kind, line };
-}
 function token_lexeme(kind) {
     let lexeme = source.slice(start, current);
     return { kind, lexeme, line };
@@ -93,7 +90,7 @@ function token_string(kind) {
     return { kind, lexeme, line };
 }
 function token_error(errorMessage) {
-    return { kind: 21, errorMessage, line };
+    return { kind: 21, lexeme: errorMessage, line };
 }
 function name_type() {
     switch (source.slice(start, current)) {
@@ -157,27 +154,27 @@ const scanner = {
         skip_whitespace();
         start = current;
         if (is_at_end())
-            return token_no_lexeme(20);
+            return token_lexeme(20);
         let c = advance();
         if (is_digit(c))
             return number_();
         if (is_alpha(c))
             return name();
         switch (c) {
-            case '(': return token_no_lexeme(3);
-            case ')': return token_no_lexeme(4);
-            case '[': return token_no_lexeme(5);
-            case ']': return token_no_lexeme(6);
-            case '$': return token_no_lexeme(1);
-            case ';': return token_no_lexeme(2);
-            case ':': return token_no_lexeme(match('=') ? 13 : 12);
-            case ',': return token_no_lexeme(0);
-            case '-': return token_no_lexeme(7);
-            case '+': return token_no_lexeme(8);
-            case '/': return token_no_lexeme(9);
-            case '*': return token_no_lexeme(10);
-            case '!': return token_no_lexeme(11);
-            case '=': return token_no_lexeme(14);
+            case '(': return token_lexeme(3);
+            case ')': return token_lexeme(4);
+            case '[': return token_lexeme(5);
+            case ']': return token_lexeme(6);
+            case '$': return token_lexeme(1);
+            case ';': return token_lexeme(2);
+            case ':': return token_lexeme(match('=') ? 13 : 12);
+            case ',': return token_lexeme(0);
+            case '-': return token_lexeme(7);
+            case '+': return token_lexeme(8);
+            case '/': return token_lexeme(9);
+            case '*': return token_lexeme(10);
+            case '!': return token_lexeme(11);
+            case '=': return token_lexeme(14);
             case '"': return string_();
         }
         return token_error("unexpected character");
@@ -202,7 +199,7 @@ const scanner = {
             else {
                 result += "   | ";
             }
-            result += `${pad9(TokenTName[token.kind])} '${Object.hasOwn(token, "lexeme") ? token.lexeme : ""}'\n`;
+            result += `${pad9(TokenTName[token.kind])} '${token.lexeme}'\n`;
             if (token.kind === 20)
                 break;
         }

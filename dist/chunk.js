@@ -10,7 +10,7 @@ var Op;
     Op[Op["List"] = 6] = "List";
     Op[Op["Load"] = 7] = "Load";
     Op[Op["Mul"] = 8] = "Mul";
-    Op[Op["Negate"] = 9] = "Negate";
+    Op[Op["Neg"] = 9] = "Neg";
     Op[Op["Not"] = 10] = "Not";
     Op[Op["Pop"] = 11] = "Pop";
     Op[Op["Ret"] = 12] = "Ret";
@@ -29,7 +29,7 @@ const OpName = {
     [6]: "List",
     [7]: "Load",
     [8]: "Mul",
-    [9]: "Negate",
+    [9]: "Neg",
     [10]: "Not",
     [11]: "Pop",
     [12]: "Ret",
@@ -73,11 +73,18 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction];
         switch (instruction) {
+            case 4:
             case 7:
                 let index = this.code[offset + 1];
                 result += `${padr6(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];
+            case 0:
+            case 2:
+            case 9:
+            case 10:
+            case 8:
             case 12:
+            case 14:
                 result += name + "\n";
                 return [result, offset + 1];
             case 13:

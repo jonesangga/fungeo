@@ -9,11 +9,11 @@ repl.place(100, 100);
 // let source = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true `;
 // scanner.init(source);
 // let result = scanner.all_string();
-// let result = scanner.all();
 // console.log(result);
 
 let chunk = new Chunk("testing");
-let source = "a = 2";
+let source = "";
+// source = "num = 12 / 34"; // binary
+source = "truth = !2"; // unary
 let compilerResult = compiler.compile(source, chunk);
 console.log(chunk.disassemble());
-// console.log(chunk);

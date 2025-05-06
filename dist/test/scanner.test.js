@@ -8,6 +8,7 @@ describe("scanner", () => {
         let eof = {
             kind: 20,
             line: 1,
+            lexeme: "",
         };
         assert.deepEqual(scanner.next(), eof);
         assert.deepEqual(scanner.next(), eof);
@@ -18,26 +19,32 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 11,
             line: 1,
+            lexeme: "!",
         });
         assert.deepEqual(scanner.next(), {
             kind: 12,
             line: 1,
+            lexeme: ":",
         });
         assert.deepEqual(scanner.next(), {
             kind: 13,
             line: 1,
+            lexeme: ":=",
         });
         assert.deepEqual(scanner.next(), {
             kind: 0,
             line: 1,
+            lexeme: ",",
         });
         assert.deepEqual(scanner.next(), {
             kind: 1,
             line: 1,
+            lexeme: "$",
         });
         assert.deepEqual(scanner.next(), {
             kind: 14,
             line: 1,
+            lexeme: "=",
         });
         assert.deepEqual(scanner.next(), {
             kind: 19,
@@ -47,14 +54,17 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 5,
             line: 1,
+            lexeme: "[",
         });
         assert.deepEqual(scanner.next(), {
             kind: 3,
             line: 1,
+            lexeme: "(",
         });
         assert.deepEqual(scanner.next(), {
             kind: 7,
             line: 1,
+            lexeme: "-",
         });
         assert.deepEqual(scanner.next(), {
             kind: 15,
@@ -69,26 +79,32 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 8,
             line: 1,
+            lexeme: "+",
         });
         assert.deepEqual(scanner.next(), {
             kind: 6,
             line: 1,
+            lexeme: "]",
         });
         assert.deepEqual(scanner.next(), {
             kind: 4,
             line: 1,
+            lexeme: ")",
         });
         assert.deepEqual(scanner.next(), {
             kind: 2,
             line: 1,
+            lexeme: ";",
         });
         assert.deepEqual(scanner.next(), {
             kind: 9,
             line: 1,
+            lexeme: "/",
         });
         assert.deepEqual(scanner.next(), {
             kind: 10,
             line: 1,
+            lexeme: "*",
         });
         assert.deepEqual(scanner.next(), {
             kind: 17,
@@ -103,6 +119,7 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 20,
             line: 1,
+            lexeme: "",
         });
     });
     it("error: unterminated string", () => {
@@ -113,11 +130,12 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 21,
             line: 2,
-            errorMessage: "unterminated string",
+            lexeme: "unterminated string",
         });
         assert.deepEqual(scanner.next(), {
             kind: 20,
             line: 2,
+            lexeme: "",
         });
     });
     it("error: unexpected character", () => {
@@ -128,17 +146,18 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: 21,
             line: 1,
-            errorMessage: "unexpected character",
+            lexeme: "unexpected character",
         });
         scanner.next();
         assert.deepEqual(scanner.next(), {
             kind: 21,
             line: 1,
-            errorMessage: "unexpected character",
+            lexeme: "unexpected character",
         });
         assert.deepEqual(scanner.next(), {
             kind: 20,
             line: 1,
+            lexeme: "",
         });
     });
 });

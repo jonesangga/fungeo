@@ -12,7 +12,7 @@ const enum Op {
     List,
     Load,
     Mul,
-    Negate,
+    Neg,
     Not,
     Pop,
     Ret,
@@ -31,7 +31,7 @@ const OpName: { [key in Op]: string } = {
     [Op.List]: "List",
     [Op.Load]: "Load",
     [Op.Mul]: "Mul",
-    [Op.Negate]: "Negate",
+    [Op.Neg]: "Neg",
     [Op.Not]: "Not",
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
@@ -80,12 +80,19 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction as Op];
         switch (instruction) {
+            case Op.Get:
             case Op.Load:
                 let index = this.code[offset + 1];
                 result += `${ padr6(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
                 return [result, offset + 2];
 
+            case Op.Add:
+            case Op.Div:
+            case Op.Neg:
+            case Op.Not:
+            case Op.Mul:
             case Op.Ret:
+            case Op.Sub:
                 result += name + "\n";
                 return [result, offset + 1];
 

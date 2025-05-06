@@ -15,6 +15,7 @@ describe("scanner", () => {
         let eof = {
             kind: TokenT.EOF,
             line: 1,
+            lexeme: "",
         };
         assert.deepEqual(scanner.next(), eof);
         assert.deepEqual(scanner.next(), eof);
@@ -32,26 +33,32 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Bang,
             line: 1,
+            lexeme: "!",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Colon,
             line: 1,
+            lexeme: ":",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.ColonEq,
             line: 1,
+            lexeme: ":=",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Comma,
             line: 1,
+            lexeme: ",",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Dollar,
             line: 1,
+            lexeme: "$",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Eq,
             line: 1,
+            lexeme: "=",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.False,
@@ -61,14 +68,17 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.LBracket,
             line: 1,
+            lexeme: "[",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.LParen,
             line: 1,
+            lexeme: "(",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Minus,
             line: 1,
+            lexeme: "-",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Name,
@@ -83,26 +93,32 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Plus,
             line: 1,
+            lexeme: "+",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.RBracket,
             line: 1,
+            lexeme: "]",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.RParen,
             line: 1,
+            lexeme: ")",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Semicolon,
             line: 1,
+            lexeme: ";",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Slash,
             line: 1,
+            lexeme: "/",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Star,
             line: 1,
+            lexeme: "*",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.String,
@@ -117,6 +133,7 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.EOF,
             line: 1,
+            lexeme: "",
         });
     });
 
@@ -129,12 +146,13 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Error,
             line: 2,
-            errorMessage: "unterminated string",
+            lexeme: "unterminated string",
         });
 
         assert.deepEqual(scanner.next(), {
             kind: TokenT.EOF,
             line: 2,
+            lexeme: "",
         });
     });
 
@@ -147,18 +165,19 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Error,
             line: 1,
-            errorMessage: "unexpected character",
+            lexeme: "unexpected character",
         });
 
         scanner.next(); // 1
         assert.deepEqual(scanner.next(), {
             kind: TokenT.Error,
             line: 1,
-            errorMessage: "unexpected character",
+            lexeme: "unexpected character",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.EOF,
             line: 1,
+            lexeme: "",
         });
     });
 });

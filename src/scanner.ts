@@ -46,8 +46,7 @@ const TokenTName: { [key in TokenT]: string } = {
 interface Token {
     kind:          TokenT;
     line:          number;
-    lexeme?:       string;
-    errorMessage?: string;
+    lexeme:        string;
 }
 
 let source  = "";
@@ -89,10 +88,6 @@ function match(expected: string): boolean {
     return true;
 }
 
-function token_no_lexeme(kind: TokenT): Token {
-    return { kind, line };
-}
-
 function token_lexeme(kind: TokenT): Token {
     let lexeme = source.slice(start, current);
     return { kind, lexeme, line };
@@ -104,7 +99,7 @@ function token_string(kind: TokenT): Token {
 }
 
 function token_error(errorMessage: string): Token {
-    return { kind: TokenT.Error, errorMessage, line };
+    return { kind: TokenT.Error, lexeme: errorMessage, line };
 }
 
 function name_type(): TokenT {
@@ -181,28 +176,28 @@ const scanner = {
         skip_whitespace();
         start = current;
 
-        if (is_at_end()) return token_no_lexeme(TokenT.EOF);
+        if (is_at_end()) return token_lexeme(TokenT.EOF);
 
         let c = advance();
         if (is_digit(c)) return number_();
         if (is_alpha(c)) return name();
         
         switch (c) {
-            case '(': return token_no_lexeme(TokenT.LParen);
-            case ')': return token_no_lexeme(TokenT.RParen);
-            case '[': return token_no_lexeme(TokenT.LBracket);
-            case ']': return token_no_lexeme(TokenT.RBracket);
-            case '$': return token_no_lexeme(TokenT.Dollar);
-            case ';': return token_no_lexeme(TokenT.Semicolon);
-            case ':': return token_no_lexeme(
+            case '(': return token_lexeme(TokenT.LParen);
+            case ')': return token_lexeme(TokenT.RParen);
+            case '[': return token_lexeme(TokenT.LBracket);
+            case ']': return token_lexeme(TokenT.RBracket);
+            case '$': return token_lexeme(TokenT.Dollar);
+            case ';': return token_lexeme(TokenT.Semicolon);
+            case ':': return token_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
-            case ',': return token_no_lexeme(TokenT.Comma);
-            case '-': return token_no_lexeme(TokenT.Minus);
-            case '+': return token_no_lexeme(TokenT.Plus);
-            case '/': return token_no_lexeme(TokenT.Slash);
-            case '*': return token_no_lexeme(TokenT.Star);
-            case '!': return token_no_lexeme(TokenT.Bang);
-            case '=': return token_no_lexeme(TokenT.Eq);
+            case ',': return token_lexeme(TokenT.Comma);
+            case '-': return token_lexeme(TokenT.Minus);
+            case '+': return token_lexeme(TokenT.Plus);
+            case '/': return token_lexeme(TokenT.Slash);
+            case '*': return token_lexeme(TokenT.Star);
+            case '!': return token_lexeme(TokenT.Bang);
+            case '=': return token_lexeme(TokenT.Eq);
             case '"': return string_();
         }
      
@@ -231,7 +226,7 @@ const scanner = {
             } else {
                 result += "   | ";
             }
-            result += `${ pad9(TokenTName[token.kind]) } '${ Object.hasOwn(token, "lexeme") ? token.lexeme : "" }'\n`;
+            result += `${ pad9(TokenTName[token.kind]) } '${ token.lexeme }'\n`;
 
             if (token.kind === TokenT.EOF) break;
         }

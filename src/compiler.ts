@@ -1,11 +1,10 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { TokenT, type Token, scanner } from "./scanner.js"
+import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGNumber, FGString, FGCallable, type Value } from "./value.js"
+import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
 import { type Types, type Version, names } from "./names.js"
 
-let source = "";
 let invalidType: Types = {kind: Kind.Nothing};
 let numberType: Types = {kind: Kind.Number};
 let lastType: Types = invalidType;
@@ -15,11 +14,11 @@ let canAssign = false as Boolean;
 const enum Precedence {
     None,
     Assignment, // =
-    Term,        // + -
-    Factor,      // * /
-    Unary,       // ! -
-    Call,        // . () _
-    PREC_PRIMARY
+    Term,       // + -
+    Factor,     // * /
+    Unary,      // ! -
+    Call,       // . () _
+    Primary
 }
 
 interface ParseRule {
@@ -28,9 +27,11 @@ interface ParseRule {
     precedence: Precedence;
 }
 
+let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
+
 let parser: { current: Token, previous: Token } = {
-    current:  {kind: TokenT.EOF, line: 0},
-    previous: {kind: TokenT.EOF, line: 0},
+    current: invalidToken,
+    previous: invalidToken,
 };
 
 let compilingChunk: Chunk;
@@ -39,47 +40,39 @@ function currentChunk(): Chunk {
     return compilingChunk;
 }
 
+//--------------------------------------------------------------------
+// Error functions.
 
-function emitReturn(): void {
-    emitByte(Op.Ret);
-}
-
-function endCompiler(): void {
-    emitReturn();
-    // disassembleChunk(currentChunk(), "code");
-}
-
-function errorAtCurrent(message: string): void {
-    errorAt(parser.current, message);
+function error_at_current(message: string): void {
+    error_at(parser.current, message);
 }
 
 function error(message: string): void {
-    errorAt(parser.previous, message);
+    error_at(parser.previous, message);
 }
 
-function errorAt(token: Token, message: string): void {
-    let result = "";
-    result += `[line ${ token.line }] Error`;
+function error_at(token: Token, message: string): void {
+    let result = token.line + "";
 
-    if (token.kind === TokenT.EOF) {
-        result += " at end";
-    } else if (token.kind === TokenT.Error) {
-        // Nothing.
-    } else {
-        result += ` at '${ token.errorMessage  }'`;
-    }
+    if (token.kind === TokenT.EOF)
+        result += ": at end";
+    else if (token.kind === TokenT.Error)
+        result += ": scanner";
+    else
+        result += `: at '${ token.lexeme }'`;
 
     result += `: ${ message }\n`;
-    throw new CompileError(message);
+    throw new CompileError(result);
 }
 
-function consume(kind: TokenT, message: string): void {
-    if (parser.current.kind === kind) {
-        advance();
-        return;
-    }
+//--------------------------------------------------------------------
 
-    errorAtCurrent(message);
+function advance(): void {
+    parser.previous = parser.current;
+    parser.current = scanner.next();
+    if (parser.current.kind === TokenT.Error) {
+        error_at_current(parser.current.lexeme);
+    }
 }
 
 function check(kind: TokenT): boolean {
@@ -87,22 +80,23 @@ function check(kind: TokenT): boolean {
 }
 
 function match(kind: TokenT): boolean {
-    if (!check(kind)) return false;
-    advance();
-    return true;
-}
-
-function advance(): void {
-    parser.previous = parser.current;
-
-    for (;;) {
-        parser.current = scanner.next();
-        if (parser.current.kind !== TokenT.Error)
-            break;
-
-        errorAtCurrent(parser.current.errorMessage as string);
+    if (parser.current.kind === kind) {
+        advance();
+        return true;
     }
+    return false;
 }
+
+function consume(kind: TokenT, message: string): void {
+    if (parser.current.kind === kind) {
+        advance();
+        return;
+    }
+    error_at_current(message);
+}
+
+//--------------------------------------------------------------------
+// Emit functions.
 
 function emitByte(byte: number): void {
     currentChunk().write(byte, parser.previous.line);
@@ -113,13 +107,26 @@ function emitBytes(byte1: number, byte2: number): void {
     emitByte(byte2);
 }
 
+function emitConstant(value: Value): void {
+    emitBytes(Op.Load, makeConstant(value));
+}
+
+function emitReturn(): void {
+    emitByte(Op.Ret);
+}
+
+//--------------------------------------------------------------------
+
+function endCompiler(): void {
+    emitReturn();
+    // disassembleChunk(currentChunk(), "code");
+}
+
 function makeConstant(value: Value) {
     return currentChunk().add_value(value);
 }
 
-function emitConstant(value: Value): void {
-    emitBytes(Op.Load, makeConstant(value));
-}
+//--------------------------------------------------------------------
 
 function grouping(): void {
     canParseArgument = true;
@@ -127,26 +134,61 @@ function grouping(): void {
     consume(TokenT.RParen, "Expect ')' after expression.");
 }
 
+function unary(): void {
+    let operatorType = parser.previous.kind;
+    parsePrecedence(Precedence.Unary);
+
+    switch (operatorType) {
+        case TokenT.Bang:
+            if (lastType.kind !== Kind.Boolean) {
+                error("'!' only for boolean");
+            }
+            emitByte(Op.Not);
+            break;
+        case TokenT.Minus:
+            if (lastType.kind !== Kind.Number) {
+                error("'-' only for number");
+            }
+            emitByte(Op.Neg);
+            break;
+        default:
+            error("unhandled unary op");
+    }
+}
+
+// Only for numbers.
 function binary(): void {
+    let operator = parser.previous.lexeme;
+    if (lastType.kind !== Kind.Number) {
+        error(`'${ operator }' only for numbers`);
+    }
+
     let operatorType = parser.previous.kind;
     let rule = getRule(operatorType);
     parsePrecedence(rule.precedence + 1);
 
+    if (lastType.kind !== Kind.Number) {
+        error(`'${ operator }' only for numbers`);
+    }
+
     switch (operatorType) {
-        case TokenT.Plus:          emitByte(Op.Add); break;
-        case TokenT.Minus:         emitByte(Op.Sub); break;
-        case TokenT.Star:          emitByte(Op.Mul); break;
-        case TokenT.Slash:         emitByte(Op.Div); break;
-        default: return; // Unreachable.
+        case TokenT.Plus:   emitByte(Op.Add); break;
+        case TokenT.Minus:  emitByte(Op.Sub); break;
+        case TokenT.Star:   emitByte(Op.Mul); break;
+        case TokenT.Slash:  emitByte(Op.Div); break;
+        default:            error("unhandled binary op");
     }
 }
 
-function literal(): void {
-    switch (parser.previous.kind) {
-        case TokenT.False:   emitByte(Op.False); break;
-        case TokenT.True:    emitByte(Op.True); break;
-        default: return; // Unreachable.
-    }
+//--------------------------------------------------------------------
+// Parsing literal.
+
+function parse_boolean(): void {
+    if (parser.previous.kind === TokenT.True)
+        emitConstant(new FGBoolean(true));
+    else
+        emitConstant(new FGBoolean(false));
+    lastType = {kind: Kind.Boolean};
 }
 
 function parse_number(): void {
@@ -155,10 +197,12 @@ function parse_number(): void {
     lastType = numberType;
 }
 
-function parsestring(): void {
-    emitConstant(new FGString(parser.previous.lexeme as string));
+function parse_string(): void {
+    emitConstant(new FGString(parser.previous.lexeme));
     lastType = {kind: Kind.String};
 }
+
+//--------------------------------------------------------------------
 
 interface TempTypes {
     kind:     Kind;
@@ -172,42 +216,31 @@ let tempNames: TempNames = {
 };
 
 function parse_name(): void {
-    let name = parser.previous.lexeme as string;
+    let name = parser.previous.lexeme;
 
     if (Object.hasOwn(names, name)) {
         canAssign = false;
-        if (check(TokenT.Eq)) {
-            error(`Use := to reassign`);
-        }
-        if (check(TokenT.ColonEq)) {
-            error(`:= is coming soon`);
-        }
+        if (check(TokenT.Eq))
+            error(`${ name } already defined`);
 
-        if (names[name].kind === Kind.Callable) {
+        if (names[name].kind === Kind.Callable)
             parse_callable(name);
-        } else {
+        else
             parse_non_callable(names, name);
-        }
     }
     else if (Object.hasOwn(tempNames, name)) {
         canAssign = false;
-        if (check(TokenT.Eq)) {
-            error(`Use := to reassign`);
-        }
-        if (check(TokenT.ColonEq)) {
-            error(`:= is coming soon`);
-            // parse_reassignment(name);
-        }
+        if (check(TokenT.Eq))
+            error(`${ name } already defined`);
 
-        if (tempNames[name].kind === Kind.Callable) {
+        if (tempNames[name].kind === Kind.Callable)
             parse_callable(name);
-        } else {
+        else
             parse_non_callable(tempNames, name);
-        }
     }
     else {
         if (!canAssign) {
-            error(`undefined variable ${name}`);
+            error(`undefined name ${name}`);
         } else {
             canAssign = false;
             parse_definition(name);
@@ -326,35 +359,6 @@ function parse_definition(name: string): void {
     lastType = invalidType;
 }
 
-function parse_reassignment(name: string): void {
-    let index = makeConstant(new FGString(name));
-
-    lastType = invalidType;
-    canParseArgument = true;
-    expression();
-
-    // if (isGeoKind(lastType.kind)) {
-        // emitBytes(Op.AssignGObj, index);
-    // } else {
-        emitBytes(Op.Set, index);
-    // }
-    emitByte(lastType.kind);
-}
-
-function unary(): void {
-    let operatorType = parser.previous.kind;
-
-    // Compile the operand.
-    parsePrecedence(Precedence.Unary);
-
-    // Emit the operator instruction.
-    switch (operatorType) {
-        case TokenT.Bang:    emitByte(Op.Not);    break;
-        case TokenT.Minus:   emitByte(Op.Negate); break;
-        default: return; // Unreachable.
-    }
-}
-
 function parsePrecedence(precedence: Precedence): void {
     // prev();
     // curr();
@@ -368,7 +372,6 @@ function parsePrecedence(precedence: Precedence): void {
     prefixRule();
 
     while (precedence <= getRule(parser.current.kind).precedence) {
-        console.log("infix");
         advance();
         let infixRule = getRule(parser.previous.kind).infix;
         if (infixRule === null) {
@@ -384,7 +387,7 @@ function expression(): void {
 }
 
 function identifierConstant(name: Token): number {
-    return makeConstant(new FGString(name.lexeme as string));
+    return makeConstant(new FGString(name.lexeme));
 }
 
 function call(name: string): void {
@@ -400,39 +403,34 @@ function call(name: string): void {
 }
 
 function prev() {
-    console.log(parser.previous.kind);
+    console.log(TokenTName[parser.previous.kind]);
 }
 function curr() {
-    console.log(parser.current.kind);
-}
-
-interface CompilerResult {
-    status: boolean;
-    message?: string;
+    console.log(TokenTName[parser.current.kind]);
 }
 
 class CompileError extends Error {}
 
 let rules: ParseRule[] = [];
-rules[TokenT.LParen]      = {prefix: grouping,    infix: null,    precedence: Precedence.None};
-rules[TokenT.RParen]     = {prefix: null,        infix: null,    precedence: Precedence.None};
+rules[TokenT.Bang]      = {prefix: unary,           infix: null,    precedence: Precedence.None};
+rules[TokenT.Colon]     = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.ColonEq]   = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Comma]     = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.EOF]       = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.False]     = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
 // rules[TokenT.LBracket]    = {prefix: parse_list,  infix: indexlist,    precedence: Precedence.Call};
-rules[TokenT.RBracket]   = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Comma]          = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.ColonEq]     = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Colon]          = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Semicolon]      = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.EOF]            = {prefix: null,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Number]         = {prefix: parse_number,     infix: null,    precedence: Precedence.None};
-rules[TokenT.Plus]           = {prefix: null,        infix: binary,  precedence: Precedence.Term};
-rules[TokenT.Minus]          = {prefix: unary,       infix: binary,  precedence: Precedence.Term};
-rules[TokenT.Star]           = {prefix: null,        infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.Slash]          = {prefix: null,        infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.False]          = {prefix: literal,     infix: null,    precedence: Precedence.None};
-rules[TokenT.True]           = {prefix: literal,     infix: null,    precedence: Precedence.None};
-rules[TokenT.Bang]           = {prefix: unary,       infix: null,    precedence: Precedence.None};
-rules[TokenT.String]         = {prefix: parsestring, infix: null,    precedence: Precedence.None};
-rules[TokenT.Name]           = {prefix: parse_name,  infix: null,    precedence: Precedence.None};
+rules[TokenT.LParen]    = {prefix: grouping,        infix: null,    precedence: Precedence.None};
+rules[TokenT.Minus]     = {prefix: unary,           infix: binary,  precedence: Precedence.Term};
+rules[TokenT.Name]      = {prefix: parse_name,      infix: null,    precedence: Precedence.None};
+rules[TokenT.Number]    = {prefix: parse_number,    infix: null,    precedence: Precedence.None};
+rules[TokenT.Plus]      = {prefix: null,            infix: binary,  precedence: Precedence.Term};
+rules[TokenT.RBracket]  = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.RParen]    = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Semicolon] = {prefix: null,            infix: null,    precedence: Precedence.None};
+rules[TokenT.Slash]     = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
+rules[TokenT.Star]      = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
+rules[TokenT.String]    = {prefix: parse_string,    infix: null,    precedence: Precedence.None};
+rules[TokenT.True]      = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
 
 function getRule(kind: TokenT): ParseRule {
     return rules[kind];
@@ -450,39 +448,44 @@ function statement(): void {
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {
-        error(`after declaration -> statement: no grammar for ${parser.current.kind}`);
+        error_at_current(`cannot start statement with ${ TokenTName[parser.current.kind] }`);
     }
 
     if (lastType !== invalidType) {
-        error("Doesn't support expression statement");
+        error("forbidden expression statement");
     }
 }
 
+interface CompilerResult {
+    success: boolean;
+    message?: string;
+}
+
 const compiler = {
-    compile(source_: string, chunk: Chunk): CompilerResult {
-        source = source_;
-        scanner.init(source_);
+    compile(source: string, chunk: Chunk): CompilerResult {
+        scanner.init(source);
         compilingChunk = chunk;
         tempNames = {};
-
-        advance();
+        parser.previous = invalidToken;
+        parser.current = invalidToken;
 
         try {
+            advance();
             while (!match(TokenT.EOF)) {
                 declaration();
             }
             endCompiler();
-            return {status: true};
+            return { success: true };
         }
         catch(error: unknown) {
             if (error instanceof CompileError) {
-                console.log("catch CompileError");
-                console.log(error);
-                return {status: false, message: (error as CompileError).message};
+                // console.log("catch CompileError");
+                // console.log(error);
+                return { success: false, message: error.message };
             } else {
-                console.log("catch Error");
-                console.log(error);
-                return {status: false, message: (error as Error).message};
+                // console.log("catch Error");
+                // console.log(error);
+                return { success: false, message: (error as Error).message };
             }
         }
     }
