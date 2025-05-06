@@ -8,8 +8,11 @@ import { type Types, type Version, names } from "./names.js"
 let invalidType: Types = {kind: Kind.Nothing};
 let numberType: Types = {kind: Kind.Number};
 let lastType: Types = invalidType;
-let canParseArgument = false as Boolean;
-let canAssign = false as Boolean;
+
+// To distinguish function as argument vs function call.
+let canParseArgument = false;
+
+let canAssign = false;
 
 const enum Precedence {
     None,
@@ -131,7 +134,7 @@ function makeConstant(value: Value) {
 function grouping(): void {
     canParseArgument = true;
     expression();
-    consume(TokenT.RParen, "Expect ')' after expression.");
+    consume(TokenT.RParen, "expect ')' after grouping");
 }
 
 function unary(): void {
@@ -145,18 +148,22 @@ function unary(): void {
             }
             emitByte(Op.Not);
             break;
+
         case TokenT.Minus:
             if (lastType.kind !== Kind.Number) {
                 error("'-' only for number");
             }
             emitByte(Op.Neg);
             break;
+
         default:
             error("unhandled unary op");
     }
 }
 
 // Only for numbers.
+// TODO: change lastType when implementing relation (<, >, ==).
+
 function binary(): void {
     let operator = parser.previous.lexeme;
     if (lastType.kind !== Kind.Number) {
@@ -343,7 +350,7 @@ function parse_non_callable(table: any, name: string): void {
 
 function parse_definition(name: string): void {
     let index = makeConstant(new FGString(name));
-    consume(TokenT.Eq, "Expect '=' after variable declaration");
+    consume(TokenT.Eq, "expect '=' after variable declaration");
 
     lastType = invalidType;
     canParseArgument = true;
@@ -365,7 +372,7 @@ function parsePrecedence(precedence: Precedence): void {
     advance();
     let prefixRule = getRule(parser.previous.kind).prefix;
     if (prefixRule === null) {
-        error("Expect expression.");
+        error("expect expression");
         return;
     }
 
@@ -375,7 +382,7 @@ function parsePrecedence(precedence: Precedence): void {
         advance();
         let infixRule = getRule(parser.previous.kind).infix;
         if (infixRule === null) {
-            error("Expect infix operator.");
+            error("expect infix operator");
             return;
         }
         infixRule();

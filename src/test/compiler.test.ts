@@ -6,18 +6,241 @@ import { Op, OpName, Chunk } from "../chunk.js"
 import { Kind, FGBoolean, FGNumber, FGString } from "../value.js"
 import { compiler } from "../compiler.js"
 
-describe("compiler", () => {
+describe("compiler:binary", () => {
 
-    it("empty string", () => {
+    it("+", () => {
         let chunk = new Chunk("test chunk");
-        let source = "";
+        let source = "num = 12 + 34";
         let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [Op.Ret]);
-        assert.deepEqual(chunk.lines, [1]);
-        assert.deepEqual(chunk.values, []);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Add,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGString("num"));
+        assert.deepEqual(chunk.values[1], new FGNumber(12));
+        assert.deepEqual(chunk.values[2], new FGNumber(34));
     });
 
-    it("number, string, boolean assignment", () => {
+    it("-", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 - 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Sub,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("*", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 * 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Mul,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("/", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 / 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Div,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("prec: +-", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 + 34 - 56";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Add,
+            Op.Load, 3, Op.Sub,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("prec: */", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 * 34 / 56";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Mul,
+            Op.Load, 3, Op.Div,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("prec: +-*/", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 + 34 * 56 - 78 / 9";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3,
+            Op.Mul, Op.Add, Op.Load, 4, Op.Load, 5, Op.Div, Op.Sub,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("with variable", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a = 12 b = a + 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Get, 3,
+            Op.Load, 4, Op.Add,
+            Op.Set, 2, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("error: string + number", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = \"real\" + 2";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '+': '+' only for numbers\n"
+        });
+    });
+
+    it("error: num * string", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 * \"real\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'real': '*' only for numbers\n"
+        });
+    });
+
+});
+
+describe("compiler:unary", () => {
+
+    it("-", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -123";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Neg,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("double unary: --", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = --123";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Neg, Op.Neg,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("!", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = !false";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Not,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
+        ]);
+    });
+
+    it("double unary: !!", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = !!false";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Not, Op.Not,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
+        ]);
+    });
+
+    it("error: -string", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -\"real\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'real': '-' only for number\n"
+        });
+    });
+
+    it("error: !number", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "truth = !2";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': '!' only for boolean\n"
+        });
+    });
+
+});
+
+describe("compiler:grouping", () => {
+
+    it("()", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 1 * (2 + 3)";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Add, Op.Mul,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("error: no ')'", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 1 * (2 + 3";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at end: expect ')' after grouping\n"
+        });
+    });
+
+    it("-()", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -(2 + 3)";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.Add, Op.Neg,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("error: -(String)", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -(\"real\")";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at ')': '-' only for number\n"
+        });
+    });
+
+    it("!()", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = !(false)";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Not,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
+        ]);
+    });
+
+    it("error: !(Number)", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = !(2)";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at ')': '!' only for boolean\n"
+        });
+    });
+
+});
+
+describe("compiler:assignment", () => {
+
+    it("number, string, boolean", () => {
         let chunk = new Chunk("test chunk");
         let source = `num = 123.456 str = \"real\"
             c = true
@@ -45,176 +268,26 @@ describe("compiler", () => {
         assert.deepEqual(chunk.values[7], new FGBoolean(false));
     });
 
-    it("binary: +", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Add,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGString("num"));
-        assert.deepEqual(chunk.values[1], new FGNumber(12));
-        assert.deepEqual(chunk.values[2], new FGNumber(34));
-    });
-
-    it("binary: -", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 - 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Sub,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary: *", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Mul,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary: /", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 / 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Div,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary prec: +-", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34 - 56";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Add,
-            Op.Load, 3, Op.Sub,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary prec: */", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * 34 / 56";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Mul,
-            Op.Load, 3, Op.Div,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary prec: +-*/", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34 * 56 - 78 / 9";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            Op.Mul, Op.Add, Op.Load, 4, Op.Load, 5, Op.Div, Op.Sub,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("binary with variable", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 b = a + 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Get, 3,
-            Op.Load, 4, Op.Add,
-            Op.Set, 2, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("error binary: string + number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = \"real\" + 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '+': '+' only for numbers\n"
-        });
-    });
-
-    it("error binary: num * string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * \"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': '*' only for numbers\n"
-        });
-    });
-
-    it("unary: -", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("double unary: --", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = --123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Neg, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("unary: !", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !false";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Not,
-            Op.Set, 0, Kind.Boolean, Op.Ret,
-        ]);
-    });
-
-    it("double unary: !!", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !!false";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Not, Op.Not,
-            Op.Set, 0, Kind.Boolean, Op.Ret,
-        ]);
-    });
-
-    it("error unary: -string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -\"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': '-' only for number\n"
-        });
-    });
-
-    it("error unary: !number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "truth = !2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': '!' only for boolean\n"
-        });
-    });
-
-    it("reassignment error", () => {
+    it("error: reassignment", () => {
         let chunk = new Chunk("test chunk");
         let source = "num = 123.456 num = 2";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
             success: false, message: "1: at 'num': num already defined\n"
         });
+    });
+
+});
+
+describe("compiler", () => {
+
+    it("empty string", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [Op.Ret]);
+        assert.deepEqual(chunk.lines, [1]);
+        assert.deepEqual(chunk.values, []);
     });
 
     it("success return", () => {

@@ -14,6 +14,7 @@ repl.place(100, 100);
 let chunk = new Chunk("testing");
 let source = "";
 // source = "num = 12 / 34"; // binary
-source = "truth = !2"; // unary
+// source = "a = 1 * 2 + 3";
+source = "a = -(\"real\")";
 let compilerResult = compiler.compile(source, chunk);
 console.log(chunk.disassemble());

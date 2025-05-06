@@ -88,7 +88,7 @@ function makeConstant(value) {
 function grouping() {
     canParseArgument = true;
     expression();
-    consume(4, "Expect ')' after expression.");
+    consume(4, "expect ')' after grouping");
 }
 function unary() {
     let operatorType = parser.previous.kind;
@@ -269,7 +269,7 @@ function parse_non_callable(table, name) {
 }
 function parse_definition(name) {
     let index = makeConstant(new FGString(name));
-    consume(14, "Expect '=' after variable declaration");
+    consume(14, "expect '=' after variable declaration");
     lastType = invalidType;
     canParseArgument = true;
     expression();
@@ -282,7 +282,7 @@ function parsePrecedence(precedence) {
     advance();
     let prefixRule = getRule(parser.previous.kind).prefix;
     if (prefixRule === null) {
-        error("Expect expression.");
+        error("expect expression");
         return;
     }
     prefixRule();
@@ -290,7 +290,7 @@ function parsePrecedence(precedence) {
         advance();
         let infixRule = getRule(parser.previous.kind).infix;
         if (infixRule === null) {
-            error("Expect infix operator.");
+            error("expect infix operator");
             return;
         }
         infixRule();

@@ -2,6 +2,10 @@
 
 #### 06-05-25
 
+- add grouping test
+- fix grouping
+- search how to skip test
+- refactor compiler.test.ts
 - test invalid unary operator
     `-` only for number
     '!' only for boolean
