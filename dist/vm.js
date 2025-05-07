@@ -19,8 +19,6 @@ let output = "";
 function print_output(s) {
     output += s;
 }
-function add() {
-}
 let chunk = new Chunk("vm");
 let ip = 0;
 function read_byte() {
@@ -48,7 +46,9 @@ function run() {
         }
         switch (read_byte()) {
             case 0:
-                add();
+                let b = pop();
+                let a = pop();
+                push(a.add(b));
                 break;
             case 8: {
                 push(read_constant());

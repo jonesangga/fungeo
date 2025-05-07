@@ -29,12 +29,6 @@ function print_output(s: string): void {
     output += s;
 }
 
-function add() {
-    // let b = asNumber(pop());
-    // let a = asNumber(pop());
-    // push(newNumber(a + b));
-}
-
 let chunk = new Chunk("vm");
 let ip    = 0;     // Index of current instruction in chunk.code array.
 
@@ -68,7 +62,9 @@ function run(): boolean {
 
         switch (read_byte()) {
             case Op.Add:
-                add();
+                let b = pop() as FGNumber;
+                let a = pop() as FGNumber;
+                push(a.add(b));
                 break;
 
             case Op.Load: {

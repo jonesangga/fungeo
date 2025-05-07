@@ -36,6 +36,10 @@ export class FGNumber {
     kind: Kind.Number = Kind.Number;
     constructor(public value: number) {}
     to_str(): string { return this.value + ""; }
+
+    add(other: FGNumber): FGNumber {
+        return new FGNumber(this.value + other.value);
+    }
 }
 
 export class FGString {

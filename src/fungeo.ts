@@ -14,7 +14,7 @@ repl.place(100, 100);
 
 let chunk = new Chunk("testing");
 let source = "";
-source = "a = 2 b = a";
+source = "a = 10 + 20";
 let compilerResult = compiler.compile(source, chunk);
 console.log(chunk.disassemble());
 

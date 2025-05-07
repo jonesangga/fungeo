@@ -41,6 +41,9 @@ export class FGNumber {
         this.value = value;
     }
     to_str() { return this.value + ""; }
+    add(other) {
+        return new FGNumber(this.value + other.value);
+    }
 }
 export class FGString {
     value;

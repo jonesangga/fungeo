@@ -61,4 +61,27 @@ describe("vm:stack", () => {
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
 
+    it("Op.Add", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 123 + 456";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.Add
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGNumber(579)
+        ]);
+    });
+
 });

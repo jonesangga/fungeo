@@ -2,6 +2,7 @@
 
 #### 07-05-25
 
+- add test for FGNumber add
 - reset userNames in vm.test
 - update compiler.test for GetUsr
 - update chunk.test for GetUsr
