@@ -1,6 +1,6 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { KindName, FGBoolean, FGNumber, FGString, FGCallable } from "./value.js";
-import { names } from "./names.js";
+import { nativeNames, userNames } from "./names.js";
 let invalidType = { kind: 0 };
 let numberType = { kind: 4 };
 let lastType = invalidType;
@@ -98,10 +98,10 @@ function emitBytes(byte1, byte2) {
     emitByte(byte2);
 }
 function emitConstant(value) {
-    emitBytes(7, makeConstant(value));
+    emitBytes(8, makeConstant(value));
 }
 function emitReturn() {
-    emitByte(12);
+    emitByte(13);
 }
 function endCompiler() {
     emitReturn();
@@ -122,13 +122,13 @@ function unary() {
             if (lastType.kind !== 2) {
                 error("'!' only for boolean");
             }
-            emitByte(10);
+            emitByte(11);
             break;
         case 7:
             if (lastType.kind !== 4) {
                 error("'-' only for number");
             }
-            emitByte(9);
+            emitByte(10);
             break;
         default:
             error("unhandled unary op");
@@ -150,10 +150,10 @@ function binary() {
             emitByte(0);
             break;
         case 7:
-            emitByte(14);
+            emitByte(15);
             break;
         case 10:
-            emitByte(8);
+            emitByte(9);
             break;
         case 9:
             emitByte(2);
@@ -180,14 +180,23 @@ function parse_string() {
 let tempNames = {};
 function parse_name() {
     let name = parser.previous.lexeme;
-    if (Object.hasOwn(names, name)) {
+    if (Object.hasOwn(nativeNames, name)) {
         canAssign = false;
         if (check(14))
             error(`${name} already defined`);
-        if (names[name].kind === 3)
+        if (nativeNames[name].kind === 3)
             parse_callable(name);
         else
-            parse_non_callable(names, name);
+            parse_non_callable(nativeNames, name, true);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        canAssign = false;
+        if (check(14))
+            error(`${name} already defined`);
+        if (nativeNames[name].kind === 3)
+            parse_callable(name);
+        else
+            parse_non_callable(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
         canAssign = false;
@@ -196,7 +205,7 @@ function parse_name() {
         if (tempNames[name].kind === 3)
             parse_callable(name);
         else
-            parse_non_callable(tempNames, name);
+            parse_non_callable(tempNames, name, false);
     }
     else {
         if (!canAssign) {
@@ -232,11 +241,11 @@ function setToKinds(set_) {
 }
 function parse_callable(name_) {
     if (!canParseArgument) {
-        lastType = names[name_];
+        lastType = nativeNames[name_];
         return;
     }
     canParseArgument = match(1);
-    let name = names[name_];
+    let name = nativeNames[name_];
     let version = name.version;
     let inputVersion = [];
     let gotTypes = [];
@@ -285,9 +294,12 @@ function parse_callable(name_) {
         lastType = { kind: version[i].output };
     }
 }
-function parse_non_callable(table, name) {
+function parse_non_callable(table, name, native) {
     let index = makeConstant(new FGString(name));
-    emitBytes(4, index);
+    if (native)
+        emitBytes(4, index);
+    else
+        emitBytes(5, index);
     lastType = { kind: table[name].kind };
     console.log("in parse_non_callable() lastType = ", lastType);
 }
@@ -297,7 +309,7 @@ function parse_definition(name) {
     lastType = invalidType;
     canParseArgument = true;
     expression();
-    emitBytes(13, index);
+    emitBytes(14, index);
     emitByte(lastType.kind);
     tempNames[name] = { kind: lastType.kind };
     lastType = invalidType;

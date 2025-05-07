@@ -12,9 +12,9 @@ describe("chunk", () => {
     });
     it("write()", () => {
         let chunk = new Chunk("test chunk");
-        chunk.write(7, 1);
+        chunk.write(8, 1);
         chunk.write(0, 2);
-        assert.deepEqual(chunk.code, [7, 0]);
+        assert.deepEqual(chunk.code, [8, 0]);
         assert.deepEqual(chunk.lines, [1, 2]);
         assert.deepEqual(chunk.values, []);
     });
@@ -30,11 +30,11 @@ describe("chunk", () => {
         let chunk = new Chunk("test chunk");
         let n = new FGNumber(2);
         let id = chunk.add_value(n);
-        chunk.write(7, 100);
+        chunk.write(8, 100);
         chunk.write(id, 100);
         let a = new FGString("a");
         id = chunk.add_value(a);
-        chunk.write(4, 110);
+        chunk.write(5, 110);
         chunk.write(id, 110);
         let result = "";
         let offset = 0;
@@ -42,18 +42,18 @@ describe("chunk", () => {
         assert.deepEqual(result, "0000  100 Load      0 '2'\n");
         assert.equal(offset, 2);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0002  110 Get       1 'a'\n");
+        assert.deepEqual(result, "0002  110 GetUsr    1 'a'\n");
         assert.equal(offset, 4);
     });
     it("Op.Ret", () => {
         let chunk = new Chunk("test chunk");
         chunk.write(0, 50);
         chunk.write(2, 60);
-        chunk.write(9, 70);
-        chunk.write(10, 80);
-        chunk.write(8, 90);
-        chunk.write(12, 100);
-        chunk.write(14, 110);
+        chunk.write(10, 70);
+        chunk.write(11, 80);
+        chunk.write(9, 90);
+        chunk.write(13, 100);
+        chunk.write(15, 110);
         let result = "";
         let offset = 0;
         [result, offset] = chunk.disassemble_instr(offset);
@@ -83,7 +83,7 @@ describe("chunk", () => {
         let name = new FGString("a");
         let kind = 4;
         let id = chunk.add_value(name);
-        chunk.write(13, 123);
+        chunk.write(14, 123);
         chunk.write(id, 123);
         chunk.write(kind, 123);
         let [result, offset] = chunk.disassemble_instr(0);

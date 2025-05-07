@@ -1,1 +1,2 @@
-export let names = {};
+export let userNames = {};
+export let nativeNames = {};

@@ -7,7 +7,8 @@ const enum Op {
     Call,
     Div,
     False,
-    Get,
+    GetNat,     // Get nativeNames.
+    GetUsr,     // Get userNames.
     Index,
     List,
     Load,
@@ -26,7 +27,8 @@ const OpName: { [key in Op]: string } = {
     [Op.Call]: "Call",
     [Op.Div]: "Div",
     [Op.False]: "False",
-    [Op.Get]: "Get",
+    [Op.GetNat]: "GetNat",
+    [Op.GetUsr]: "GetUsr",
     [Op.Index]: "Index",
     [Op.List]: "List",
     [Op.Load]: "Load",
@@ -80,7 +82,8 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction as Op];
         switch (instruction) {
-            case Op.Get:
+            case Op.GetNat:
+            case Op.GetUsr:
             case Op.Load:
                 let index = this.code[offset + 1];
                 result += `${ padr6(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;

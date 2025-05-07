@@ -1,7 +1,8 @@
 import { Chunk } from "./chunk.js";
-import { names } from "./names.js";
-let stack = [];
-let stackTop = 0;
+import { nativeNames, userNames } from "./names.js";
+const TESTING = true;
+export let stack = [];
+export let stackTop = 0;
 function push(value) {
     stack[stackTop++] = value;
 }
@@ -14,24 +15,16 @@ function peek(distance) {
 function resetStack() {
     stackTop = 0;
 }
-let replOutput = "";
+let output = "";
 function print_output(s) {
-    replOutput += s;
+    output += s;
 }
-var InterpretResult;
-(function (InterpretResult) {
-    InterpretResult[InterpretResult["Ok"] = 0] = "Ok";
-    InterpretResult[InterpretResult["CompileError"] = 1] = "CompileError";
-    InterpretResult[InterpretResult["RuntimeError"] = 2] = "RuntimeError";
-})(InterpretResult || (InterpretResult = {}));
-;
 function add() {
 }
 let chunk = new Chunk("vm");
 let ip = 0;
 function read_byte() {
-    ip++;
-    return chunk.code[ip - 1];
+    return chunk.code[ip++];
 }
 function read_constant() {
     return chunk.values[read_byte()];
@@ -39,51 +32,78 @@ function read_constant() {
 function read_string() {
     return read_constant().value;
 }
+const debug = true;
 function run() {
     for (;;) {
-        let instruction;
-        switch (instruction = read_byte()) {
+        if (debug) {
+            let str = "      ";
+            for (let slot = 0; slot < stackTop; slot++) {
+                str += "[ ";
+                str += stack[slot].to_str();
+                str += " ]";
+            }
+            str += "\n";
+            let [result,] = chunk.disassemble_instr(ip);
+            console.log(str + result);
+        }
+        switch (read_byte()) {
             case 0:
                 add();
                 break;
-            case 7: {
+            case 8: {
                 push(read_constant());
                 break;
             }
             case 4: {
                 let name = read_string();
-                let value = names[name].value;
+                let value = nativeNames[name].value;
                 push(value);
                 break;
             }
-            case 13: {
+            case 5: {
+                let name = read_string();
+                let value = userNames[name].value;
+                push(value);
+                break;
+            }
+            case 14: {
                 let name = read_string();
                 let kind = read_byte();
                 let value = pop();
-                names[name] = { kind, value };
+                userNames[name] = { kind, value };
                 break;
             }
-            case 12: {
-                return 0;
-            }
+            case 13:
+                return true;
         }
+        if (TESTING)
+            return true;
     }
 }
 const vm = {
     init() {
         resetStack();
+        for (let name in userNames) {
+            delete userNames[name];
+        }
     },
     interpret(chunk_) {
         chunk = chunk_;
         ip = 0;
-        replOutput = "";
-        let result = run();
-        if (result === 0) {
-            return { status: result, message: replOutput };
+        output = "";
+        let success = run();
+        if (success) {
+            return { success, message: output };
         }
         else {
-            return { status: result, message: "runtime: " + replOutput };
+            return { success, message: "runtime: " + output };
         }
-    }
+    },
+    set(chunk_) {
+        chunk = chunk_;
+        ip = 0;
+    },
+    step() { if (TESTING)
+        run(); }
 };
 export { vm };

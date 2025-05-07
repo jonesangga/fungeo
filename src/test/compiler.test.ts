@@ -89,7 +89,7 @@ describe("compiler:binary", () => {
         let source = "a = 12 b = a + 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Get, 3,
+            Op.Load, 1, Op.Set, 0, Kind.Number, Op.GetUsr, 3,
             Op.Load, 4, Op.Add,
             Op.Set, 2, Kind.Number, Op.Ret,
         ]);

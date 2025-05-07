@@ -24,7 +24,9 @@ interface Names {
     [name: string]: Types;
 }
 
-export let names: Names = {
+export let userNames: Names = {};
+
+export let nativeNames: Names = {
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
     // "fishp": { kind: Kind.Pic, value: fishp, drawn: true },

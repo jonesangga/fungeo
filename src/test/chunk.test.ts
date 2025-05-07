@@ -44,7 +44,7 @@ describe("chunk", () => {
 
         let a = new FGString("a");
         id = chunk.add_value(a);
-        chunk.write(Op.Get, 110);
+        chunk.write(Op.GetUsr, 110);
         chunk.write(id, 110);
 
         let result = "";
@@ -54,7 +54,7 @@ describe("chunk", () => {
         assert.equal(offset, 2);
 
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0002  110 Get       1 'a'\n");
+        assert.deepEqual(result, "0002  110 GetUsr    1 'a'\n");
         assert.equal(offset, 4);
     });
 

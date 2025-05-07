@@ -2,6 +2,17 @@
 
 #### 07-05-25
 
+- reset userNames in vm.test
+- update compiler.test for GetUsr
+- update chunk.test for GetUsr
+- new instruction Op.GetUsr
+- change Op.Get to Op.GetNat for nativeNames
+- make new userNames
+- change names to nativeNames
+- modify Op.Get instruction, need another flag for which names?
+- separate built-name names with user defined names
+- remove InterpretResult enum
+- test vm stack
 - test compiler error: expect expression
 - bug: rules[parser.current.kind] is undefined: solve
   make rules exhaustive

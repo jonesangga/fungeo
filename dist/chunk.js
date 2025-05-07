@@ -5,18 +5,19 @@ var Op;
     Op[Op["Call"] = 1] = "Call";
     Op[Op["Div"] = 2] = "Div";
     Op[Op["False"] = 3] = "False";
-    Op[Op["Get"] = 4] = "Get";
-    Op[Op["Index"] = 5] = "Index";
-    Op[Op["List"] = 6] = "List";
-    Op[Op["Load"] = 7] = "Load";
-    Op[Op["Mul"] = 8] = "Mul";
-    Op[Op["Neg"] = 9] = "Neg";
-    Op[Op["Not"] = 10] = "Not";
-    Op[Op["Pop"] = 11] = "Pop";
-    Op[Op["Ret"] = 12] = "Ret";
-    Op[Op["Set"] = 13] = "Set";
-    Op[Op["Sub"] = 14] = "Sub";
-    Op[Op["True"] = 15] = "True";
+    Op[Op["GetNat"] = 4] = "GetNat";
+    Op[Op["GetUsr"] = 5] = "GetUsr";
+    Op[Op["Index"] = 6] = "Index";
+    Op[Op["List"] = 7] = "List";
+    Op[Op["Load"] = 8] = "Load";
+    Op[Op["Mul"] = 9] = "Mul";
+    Op[Op["Neg"] = 10] = "Neg";
+    Op[Op["Not"] = 11] = "Not";
+    Op[Op["Pop"] = 12] = "Pop";
+    Op[Op["Ret"] = 13] = "Ret";
+    Op[Op["Set"] = 14] = "Set";
+    Op[Op["Sub"] = 15] = "Sub";
+    Op[Op["True"] = 16] = "True";
 })(Op || (Op = {}));
 ;
 const OpName = {
@@ -24,18 +25,19 @@ const OpName = {
     [1]: "Call",
     [2]: "Div",
     [3]: "False",
-    [4]: "Get",
-    [5]: "Index",
-    [6]: "List",
-    [7]: "Load",
-    [8]: "Mul",
-    [9]: "Neg",
-    [10]: "Not",
-    [11]: "Pop",
-    [12]: "Ret",
-    [13]: "Set",
-    [14]: "Sub",
-    [15]: "True",
+    [4]: "GetNat",
+    [5]: "GetUsr",
+    [6]: "Index",
+    [7]: "List",
+    [8]: "Load",
+    [9]: "Mul",
+    [10]: "Neg",
+    [11]: "Not",
+    [12]: "Pop",
+    [13]: "Ret",
+    [14]: "Set",
+    [15]: "Sub",
+    [16]: "True",
 };
 class Chunk {
     name;
@@ -74,20 +76,21 @@ class Chunk {
         let name = OpName[instruction];
         switch (instruction) {
             case 4:
-            case 7:
+            case 5:
+            case 8:
                 let index = this.code[offset + 1];
                 result += `${padr6(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];
             case 0:
             case 2:
-            case 9:
             case 10:
-            case 8:
-            case 12:
-            case 14:
+            case 11:
+            case 9:
+            case 13:
+            case 15:
                 result += name + "\n";
                 return [result, offset + 1];
-            case 13:
+            case 14:
                 let nameId = this.code[offset + 1];
                 let kind = this.code[offset + 2];
                 result += `${padr6(name)} ${padl4(nameId)} '`;

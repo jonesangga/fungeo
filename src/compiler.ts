@@ -3,7 +3,7 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
-import { type Types, type Version, names } from "./names.js"
+import { type Types, type Version, nativeNames, userNames } from "./names.js"
 
 let invalidType: Types = { kind: Kind.Nothing };
 let numberType: Types = { kind: Kind.Number };
@@ -247,18 +247,29 @@ interface TempNames {
 let tempNames: TempNames = {
 };
 
+// TODO: clean up this.
 function parse_name(): void {
     let name = parser.previous.lexeme;
 
-    if (Object.hasOwn(names, name)) {
+    if (Object.hasOwn(nativeNames, name)) {
         canAssign = false;
         if (check(TokenT.Eq))
             error(`${ name } already defined`);
 
-        if (names[name].kind === Kind.Callable)
+        if (nativeNames[name].kind === Kind.Callable)
             parse_callable(name);
         else
-            parse_non_callable(names, name);
+            parse_non_callable(nativeNames, name, true);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        canAssign = false;
+        if (check(TokenT.Eq))
+            error(`${ name } already defined`);
+
+        if (nativeNames[name].kind === Kind.Callable)
+            parse_callable(name);
+        else
+            parse_non_callable(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
         canAssign = false;
@@ -268,7 +279,7 @@ function parse_name(): void {
         if (tempNames[name].kind === Kind.Callable)
             parse_callable(name);
         else
-            parse_non_callable(tempNames, name);
+            parse_non_callable(tempNames, name, false);
     }
     else {
         if (!canAssign) {
@@ -304,12 +315,12 @@ function setToKinds(set_: Set<number>): string[] {
 
 function parse_callable(name_: string): void {
     if (!canParseArgument) {
-        lastType = names[name_];
+        lastType = nativeNames[name_];
         return;
     }
     canParseArgument = match(TokenT.Dollar);
 
-    let name    = names[name_];
+    let name    = nativeNames[name_];
     let version = name.version as Version[];
     let inputVersion: (Set<number> | Kind)[] = [];
     let gotTypes: Kind[]     = [];
@@ -362,9 +373,12 @@ function parse_callable(name_: string): void {
     }
 }
 
-function parse_non_callable(table: any, name: string): void {
+function parse_non_callable(table: any, name: string, native: boolean): void {
     let index = makeConstant(new FGString(name));
-    emitBytes(Op.Get, index);
+    if (native)
+        emitBytes(Op.GetNat, index);
+    else
+        emitBytes(Op.GetUsr, index);
     // if (table[name].kind === Kind.List) {
         // lastType = {kind: table[name].kind, listKind: table[name].listKind};
     // } else {
