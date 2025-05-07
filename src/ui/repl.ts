@@ -128,19 +128,15 @@ function input_binding(e: any): void {
             input.value = "";
             input_reset();
 
-            source = source.replaceAll("\n", "\n| ");
+            let trimmed = source.replaceAll("\n", "\n| ");
 
-            if (history[history.length - 1].code !== source) {
+            if (history[history.length - 1].code !== trimmed) {
                 history.push({ code: source });
+                terminal.innerHTML += `> ${ trimmed }\n`;
             }
             historyViewIdx = history.length;
 
-            // For testing. Delete later.
-            if (source.length < 5)
-                repl.error("too small alkja a la aj ak a aj aj lajflkajfajelajelakf awej aejfa lejf");
-            else
-                repl.ok("nice");
-            // main(source);
+            repl.callback(source);
             terminal_update();
         }
         e.preventDefault();
@@ -149,6 +145,14 @@ function input_binding(e: any): void {
 
 
 const repl = {
+    callback(source: string): void {
+        console.log(source);
+    },
+
+    set_callback(fn: (source: string) => void): void {
+        this.callback = fn;
+    },
+
     place(x: number, y: number): void {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
@@ -159,6 +163,7 @@ const repl = {
     },
 
     ok(message: string): void {
+        terminal.innerHTML += `${ message }\n`;
         history[history.length - 1].output = message;
         holder.style.background = colorOk;
 
@@ -174,6 +179,7 @@ const repl = {
     },
  
     error(message: string): void {
+        terminal.innerHTML += `${ message }\n`;
         history[history.length - 1].output = message;
         holder.style.background  = colorFail;
 
@@ -207,11 +213,6 @@ terminal.style.overflow   = "scroll";
 let terminalShow = true;
 
 function terminal_update() {
-    let item = history[history.length - 1];
-    terminal.innerHTML += `> ${ item.code }\n`;
-    if (Object.hasOwn(item, "output")) {
-        terminal.innerHTML += `${ item.output }\n`;
-    }
     terminal.scrollTop = terminal.scrollHeight;
 }
 

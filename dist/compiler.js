@@ -16,25 +16,30 @@ var Precedence;
     Precedence[Precedence["Call"] = 5] = "Call";
     Precedence[Precedence["Primary"] = 6] = "Primary";
 })(Precedence || (Precedence = {}));
-let rules = [];
-rules[11] = { prefix: unary, infix: null, precedence: 0 };
-rules[12] = { prefix: null, infix: null, precedence: 0 };
-rules[13] = { prefix: null, infix: null, precedence: 0 };
-rules[0] = { prefix: null, infix: null, precedence: 0 };
-rules[20] = { prefix: null, infix: null, precedence: 0 };
-rules[19] = { prefix: parse_boolean, infix: null, precedence: 0 };
-rules[3] = { prefix: grouping, infix: null, precedence: 0 };
-rules[7] = { prefix: unary, infix: binary, precedence: 2 };
-rules[15] = { prefix: parse_name, infix: null, precedence: 0 };
-rules[16] = { prefix: parse_number, infix: null, precedence: 0 };
-rules[8] = { prefix: null, infix: binary, precedence: 2 };
-rules[6] = { prefix: null, infix: null, precedence: 0 };
-rules[4] = { prefix: null, infix: null, precedence: 0 };
-rules[2] = { prefix: null, infix: null, precedence: 0 };
-rules[9] = { prefix: null, infix: binary, precedence: 3 };
-rules[10] = { prefix: null, infix: binary, precedence: 3 };
-rules[17] = { prefix: parse_string, infix: null, precedence: 0 };
-rules[18] = { prefix: parse_boolean, infix: null, precedence: 0 };
+const rules = {
+    [11]: { prefix: unary, infix: null, precedence: 0 },
+    [12]: { prefix: null, infix: null, precedence: 0 },
+    [13]: { prefix: null, infix: null, precedence: 0 },
+    [0]: { prefix: null, infix: null, precedence: 0 },
+    [1]: { prefix: null, infix: null, precedence: 0 },
+    [20]: { prefix: null, infix: null, precedence: 0 },
+    [14]: { prefix: null, infix: null, precedence: 0 },
+    [21]: { prefix: null, infix: null, precedence: 0 },
+    [19]: { prefix: parse_boolean, infix: null, precedence: 0 },
+    [5]: { prefix: grouping, infix: null, precedence: 0 },
+    [3]: { prefix: grouping, infix: null, precedence: 0 },
+    [7]: { prefix: unary, infix: binary, precedence: 2 },
+    [15]: { prefix: parse_name, infix: null, precedence: 0 },
+    [16]: { prefix: parse_number, infix: null, precedence: 0 },
+    [8]: { prefix: null, infix: binary, precedence: 2 },
+    [6]: { prefix: null, infix: null, precedence: 0 },
+    [4]: { prefix: null, infix: null, precedence: 0 },
+    [2]: { prefix: null, infix: null, precedence: 0 },
+    [9]: { prefix: null, infix: binary, precedence: 3 },
+    [10]: { prefix: null, infix: binary, precedence: 3 },
+    [17]: { prefix: parse_string, infix: null, precedence: 0 },
+    [18]: { prefix: parse_boolean, infix: null, precedence: 0 },
+};
 let invalidToken = { kind: 20, line: -1, lexeme: "" };
 let parser = {
     current: invalidToken,

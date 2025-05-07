@@ -30,26 +30,30 @@ interface ParseRule {
     precedence: Precedence;
 }
 
-let rules: ParseRule[] = [];
-rules[TokenT.Bang]      = {prefix: unary,           infix: null,    precedence: Precedence.None};
-rules[TokenT.Colon]     = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.ColonEq]   = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Comma]     = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.EOF]       = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.False]     = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
-// rules[TokenT.LBracket]    = {prefix: parse_list,  infix: indexlist,    precedence: Precedence.Call};
-rules[TokenT.LParen]    = {prefix: grouping,        infix: null,    precedence: Precedence.None};
-rules[TokenT.Minus]     = {prefix: unary,           infix: binary,  precedence: Precedence.Term};
-rules[TokenT.Name]      = {prefix: parse_name,      infix: null,    precedence: Precedence.None};
-rules[TokenT.Number]    = {prefix: parse_number,    infix: null,    precedence: Precedence.None};
-rules[TokenT.Plus]      = {prefix: null,            infix: binary,  precedence: Precedence.Term};
-rules[TokenT.RBracket]  = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.RParen]    = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Semicolon] = {prefix: null,            infix: null,    precedence: Precedence.None};
-rules[TokenT.Slash]     = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.Star]      = {prefix: null,            infix: binary,  precedence: Precedence.Factor};
-rules[TokenT.String]    = {prefix: parse_string,    infix: null,    precedence: Precedence.None};
-rules[TokenT.True]      = {prefix: parse_boolean,   infix: null,    precedence: Precedence.None};
+const rules: { [key in TokenT]: ParseRule } = {
+    [TokenT.Bang]      : {prefix: unary,           infix: null,    precedence: Precedence.None},
+    [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Eq]        : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Error]     : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
+    [TokenT.LBracket]  : {prefix: grouping,        infix: null,    precedence: Precedence.None},
+    [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
+    [TokenT.Minus]     : {prefix: unary,           infix: binary,  precedence: Precedence.Term},
+    [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
+    [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
+    [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
+    [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.RParen]    : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Semicolon] : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Slash]     : {prefix: null,            infix: binary,  precedence: Precedence.Factor},
+    [TokenT.Star]      : {prefix: null,            infix: binary,  precedence: Precedence.Factor},
+    [TokenT.String]    : {prefix: parse_string,    infix: null,    precedence: Precedence.None},
+    [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
+}
 
 let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
 

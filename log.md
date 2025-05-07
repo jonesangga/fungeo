@@ -1,5 +1,15 @@
 # Log
 
+#### 07-05-25
+
+- bug: rules[parser.current.kind] is undefined: solve
+  make rules exhaustive
+- store code in history unmodified, but append to terminal modified (change new line to |)
+- bug: the source is modified in repl before compiled: solved
+- send compilerResult to repl
+- add set_callback(string) to repl module 
+- add vm.ts
+
 #### 06-05-25
 
 - remove getRule just index the array directly

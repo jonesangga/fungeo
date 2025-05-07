@@ -107,21 +107,25 @@ function input_binding(e) {
         if (source !== "") {
             input.value = "";
             input_reset();
-            source = source.replaceAll("\n", "\n| ");
-            if (history[history.length - 1].code !== source) {
+            let trimmed = source.replaceAll("\n", "\n| ");
+            if (history[history.length - 1].code !== trimmed) {
                 history.push({ code: source });
+                terminal.innerHTML += `> ${trimmed}\n`;
             }
             historyViewIdx = history.length;
-            if (source.length < 5)
-                repl.error("too small alkja a la aj ak a aj aj lajflkajfajelajelakf awej aejfa lejf");
-            else
-                repl.ok("nice");
+            repl.callback(source);
             terminal_update();
         }
         e.preventDefault();
     }
 }
 const repl = {
+    callback(source) {
+        console.log(source);
+    },
+    set_callback(fn) {
+        this.callback = fn;
+    },
     place(x, y) {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
@@ -131,6 +135,7 @@ const repl = {
         container.style.top = y + "px";
     },
     ok(message) {
+        terminal.innerHTML += `${message}\n`;
         history[history.length - 1].output = message;
         holder.style.background = colorOk;
         if (!terminalShow) {
@@ -145,6 +150,7 @@ const repl = {
         }
     },
     error(message) {
+        terminal.innerHTML += `${message}\n`;
         history[history.length - 1].output = message;
         holder.style.background = colorFail;
         if (!terminalShow) {
@@ -167,11 +173,6 @@ terminal.style.background = "#eee";
 terminal.style.overflow = "scroll";
 let terminalShow = true;
 function terminal_update() {
-    let item = history[history.length - 1];
-    terminal.innerHTML += `> ${item.code}\n`;
-    if (Object.hasOwn(item, "output")) {
-        terminal.innerHTML += `${item.output}\n`;
-    }
     terminal.scrollTop = terminal.scrollHeight;
 }
 export { repl };
