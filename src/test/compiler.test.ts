@@ -335,6 +335,15 @@ describe("compiler", () => {
         });
     });
 
+    it("error: expect expression", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a =";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at end: expect expression\n"
+        });
+    });
+
     it("error: forbidden expression stmt", () => {
         let chunk = new Chunk("test chunk");
         let source = "a = 2 a";

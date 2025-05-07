@@ -2,6 +2,7 @@
 
 #### 07-05-25
 
+- test compiler error: expect expression
 - bug: rules[parser.current.kind] is undefined: solve
   make rules exhaustive
 - store code in history unmodified, but append to terminal modified (change new line to |)
