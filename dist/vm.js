@@ -91,6 +91,18 @@ function run() {
                 push(value);
                 break;
             }
+            case 10: {
+                let a = pop();
+                a.value *= -1;
+                push(a);
+                break;
+            }
+            case 11: {
+                let a = pop();
+                a.value = !a.value;
+                push(a);
+                break;
+            }
             case 14: {
                 let name = read_string();
                 let kind = read_byte();

@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { Chunk } from "../chunk.js";
-import { FGNumber } from "../value.js";
+import { FGBoolean, FGNumber } from "../value.js";
 import { compiler } from "../compiler.js";
 import { stack, stackTop, vm } from "../vm.js";
 describe("vm:stack", () => {
@@ -145,5 +145,37 @@ describe("vm:stack", () => {
         assert.deepEqual(runresult, {
             success: false, message: "1: in script: division by zero\n"
         });
+    });
+    it("Op.Neg", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = -50";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+        vm.set(chunk);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGNumber(-50)
+        ]);
+    });
+    it("Op.Not", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = !false";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+        vm.set(chunk);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
     });
 });

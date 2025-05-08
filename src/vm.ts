@@ -116,6 +116,20 @@ function run(): boolean {
                 break;
             }
 
+            case Op.Neg: {
+                let a = pop() as FGNumber;
+                a.value *= -1;
+                push(a);
+                break;
+            }
+
+            case Op.Not: {
+                let a = pop() as FGBoolean;
+                a.value = !a.value;
+                push(a);
+                break;
+            }
+
             case Op.Set: {
                 let name = read_string();
                 let kind = read_byte();

@@ -1,5 +1,9 @@
 # Log
 
+#### 08-05-25
+
+- vm: Neg, Not and test
+
 #### 07-05-25
 
 - test division by zero

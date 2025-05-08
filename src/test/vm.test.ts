@@ -179,4 +179,42 @@ describe("vm:stack", () => {
         });
     });
 
+    it("Op.Neg", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = -50";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Neg
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGNumber(-50)
+        ]);
+    });
+
+    it("Op.Not", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = !false";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Not
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+    });
+
 });
