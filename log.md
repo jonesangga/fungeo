@@ -2,6 +2,8 @@
 
 #### 08-05-25
 
+- test Op.CallNat in chunk
+- add test chunk.test for GetUsr GetNat
 - add Type nativefn
 - add Op.CallNat in VM
 - add Op.CallNat in chunk

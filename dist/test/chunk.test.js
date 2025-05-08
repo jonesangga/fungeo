@@ -45,6 +45,45 @@ describe("chunk", () => {
         assert.deepEqual(result, "0002  110 GetUsr     1 'a'\n");
         assert.equal(offset, 4);
     });
+    it("Op.GetNat", () => {
+        let chunk = new Chunk("test chunk");
+        let n = new FGNumber(2);
+        let id = chunk.add_value(n);
+        chunk.write(800, 100);
+        chunk.write(id, 100);
+        let a = new FGString("a");
+        id = chunk.add_value(a);
+        chunk.write(400, 110);
+        chunk.write(id, 110);
+        let result = "";
+        let offset = 0;
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0000  100 Load       0 '2'\n");
+        assert.equal(offset, 2);
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0002  110 GetNat     1 'a'\n");
+        assert.equal(offset, 4);
+    });
+    it("Op.CallNat", () => {
+        let chunk = new Chunk("test chunk");
+        let n = new FGNumber(2);
+        let id = chunk.add_value(n);
+        chunk.write(800, 100);
+        chunk.write(id, 100);
+        let a = new FGString("a");
+        id = chunk.add_value(a);
+        chunk.write(200, 110);
+        chunk.write(id, 110);
+        chunk.write(0, 110);
+        let result = "";
+        let offset = 0;
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0000  100 Load       0 '2'\n");
+        assert.equal(offset, 2);
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0002  110 CallNat    1 'v0'\n");
+        assert.equal(offset, 5);
+    });
     it("Op.Ret", () => {
         let chunk = new Chunk("test chunk");
         chunk.write(100, 50);

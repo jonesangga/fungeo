@@ -45,7 +45,7 @@ class Chunk {
 
     constructor(public name: string) {}
 
-    write(op: Op, line: number): void {
+    write(op: number, line: number): void {
         this.code.push(op);
         this.lines.push(line);
     }
