@@ -1,26 +1,26 @@
 export var Kind;
 (function (Kind) {
-    Kind[Kind["Nothing"] = 0] = "Nothing";
-    Kind[Kind["Any"] = 1] = "Any";
-    Kind[Kind["Boolean"] = 2] = "Boolean";
-    Kind[Kind["Callable"] = 3] = "Callable";
-    Kind[Kind["Number"] = 4] = "Number";
-    Kind[Kind["String"] = 5] = "String";
-    Kind[Kind["Point"] = 6] = "Point";
+    Kind[Kind["Nothing"] = 100] = "Nothing";
+    Kind[Kind["Any"] = 200] = "Any";
+    Kind[Kind["Boolean"] = 300] = "Boolean";
+    Kind[Kind["Callable"] = 400] = "Callable";
+    Kind[Kind["Number"] = 500] = "Number";
+    Kind[Kind["String"] = 600] = "String";
+    Kind[Kind["Point"] = 700] = "Point";
 })(Kind || (Kind = {}));
 ;
 export const KindName = {
-    [1]: "Any",
-    [2]: "Boolean",
-    [3]: "Callable",
-    [0]: "Nothing",
-    [4]: "Number",
-    [6]: "Point",
-    [5]: "String",
+    [200]: "Any",
+    [300]: "Boolean",
+    [400]: "Callable",
+    [100]: "Nothing",
+    [500]: "Number",
+    [700]: "Point",
+    [600]: "String",
 };
 export class FGBoolean {
     value;
-    kind = 2;
+    kind = 300;
     constructor(value) {
         this.value = value;
     }
@@ -28,7 +28,7 @@ export class FGBoolean {
 }
 export class FGCallable {
     value;
-    kind = 3;
+    kind = 400;
     constructor(value) {
         this.value = value;
     }
@@ -36,7 +36,7 @@ export class FGCallable {
 }
 export class FGNumber {
     value;
-    kind = 4;
+    kind = 500;
     constructor(value) {
         this.value = value;
     }
@@ -56,7 +56,7 @@ export class FGNumber {
 }
 export class FGString {
     value;
-    kind = 5;
+    kind = 600;
     constructor(value) {
         this.value = value;
     }

@@ -81,7 +81,7 @@ describe("chunk", () => {
     it("Op.Set", () => {
         let chunk = new Chunk("test chunk");
         let name = new FGString("a");
-        let kind = 4;
+        let kind = 500;
         let id = chunk.add_value(name);
         chunk.write(1400, 123);
         chunk.write(id, 123);

@@ -1,13 +1,13 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 export const enum Kind {
-    Nothing,
-    Any,
-    Boolean,    // Literal.
-    Callable,
-    Number,
-    String,
-    Point,      // Geometry.
+    Nothing = 100,
+    Any = 200,
+    Boolean = 300,    // Literal.
+    Callable = 400,
+    Number = 500,
+    String = 600,
+    Point = 700,      // Geometry.
 };
 
 export const KindName: { [key in Kind]: string } = {

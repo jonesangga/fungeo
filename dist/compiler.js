@@ -1,8 +1,8 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { KindName, FGBoolean, FGNumber, FGString, FGCallable } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
-let invalidType = { kind: 0 };
-let numberType = { kind: 4 };
+let invalidType = { kind: 100 };
+let numberType = { kind: 500 };
 let lastType = invalidType;
 let canParseArgument = false;
 let canAssign = false;
@@ -119,13 +119,13 @@ function unary() {
     parsePrecedence(4);
     switch (operatorType) {
         case 11:
-            if (lastType.kind !== 2) {
+            if (lastType.kind !== 300) {
                 error("'!' only for boolean");
             }
             emitByte(1100);
             break;
         case 7:
-            if (lastType.kind !== 4) {
+            if (lastType.kind !== 500) {
                 error("'-' only for number");
             }
             emitByte(1000);
@@ -136,13 +136,13 @@ function unary() {
 }
 function binary() {
     let operator = parser.previous.lexeme;
-    if (lastType.kind !== 4) {
+    if (lastType.kind !== 500) {
         error(`'${operator}' only for numbers`);
     }
     let operatorType = parser.previous.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
-    if (lastType.kind !== 4) {
+    if (lastType.kind !== 500) {
         error(`'${operator}' only for numbers`);
     }
     switch (operatorType) {
@@ -166,7 +166,7 @@ function parse_boolean() {
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
-    lastType = { kind: 2 };
+    lastType = { kind: 300 };
 }
 function parse_number() {
     let value = Number(parser.previous.lexeme);
@@ -175,7 +175,7 @@ function parse_number() {
 }
 function parse_string() {
     emitConstant(new FGString(parser.previous.lexeme));
-    lastType = { kind: 5 };
+    lastType = { kind: 600 };
 }
 let tempNames = {};
 function parse_name() {
@@ -184,7 +184,7 @@ function parse_name() {
         canAssign = false;
         if (check(14))
             error(`${name} already defined`);
-        if (nativeNames[name].kind === 3)
+        if (nativeNames[name].kind === 400)
             parse_callable(name);
         else
             parse_non_callable(nativeNames, name, true);
@@ -193,7 +193,7 @@ function parse_name() {
         canAssign = false;
         if (check(14))
             error(`${name} already defined`);
-        if (nativeNames[name].kind === 3)
+        if (nativeNames[name].kind === 400)
             parse_callable(name);
         else
             parse_non_callable(userNames, name, false);
@@ -202,7 +202,7 @@ function parse_name() {
         canAssign = false;
         if (check(14))
             error(`${name} already defined`);
-        if (tempNames[name].kind === 3)
+        if (tempNames[name].kind === 400)
             parse_callable(name);
         else
             parse_non_callable(tempNames, name, false);
@@ -219,7 +219,7 @@ function parse_name() {
 }
 function matchType(expected, actual) {
     console.log(expected, actual);
-    if (expected === 1) {
+    if (expected === 200) {
         console.log("type any");
         return true;
     }
@@ -287,7 +287,7 @@ function parse_callable(name_) {
     }
     emitBytes(200, i);
     emitConstant(new FGCallable(name.call));
-    if (version[i].output === 0) {
+    if (version[i].output === 100) {
         lastType = invalidType;
     }
     else {
