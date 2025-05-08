@@ -6,7 +6,7 @@ describe("scanner", () => {
         let code = "";
         scanner.init(code);
         let eof = {
-            kind: 20,
+            kind: 2100,
             line: 1,
             lexeme: "",
         };
@@ -17,107 +17,107 @@ describe("scanner", () => {
         let code = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true `;
         scanner.init(code);
         assert.deepEqual(scanner.next(), {
-            kind: 11,
+            kind: 1200,
             line: 1,
             lexeme: "!",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 12,
+            kind: 1300,
             line: 1,
             lexeme: ":",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 13,
+            kind: 1400,
             line: 1,
             lexeme: ":=",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 0,
+            kind: 100,
             line: 1,
             lexeme: ",",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 1,
+            kind: 200,
             line: 1,
             lexeme: "$",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 14,
+            kind: 1500,
             line: 1,
             lexeme: "=",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 19,
+            kind: 2000,
             line: 1,
             lexeme: "false",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 5,
+            kind: 600,
             line: 1,
             lexeme: "[",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 3,
+            kind: 400,
             line: 1,
             lexeme: "(",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 7,
+            kind: 800,
             line: 1,
             lexeme: "-",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 15,
+            kind: 1600,
             line: 1,
             lexeme: "abc",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 16,
+            kind: 1700,
             line: 1,
             lexeme: "123.456",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 8,
+            kind: 900,
             line: 1,
             lexeme: "+",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 6,
+            kind: 700,
             line: 1,
             lexeme: "]",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 4,
+            kind: 500,
             line: 1,
             lexeme: ")",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 2,
+            kind: 300,
             line: 1,
             lexeme: ";",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 9,
+            kind: 1000,
             line: 1,
             lexeme: "/",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 10,
+            kind: 1100,
             line: 1,
             lexeme: "*",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 17,
+            kind: 1800,
             line: 1,
             lexeme: "real",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 18,
+            kind: 1900,
             line: 1,
             lexeme: "true",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 20,
+            kind: 2100,
             line: 1,
             lexeme: "",
         });
@@ -128,12 +128,12 @@ describe("scanner", () => {
         scanner.next();
         scanner.next();
         assert.deepEqual(scanner.next(), {
-            kind: 21,
+            kind: 2200,
             line: 2,
             lexeme: "unterminated string",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 20,
+            kind: 2100,
             line: 2,
             lexeme: "",
         });
@@ -144,18 +144,18 @@ describe("scanner", () => {
         scanner.next();
         scanner.next();
         assert.deepEqual(scanner.next(), {
-            kind: 21,
+            kind: 2200,
             line: 1,
             lexeme: "unexpected character",
         });
         scanner.next();
         assert.deepEqual(scanner.next(), {
-            kind: 21,
+            kind: 2200,
             line: 1,
             lexeme: "unexpected character",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 20,
+            kind: 2100,
             line: 1,
             lexeme: "",
         });

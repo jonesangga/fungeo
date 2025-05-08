@@ -4,18 +4,28 @@
 //       Support comment.
 
 const enum TokenT {
-    // Single character.
-    Comma, Dollar, Semicolon,
-    LParen, RParen, LBracket, RBracket,
-    Minus, Plus, Slash, Star,
-
-    // One or more characters.
-    Bang, Colon, ColonEq, Eq,
-
-    // Literals.
-    Name, Number, String, True, False,
-
-    EOF, Error,
+    Comma = 100,      // Single character.
+    Dollar = 200,
+    Semicolon = 300,
+    LParen = 400,
+    RParen = 500,
+    LBracket = 600,
+    RBracket = 700,
+    Minus = 800,
+    Plus = 900,
+    Slash = 1000,
+    Star = 1100,
+    Bang = 1200,       // One or more characters.
+    Colon = 1300,
+    ColonEq = 1400,
+    Eq = 1500,
+    Name = 1600,       // Literals.
+    Number = 1700,
+    String = 1800,
+    True = 1900,
+    False = 2000,
+    EOF = 2100,        // Other.
+    Error = 2200,
 };
 
 const TokenTName: { [key in TokenT]: string } = {

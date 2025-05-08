@@ -17,30 +17,30 @@ var Precedence;
     Precedence[Precedence["Primary"] = 6] = "Primary";
 })(Precedence || (Precedence = {}));
 const rules = {
-    [11]: { prefix: unary, infix: null, precedence: 0 },
-    [12]: { prefix: null, infix: null, precedence: 0 },
-    [13]: { prefix: null, infix: null, precedence: 0 },
-    [0]: { prefix: null, infix: null, precedence: 0 },
-    [1]: { prefix: null, infix: null, precedence: 0 },
-    [20]: { prefix: null, infix: null, precedence: 0 },
-    [14]: { prefix: null, infix: null, precedence: 0 },
-    [21]: { prefix: null, infix: null, precedence: 0 },
-    [19]: { prefix: parse_boolean, infix: null, precedence: 0 },
-    [5]: { prefix: grouping, infix: null, precedence: 0 },
-    [3]: { prefix: grouping, infix: null, precedence: 0 },
-    [7]: { prefix: unary, infix: binary, precedence: 2 },
-    [15]: { prefix: parse_name, infix: null, precedence: 0 },
-    [16]: { prefix: parse_number, infix: null, precedence: 0 },
-    [8]: { prefix: null, infix: binary, precedence: 2 },
-    [6]: { prefix: null, infix: null, precedence: 0 },
-    [4]: { prefix: null, infix: null, precedence: 0 },
-    [2]: { prefix: null, infix: null, precedence: 0 },
-    [9]: { prefix: null, infix: binary, precedence: 3 },
-    [10]: { prefix: null, infix: binary, precedence: 3 },
-    [17]: { prefix: parse_string, infix: null, precedence: 0 },
-    [18]: { prefix: parse_boolean, infix: null, precedence: 0 },
+    [1200]: { prefix: unary, infix: null, precedence: 0 },
+    [1300]: { prefix: null, infix: null, precedence: 0 },
+    [1400]: { prefix: null, infix: null, precedence: 0 },
+    [100]: { prefix: null, infix: null, precedence: 0 },
+    [200]: { prefix: null, infix: null, precedence: 0 },
+    [2100]: { prefix: null, infix: null, precedence: 0 },
+    [1500]: { prefix: null, infix: null, precedence: 0 },
+    [2200]: { prefix: null, infix: null, precedence: 0 },
+    [2000]: { prefix: parse_boolean, infix: null, precedence: 0 },
+    [600]: { prefix: grouping, infix: null, precedence: 0 },
+    [400]: { prefix: grouping, infix: null, precedence: 0 },
+    [800]: { prefix: unary, infix: binary, precedence: 2 },
+    [1600]: { prefix: parse_name, infix: null, precedence: 0 },
+    [1700]: { prefix: parse_number, infix: null, precedence: 0 },
+    [900]: { prefix: null, infix: binary, precedence: 2 },
+    [700]: { prefix: null, infix: null, precedence: 0 },
+    [500]: { prefix: null, infix: null, precedence: 0 },
+    [300]: { prefix: null, infix: null, precedence: 0 },
+    [1000]: { prefix: null, infix: binary, precedence: 3 },
+    [1100]: { prefix: null, infix: binary, precedence: 3 },
+    [1800]: { prefix: parse_string, infix: null, precedence: 0 },
+    [1900]: { prefix: parse_boolean, infix: null, precedence: 0 },
 };
-let invalidToken = { kind: 20, line: -1, lexeme: "" };
+let invalidToken = { kind: 2100, line: -1, lexeme: "" };
 let parser = {
     current: invalidToken,
     previous: invalidToken,
@@ -57,9 +57,9 @@ function error(message) {
 }
 function error_at(token, message) {
     let result = token.line + "";
-    if (token.kind === 20)
+    if (token.kind === 2100)
         result += ": at end";
-    else if (token.kind === 21)
+    else if (token.kind === 2200)
         result += ": scanner";
     else
         result += `: at '${token.lexeme}'`;
@@ -69,7 +69,7 @@ function error_at(token, message) {
 function advance() {
     parser.previous = parser.current;
     parser.current = scanner.next();
-    if (parser.current.kind === 21) {
+    if (parser.current.kind === 2200) {
         error_at_current(parser.current.lexeme);
     }
 }
@@ -112,19 +112,19 @@ function makeConstant(value) {
 function grouping() {
     canParseArgument = true;
     expression();
-    consume(4, "expect ')' after grouping");
+    consume(500, "expect ')' after grouping");
 }
 function unary() {
     let operatorType = parser.previous.kind;
     parsePrecedence(4);
     switch (operatorType) {
-        case 11:
+        case 1200:
             if (lastType.kind !== 300) {
                 error("'!' only for boolean");
             }
             emitByte(1100);
             break;
-        case 7:
+        case 800:
             if (lastType.kind !== 500) {
                 error("'-' only for number");
             }
@@ -146,23 +146,23 @@ function binary() {
         error(`'${operator}' only for numbers`);
     }
     switch (operatorType) {
-        case 8:
+        case 900:
             emitByte(100);
             break;
-        case 7:
+        case 800:
             emitByte(1500);
             break;
-        case 10:
+        case 1100:
             emitByte(900);
             break;
-        case 9:
+        case 1000:
             emitByte(300);
             break;
         default: error("unhandled binary op");
     }
 }
 function parse_boolean() {
-    if (parser.previous.kind === 18)
+    if (parser.previous.kind === 1900)
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
@@ -182,7 +182,7 @@ function parse_name() {
     let name = parser.previous.lexeme;
     if (Object.hasOwn(nativeNames, name)) {
         canAssign = false;
-        if (check(14))
+        if (check(1500))
             error(`${name} already defined`);
         if (nativeNames[name].kind === 400)
             parse_callable(name);
@@ -191,7 +191,7 @@ function parse_name() {
     }
     else if (Object.hasOwn(userNames, name)) {
         canAssign = false;
-        if (check(14))
+        if (check(1500))
             error(`${name} already defined`);
         if (nativeNames[name].kind === 400)
             parse_callable(name);
@@ -200,7 +200,7 @@ function parse_name() {
     }
     else if (Object.hasOwn(tempNames, name)) {
         canAssign = false;
-        if (check(14))
+        if (check(1500))
             error(`${name} already defined`);
         if (tempNames[name].kind === 400)
             parse_callable(name);
@@ -244,7 +244,7 @@ function parse_callable(name_) {
         lastType = nativeNames[name_];
         return;
     }
-    canParseArgument = match(1);
+    canParseArgument = match(200);
     let name = nativeNames[name_];
     let version = name.version;
     let inputVersion = [];
@@ -305,7 +305,7 @@ function parse_non_callable(table, name, native) {
 }
 function parse_definition(name) {
     let index = makeConstant(new FGString(name));
-    consume(14, "expect '=' after variable declaration");
+    consume(1500, "expect '=' after variable declaration");
     lastType = invalidType;
     canParseArgument = true;
     expression();
@@ -344,7 +344,7 @@ function call(name) {
     do {
         expression();
         argCount++;
-    } while (!match(20));
+    } while (!match(2100));
     emitBytes(200, constant);
     emitByte(argCount);
 }
@@ -358,12 +358,12 @@ function declaration() {
     statement();
 }
 function statement() {
-    if (match(15)) {
+    if (match(1600)) {
         canParseArgument = true;
         canAssign = true;
         parse_name();
     }
-    else if (match(2)) {
+    else if (match(300)) {
     }
     else {
         error_at_current(`cannot start statement with ${TokenTName[parser.current.kind]}`);
@@ -383,7 +383,7 @@ const compiler = {
         parser.current = invalidToken;
         try {
             advance();
-            while (!match(20)) {
+            while (!match(2100)) {
                 declaration();
             }
             endCompiler();

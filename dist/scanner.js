@@ -1,52 +1,52 @@
 var TokenT;
 (function (TokenT) {
-    TokenT[TokenT["Comma"] = 0] = "Comma";
-    TokenT[TokenT["Dollar"] = 1] = "Dollar";
-    TokenT[TokenT["Semicolon"] = 2] = "Semicolon";
-    TokenT[TokenT["LParen"] = 3] = "LParen";
-    TokenT[TokenT["RParen"] = 4] = "RParen";
-    TokenT[TokenT["LBracket"] = 5] = "LBracket";
-    TokenT[TokenT["RBracket"] = 6] = "RBracket";
-    TokenT[TokenT["Minus"] = 7] = "Minus";
-    TokenT[TokenT["Plus"] = 8] = "Plus";
-    TokenT[TokenT["Slash"] = 9] = "Slash";
-    TokenT[TokenT["Star"] = 10] = "Star";
-    TokenT[TokenT["Bang"] = 11] = "Bang";
-    TokenT[TokenT["Colon"] = 12] = "Colon";
-    TokenT[TokenT["ColonEq"] = 13] = "ColonEq";
-    TokenT[TokenT["Eq"] = 14] = "Eq";
-    TokenT[TokenT["Name"] = 15] = "Name";
-    TokenT[TokenT["Number"] = 16] = "Number";
-    TokenT[TokenT["String"] = 17] = "String";
-    TokenT[TokenT["True"] = 18] = "True";
-    TokenT[TokenT["False"] = 19] = "False";
-    TokenT[TokenT["EOF"] = 20] = "EOF";
-    TokenT[TokenT["Error"] = 21] = "Error";
+    TokenT[TokenT["Comma"] = 100] = "Comma";
+    TokenT[TokenT["Dollar"] = 200] = "Dollar";
+    TokenT[TokenT["Semicolon"] = 300] = "Semicolon";
+    TokenT[TokenT["LParen"] = 400] = "LParen";
+    TokenT[TokenT["RParen"] = 500] = "RParen";
+    TokenT[TokenT["LBracket"] = 600] = "LBracket";
+    TokenT[TokenT["RBracket"] = 700] = "RBracket";
+    TokenT[TokenT["Minus"] = 800] = "Minus";
+    TokenT[TokenT["Plus"] = 900] = "Plus";
+    TokenT[TokenT["Slash"] = 1000] = "Slash";
+    TokenT[TokenT["Star"] = 1100] = "Star";
+    TokenT[TokenT["Bang"] = 1200] = "Bang";
+    TokenT[TokenT["Colon"] = 1300] = "Colon";
+    TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
+    TokenT[TokenT["Eq"] = 1500] = "Eq";
+    TokenT[TokenT["Name"] = 1600] = "Name";
+    TokenT[TokenT["Number"] = 1700] = "Number";
+    TokenT[TokenT["String"] = 1800] = "String";
+    TokenT[TokenT["True"] = 1900] = "True";
+    TokenT[TokenT["False"] = 2000] = "False";
+    TokenT[TokenT["EOF"] = 2100] = "EOF";
+    TokenT[TokenT["Error"] = 2200] = "Error";
 })(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
-    [11]: "Bang",
-    [12]: "Colon",
-    [13]: "ColonEq",
-    [0]: "Comma",
-    [1]: "Dollar",
-    [20]: "EOF",
-    [14]: "Eq",
-    [21]: "Error",
-    [19]: "False",
-    [5]: "LBracket",
-    [3]: "LParen",
-    [7]: "Minus",
-    [15]: "Name",
-    [16]: "Number",
-    [8]: "Plus",
-    [6]: "RBracket",
-    [4]: "RParen",
-    [2]: "Semicolon",
-    [9]: "Slash",
-    [10]: "Star",
-    [17]: "String",
-    [18]: "True",
+    [1200]: "Bang",
+    [1300]: "Colon",
+    [1400]: "ColonEq",
+    [100]: "Comma",
+    [200]: "Dollar",
+    [2100]: "EOF",
+    [1500]: "Eq",
+    [2200]: "Error",
+    [2000]: "False",
+    [600]: "LBracket",
+    [400]: "LParen",
+    [800]: "Minus",
+    [1600]: "Name",
+    [1700]: "Number",
+    [900]: "Plus",
+    [700]: "RBracket",
+    [500]: "RParen",
+    [300]: "Semicolon",
+    [1000]: "Slash",
+    [1100]: "Star",
+    [1800]: "String",
+    [1900]: "True",
 };
 let source = "";
 let start = 0;
@@ -90,14 +90,14 @@ function token_string(kind) {
     return { kind, lexeme, line };
 }
 function token_error(errorMessage) {
-    return { kind: 21, lexeme: errorMessage, line };
+    return { kind: 2200, lexeme: errorMessage, line };
 }
 function name_type() {
     switch (source.slice(start, current)) {
-        case "false": return 19;
-        case "true": return 18;
+        case "false": return 2000;
+        case "true": return 1900;
     }
-    return 15;
+    return 1600;
 }
 function name() {
     while (is_alpha(peek()) || is_digit(peek()))
@@ -112,7 +112,7 @@ function number_() {
         while (is_digit(peek()))
             advance();
     }
-    return token_lexeme(16);
+    return token_lexeme(1700);
 }
 function string_() {
     while (peek() != '"' && !is_at_end()) {
@@ -123,7 +123,7 @@ function string_() {
     if (is_at_end())
         return token_error("unterminated string");
     advance();
-    return token_string(17);
+    return token_string(1800);
 }
 function skip_whitespace() {
     for (;;) {
@@ -154,27 +154,27 @@ const scanner = {
         skip_whitespace();
         start = current;
         if (is_at_end())
-            return token_lexeme(20);
+            return token_lexeme(2100);
         let c = advance();
         if (is_digit(c))
             return number_();
         if (is_alpha(c))
             return name();
         switch (c) {
-            case '(': return token_lexeme(3);
-            case ')': return token_lexeme(4);
-            case '[': return token_lexeme(5);
-            case ']': return token_lexeme(6);
-            case '$': return token_lexeme(1);
-            case ';': return token_lexeme(2);
-            case ':': return token_lexeme(match('=') ? 13 : 12);
-            case ',': return token_lexeme(0);
-            case '-': return token_lexeme(7);
-            case '+': return token_lexeme(8);
-            case '/': return token_lexeme(9);
-            case '*': return token_lexeme(10);
-            case '!': return token_lexeme(11);
-            case '=': return token_lexeme(14);
+            case '(': return token_lexeme(400);
+            case ')': return token_lexeme(500);
+            case '[': return token_lexeme(600);
+            case ']': return token_lexeme(700);
+            case '$': return token_lexeme(200);
+            case ';': return token_lexeme(300);
+            case ':': return token_lexeme(match('=') ? 1400 : 1300);
+            case ',': return token_lexeme(100);
+            case '-': return token_lexeme(800);
+            case '+': return token_lexeme(900);
+            case '/': return token_lexeme(1000);
+            case '*': return token_lexeme(1100);
+            case '!': return token_lexeme(1200);
+            case '=': return token_lexeme(1500);
             case '"': return string_();
         }
         return token_error("unexpected character");
@@ -200,7 +200,7 @@ const scanner = {
                 result += "   | ";
             }
             result += `${pad9(TokenTName[token.kind])} '${token.lexeme}'\n`;
-            if (token.kind === 20)
+            if (token.kind === 2100)
                 break;
         }
         return result;
