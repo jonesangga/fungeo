@@ -25,12 +25,15 @@ function resetStack(): void {
 }
 
 let output = "";
-function print_output(s: string): void {
-    output += s;
-}
 
 let chunk = new Chunk("vm");
 let ip    = 0;     // Index of current instruction in chunk.code array.
+
+function error(msg: string): void {
+    let line = chunk.lines[ip - 1];
+    output += `${ line }: in script: ${ msg }\n`;
+    resetStack();
+}
 
 function read_byte(): number {
     return chunk.code[ip++];
@@ -61,11 +64,38 @@ function run(): boolean {
         }
 
         switch (read_byte()) {
-            case Op.Add:
+            case Op.Add: {
                 let b = pop() as FGNumber;
                 let a = pop() as FGNumber;
                 push(a.add(b));
                 break;
+            }
+
+            case Op.Div: {
+                let b = pop() as FGNumber;
+                let a = pop() as FGNumber;
+                if (b.value === 0) {
+                    error("division by zero");
+                    return false;
+                }
+                push(a.div(b));
+                break;
+            }
+
+            case Op.Mul: {
+                let b = pop() as FGNumber;
+                let a = pop() as FGNumber;
+                push(a.mul(b));
+                break;
+            }
+
+            case Op.Sub: {
+                let b = pop() as FGNumber;
+                let a = pop() as FGNumber;
+                push(a.sub(b));
+                break;
+            }
+
 
             case Op.Load: {
                 push(read_constant());
@@ -94,8 +124,9 @@ function run(): boolean {
                 break;
             }
 
-            case Op.Ret:
+            case Op.Ret: {
                 return true;
+            }
         }
 
         if (TESTING) return true;
@@ -118,13 +149,13 @@ const vm = {
     interpret(chunk_: Chunk): VMResult {
         chunk = chunk_;
         ip = 0;
-
         output = "";
-        let success = run();
-        if (success) {
-            return {success, message: output};
+
+        let result = run();
+        if (result) {
+            return {success: true, message: output};
         } else {
-            return {success, message: "runtime: " + output};
+            return {success: false, message: output};
         }
     },
 
@@ -132,7 +163,15 @@ const vm = {
         chunk = chunk_;
         ip = 0;
     },
-    step() { if (TESTING) run(); }
+
+    step(): VMResult {
+        let result = run();
+        if (result) {
+            return {success: true, message: output};
+        } else {
+            return {success: false, message: output};
+        }
+    }
 };
 
 export { vm };

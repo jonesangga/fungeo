@@ -16,11 +16,13 @@ function resetStack() {
     stackTop = 0;
 }
 let output = "";
-function print_output(s) {
-    output += s;
-}
 let chunk = new Chunk("vm");
 let ip = 0;
+function error(msg) {
+    let line = chunk.lines[ip - 1];
+    output += `${line}: in script: ${msg}\n`;
+    resetStack();
+}
 function read_byte() {
     return chunk.code[ip++];
 }
@@ -45,11 +47,34 @@ function run() {
             console.log(str + result);
         }
         switch (read_byte()) {
-            case 0:
+            case 0: {
                 let b = pop();
                 let a = pop();
                 push(a.add(b));
                 break;
+            }
+            case 2: {
+                let b = pop();
+                let a = pop();
+                if (b.value === 0) {
+                    error("division by zero");
+                    return false;
+                }
+                push(a.div(b));
+                break;
+            }
+            case 9: {
+                let b = pop();
+                let a = pop();
+                push(a.mul(b));
+                break;
+            }
+            case 15: {
+                let b = pop();
+                let a = pop();
+                push(a.sub(b));
+                break;
+            }
             case 8: {
                 push(read_constant());
                 break;
@@ -73,8 +98,9 @@ function run() {
                 userNames[name] = { kind, value };
                 break;
             }
-            case 13:
+            case 13: {
                 return true;
+            }
         }
         if (TESTING)
             return true;
@@ -91,19 +117,26 @@ const vm = {
         chunk = chunk_;
         ip = 0;
         output = "";
-        let success = run();
-        if (success) {
-            return { success, message: output };
+        let result = run();
+        if (result) {
+            return { success: true, message: output };
         }
         else {
-            return { success, message: "runtime: " + output };
+            return { success: false, message: output };
         }
     },
     set(chunk_) {
         chunk = chunk_;
         ip = 0;
     },
-    step() { if (TESTING)
-        run(); }
+    step() {
+        let result = run();
+        if (result) {
+            return { success: true, message: output };
+        }
+        else {
+            return { success: false, message: output };
+        }
+    }
 };
 export { vm };

@@ -2,6 +2,9 @@
 
 #### 07-05-25
 
+- test division by zero
+- add test for below
+- fix sub, mul, div
 - add test for FGNumber add
 - reset userNames in vm.test
 - update compiler.test for GetUsr

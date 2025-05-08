@@ -44,6 +44,15 @@ export class FGNumber {
     add(other) {
         return new FGNumber(this.value + other.value);
     }
+    div(other) {
+        return new FGNumber(this.value / other.value);
+    }
+    mul(other) {
+        return new FGNumber(this.value * other.value);
+    }
+    sub(other) {
+        return new FGNumber(this.value - other.value);
+    }
 }
 export class FGString {
     value;
