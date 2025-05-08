@@ -15,13 +15,13 @@ let canParseArgument = false;
 let canAssign = false;
 
 const enum Precedence {
-    None,
-    Assignment, // =
-    Term,       // + -
-    Factor,     // * /
-    Unary,      // ! -
-    Call,       // . () _
-    Primary
+    None = 100,
+    Assignment = 200, // =
+    Term = 300,       // + -
+    Factor = 400,     // * /
+    Unary = 500,      // ! -
+    Call = 600,       // . () _
+    Primary = 700,
 }
 
 interface ParseRule {

@@ -8,37 +8,37 @@ let canParseArgument = false;
 let canAssign = false;
 var Precedence;
 (function (Precedence) {
-    Precedence[Precedence["None"] = 0] = "None";
-    Precedence[Precedence["Assignment"] = 1] = "Assignment";
-    Precedence[Precedence["Term"] = 2] = "Term";
-    Precedence[Precedence["Factor"] = 3] = "Factor";
-    Precedence[Precedence["Unary"] = 4] = "Unary";
-    Precedence[Precedence["Call"] = 5] = "Call";
-    Precedence[Precedence["Primary"] = 6] = "Primary";
+    Precedence[Precedence["None"] = 100] = "None";
+    Precedence[Precedence["Assignment"] = 200] = "Assignment";
+    Precedence[Precedence["Term"] = 300] = "Term";
+    Precedence[Precedence["Factor"] = 400] = "Factor";
+    Precedence[Precedence["Unary"] = 500] = "Unary";
+    Precedence[Precedence["Call"] = 600] = "Call";
+    Precedence[Precedence["Primary"] = 700] = "Primary";
 })(Precedence || (Precedence = {}));
 const rules = {
-    [1200]: { prefix: unary, infix: null, precedence: 0 },
-    [1300]: { prefix: null, infix: null, precedence: 0 },
-    [1400]: { prefix: null, infix: null, precedence: 0 },
-    [100]: { prefix: null, infix: null, precedence: 0 },
-    [200]: { prefix: null, infix: null, precedence: 0 },
-    [2100]: { prefix: null, infix: null, precedence: 0 },
-    [1500]: { prefix: null, infix: null, precedence: 0 },
-    [2200]: { prefix: null, infix: null, precedence: 0 },
-    [2000]: { prefix: parse_boolean, infix: null, precedence: 0 },
-    [600]: { prefix: grouping, infix: null, precedence: 0 },
-    [400]: { prefix: grouping, infix: null, precedence: 0 },
-    [800]: { prefix: unary, infix: binary, precedence: 2 },
-    [1600]: { prefix: parse_name, infix: null, precedence: 0 },
-    [1700]: { prefix: parse_number, infix: null, precedence: 0 },
-    [900]: { prefix: null, infix: binary, precedence: 2 },
-    [700]: { prefix: null, infix: null, precedence: 0 },
-    [500]: { prefix: null, infix: null, precedence: 0 },
-    [300]: { prefix: null, infix: null, precedence: 0 },
-    [1000]: { prefix: null, infix: binary, precedence: 3 },
-    [1100]: { prefix: null, infix: binary, precedence: 3 },
-    [1800]: { prefix: parse_string, infix: null, precedence: 0 },
-    [1900]: { prefix: parse_boolean, infix: null, precedence: 0 },
+    [1200]: { prefix: unary, infix: null, precedence: 100 },
+    [1300]: { prefix: null, infix: null, precedence: 100 },
+    [1400]: { prefix: null, infix: null, precedence: 100 },
+    [100]: { prefix: null, infix: null, precedence: 100 },
+    [200]: { prefix: null, infix: null, precedence: 100 },
+    [2100]: { prefix: null, infix: null, precedence: 100 },
+    [1500]: { prefix: null, infix: null, precedence: 100 },
+    [2200]: { prefix: null, infix: null, precedence: 100 },
+    [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
+    [600]: { prefix: grouping, infix: null, precedence: 100 },
+    [400]: { prefix: grouping, infix: null, precedence: 100 },
+    [800]: { prefix: unary, infix: binary, precedence: 300 },
+    [1600]: { prefix: parse_name, infix: null, precedence: 100 },
+    [1700]: { prefix: parse_number, infix: null, precedence: 100 },
+    [900]: { prefix: null, infix: binary, precedence: 300 },
+    [700]: { prefix: null, infix: null, precedence: 100 },
+    [500]: { prefix: null, infix: null, precedence: 100 },
+    [300]: { prefix: null, infix: null, precedence: 100 },
+    [1000]: { prefix: null, infix: binary, precedence: 400 },
+    [1100]: { prefix: null, infix: binary, precedence: 400 },
+    [1800]: { prefix: parse_string, infix: null, precedence: 100 },
+    [1900]: { prefix: parse_boolean, infix: null, precedence: 100 },
 };
 let invalidToken = { kind: 2100, line: -1, lexeme: "" };
 let parser = {
@@ -116,7 +116,7 @@ function grouping() {
 }
 function unary() {
     let operatorType = parser.previous.kind;
-    parsePrecedence(4);
+    parsePrecedence(500);
     switch (operatorType) {
         case 1200:
             if (lastType.kind !== 300) {
@@ -333,7 +333,7 @@ function parsePrecedence(precedence) {
     }
 }
 function expression() {
-    parsePrecedence(1);
+    parsePrecedence(200);
 }
 function identifierConstant(name) {
     return makeConstant(new FGString(name.lexeme));

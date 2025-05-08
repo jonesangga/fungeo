@@ -2,6 +2,7 @@
 
 #### 08-05-25
 
+- initialize Precedence num
 - initialize TokenT enum
 - initialize Kind enum
 - initialize Op enum so it doesn't pollute the diff when inserting or changing order
