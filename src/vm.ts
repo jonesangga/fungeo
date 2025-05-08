@@ -96,7 +96,6 @@ function run(): boolean {
                 break;
             }
 
-
             case Op.Load: {
                 push(read_constant());
                 break;

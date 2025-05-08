@@ -1,43 +1,39 @@
 import { KindName } from "./value.js";
 var Op;
 (function (Op) {
-    Op[Op["Add"] = 0] = "Add";
-    Op[Op["Call"] = 1] = "Call";
-    Op[Op["Div"] = 2] = "Div";
-    Op[Op["False"] = 3] = "False";
-    Op[Op["GetNat"] = 4] = "GetNat";
-    Op[Op["GetUsr"] = 5] = "GetUsr";
-    Op[Op["Index"] = 6] = "Index";
-    Op[Op["List"] = 7] = "List";
-    Op[Op["Load"] = 8] = "Load";
-    Op[Op["Mul"] = 9] = "Mul";
-    Op[Op["Neg"] = 10] = "Neg";
-    Op[Op["Not"] = 11] = "Not";
-    Op[Op["Pop"] = 12] = "Pop";
-    Op[Op["Ret"] = 13] = "Ret";
-    Op[Op["Set"] = 14] = "Set";
-    Op[Op["Sub"] = 15] = "Sub";
-    Op[Op["True"] = 16] = "True";
+    Op[Op["Add"] = 100] = "Add";
+    Op[Op["Call"] = 200] = "Call";
+    Op[Op["Div"] = 300] = "Div";
+    Op[Op["GetNat"] = 400] = "GetNat";
+    Op[Op["GetUsr"] = 500] = "GetUsr";
+    Op[Op["Index"] = 600] = "Index";
+    Op[Op["List"] = 700] = "List";
+    Op[Op["Load"] = 800] = "Load";
+    Op[Op["Mul"] = 900] = "Mul";
+    Op[Op["Neg"] = 1000] = "Neg";
+    Op[Op["Not"] = 1100] = "Not";
+    Op[Op["Pop"] = 1200] = "Pop";
+    Op[Op["Ret"] = 1300] = "Ret";
+    Op[Op["Set"] = 1400] = "Set";
+    Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
 ;
 const OpName = {
-    [0]: "Add",
-    [1]: "Call",
-    [2]: "Div",
-    [3]: "False",
-    [4]: "GetNat",
-    [5]: "GetUsr",
-    [6]: "Index",
-    [7]: "List",
-    [8]: "Load",
-    [9]: "Mul",
-    [10]: "Neg",
-    [11]: "Not",
-    [12]: "Pop",
-    [13]: "Ret",
-    [14]: "Set",
-    [15]: "Sub",
-    [16]: "True",
+    [100]: "Add",
+    [200]: "Call",
+    [300]: "Div",
+    [400]: "GetNat",
+    [500]: "GetUsr",
+    [600]: "Index",
+    [700]: "List",
+    [800]: "Load",
+    [900]: "Mul",
+    [1000]: "Neg",
+    [1100]: "Not",
+    [1200]: "Pop",
+    [1300]: "Ret",
+    [1400]: "Set",
+    [1500]: "Sub",
 };
 class Chunk {
     name;
@@ -75,22 +71,22 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction];
         switch (instruction) {
-            case 4:
-            case 5:
-            case 8:
+            case 400:
+            case 500:
+            case 800:
                 let index = this.code[offset + 1];
                 result += `${padr6(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];
-            case 0:
-            case 2:
-            case 10:
-            case 11:
-            case 9:
-            case 13:
-            case 15:
+            case 100:
+            case 300:
+            case 1000:
+            case 1100:
+            case 900:
+            case 1300:
+            case 1500:
                 result += name + "\n";
                 return [result, offset + 1];
-            case 14:
+            case 1400:
                 let nameId = this.code[offset + 1];
                 let kind = this.code[offset + 2];
                 result += `${padr6(name)} ${padl4(nameId)} '`;

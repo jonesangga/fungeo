@@ -3,30 +3,27 @@
 import { Kind, KindName, type Value } from "./value.js"
 
 const enum Op {
-    Add,
-    Call,
-    Div,
-    False,
-    GetNat,     // Get nativeNames.
-    GetUsr,     // Get userNames.
-    Index,
-    List,
-    Load,
-    Mul,
-    Neg,
-    Not,
-    Pop,
-    Ret,
-    Set,
-    Sub,
-    True,
+    Add = 100,
+    Call = 200,
+    Div = 300,
+    GetNat = 400,   // Get nativeNames.
+    GetUsr = 500,   // Get userNames.
+    Index = 600,
+    List = 700,
+    Load = 800,
+    Mul = 900,
+    Neg = 1000,
+    Not = 1100,
+    Pop = 1200,
+    Ret = 1300,
+    Set = 1400,
+    Sub = 1500,
 };
 
 const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
     [Op.Call]: "Call",
     [Op.Div]: "Div",
-    [Op.False]: "False",
     [Op.GetNat]: "GetNat",
     [Op.GetUsr]: "GetUsr",
     [Op.Index]: "Index",
@@ -39,7 +36,6 @@ const OpName: { [key in Op]: string } = {
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
     [Op.Sub]: "Sub",
-    [Op.True]: "True",
 };
 
 class Chunk {

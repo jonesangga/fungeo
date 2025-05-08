@@ -47,13 +47,13 @@ function run() {
             console.log(str + result);
         }
         switch (read_byte()) {
-            case 0: {
+            case 100: {
                 let b = pop();
                 let a = pop();
                 push(a.add(b));
                 break;
             }
-            case 2: {
+            case 300: {
                 let b = pop();
                 let a = pop();
                 if (b.value === 0) {
@@ -63,54 +63,54 @@ function run() {
                 push(a.div(b));
                 break;
             }
-            case 9: {
+            case 900: {
                 let b = pop();
                 let a = pop();
                 push(a.mul(b));
                 break;
             }
-            case 15: {
+            case 1500: {
                 let b = pop();
                 let a = pop();
                 push(a.sub(b));
                 break;
             }
-            case 8: {
+            case 800: {
                 push(read_constant());
                 break;
             }
-            case 4: {
+            case 400: {
                 let name = read_string();
                 let value = nativeNames[name].value;
                 push(value);
                 break;
             }
-            case 5: {
+            case 500: {
                 let name = read_string();
                 let value = userNames[name].value;
                 push(value);
                 break;
             }
-            case 10: {
+            case 1000: {
                 let a = pop();
                 a.value *= -1;
                 push(a);
                 break;
             }
-            case 11: {
+            case 1100: {
                 let a = pop();
                 a.value = !a.value;
                 push(a);
                 break;
             }
-            case 14: {
+            case 1400: {
                 let name = read_string();
                 let kind = read_byte();
                 let value = pop();
                 userNames[name] = { kind, value };
                 break;
             }
-            case 13: {
+            case 1300: {
                 return true;
             }
         }

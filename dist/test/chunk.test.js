@@ -12,9 +12,9 @@ describe("chunk", () => {
     });
     it("write()", () => {
         let chunk = new Chunk("test chunk");
-        chunk.write(8, 1);
-        chunk.write(0, 2);
-        assert.deepEqual(chunk.code, [8, 0]);
+        chunk.write(800, 1);
+        chunk.write(100, 2);
+        assert.deepEqual(chunk.code, [800, 100]);
         assert.deepEqual(chunk.lines, [1, 2]);
         assert.deepEqual(chunk.values, []);
     });
@@ -30,11 +30,11 @@ describe("chunk", () => {
         let chunk = new Chunk("test chunk");
         let n = new FGNumber(2);
         let id = chunk.add_value(n);
-        chunk.write(8, 100);
+        chunk.write(800, 100);
         chunk.write(id, 100);
         let a = new FGString("a");
         id = chunk.add_value(a);
-        chunk.write(5, 110);
+        chunk.write(500, 110);
         chunk.write(id, 110);
         let result = "";
         let offset = 0;
@@ -47,13 +47,13 @@ describe("chunk", () => {
     });
     it("Op.Ret", () => {
         let chunk = new Chunk("test chunk");
-        chunk.write(0, 50);
-        chunk.write(2, 60);
-        chunk.write(10, 70);
-        chunk.write(11, 80);
-        chunk.write(9, 90);
-        chunk.write(13, 100);
-        chunk.write(15, 110);
+        chunk.write(100, 50);
+        chunk.write(300, 60);
+        chunk.write(1000, 70);
+        chunk.write(1100, 80);
+        chunk.write(900, 90);
+        chunk.write(1300, 100);
+        chunk.write(1500, 110);
         let result = "";
         let offset = 0;
         [result, offset] = chunk.disassemble_instr(offset);
@@ -83,7 +83,7 @@ describe("chunk", () => {
         let name = new FGString("a");
         let kind = 4;
         let id = chunk.add_value(name);
-        chunk.write(14, 123);
+        chunk.write(1400, 123);
         chunk.write(id, 123);
         chunk.write(kind, 123);
         let [result, offset] = chunk.disassemble_instr(0);

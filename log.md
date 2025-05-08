@@ -2,6 +2,8 @@
 
 #### 08-05-25
 
+- initialize Op enum so it doesn't pollute the diff when inserting or changing order
+- remove unnecessary Op.False and Op.True
 - vm: Neg, Not and test
 
 #### 07-05-25

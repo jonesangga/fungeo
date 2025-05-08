@@ -98,10 +98,10 @@ function emitBytes(byte1, byte2) {
     emitByte(byte2);
 }
 function emitConstant(value) {
-    emitBytes(8, makeConstant(value));
+    emitBytes(800, makeConstant(value));
 }
 function emitReturn() {
-    emitByte(13);
+    emitByte(1300);
 }
 function endCompiler() {
     emitReturn();
@@ -122,13 +122,13 @@ function unary() {
             if (lastType.kind !== 2) {
                 error("'!' only for boolean");
             }
-            emitByte(11);
+            emitByte(1100);
             break;
         case 7:
             if (lastType.kind !== 4) {
                 error("'-' only for number");
             }
-            emitByte(10);
+            emitByte(1000);
             break;
         default:
             error("unhandled unary op");
@@ -147,16 +147,16 @@ function binary() {
     }
     switch (operatorType) {
         case 8:
-            emitByte(0);
+            emitByte(100);
             break;
         case 7:
-            emitByte(15);
+            emitByte(1500);
             break;
         case 10:
-            emitByte(9);
+            emitByte(900);
             break;
         case 9:
-            emitByte(2);
+            emitByte(300);
             break;
         default: error("unhandled binary op");
     }
@@ -285,7 +285,7 @@ function parse_callable(name_) {
         else
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j])}], got ${KindName[gotTypes[j]]}`);
     }
-    emitBytes(1, i);
+    emitBytes(200, i);
     emitConstant(new FGCallable(name.call));
     if (version[i].output === 0) {
         lastType = invalidType;
@@ -297,9 +297,9 @@ function parse_callable(name_) {
 function parse_non_callable(table, name, native) {
     let index = makeConstant(new FGString(name));
     if (native)
-        emitBytes(4, index);
+        emitBytes(400, index);
     else
-        emitBytes(5, index);
+        emitBytes(500, index);
     lastType = { kind: table[name].kind };
     console.log("in parse_non_callable() lastType = ", lastType);
 }
@@ -309,7 +309,7 @@ function parse_definition(name) {
     lastType = invalidType;
     canParseArgument = true;
     expression();
-    emitBytes(14, index);
+    emitBytes(1400, index);
     emitByte(lastType.kind);
     tempNames[name] = { kind: lastType.kind };
     lastType = invalidType;
@@ -345,7 +345,7 @@ function call(name) {
         expression();
         argCount++;
     } while (!match(20));
-    emitBytes(1, constant);
+    emitBytes(200, constant);
     emitByte(argCount);
 }
 function prev() {

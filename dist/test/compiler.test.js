@@ -9,8 +9,8 @@ describe("compiler:binary", () => {
         let source = "num = 12 + 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 0,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 100,
+            1400, 0, 4, 1300,
         ]);
         assert.deepEqual(chunk.values[0], new FGString("num"));
         assert.deepEqual(chunk.values[1], new FGNumber(12));
@@ -21,8 +21,8 @@ describe("compiler:binary", () => {
         let source = "num = 12 - 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 15,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 1500,
+            1400, 0, 4, 1300,
         ]);
     });
     it("*", () => {
@@ -30,8 +30,8 @@ describe("compiler:binary", () => {
         let source = "num = 12 * 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 9,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 900,
+            1400, 0, 4, 1300,
         ]);
     });
     it("/", () => {
@@ -39,8 +39,8 @@ describe("compiler:binary", () => {
         let source = "num = 12 / 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 2,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 300,
+            1400, 0, 4, 1300,
         ]);
     });
     it("prec: +-", () => {
@@ -48,9 +48,9 @@ describe("compiler:binary", () => {
         let source = "num = 12 + 34 - 56";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 0,
-            8, 3, 15,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 100,
+            800, 3, 1500,
+            1400, 0, 4, 1300,
         ]);
     });
     it("prec: */", () => {
@@ -58,9 +58,9 @@ describe("compiler:binary", () => {
         let source = "num = 12 * 34 / 56";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 9,
-            8, 3, 2,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 900,
+            800, 3, 300,
+            1400, 0, 4, 1300,
         ]);
     });
     it("prec: +-*/", () => {
@@ -68,9 +68,9 @@ describe("compiler:binary", () => {
         let source = "num = 12 + 34 * 56 - 78 / 9";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 8, 3,
-            9, 0, 8, 4, 8, 5, 2, 15,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 800, 3,
+            900, 100, 800, 4, 800, 5, 300, 1500,
+            1400, 0, 4, 1300,
         ]);
     });
     it("with variable", () => {
@@ -78,9 +78,9 @@ describe("compiler:binary", () => {
         let source = "a = 12 b = a + 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 14, 0, 4, 5, 3,
-            8, 4, 0,
-            14, 2, 4, 13,
+            800, 1, 1400, 0, 4, 500, 3,
+            800, 4, 100,
+            1400, 2, 4, 1300,
         ]);
     });
     it("error: string + number", () => {
@@ -106,8 +106,8 @@ describe("compiler:unary", () => {
         let source = "num = -123";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 10,
-            14, 0, 4, 13,
+            800, 1, 1000,
+            1400, 0, 4, 1300,
         ]);
     });
     it("double unary: --", () => {
@@ -115,8 +115,8 @@ describe("compiler:unary", () => {
         let source = "num = --123";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 10, 10,
-            14, 0, 4, 13,
+            800, 1, 1000, 1000,
+            1400, 0, 4, 1300,
         ]);
     });
     it("!", () => {
@@ -124,8 +124,8 @@ describe("compiler:unary", () => {
         let source = "num = !false";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 11,
-            14, 0, 2, 13,
+            800, 1, 1100,
+            1400, 0, 2, 1300,
         ]);
     });
     it("double unary: !!", () => {
@@ -133,8 +133,8 @@ describe("compiler:unary", () => {
         let source = "num = !!false";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 11, 11,
-            14, 0, 2, 13,
+            800, 1, 1100, 1100,
+            1400, 0, 2, 1300,
         ]);
     });
     it("error: -string", () => {
@@ -160,8 +160,8 @@ describe("compiler:grouping", () => {
         let source = "num = 1 * (2 + 3)";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 8, 3, 0, 9,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 800, 3, 100, 900,
+            1400, 0, 4, 1300,
         ]);
     });
     it("error: no ')'", () => {
@@ -177,8 +177,8 @@ describe("compiler:grouping", () => {
         let source = "num = -(2 + 3)";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 8, 2, 0, 10,
-            14, 0, 4, 13,
+            800, 1, 800, 2, 100, 1000,
+            1400, 0, 4, 1300,
         ]);
     });
     it("error: -(String)", () => {
@@ -194,8 +194,8 @@ describe("compiler:grouping", () => {
         let source = "num = !(false)";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 11,
-            14, 0, 2, 13,
+            800, 1, 1100,
+            1400, 0, 2, 1300,
         ]);
     });
     it("error: !(Number)", () => {
@@ -215,10 +215,10 @@ describe("compiler:assignment", () => {
             d = false`;
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            8, 1, 14, 0, 4,
-            8, 3, 14, 2, 5,
-            8, 5, 14, 4, 2,
-            8, 7, 14, 6, 2, 13,
+            800, 1, 1400, 0, 4,
+            800, 3, 1400, 2, 5,
+            800, 5, 1400, 4, 2,
+            800, 7, 1400, 6, 2, 1300,
         ]);
         assert.deepEqual(chunk.lines, [
             1, 1, 1, 1, 1,
@@ -249,7 +249,7 @@ describe("compiler", () => {
         let chunk = new Chunk("test chunk");
         let source = "";
         let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [13]);
+        assert.deepEqual(chunk.code, [1300]);
         assert.deepEqual(chunk.lines, [1]);
         assert.deepEqual(chunk.values, []);
     });
