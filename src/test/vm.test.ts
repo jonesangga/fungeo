@@ -84,6 +84,29 @@ describe("vm:stack", () => {
         ]);
     });
 
+    it("Op.AddStr", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "str = \"so \" ++ \"real\"";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.AddStr
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGString("so real")
+        ]);
+    });
+
     it("Op.Sub", () => {
         vm.init();
         let chunk = new Chunk("test chunk");

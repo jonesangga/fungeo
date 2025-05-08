@@ -114,6 +114,7 @@ describe("chunk", () => {
         chunk.write(Op.Mul, 90);
         chunk.write(Op.Ret, 100);
         chunk.write(Op.Sub, 110);
+        chunk.write(Op.AddStr, 120);
 
         let result = "";
         let offset = 0;
@@ -144,6 +145,10 @@ describe("chunk", () => {
         [result, offset] = chunk.disassemble_instr(offset);
         assert.deepEqual(result, "0006  110 Sub\n");
         assert.equal(offset, 7);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0007  120 AddStr\n");
+        assert.equal(offset, 8);
     });
 
     it("Op.Set", () => {

@@ -216,7 +216,7 @@ function binary(): void {
 function binary_str(): void {
     let operator = parser.previous.lexeme;
     if (lastType.kind !== Kind.String) {
-        error(`'${ operator }' only for string`);
+        error(`'${ operator }' only for strings`);
     }
 
     let operatorType = parser.previous.kind;
@@ -224,7 +224,7 @@ function binary_str(): void {
     parsePrecedence(rule.precedence + 1);
 
     if (lastType.kind !== Kind.String) {
-        error(`'${ operator }' only for string`);
+        error(`'${ operator }' only for strings`);
     }
 
     emitByte(Op.AddStr);
@@ -511,11 +511,11 @@ const compiler = {
         catch(error: unknown) {
             if (error instanceof CompileError) {
                 // console.log("catch CompileError");
-                console.log(error);
+                // console.log(error);
                 return { success: false, message: error.message };
             } else {
                 // console.log("catch Error");
-                console.log(error);
+                // console.log(error);
                 return { success: false, message: (error as Error).message };
             }
         }

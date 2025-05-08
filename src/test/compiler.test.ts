@@ -115,6 +115,32 @@ describe("compiler:binary", () => {
 
 });
 
+describe("compiler:binary_str", () => {
+
+    it("++", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "str = \"so \" ++ \"real\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.AddStr,
+            Op.Set, 0, Kind.String, Op.Ret,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGString("str"));
+        assert.deepEqual(chunk.values[1], new FGString("so "));
+        assert.deepEqual(chunk.values[2], new FGString("real"));
+    });
+
+    it("error: string ++ number", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "str = \"real\" ++ 2";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': '++' only for strings\n"
+        });
+    });
+
+});
+
 describe("compiler:unary", () => {
 
     it("-", () => {

@@ -93,6 +93,7 @@ describe("chunk", () => {
         chunk.write(900, 90);
         chunk.write(1300, 100);
         chunk.write(1500, 110);
+        chunk.write(120, 120);
         let result = "";
         let offset = 0;
         [result, offset] = chunk.disassemble_instr(offset);
@@ -116,6 +117,9 @@ describe("chunk", () => {
         [result, offset] = chunk.disassemble_instr(offset);
         assert.deepEqual(result, "0006  110 Sub\n");
         assert.equal(offset, 7);
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0007  120 AddStr\n");
+        assert.equal(offset, 8);
     });
     it("Op.Set", () => {
         let chunk = new Chunk("test chunk");

@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { Chunk } from "../chunk.js";
-import { FGBoolean, FGNumber } from "../value.js";
+import { FGBoolean, FGNumber, FGString } from "../value.js";
 import { compiler } from "../compiler.js";
 import { stack, stackTop, vm } from "../vm.js";
 describe("vm:stack", () => {
@@ -65,6 +65,25 @@ describe("vm:stack", () => {
         vm.step();
         assert.deepEqual(stack.slice(0, stackTop), [
             new FGNumber(579)
+        ]);
+    });
+    it("Op.AddStr", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "str = \"so \" ++ \"real\"";
+        let result = compiler.compile(source, chunk);
+        vm.set(chunk);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGString("so real")
         ]);
     });
     it("Op.Sub", () => {

@@ -25,7 +25,7 @@ describe("scanner", () => {
     // NOTE: add new lexeme at the end so it doesn't mess with prev passing tests.
 
     it("scan all types", () => {
-        let code = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true `;
+        let code = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true ++`;
                  // 012345678901234567890123456789012345678901234567890123456789012
                            // 1         2         3         4         5         6
 
@@ -129,6 +129,11 @@ describe("scanner", () => {
             kind: TokenT.True,
             line: 1,
             lexeme: "true",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: TokenT.PlusPlus,
+            line: 1,
+            lexeme: "++",
         });
         assert.deepEqual(scanner.next(), {
             kind: TokenT.EOF,

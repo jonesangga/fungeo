@@ -165,13 +165,13 @@ function binary() {
 function binary_str() {
     let operator = parser.previous.lexeme;
     if (lastType.kind !== 600) {
-        error(`'${operator}' only for string`);
+        error(`'${operator}' only for strings`);
     }
     let operatorType = parser.previous.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
     if (lastType.kind !== 600) {
-        error(`'${operator}' only for string`);
+        error(`'${operator}' only for strings`);
     }
     emitByte(120);
 }
@@ -398,11 +398,9 @@ const compiler = {
         }
         catch (error) {
             if (error instanceof CompileError) {
-                console.log(error);
                 return { success: false, message: error.message };
             }
             else {
-                console.log(error);
                 return { success: false, message: error.message };
             }
         }
