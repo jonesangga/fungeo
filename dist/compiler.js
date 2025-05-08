@@ -193,7 +193,7 @@ function parse_name() {
         canAssign = false;
         if (check(1500))
             error(`${name} already defined`);
-        if (nativeNames[name].kind === 400)
+        if (userNames[name].kind === 400)
             parse_callable(name);
         else
             parse_non_callable(userNames, name, false);
@@ -384,9 +384,11 @@ const compiler = {
         }
         catch (error) {
             if (error instanceof CompileError) {
+                console.log(error);
                 return { success: false, message: error.message };
             }
             else {
+                console.log(error);
                 return { success: false, message: error.message };
             }
         }

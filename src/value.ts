@@ -1,7 +1,5 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { type Version } from "./names.js"
-
 export const enum Kind {
     Nothing = 100,
     Any = 200,
@@ -26,6 +24,11 @@ export class FGBoolean {
     kind: Kind.Boolean = Kind.Boolean;
     constructor(public value: boolean) {}
     to_str(): string { return this.value.toString(); }
+}
+
+export interface Version {
+    input:   (Set<number> | Kind)[];
+    output:  Kind;
 }
 
 export class FGCallable {

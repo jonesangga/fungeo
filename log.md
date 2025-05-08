@@ -2,6 +2,7 @@
 
 #### 08-05-25
 
+- add Type nativefn
 - add Op.CallNat in VM
 - add Op.CallNat in chunk
 - new CallNat, CallUsr

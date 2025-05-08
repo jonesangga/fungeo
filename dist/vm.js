@@ -1,6 +1,6 @@
 import { Chunk } from "./chunk.js";
 import { nativeNames, userNames } from "./names.js";
-const TESTING = true;
+const TESTING = false;
 export let stack = [];
 export let stackTop = 0;
 export function push(value) {

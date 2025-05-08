@@ -2,8 +2,8 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
-import { type Types, type Version, nativeNames, userNames } from "./names.js"
+import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
+import { type Types, nativeNames, userNames } from "./names.js"
 
 let invalidType: Types = { kind: Kind.Nothing };
 let numberType: Types = { kind: Kind.Number };
@@ -266,7 +266,7 @@ function parse_name(): void {
         if (check(TokenT.Eq))
             error(`${ name } already defined`);
 
-        if (nativeNames[name].kind === Kind.Callable)
+        if (userNames[name].kind === Kind.Callable)
             parse_callable(name);
         else
             parse_non_callable(userNames, name, false);
@@ -493,11 +493,11 @@ const compiler = {
         catch(error: unknown) {
             if (error instanceof CompileError) {
                 // console.log("catch CompileError");
-                // console.log(error);
+                console.log(error);
                 return { success: false, message: error.message };
             } else {
                 // console.log("catch Error");
-                // console.log(error);
+                console.log(error);
                 return { success: false, message: (error as Error).message };
             }
         }

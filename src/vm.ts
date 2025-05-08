@@ -3,7 +3,7 @@ import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value }
 import { nativeNames, userNames } from "./names.js"
 import { compiler } from "./compiler.js"
 
-const TESTING = true;
+const TESTING = false;
 
 export let stack: Value[] = [];
 export let stackTop = 0;
