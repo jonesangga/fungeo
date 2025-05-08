@@ -8,11 +8,11 @@ const TESTING = true;
 export let stack: Value[] = [];
 export let stackTop = 0;
 
-function push(value: Value): void {
+export function push(value: Value): void {
     stack[stackTop++] = value;
 }
 
-function pop(): Value {
+export function pop(): Value {
     return stack[--stackTop];
 }
 
@@ -24,7 +24,10 @@ function resetStack(): void {
     stackTop = 0;
 }
 
-let output = "";
+export let output = "";
+export function vmoutput(str: string): void {
+    output += str;
+}
 
 let chunk = new Chunk("vm");
 let ip    = 0;     // Index of current instruction in chunk.code array.
@@ -68,6 +71,13 @@ function run(): boolean {
                 let b = pop() as FGNumber;
                 let a = pop() as FGNumber;
                 push(a.add(b));
+                break;
+            }
+
+            case Op.CallNat: {
+                let name = read_constant() as FGCallable;
+                let ver = read_byte();
+                name.value(ver);
                 break;
             }
 
@@ -148,7 +158,7 @@ function run(): boolean {
 
 interface VMResult {
     success: boolean;
-    message?: string;
+    message: string;
 }
 
 const vm = {

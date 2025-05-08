@@ -5,7 +5,7 @@ import { vm } from "./vm.js";
 repl.place(100, 100);
 let chunk = new Chunk("testing");
 let source = "";
-source = "a = 10 + 20";
+source = " a = 2 Print 2";
 let compilerResult = compiler.compile(source, chunk);
 console.log(chunk.disassemble());
 vm.init();
@@ -15,7 +15,10 @@ function main(source) {
     if (result.success) {
         console.log(chunk.disassemble());
         let vmresult = vm.interpret(chunk);
-        console.log(vmresult);
+        if (vmresult.success)
+            repl.ok(vmresult.message);
+        else
+            repl.error(vmresult.message);
     }
     else {
         repl.error(result.message);

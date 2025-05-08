@@ -3,10 +3,10 @@ import { nativeNames, userNames } from "./names.js";
 const TESTING = true;
 export let stack = [];
 export let stackTop = 0;
-function push(value) {
+export function push(value) {
     stack[stackTop++] = value;
 }
-function pop() {
+export function pop() {
     return stack[--stackTop];
 }
 function peek(distance) {
@@ -15,7 +15,10 @@ function peek(distance) {
 function resetStack() {
     stackTop = 0;
 }
-let output = "";
+export let output = "";
+export function vmoutput(str) {
+    output += str;
+}
 let chunk = new Chunk("vm");
 let ip = 0;
 function error(msg) {
@@ -51,6 +54,12 @@ function run() {
                 let b = pop();
                 let a = pop();
                 push(a.add(b));
+                break;
+            }
+            case 200: {
+                let name = read_constant();
+                let ver = read_byte();
+                name.value(ver);
                 break;
             }
             case 300: {

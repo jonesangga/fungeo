@@ -314,14 +314,17 @@ function setToKinds(set_: Set<number>): string[] {
 }
 
 function parse_callable(name_: string): void {
+    console.log("in parse_callable()");
     if (!canParseArgument) {
         lastType = nativeNames[name_];
         return;
     }
     canParseArgument = match(TokenT.Dollar);
+    console.log("can parse argument");
 
     let name    = nativeNames[name_];
-    let version = name.version as Version[];
+    // let version = name.version as Version[];
+    let version = (name.value as FGCallable).version;
     let inputVersion: (Set<number> | Kind)[] = [];
     let gotTypes: Kind[]     = [];
 
@@ -364,8 +367,9 @@ function parse_callable(name_: string): void {
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j] as Set<number>)}], got ${KindName[gotTypes[j]]}`);
     }
 
-    emitBytes(Op.Call, i);
-    emitConstant(new FGCallable(name.call as (n: number) => void));
+    let index = makeConstant(name.value as FGCallable);
+    emitBytes(Op.CallNat, index);
+    emitByte(i);
     if (version[i].output === Kind.Nothing) {
         lastType = invalidType;
     } else {
@@ -434,18 +438,6 @@ function expression(): void {
 
 function identifierConstant(name: Token): number {
     return makeConstant(new FGString(name.lexeme));
-}
-
-function call(name: string): void {
-    let constant = currentChunk().add_value(new FGString(name));
-
-    let argCount = 0;
-    do {
-        expression();
-        argCount++;
-    } while (!match(TokenT.EOF));
-    emitBytes(Op.Call, constant);
-    emitByte(argCount);
 }
 
 function prev() {

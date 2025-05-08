@@ -1,5 +1,5 @@
 import { TokenTName, scanner } from "./scanner.js";
-import { KindName, FGBoolean, FGNumber, FGString, FGCallable } from "./value.js";
+import { KindName, FGBoolean, FGNumber, FGString } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
 let invalidType = { kind: 100 };
 let numberType = { kind: 500 };
@@ -240,13 +240,15 @@ function setToKinds(set_) {
     return s;
 }
 function parse_callable(name_) {
+    console.log("in parse_callable()");
     if (!canParseArgument) {
         lastType = nativeNames[name_];
         return;
     }
     canParseArgument = match(200);
+    console.log("can parse argument");
     let name = nativeNames[name_];
-    let version = name.version;
+    let version = name.value.version;
     let inputVersion = [];
     let gotTypes = [];
     let success = true;
@@ -285,8 +287,9 @@ function parse_callable(name_) {
         else
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j])}], got ${KindName[gotTypes[j]]}`);
     }
-    emitBytes(200, i);
-    emitConstant(new FGCallable(name.call));
+    let index = makeConstant(name.value);
+    emitBytes(200, index);
+    emitByte(i);
     if (version[i].output === 100) {
         lastType = invalidType;
     }
@@ -337,16 +340,6 @@ function expression() {
 }
 function identifierConstant(name) {
     return makeConstant(new FGString(name.lexeme));
-}
-function call(name) {
-    let constant = currentChunk().add_value(new FGString(name));
-    let argCount = 0;
-    do {
-        expression();
-        argCount++;
-    } while (!match(2100));
-    emitBytes(200, constant);
-    emitByte(argCount);
 }
 function prev() {
     console.log(TokenTName[parser.previous.kind]);

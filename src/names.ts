@@ -2,15 +2,14 @@
 //
 // TODO: Clean up this.
 
-import { Kind, type Value } from "./value.js"
+import { Kind, FGCallable, type Value } from "./value.js"
+import { Print } from "./vmfunction.js"
 
 export interface Types {
     kind:     Kind;
     value?:   Value;
     listKind?: Kind;
     drawn?:   boolean;
-    input?:   Kind[];
-    output?:  Kind;
     version?: Version[];
     call?:   (n: number) => void;
 }
@@ -27,6 +26,11 @@ interface Names {
 export let userNames: Names = {};
 
 export let nativeNames: Names = {
+
+    "Print": {
+        kind:  Kind.Callable,
+        value: Print,
+    },
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
     // "fishp": { kind: Kind.Pic, value: fishp, drawn: true },
@@ -146,16 +150,6 @@ export let nativeNames: Names = {
             // },
             // {
                 // input:  [Kind.Pic, Kind.List],
-                // output: Kind.Nothing,
-            // },
-        // ],
-    // },
-    // "print": {
-        // kind:    Kind.Callable,
-        // call:    Print,
-        // version: [
-            // {
-                // input:  [Kind.Any],
                 // output: Kind.Nothing,
             // },
         // ],

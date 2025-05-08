@@ -163,7 +163,7 @@ const repl = {
     },
 
     ok(message: string): void {
-        terminal.innerHTML += `${ message }\n`;
+        terminal.innerHTML += `${ message }`;
         history[history.length - 1].output = message;
         holder.style.background = colorOk;
 
@@ -179,7 +179,7 @@ const repl = {
     },
  
     error(message: string): void {
-        terminal.innerHTML += `${ message }\n`;
+        terminal.innerHTML += `${ message }`;
         history[history.length - 1].output = message;
         holder.style.background  = colorFail;
 

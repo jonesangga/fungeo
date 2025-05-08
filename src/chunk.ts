@@ -4,7 +4,7 @@ import { Kind, KindName, type Value } from "./value.js"
 
 const enum Op {
     Add = 100,
-    Call = 200,
+    CallNat = 200,
     Div = 300,
     GetNat = 400,   // Get nativeNames.
     GetUsr = 500,   // Get userNames.
@@ -22,7 +22,7 @@ const enum Op {
 
 const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
-    [Op.Call]: "Call",
+    [Op.CallNat]: "CallNat",
     [Op.Div]: "Div",
     [Op.GetNat]: "GetNat",
     [Op.GetUsr]: "GetUsr",
@@ -78,12 +78,20 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction as Op];
         switch (instruction) {
+            case Op.CallNat: {
+                let index = this.code[offset + 1];
+                let ver = this.code[offset + 2];
+                result += `${ padr7(name) } ${ padl4(index) } 'v${ ver }'\n`;
+                return [result, offset + 3];
+            }
+
             case Op.GetNat:
             case Op.GetUsr:
-            case Op.Load:
+            case Op.Load: {
                 let index = this.code[offset + 1];
-                result += `${ padr6(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
+                result += `${ padr7(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
                 return [result, offset + 2];
+            }
 
             case Op.Add:
             case Op.Div:
@@ -91,22 +99,25 @@ class Chunk {
             case Op.Not:
             case Op.Mul:
             case Op.Ret:
-            case Op.Sub:
+            case Op.Sub: {
                 result += name + "\n";
                 return [result, offset + 1];
+            }
 
-            case Op.Set:
+            case Op.Set: {
                 let nameId     = this.code[offset + 1];
                 let kind: Kind = this.code[offset + 2];
 
-                result += `${ padr6(name) } ${ padl4(nameId) } '`;
+                result += `${ padr7(name) } ${ padl4(nameId) } '`;
                 result += this.values[nameId].to_str();
                 result += `: ${ KindName[kind] }'\n`;
                 return [result, offset + 3];
+            }
 
-            default:
+            default: {
                 result += `Unknown code ${ instruction }\n`;
                 return [result, offset + 1];
+            }
         }
     }
 }
@@ -121,9 +132,9 @@ function padl4(n: number): string {
     return ('   '+n).slice(-4);
 }
 
-// Padding right 6 characters.
-function padr6(s: string): string {
-    return (s+'      ').slice(0, 6);
+// Padding right 7 characters.
+function padr7(s: string): string {
+    return (s+'       ').slice(0, 7);
 }
 
 export { Op, OpName, Chunk };

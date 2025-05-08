@@ -14,7 +14,7 @@ repl.place(100, 100);
 
 let chunk = new Chunk("testing");
 let source = "";
-source = "a = 10 + 20";
+source = " a = 2 Print 2";
 let compilerResult = compiler.compile(source, chunk);
 console.log(chunk.disassemble());
 
@@ -27,7 +27,11 @@ function main(source: string): void {
     if (result.success) {
         console.log(chunk.disassemble());
         let vmresult = vm.interpret(chunk);
-        console.log(vmresult);
+        if (vmresult.success)
+            repl.ok(vmresult.message)
+        else
+            repl.error(vmresult.message)
+        // console.log(vmresult);
     }
     else {
         repl.error(result.message as string);

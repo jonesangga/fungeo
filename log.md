@@ -2,6 +2,11 @@
 
 #### 08-05-25
 
+- add Op.CallNat in VM
+- add Op.CallNat in chunk
+- new CallNat, CallUsr
+- update chunk.test.ts
+- change padding to 7
 - initialize Precedence num
 - initialize TokenT enum
 - initialize Kind enum

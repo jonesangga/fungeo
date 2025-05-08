@@ -2,7 +2,7 @@ import { KindName } from "./value.js";
 var Op;
 (function (Op) {
     Op[Op["Add"] = 100] = "Add";
-    Op[Op["Call"] = 200] = "Call";
+    Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["GetNat"] = 400] = "GetNat";
     Op[Op["GetUsr"] = 500] = "GetUsr";
@@ -20,7 +20,7 @@ var Op;
 ;
 const OpName = {
     [100]: "Add",
-    [200]: "Call",
+    [200]: "CallNat",
     [300]: "Div",
     [400]: "GetNat",
     [500]: "GetUsr",
@@ -71,31 +71,41 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction];
         switch (instruction) {
+            case 200: {
+                let index = this.code[offset + 1];
+                let ver = this.code[offset + 2];
+                result += `${padr7(name)} ${padl4(index)} 'v${ver}'\n`;
+                return [result, offset + 3];
+            }
             case 400:
             case 500:
-            case 800:
+            case 800: {
                 let index = this.code[offset + 1];
-                result += `${padr6(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
+                result += `${padr7(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];
+            }
             case 100:
             case 300:
             case 1000:
             case 1100:
             case 900:
             case 1300:
-            case 1500:
+            case 1500: {
                 result += name + "\n";
                 return [result, offset + 1];
-            case 1400:
+            }
+            case 1400: {
                 let nameId = this.code[offset + 1];
                 let kind = this.code[offset + 2];
-                result += `${padr6(name)} ${padl4(nameId)} '`;
+                result += `${padr7(name)} ${padl4(nameId)} '`;
                 result += this.values[nameId].to_str();
                 result += `: ${KindName[kind]}'\n`;
                 return [result, offset + 3];
-            default:
+            }
+            default: {
                 result += `Unknown code ${instruction}\n`;
                 return [result, offset + 1];
+            }
         }
     }
 }
@@ -105,7 +115,7 @@ function zpad4(n) {
 function padl4(n) {
     return ('   ' + n).slice(-4);
 }
-function padr6(s) {
-    return (s + '      ').slice(0, 6);
+function padr7(s) {
+    return (s + '       ').slice(0, 7);
 }
 export { Op, OpName, Chunk };

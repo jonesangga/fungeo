@@ -15,7 +15,12 @@ describe("value", () => {
 
     it("FGCallable", () => {
         let f = (n: number) => {return;};
-        let b = new FGCallable(f);
+        let b = new FGCallable(f, [
+            {
+                input: [Kind.Number],
+                output: Kind.Number,
+            }
+        ]);
         assert.equal(b.kind, Kind.Callable);
         assert.deepEqual(b.value, f);
         assert.equal(b.to_str(), "fn(n: number): void");

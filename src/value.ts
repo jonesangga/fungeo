@@ -1,5 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
+import { type Version } from "./names.js"
+
 export const enum Kind {
     Nothing = 100,
     Any = 200,
@@ -28,7 +30,11 @@ export class FGBoolean {
 
 export class FGCallable {
     kind: Kind.Callable = Kind.Callable;
-    constructor(public value: (n: number) => void) {}
+    constructor(
+        public value: (n: number) => void,
+        public version: Version[]
+    ) {}
+
     to_str(): string { return "fn(n: number): void"; }
 }
 

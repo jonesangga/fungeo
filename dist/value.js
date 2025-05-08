@@ -28,9 +28,11 @@ export class FGBoolean {
 }
 export class FGCallable {
     value;
+    version;
     kind = 400;
-    constructor(value) {
+    constructor(value, version) {
         this.value = value;
+        this.version = version;
     }
     to_str() { return "fn(n: number): void"; }
 }

@@ -135,7 +135,7 @@ const repl = {
         container.style.top = y + "px";
     },
     ok(message) {
-        terminal.innerHTML += `${message}\n`;
+        terminal.innerHTML += `${message}`;
         history[history.length - 1].output = message;
         holder.style.background = colorOk;
         if (!terminalShow) {
@@ -150,7 +150,7 @@ const repl = {
         }
     },
     error(message) {
-        terminal.innerHTML += `${message}\n`;
+        terminal.innerHTML += `${message}`;
         history[history.length - 1].output = message;
         holder.style.background = colorFail;
         if (!terminalShow) {
