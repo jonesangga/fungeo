@@ -2,6 +2,7 @@
 
 #### 08-05-25
 
+- new syntax ++ for string concat
 - test Op.CallNat in chunk
 - add test chunk.test for GetUsr GetNat
 - add Type nativefn

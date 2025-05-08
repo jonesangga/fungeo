@@ -56,6 +56,12 @@ function run() {
                 push(a.add(b));
                 break;
             }
+            case 120: {
+                let b = pop();
+                let a = pop();
+                push(a.add(b));
+                break;
+            }
             case 200: {
                 let name = read_constant();
                 let ver = read_byte();

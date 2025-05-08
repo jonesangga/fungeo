@@ -31,7 +31,8 @@ const rules = {
     [800]: { prefix: unary, infix: binary, precedence: 300 },
     [1600]: { prefix: parse_name, infix: null, precedence: 100 },
     [1700]: { prefix: parse_number, infix: null, precedence: 100 },
-    [900]: { prefix: null, infix: binary, precedence: 300 },
+    [1585]: { prefix: null, infix: binary, precedence: 300 },
+    [1590]: { prefix: null, infix: binary_str, precedence: 300 },
     [700]: { prefix: null, infix: null, precedence: 100 },
     [500]: { prefix: null, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
@@ -146,7 +147,7 @@ function binary() {
         error(`'${operator}' only for numbers`);
     }
     switch (operatorType) {
-        case 900:
+        case 1585:
             emitByte(100);
             break;
         case 800:
@@ -160,6 +161,19 @@ function binary() {
             break;
         default: error("unhandled binary op");
     }
+}
+function binary_str() {
+    let operator = parser.previous.lexeme;
+    if (lastType.kind !== 600) {
+        error(`'${operator}' only for string`);
+    }
+    let operatorType = parser.previous.kind;
+    let rule = rules[operatorType];
+    parsePrecedence(rule.precedence + 1);
+    if (lastType.kind !== 600) {
+        error(`'${operator}' only for string`);
+    }
+    emitByte(120);
 }
 function parse_boolean() {
     if (parser.previous.kind === 1900)

@@ -63,4 +63,7 @@ export class FGString {
         this.value = value;
     }
     to_str() { return this.value; }
+    add(other) {
+        return new FGString(this.value + other.value);
+    }
 }

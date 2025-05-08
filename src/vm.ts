@@ -74,6 +74,13 @@ function run(): boolean {
                 break;
             }
 
+            case Op.AddStr: {
+                let b = pop() as FGString;
+                let a = pop() as FGString;
+                push(a.add(b));
+                break;
+            }
+
             case Op.CallNat: {
                 let name = read_constant() as FGCallable;
                 let ver = read_byte();

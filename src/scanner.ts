@@ -12,13 +12,14 @@ const enum TokenT {
     LBracket = 600,
     RBracket = 700,
     Minus = 800,
-    Plus = 900,
     Slash = 1000,
     Star = 1100,
     Bang = 1200,       // One or more characters.
     Colon = 1300,
     ColonEq = 1400,
     Eq = 1500,
+    Plus = 1585,
+    PlusPlus = 1590,
     Name = 1600,       // Literals.
     Number = 1700,
     String = 1800,
@@ -44,6 +45,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Name]: "Name",
     [TokenT.Number]: "Number",
     [TokenT.Plus]: "Plus",
+    [TokenT.PlusPlus]: "PlusPlus",
     [TokenT.RBracket]: "RBracket",
     [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
@@ -203,7 +205,8 @@ const scanner = {
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
             case ',': return token_lexeme(TokenT.Comma);
             case '-': return token_lexeme(TokenT.Minus);
-            case '+': return token_lexeme(TokenT.Plus);
+            case '+': return token_lexeme(
+                match('+') ? TokenT.PlusPlus : TokenT.Plus);
             case '/': return token_lexeme(TokenT.Slash);
             case '*': return token_lexeme(TokenT.Star);
             case '!': return token_lexeme(TokenT.Bang);

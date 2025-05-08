@@ -46,6 +46,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
+    [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RParen]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Semicolon] : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -210,6 +211,23 @@ function binary(): void {
         case TokenT.Slash:  emitByte(Op.Div); break;
         default:            error("unhandled binary op");
     }
+}
+
+function binary_str(): void {
+    let operator = parser.previous.lexeme;
+    if (lastType.kind !== Kind.String) {
+        error(`'${ operator }' only for string`);
+    }
+
+    let operatorType = parser.previous.kind;
+    let rule = rules[operatorType];
+    parsePrecedence(rule.precedence + 1);
+
+    if (lastType.kind !== Kind.String) {
+        error(`'${ operator }' only for string`);
+    }
+
+    emitByte(Op.AddStr);
 }
 
 //--------------------------------------------------------------------

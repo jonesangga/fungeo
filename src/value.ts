@@ -64,6 +64,10 @@ export class FGString {
     kind: Kind.String = Kind.String;
     constructor(public value: string) {}
     to_str(): string { return this.value; }
+
+    add(other: FGString): FGString {
+        return new FGString(this.value + other.value);
+    }
 }
 
 type LitObj = FGBoolean | FGNumber | FGString | FGCallable;

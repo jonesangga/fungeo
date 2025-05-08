@@ -2,6 +2,7 @@ import { KindName } from "./value.js";
 var Op;
 (function (Op) {
     Op[Op["Add"] = 100] = "Add";
+    Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["GetNat"] = 400] = "GetNat";
@@ -20,6 +21,7 @@ var Op;
 ;
 const OpName = {
     [100]: "Add",
+    [120]: "AddStr",
     [200]: "CallNat",
     [300]: "Div",
     [400]: "GetNat",
@@ -85,6 +87,7 @@ class Chunk {
                 return [result, offset + 2];
             }
             case 100:
+            case 120:
             case 300:
             case 1000:
             case 1100:

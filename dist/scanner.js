@@ -8,13 +8,14 @@ var TokenT;
     TokenT[TokenT["LBracket"] = 600] = "LBracket";
     TokenT[TokenT["RBracket"] = 700] = "RBracket";
     TokenT[TokenT["Minus"] = 800] = "Minus";
-    TokenT[TokenT["Plus"] = 900] = "Plus";
     TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
     TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
     TokenT[TokenT["Eq"] = 1500] = "Eq";
+    TokenT[TokenT["Plus"] = 1585] = "Plus";
+    TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
     TokenT[TokenT["Name"] = 1600] = "Name";
     TokenT[TokenT["Number"] = 1700] = "Number";
     TokenT[TokenT["String"] = 1800] = "String";
@@ -39,7 +40,8 @@ const TokenTName = {
     [800]: "Minus",
     [1600]: "Name",
     [1700]: "Number",
-    [900]: "Plus",
+    [1585]: "Plus",
+    [1590]: "PlusPlus",
     [700]: "RBracket",
     [500]: "RParen",
     [300]: "Semicolon",
@@ -170,7 +172,7 @@ const scanner = {
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
             case ',': return token_lexeme(100);
             case '-': return token_lexeme(800);
-            case '+': return token_lexeme(900);
+            case '+': return token_lexeme(match('+') ? 1590 : 1585);
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
             case '!': return token_lexeme(1200);

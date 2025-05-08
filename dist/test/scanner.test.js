@@ -77,7 +77,7 @@ describe("scanner", () => {
             lexeme: "123.456",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 900,
+            kind: 1585,
             line: 1,
             lexeme: "+",
         });

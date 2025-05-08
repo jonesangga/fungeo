@@ -4,6 +4,7 @@ import { Kind, KindName, type Value } from "./value.js"
 
 const enum Op {
     Add = 100,
+    AddStr = 120,
     CallNat = 200,
     Div = 300,
     GetNat = 400,   // Get nativeNames.
@@ -22,6 +23,7 @@ const enum Op {
 
 const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
+    [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
     [Op.Div]: "Div",
     [Op.GetNat]: "GetNat",
@@ -94,6 +96,7 @@ class Chunk {
             }
 
             case Op.Add:
+            case Op.AddStr:
             case Op.Div:
             case Op.Neg:
             case Op.Not:
