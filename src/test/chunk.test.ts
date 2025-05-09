@@ -34,51 +34,52 @@ describe("chunk", () => {
         chunk.add_value(s);
         assert.deepEqual(chunk.values, [n, s]);
     });
+});
 
-    it("Op.Load", () => {
-        let chunk = new Chunk("test chunk");
-        let n = new FGNumber(2);
-        let id = chunk.add_value(n);
-        chunk.write(Op.Load, 100);
-        chunk.write(id, 100);
+describe("chunk:disassemble_instr", () => {
 
-        let a = new FGString("a");
-        id = chunk.add_value(a);
-        chunk.write(Op.GetUsr, 110);
-        chunk.write(id, 110);
+    function t(op: Op, expect: string): void {
+        let chunk = new Chunk("");
+        chunk.write(op, 123);
 
-        let result = "";
-        let offset = 0;
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0000  100 Load       0 '2'\n");
-        assert.equal(offset, 2);
+        let [result, offset] = chunk.disassemble_instr(0);
+        assert.deepEqual(result, expect);
+        assert.equal(offset, 1);
+    }
 
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0002  110 GetUsr     1 'a'\n");
-        assert.equal(offset, 4);
+    it("all op with no arg", () => {
+        t(Op.Add, "0000  123 Add\n");
+        t(Op.AddStr, "0000  123 AddStr\n");
+        t(Op.Div, "0000  123 Div\n");
+        t(Op.Eq, "0000  123 Eq\n");
+        t(Op.GEq, "0000  123 GEq\n");
+        t(Op.GT, "0000  123 GT\n");
+        t(Op.LEq, "0000  123 LEq\n");
+        t(Op.LT, "0000  123 LT\n");
+        t(Op.Mul, "0000  123 Mul\n");
+        t(Op.Neg, "0000  123 Neg\n");
+        t(Op.NEq, "0000  123 NEq\n");
+        t(Op.Not, "0000  123 Not\n");
+        t(Op.Ret, "0000  123 Ret\n");
+        t(Op.Sub, "0000  123 Sub\n");
     });
 
-    it("Op.GetNat", () => {
-        let chunk = new Chunk("test chunk");
-        let n = new FGNumber(2);
+    function s(op: Op, expect: string): void {
+        let chunk = new Chunk("");
+        let n = new FGNumber(123);
         let id = chunk.add_value(n);
-        chunk.write(Op.Load, 100);
+        chunk.write(op, 100);
         chunk.write(id, 100);
 
-        let a = new FGString("a");
-        id = chunk.add_value(a);
-        chunk.write(Op.GetNat, 110);
-        chunk.write(id, 110);
-
-        let result = "";
-        let offset = 0;
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0000  100 Load       0 '2'\n");
+        let [result, offset] = chunk.disassemble_instr(0);
+        assert.deepEqual(result, expect);
         assert.equal(offset, 2);
+    }
 
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0002  110 GetNat     1 'a'\n");
-        assert.equal(offset, 4);
+    it("Load and Get", () => {
+        s(Op.GetNat, "0000  100 GetNat     0 '123'\n");
+        s(Op.GetUsr, "0000  100 GetUsr     0 '123'\n");
+        s(Op.Load, "0000  100 Load       0 '123'\n");
     });
 
     it("Op.CallNat", () => {
@@ -105,52 +106,6 @@ describe("chunk", () => {
         assert.equal(offset, 5);
     });
 
-    it("Op.Ret", () => {
-        let chunk = new Chunk("test chunk");
-        chunk.write(Op.Add, 50);
-        chunk.write(Op.Div, 60);
-        chunk.write(Op.Neg, 70);
-        chunk.write(Op.Not, 80);
-        chunk.write(Op.Mul, 90);
-        chunk.write(Op.Ret, 100);
-        chunk.write(Op.Sub, 110);
-        chunk.write(Op.AddStr, 120);
-
-        let result = "";
-        let offset = 0;
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0000   50 Add\n");
-        assert.equal(offset, 1);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0001   60 Div\n");
-        assert.equal(offset, 2);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0002   70 Neg\n");
-        assert.equal(offset, 3);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0003   80 Not\n");
-        assert.equal(offset, 4);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0004   90 Mul\n");
-        assert.equal(offset, 5);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0005  100 Ret\n");
-        assert.equal(offset, 6);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0006  110 Sub\n");
-        assert.equal(offset, 7);
-
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0007  120 AddStr\n");
-        assert.equal(offset, 8);
-    });
-
     it("Op.Set", () => {
         let chunk = new Chunk("test chunk");
         let name = new FGString("a");
@@ -173,5 +128,4 @@ describe("chunk", () => {
         assert.deepEqual(result, "0000  123 Unknown code 78\n");
         assert.equal(offset, 1);
     });
-
 });
