@@ -2,6 +2,9 @@
 
 #### 09-05-25
 
+- update README
+- link doc in README
+- make separated repo for docs
 - make type Comparable = FGNumber | FGString
 - new compare() function
 - Add Eq, NEq, LT, GT, LEq, GEq to chunk

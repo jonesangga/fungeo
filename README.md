@@ -1,6 +1,10 @@
 # FunGeo - Fun Geometry
 
-Live: [https://jonesangga.github.io/fungeo/](https://jonesangga.github.io/fungeo/)
+Status: Still experimenting. No if, loop, user-defined function yet.
+
+- [Live](https://jonesangga.github.io/fungeo/)
+- [Documentation](https://jonesangga.github.io/fungeo-doc/)
+- [Development log](log.md)
 
 ## Installation
 
@@ -16,6 +20,6 @@ npm install
 npm start
 ```
 
----
+## License
 
-- [Development log](log.md)
+MIT.
