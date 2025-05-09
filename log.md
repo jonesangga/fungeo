@@ -2,6 +2,7 @@
 
 #### 09-05-25
 
+- test vm: Eq, NEq, LT, GT, LEq, GEq
 - bug: forget update lastType in eq() and neq()
 - test compiler: Eq, NEq, LT, GT, LEq, GEq
 - test.chunk: group test by their args number

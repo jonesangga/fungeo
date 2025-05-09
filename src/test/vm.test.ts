@@ -240,4 +240,144 @@ describe("vm:stack", () => {
         ]);
     });
 
+    it("Op.Eq", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 12 == 34";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.Eq
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(false)
+        ]);
+    });
+
+    it("Op.NEq", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 12 != 34";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.NEq
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+    });
+
+    it("Op.LT", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 123 < 456";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.LT
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+    });
+
+    it("Op.LEq", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 123 <= 456";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.LEq
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+    });
+
+    it("Op.GT", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 123 > 456";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.GT
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(false)
+        ]);
+    });
+
+    it("Op.GEq", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "a = 123 >= 456";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.GEq
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(false)
+        ]);
+    });
+
 });
