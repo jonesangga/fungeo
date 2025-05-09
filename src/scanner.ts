@@ -213,6 +213,12 @@ const scanner = {
             case ']': return token_lexeme(TokenT.RBracket);
             case '$': return token_lexeme(TokenT.Dollar);
             case ';': return token_lexeme(TokenT.Semicolon);
+            case ',': return token_lexeme(TokenT.Comma);
+            case '-': return token_lexeme(TokenT.Minus);
+            case '/': return token_lexeme(TokenT.Slash);
+            case '*': return token_lexeme(TokenT.Star);
+            case '"': return string_();
+
             case ':': return token_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
             case '<': return token_lexeme(
@@ -223,13 +229,8 @@ const scanner = {
                 match('=') ? TokenT.EqEq : TokenT.Eq);
             case '!': return token_lexeme(
                 match('=') ? TokenT.BangEq : TokenT.Bang);
-            case ',': return token_lexeme(TokenT.Comma);
-            case '-': return token_lexeme(TokenT.Minus);
             case '+': return token_lexeme(
                 match('+') ? TokenT.PlusPlus : TokenT.Plus);
-            case '/': return token_lexeme(TokenT.Slash);
-            case '*': return token_lexeme(TokenT.Star);
-            case '"': return string_();
         }
      
         return token_error("unexpected character");

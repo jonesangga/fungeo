@@ -2,6 +2,7 @@
 
 #### 09-05-25
 
+- test scanner: Eq, BangEq, Less, Greater, LessEq, GreaterEq
 - bug on Op.Eq and Op.NEq in VM: solved
 - update README
 - link doc in README

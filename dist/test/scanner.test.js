@@ -14,7 +14,7 @@ describe("scanner", () => {
         assert.deepEqual(scanner.next(), eof);
     });
     it("scan all types", () => {
-        let code = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true ++`;
+        let code = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true ++ == != < <= > >=`;
         scanner.init(code);
         assert.deepEqual(scanner.next(), {
             kind: 1200,
@@ -120,6 +120,36 @@ describe("scanner", () => {
             kind: 1590,
             line: 1,
             lexeme: "++",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1505,
+            line: 1,
+            lexeme: "==",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1210,
+            line: 1,
+            lexeme: "!=",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1550,
+            line: 1,
+            lexeme: "<",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1555,
+            line: 1,
+            lexeme: "<=",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1520,
+            line: 1,
+            lexeme: ">",
+        });
+        assert.deepEqual(scanner.next(), {
+            kind: 1525,
+            line: 1,
+            lexeme: ">=",
         });
         assert.deepEqual(scanner.next(), {
             kind: 2100,

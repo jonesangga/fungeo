@@ -181,17 +181,17 @@ const scanner = {
             case ']': return token_lexeme(700);
             case '$': return token_lexeme(200);
             case ';': return token_lexeme(300);
+            case ',': return token_lexeme(100);
+            case '-': return token_lexeme(800);
+            case '/': return token_lexeme(1000);
+            case '*': return token_lexeme(1100);
+            case '"': return string_();
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
             case '<': return token_lexeme(match('=') ? 1555 : 1550);
             case '>': return token_lexeme(match('=') ? 1525 : 1520);
             case '=': return token_lexeme(match('=') ? 1505 : 1500);
             case '!': return token_lexeme(match('=') ? 1210 : 1200);
-            case ',': return token_lexeme(100);
-            case '-': return token_lexeme(800);
             case '+': return token_lexeme(match('+') ? 1590 : 1585);
-            case '/': return token_lexeme(1000);
-            case '*': return token_lexeme(1100);
-            case '"': return string_();
         }
         return token_error("unexpected character");
     },
