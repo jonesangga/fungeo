@@ -190,11 +190,13 @@ function negate(): void {
 function eq(): void {
     parsePrecedence(Precedence.Equality + 1);
     emitByte(Op.Eq);
+    lastType = {kind: Kind.Boolean};
 }
 
 function neq(): void {
     parsePrecedence(Precedence.Equality + 1);
     emitByte(Op.NEq);
+    lastType = {kind: Kind.Boolean};
 }
 
 // Can only compare 2 numbers or 2 string for now.

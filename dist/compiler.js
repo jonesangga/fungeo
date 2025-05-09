@@ -140,10 +140,12 @@ function negate() {
 function eq() {
     parsePrecedence(230 + 1);
     emitByte(380);
+    lastType = { kind: 300 };
 }
 function neq() {
     parsePrecedence(230 + 1);
     emitByte(1010);
+    lastType = { kind: 300 };
 }
 function compare() {
     let operator = parser.previous.kind;

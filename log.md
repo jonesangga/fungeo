@@ -2,6 +2,8 @@
 
 #### 09-05-25
 
+- bug: forget update lastType in eq() and neq()
+- test compiler: Eq, NEq, LT, GT, LEq, GEq
 - test.chunk: group test by their args number
 - test chunk: Eq, NEq, LT, GT, LEq, GEq
 - test scanner: Eq, BangEq, Less, Greater, LessEq, GreaterEq

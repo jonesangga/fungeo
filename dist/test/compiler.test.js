@@ -150,6 +150,66 @@ describe("compiler:not", () => {
         });
     });
 });
+describe("compiler:eq", () => {
+    it("==", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 2 == 3";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 380,
+            1400, 0, 300, 1300,
+        ]);
+    });
+});
+describe.only("compiler:neq", () => {
+    it("!=", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 2 != 3";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 1010,
+            1400, 0, 300, 1300,
+        ]);
+    });
+});
+describe("compiler:compare", () => {
+    it("<", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 < 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 810,
+            1400, 0, 500, 1300,
+        ]);
+    });
+    it("<=", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 <= 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 690,
+            1400, 0, 500, 1300,
+        ]);
+    });
+    it(">", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 > 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 530,
+            1400, 0, 500, 1300,
+        ]);
+    });
+    it(">=", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = 12 >= 34";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 390,
+            1400, 0, 500, 1300,
+        ]);
+    });
+});
 describe("compiler:negate", () => {
     it("-", () => {
         let chunk = new Chunk("test chunk");
