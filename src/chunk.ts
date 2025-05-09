@@ -7,13 +7,19 @@ const enum Op {
     AddStr = 120,
     CallNat = 200,
     Div = 300,
+    Eq = 380,
+    GEq = 390,
     GetNat = 400,   // Get nativeNames.
     GetUsr = 500,   // Get userNames.
+    GT = 530,
     Index = 600,
+    LEq = 690,
     List = 700,
     Load = 800,
+    LT = 810,
     Mul = 900,
     Neg = 1000,
+    NEq = 1010,
     Not = 1100,
     Pop = 1200,
     Ret = 1300,
@@ -26,13 +32,19 @@ const OpName: { [key in Op]: string } = {
     [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
     [Op.Div]: "Div",
+    [Op.Eq]: "Eq",
+    [Op.GEq]: "GEq",
     [Op.GetNat]: "GetNat",
     [Op.GetUsr]: "GetUsr",
+    [Op.GT]: "GT",
     [Op.Index]: "Index",
+    [Op.LEq]: "LEq",
     [Op.List]: "List",
     [Op.Load]: "Load",
+    [Op.LT]: "LT",
     [Op.Mul]: "Mul",
     [Op.Neg]: "Neg",
+    [Op.NEq]: "NEq",
     [Op.Not]: "Not",
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
@@ -98,9 +110,15 @@ class Chunk {
             case Op.Add:
             case Op.AddStr:
             case Op.Div:
-            case Op.Neg:
-            case Op.Not:
+            case Op.Eq:
+            case Op.GEq:
+            case Op.GT:
+            case Op.LEq:
+            case Op.LT:
             case Op.Mul:
+            case Op.Neg:
+            case Op.NEq:
+            case Op.Not:
             case Op.Ret:
             case Op.Sub: {
                 result += name + "\n";

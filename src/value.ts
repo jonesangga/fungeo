@@ -72,3 +72,4 @@ export class FGString {
 
 type LitObj = FGBoolean | FGNumber | FGString | FGCallable;
 export type Value  = LitObj;
+export type Comparable = FGNumber | FGString;

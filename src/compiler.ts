@@ -17,6 +17,8 @@ let canAssign = false;
 const enum Precedence {
     None = 100,
     Assignment = 200, // =
+    Equality = 230,   // == !=
+    Comparison = 250, // < > <= >=
     Term = 300,       // + -
     Factor = 400,     // * /
     Unary = 500,      // ! -
@@ -32,15 +34,21 @@ interface ParseRule {
 
 const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
+    [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Eq]        : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.EqEq]      : {prefix: null,            infix: eq,      precedence: Precedence.Equality},
     [TokenT.Error]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
+    [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
+    [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.LBracket]  : {prefix: grouping,        infix: null,    precedence: Precedence.None},
+    [TokenT.Less]      : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
+    [TokenT.LessEq]    : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
     [TokenT.Minus]     : {prefix: negate,          infix: binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
@@ -177,6 +185,37 @@ function negate(): void {
         error(`'-' is only for number`);
     }
     emitByte(Op.Neg);
+}
+
+function eq(): void {
+    parsePrecedence(Precedence.Equality + 1);
+    emitByte(Op.Eq);
+}
+
+function neq(): void {
+    parsePrecedence(Precedence.Equality + 1);
+    emitByte(Op.NEq);
+}
+
+// Can only compare 2 numbers or 2 string for now.
+
+function compare(): void {
+    let operator = parser.previous.kind;
+    let left = lastType.kind;
+    if (left !== Kind.Number && left !== Kind.String)
+        error("can only coompare strings or numbers");
+
+    parsePrecedence(Precedence.Comparison + 1);
+    if (lastType.kind !== left)
+        error("type not match");
+
+    switch (operator) {
+        case TokenT.Less:      emitByte(Op.LT); break;
+        case TokenT.Greater:   emitByte(Op.GT); break;
+        case TokenT.LessEq:    emitByte(Op.LEq); break;
+        case TokenT.GreaterEq: emitByte(Op.GEq); break;
+        default:               error("unhandled camparison op");
+    }
 }
 
 // Only for numbers.

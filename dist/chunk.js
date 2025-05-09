@@ -5,13 +5,19 @@ var Op;
     Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["Div"] = 300] = "Div";
+    Op[Op["Eq"] = 380] = "Eq";
+    Op[Op["GEq"] = 390] = "GEq";
     Op[Op["GetNat"] = 400] = "GetNat";
     Op[Op["GetUsr"] = 500] = "GetUsr";
+    Op[Op["GT"] = 530] = "GT";
     Op[Op["Index"] = 600] = "Index";
+    Op[Op["LEq"] = 690] = "LEq";
     Op[Op["List"] = 700] = "List";
     Op[Op["Load"] = 800] = "Load";
+    Op[Op["LT"] = 810] = "LT";
     Op[Op["Mul"] = 900] = "Mul";
     Op[Op["Neg"] = 1000] = "Neg";
+    Op[Op["NEq"] = 1010] = "NEq";
     Op[Op["Not"] = 1100] = "Not";
     Op[Op["Pop"] = 1200] = "Pop";
     Op[Op["Ret"] = 1300] = "Ret";
@@ -24,13 +30,19 @@ const OpName = {
     [120]: "AddStr",
     [200]: "CallNat",
     [300]: "Div",
+    [380]: "Eq",
+    [390]: "GEq",
     [400]: "GetNat",
     [500]: "GetUsr",
+    [530]: "GT",
     [600]: "Index",
+    [690]: "LEq",
     [700]: "List",
     [800]: "Load",
+    [810]: "LT",
     [900]: "Mul",
     [1000]: "Neg",
+    [1010]: "NEq",
     [1100]: "Not",
     [1200]: "Pop",
     [1300]: "Ret",
@@ -89,9 +101,15 @@ class Chunk {
             case 100:
             case 120:
             case 300:
-            case 1000:
-            case 1100:
+            case 380:
+            case 390:
+            case 530:
+            case 690:
+            case 810:
             case 900:
+            case 1000:
+            case 1010:
+            case 1100:
             case 1300:
             case 1500: {
                 result += name + "\n";

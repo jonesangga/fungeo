@@ -11,9 +11,15 @@ var TokenT;
     TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
+    TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
     TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
     TokenT[TokenT["Eq"] = 1500] = "Eq";
+    TokenT[TokenT["EqEq"] = 1505] = "EqEq";
+    TokenT[TokenT["Greater"] = 1520] = "Greater";
+    TokenT[TokenT["GreaterEq"] = 1525] = "GreaterEq";
+    TokenT[TokenT["Less"] = 1550] = "Less";
+    TokenT[TokenT["LessEq"] = 1555] = "LessEq";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
     TokenT[TokenT["Name"] = 1600] = "Name";
@@ -27,15 +33,21 @@ var TokenT;
 ;
 const TokenTName = {
     [1200]: "Bang",
+    [1210]: "BangEq",
     [1300]: "Colon",
     [1400]: "ColonEq",
     [100]: "Comma",
     [200]: "Dollar",
     [2100]: "EOF",
     [1500]: "Eq",
+    [1505]: "EqEq",
     [2200]: "Error",
     [2000]: "False",
+    [1520]: "Greater",
+    [1525]: "GreaterEq",
     [600]: "LBracket",
+    [1550]: "Less",
+    [1555]: "LessEq",
     [400]: "LParen",
     [800]: "Minus",
     [1600]: "Name",
@@ -170,13 +182,15 @@ const scanner = {
             case '$': return token_lexeme(200);
             case ';': return token_lexeme(300);
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
+            case '<': return token_lexeme(match('=') ? 1555 : 1550);
+            case '>': return token_lexeme(match('=') ? 1525 : 1520);
+            case '=': return token_lexeme(match('=') ? 1505 : 1500);
+            case '!': return token_lexeme(match('=') ? 1210 : 1200);
             case ',': return token_lexeme(100);
             case '-': return token_lexeme(800);
             case '+': return token_lexeme(match('+') ? 1590 : 1585);
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
-            case '!': return token_lexeme(1200);
-            case '=': return token_lexeme(1500);
             case '"': return string_();
         }
         return token_error("unexpected character");

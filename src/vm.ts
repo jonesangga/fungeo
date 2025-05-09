@@ -1,5 +1,5 @@
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
+import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value, type Comparable } from "./value.js"
 import { nativeNames, userNames } from "./names.js"
 import { compiler } from "./compiler.js"
 
@@ -49,6 +49,23 @@ function read_constant(): Value {
 function read_string(): string {
     return (read_constant() as FGString).value;
 }
+
+type NumStr = number | string;
+
+function compare(
+    f: (a: NumStr, b: NumStr) => boolean
+): void {
+    let b = pop() as Comparable;
+    let a = pop() as Comparable;
+    push(new FGBoolean( f(a.value, b.value) ));
+}
+
+const eq = (a: NumStr, b: NumStr): boolean => a === b;
+const neq = (a: NumStr, b: NumStr): boolean => a !== b;
+const lt = (a: NumStr, b: NumStr): boolean => a < b;
+const gt = (a: NumStr, b: NumStr): boolean => a > b;
+const leq = (a: NumStr, b: NumStr): boolean => a <= b;
+const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
 const debug = true;
 
@@ -112,6 +129,13 @@ function run(): boolean {
                 push(a.sub(b));
                 break;
             }
+
+            case Op.Eq: compare(eq); break;
+            case Op.NEq: compare(neq); break;
+            case Op.LT: compare(lt); break;
+            case Op.LEq: compare(leq); break;
+            case Op.GT: compare(gt); break;
+            case Op.GEq: compare(geq); break;
 
             case Op.Load: {
                 push(read_constant());

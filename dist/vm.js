@@ -1,4 +1,5 @@
 import { Chunk } from "./chunk.js";
+import { FGBoolean } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
 const TESTING = false;
 export let stack = [];
@@ -35,6 +36,17 @@ function read_constant() {
 function read_string() {
     return read_constant().value;
 }
+function compare(f) {
+    let b = pop();
+    let a = pop();
+    push(new FGBoolean(f(a.value, b.value)));
+}
+const eq = (a, b) => a === b;
+const neq = (a, b) => a !== b;
+const lt = (a, b) => a < b;
+const gt = (a, b) => a > b;
+const leq = (a, b) => a <= b;
+const geq = (a, b) => a >= b;
 const debug = true;
 function run() {
     for (;;) {
@@ -90,6 +102,24 @@ function run() {
                 push(a.sub(b));
                 break;
             }
+            case 380:
+                compare(eq);
+                break;
+            case 1010:
+                compare(neq);
+                break;
+            case 810:
+                compare(lt);
+                break;
+            case 690:
+                compare(leq);
+                break;
+            case 530:
+                compare(gt);
+                break;
+            case 390:
+                compare(geq);
+                break;
             case 800: {
                 push(read_constant());
                 break;

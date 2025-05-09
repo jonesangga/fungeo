@@ -15,9 +15,15 @@ const enum TokenT {
     Slash = 1000,
     Star = 1100,
     Bang = 1200,       // One or more characters.
+    BangEq = 1210,
     Colon = 1300,
     ColonEq = 1400,
     Eq = 1500,
+    EqEq = 1505,
+    Greater = 1520,
+    GreaterEq = 1525,
+    Less = 1550,
+    LessEq = 1555,
     Plus = 1585,
     PlusPlus = 1590,
     Name = 1600,       // Literals.
@@ -31,15 +37,21 @@ const enum TokenT {
 
 const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Bang]: "Bang",
+    [TokenT.BangEq]: "BangEq",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
     [TokenT.Dollar]: "Dollar",
     [TokenT.EOF]: "EOF",
     [TokenT.Eq]: "Eq",
+    [TokenT.EqEq]: "EqEq",
     [TokenT.Error]: "Error",
     [TokenT.False]: "False",
+    [TokenT.Greater]: "Greater",
+    [TokenT.GreaterEq]: "GreaterEq",
     [TokenT.LBracket]: "LBracket",
+    [TokenT.Less]: "Less",
+    [TokenT.LessEq]: "LessEq",
     [TokenT.LParen]: "LParen",
     [TokenT.Minus]: "Minus",
     [TokenT.Name]: "Name",
@@ -203,14 +215,20 @@ const scanner = {
             case ';': return token_lexeme(TokenT.Semicolon);
             case ':': return token_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
+            case '<': return token_lexeme(
+                match('=') ? TokenT.LessEq : TokenT.Less);
+            case '>': return token_lexeme(
+                match('=') ? TokenT.GreaterEq : TokenT.Greater);
+            case '=': return token_lexeme(
+                match('=') ? TokenT.EqEq : TokenT.Eq);
+            case '!': return token_lexeme(
+                match('=') ? TokenT.BangEq : TokenT.Bang);
             case ',': return token_lexeme(TokenT.Comma);
             case '-': return token_lexeme(TokenT.Minus);
             case '+': return token_lexeme(
                 match('+') ? TokenT.PlusPlus : TokenT.Plus);
             case '/': return token_lexeme(TokenT.Slash);
             case '*': return token_lexeme(TokenT.Star);
-            case '!': return token_lexeme(TokenT.Bang);
-            case '=': return token_lexeme(TokenT.Eq);
             case '"': return string_();
         }
      

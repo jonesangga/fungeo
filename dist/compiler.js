@@ -10,6 +10,8 @@ var Precedence;
 (function (Precedence) {
     Precedence[Precedence["None"] = 100] = "None";
     Precedence[Precedence["Assignment"] = 200] = "Assignment";
+    Precedence[Precedence["Equality"] = 230] = "Equality";
+    Precedence[Precedence["Comparison"] = 250] = "Comparison";
     Precedence[Precedence["Term"] = 300] = "Term";
     Precedence[Precedence["Factor"] = 400] = "Factor";
     Precedence[Precedence["Unary"] = 500] = "Unary";
@@ -18,15 +20,21 @@ var Precedence;
 })(Precedence || (Precedence = {}));
 const rules = {
     [1200]: { prefix: not, infix: null, precedence: 100 },
+    [1210]: { prefix: null, infix: neq, precedence: 230 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
     [200]: { prefix: null, infix: null, precedence: 100 },
     [2100]: { prefix: null, infix: null, precedence: 100 },
     [1500]: { prefix: null, infix: null, precedence: 100 },
+    [1505]: { prefix: null, infix: eq, precedence: 230 },
     [2200]: { prefix: null, infix: null, precedence: 100 },
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
+    [1520]: { prefix: null, infix: compare, precedence: 250 },
+    [1525]: { prefix: null, infix: compare, precedence: 250 },
     [600]: { prefix: grouping, infix: null, precedence: 100 },
+    [1550]: { prefix: null, infix: compare, precedence: 250 },
+    [1555]: { prefix: null, infix: compare, precedence: 250 },
     [400]: { prefix: grouping, infix: null, precedence: 100 },
     [800]: { prefix: negate, infix: binary, precedence: 300 },
     [1600]: { prefix: parse_name, infix: null, precedence: 100 },
@@ -128,6 +136,38 @@ function negate() {
         error(`'-' is only for number`);
     }
     emitByte(1000);
+}
+function eq() {
+    parsePrecedence(230 + 1);
+    emitByte(380);
+}
+function neq() {
+    parsePrecedence(230 + 1);
+    emitByte(1010);
+}
+function compare() {
+    let operator = parser.previous.kind;
+    let left = lastType.kind;
+    if (left !== 500 && left !== 600)
+        error("can only coompare strings or numbers");
+    parsePrecedence(250 + 1);
+    if (lastType.kind !== left)
+        error("type not match");
+    switch (operator) {
+        case 1550:
+            emitByte(810);
+            break;
+        case 1520:
+            emitByte(530);
+            break;
+        case 1555:
+            emitByte(690);
+            break;
+        case 1525:
+            emitByte(390);
+            break;
+        default: error("unhandled camparison op");
+    }
 }
 function binary() {
     let operator = parser.previous.lexeme;

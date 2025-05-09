@@ -2,6 +2,9 @@
 
 #### 09-05-25
 
+- make type Comparable = FGNumber | FGString
+- new compare() function
+- Add Eq, NEq, LT, GT, LEq, GEq to chunk
 - test not() in compiler
 - test negate() in compiler
 - split unary() into not() and negate()
