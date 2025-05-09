@@ -60,8 +60,13 @@ function compare(
     push(new FGBoolean( f(a.value, b.value) ));
 }
 
-const eq = (a: NumStr, b: NumStr): boolean => a === b;
-const neq = (a: NumStr, b: NumStr): boolean => a !== b;
+function equal(a: Value, b: Value): boolean {
+    if (a.kind !== b.kind) return false;
+    if (a.kind === Kind.Number || a.kind === Kind.String || a.kind === Kind.Boolean)
+        return a.value === b.value;
+    return false;
+}
+
 const lt = (a: NumStr, b: NumStr): boolean => a < b;
 const gt = (a: NumStr, b: NumStr): boolean => a > b;
 const leq = (a: NumStr, b: NumStr): boolean => a <= b;
@@ -130,8 +135,18 @@ function run(): boolean {
                 break;
             }
 
-            case Op.Eq: compare(eq); break;
-            case Op.NEq: compare(neq); break;
+            case Op.Eq: {
+                let b = pop();
+                let a = pop();
+                push(new FGBoolean( equal(a, b)) );
+                break;
+            }
+            case Op.NEq: {
+                let b = pop();
+                let a = pop();
+                push(new FGBoolean( !equal(a, b)) );
+                break;
+            }
             case Op.LT: compare(lt); break;
             case Op.LEq: compare(leq); break;
             case Op.GT: compare(gt); break;

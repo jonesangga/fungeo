@@ -2,6 +2,7 @@
 
 #### 09-05-25
 
+- bug on Op.Eq and Op.NEq in VM: solved
 - update README
 - link doc in README
 - make separated repo for docs
