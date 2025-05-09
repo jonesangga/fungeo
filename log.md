@@ -1,5 +1,11 @@
 # Log
 
+#### 09-05-25
+
+- test not() in compiler
+- test negate() in compiler
+- split unary() into not() and negate()
+
 #### 08-05-25
 
 - test vm: FGString.add

@@ -31,7 +31,7 @@ interface ParseRule {
 }
 
 const rules: { [key in TokenT]: ParseRule } = {
-    [TokenT.Bang]      : {prefix: unary,           infix: null,    precedence: Precedence.None},
+    [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -42,7 +42,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
     [TokenT.LBracket]  : {prefix: grouping,        infix: null,    precedence: Precedence.None},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
-    [TokenT.Minus]     : {prefix: unary,           infix: binary,  precedence: Precedence.Term},
+    [TokenT.Minus]     : {prefix: negate,          infix: binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
@@ -163,28 +163,20 @@ function grouping(): void {
     consume(TokenT.RParen, "expect ')' after grouping");
 }
 
-function unary(): void {
-    let operatorType = parser.previous.kind;
+function not(): void {
     parsePrecedence(Precedence.Unary);
-
-    switch (operatorType) {
-        case TokenT.Bang:
-            if (lastType.kind !== Kind.Boolean) {
-                error("'!' only for boolean");
-            }
-            emitByte(Op.Not);
-            break;
-
-        case TokenT.Minus:
-            if (lastType.kind !== Kind.Number) {
-                error("'-' only for number");
-            }
-            emitByte(Op.Neg);
-            break;
-
-        default:
-            error("unhandled unary op");
+    if (lastType.kind !== Kind.Boolean) {
+        error(`'!' is only for boolean`);
     }
+    emitByte(Op.Not);
+}
+
+function negate(): void {
+    parsePrecedence(Precedence.Unary);
+    if (lastType.kind !== Kind.Number) {
+        error(`'-' is only for number`);
+    }
+    emitByte(Op.Neg);
 }
 
 // Only for numbers.

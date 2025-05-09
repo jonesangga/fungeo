@@ -17,7 +17,7 @@ var Precedence;
     Precedence[Precedence["Primary"] = 700] = "Primary";
 })(Precedence || (Precedence = {}));
 const rules = {
-    [1200]: { prefix: unary, infix: null, precedence: 100 },
+    [1200]: { prefix: not, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
@@ -28,7 +28,7 @@ const rules = {
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [600]: { prefix: grouping, infix: null, precedence: 100 },
     [400]: { prefix: grouping, infix: null, precedence: 100 },
-    [800]: { prefix: unary, infix: binary, precedence: 300 },
+    [800]: { prefix: negate, infix: binary, precedence: 300 },
     [1600]: { prefix: parse_name, infix: null, precedence: 100 },
     [1700]: { prefix: parse_number, infix: null, precedence: 100 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
@@ -115,25 +115,19 @@ function grouping() {
     expression();
     consume(500, "expect ')' after grouping");
 }
-function unary() {
-    let operatorType = parser.previous.kind;
+function not() {
     parsePrecedence(500);
-    switch (operatorType) {
-        case 1200:
-            if (lastType.kind !== 300) {
-                error("'!' only for boolean");
-            }
-            emitByte(1100);
-            break;
-        case 800:
-            if (lastType.kind !== 500) {
-                error("'-' only for number");
-            }
-            emitByte(1000);
-            break;
-        default:
-            error("unhandled unary op");
+    if (lastType.kind !== 300) {
+        error(`'!' is only for boolean`);
     }
+    emitByte(1100);
+}
+function negate() {
+    parsePrecedence(500);
+    if (lastType.kind !== 500) {
+        error(`'-' is only for number`);
+    }
+    emitByte(1000);
 }
 function binary() {
     let operator = parser.previous.lexeme;

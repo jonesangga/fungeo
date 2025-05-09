@@ -141,27 +141,7 @@ describe("compiler:binary_str", () => {
 
 });
 
-describe("compiler:unary", () => {
-
-    it("-", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
-
-    it("double unary: --", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = --123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            Op.Load, 1, Op.Neg, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ret,
-        ]);
-    });
+describe("compiler:not", () => {
 
     it("!", () => {
         let chunk = new Chunk("test chunk");
@@ -183,21 +163,45 @@ describe("compiler:unary", () => {
         ]);
     });
 
-    it("error: -string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -\"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': '-' only for number\n"
-        });
-    });
-
     it("error: !number", () => {
         let chunk = new Chunk("test chunk");
         let source = "truth = !2";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at '2': '!' only for boolean\n"
+            success: false, message: "1: at '2': '!' is only for boolean\n"
+        });
+    });
+
+});
+
+describe("compiler:negate", () => {
+
+    it("-", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -123";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Neg,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("double unary: --", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = --123";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Neg, Op.Neg,
+            Op.Set, 0, Kind.Number, Op.Ret,
+        ]);
+    });
+
+    it("error: -string", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "num = -\"real\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'real': '-' is only for number\n"
         });
     });
 
@@ -239,7 +243,7 @@ describe("compiler:grouping", () => {
         let source = "num = -(\"real\")";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at ')': '-' only for number\n"
+            success: false, message: "1: at ')': '-' is only for number\n"
         });
     });
 
@@ -258,7 +262,7 @@ describe("compiler:grouping", () => {
         let source = "num = !(2)";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at ')': '!' only for boolean\n"
+            success: false, message: "1: at ')': '!' is only for boolean\n"
         });
     });
 
