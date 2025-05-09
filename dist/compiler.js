@@ -170,6 +170,7 @@ function compare() {
             break;
         default: error("unhandled camparison op");
     }
+    lastType = { kind: 300 };
 }
 function binary() {
     let operator = parser.previous.lexeme;

@@ -2,6 +2,9 @@
 
 #### 09-05-25
 
+- fixed
+- bug: forgot changing lastType to boolean in compare()
+  this will error: Print !(2 < 3): 
 - test vm: Eq, NEq, LT, GT, LEq, GEq
 - bug: forget update lastType in eq() and neq()
 - test compiler: Eq, NEq, LT, GT, LEq, GEq

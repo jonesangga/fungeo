@@ -218,6 +218,7 @@ function compare(): void {
         case TokenT.GreaterEq: emitByte(Op.GEq); break;
         default:               error("unhandled camparison op");
     }
+    lastType = {kind: Kind.Boolean};
 }
 
 // Only for numbers.
