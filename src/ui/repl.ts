@@ -128,13 +128,11 @@ function input_binding(e: any): void {
             input.value = "";
             input_reset();
 
-            let trimmed = source.replaceAll("\n", "\n| ");
-
-            if (history[history.length - 1].code !== trimmed) {
+            if (history[history.length - 1].code !== source) {
                 history.push({ code: source });
-                terminal.innerHTML += `> ${ trimmed }\n`;
             }
             historyViewIdx = history.length;
+            terminal_add_code(source);
 
             repl.callback(source);
             terminal_update();
@@ -163,7 +161,9 @@ const repl = {
     },
 
     ok(message: string): void {
-        terminal.innerHTML += `${ message }`;
+        if (message === "")
+          return;
+        terminal_add_code(message, 1);
         history[history.length - 1].output = message;
         holder.style.background = colorOk;
 
@@ -179,7 +179,7 @@ const repl = {
     },
  
     error(message: string): void {
-        terminal.innerHTML += `${ message }`;
+        terminal_add_code(message, 0);
         history[history.length - 1].output = message;
         holder.style.background  = colorFail;
 
@@ -197,23 +197,37 @@ const repl = {
 // TODO: Add <span> for coloring error message.
 //       Change it to be an object and add its name in names object.
 
-const terminal = document.createElement("pre");
+const terminal = document.createElement("div");
 container.appendChild(terminal);
 terminal.style.position   = "absolute";
 terminal.style.top        = "-400px";
-terminal.style.left       = "15px";
-terminal.style.width      = "220px";
+terminal.style.left       = "0px";
+terminal.style.width      = "240px";
 terminal.style.height     = "390px";
 terminal.style.border     = "1px solid #000";
 terminal.style.fontSize   = "11px";
 terminal.style.background = "#eee";
-terminal.style.overflow   = "scroll";
+terminal.style.overflow   = "auto";
+terminal.style.fontFamily = "monospace";
+terminal.style.whiteSpace = "pre";
 // terminal.style.visibility = "hidden";
 
 let terminalShow = true;
 
-function terminal_update() {
+function terminal_update(): void {
     terminal.scrollTop = terminal.scrollHeight;
+}
+
+function terminal_add_code(code: string, type?: number): void {
+    const div = document.createElement("div");
+    div.style.borderBottom     = "1px solid #000";
+    if (type === 0) {
+        div.style.background     = "#fee";
+    } else if (type === 1) {
+        div.style.background     = "#caf8dc";
+    }
+    div.innerHTML = code;
+    terminal.appendChild(div);
 }
 
 export { repl };

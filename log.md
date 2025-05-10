@@ -2,6 +2,11 @@
 
 #### 10-05-25
 
+- color red for error, green otherwise
+- count code number
+- change the left and width of terminal
+- change terminal from <pre> to <div>
+- update repl
 - if stmt support
 - new Op: Jmp, JmpF
 - new Token: If, Else
