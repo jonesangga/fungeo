@@ -2,6 +2,8 @@
 
 #### 10-05-25
 
+- compiler.test: block error: local duplicate
+- compiler.test: block
 - scanner.test: change scanner error message unexpecter character to include the character
 - scanner.test: add test for `{` and `}` lexemes.
 - make TokenType sorted alphabetically

@@ -328,6 +328,58 @@ describe("compiler:assignment", () => {
         });
     });
 });
+describe("compiler:block", () => {
+    it("simple { }, SetLoc", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 0, 1410, 1200, 1300,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+    });
+    it("simple { }, GetLoc", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1 Print a}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 0, 1410, 395, 0,
+            200, 1, 0, 1200, 1300,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+    });
+    it("nested { }", () => {
+        let chunk = new Chunk("test chunk");
+        let source = `
+            {
+              a = 1
+              {
+                a = 2
+                Print a
+              }
+              Print a
+            }
+        `;
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 0, 1410,
+            800, 1, 1410,
+            395, 1, 200, 2, 0, 1200,
+            395, 0, 200, 3, 0, 1200,
+            1300,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+        assert.deepEqual(chunk.values[1], new FGNumber(2));
+    });
+    it("error: duplicate", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1 a = 2}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '=': a already defined in this scope\n"
+        });
+    });
+});
 describe("compiler", () => {
     it("empty string", () => {
         let chunk = new Chunk("test chunk");
@@ -366,7 +418,7 @@ describe("compiler", () => {
         let source = "a % b";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: scanner: unexpected character\n"
+            success: false, message: "1: scanner: unexpected character %\n"
         });
     });
     it("error: start statement", () => {

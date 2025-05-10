@@ -380,6 +380,64 @@ describe("compiler:assignment", () => {
 
 });
 
+describe("compiler:block", () => {
+
+    it("simple { }, SetLoc", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 0, Op.SetLoc, Op.Pop, Op.Ret,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+    });
+
+    it("simple { }, GetLoc", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1 Print a}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 0, Op.SetLoc, Op.GetLoc, 0,
+            Op.CallNat, 1, 0, Op.Pop, Op.Ret,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+    });
+
+    it("nested { }", () => {
+        let chunk = new Chunk("test chunk");
+        let source = `
+            {
+              a = 1
+              {
+                a = 2
+                Print a
+              }
+              Print a
+            }
+        `;
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 0, Op.SetLoc,
+            Op.Load, 1, Op.SetLoc,
+            Op.GetLoc, 1, Op.CallNat, 2, 0, Op.Pop,
+            Op.GetLoc, 0, Op.CallNat, 3, 0, Op.Pop,
+            Op.Ret,
+        ]);
+        assert.deepEqual(chunk.values[0], new FGNumber(1));
+        assert.deepEqual(chunk.values[1], new FGNumber(2));
+    });
+
+    it("error: duplicate", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 1 a = 2}";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '=': a already defined in this scope\n"
+        });
+    });
+
+});
+
 describe("compiler", () => {
 
     it("empty string", () => {
@@ -423,7 +481,7 @@ describe("compiler", () => {
         let source = "a % b";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: scanner: unexpected character\n"
+            success: false, message: "1: scanner: unexpected character %\n"
         });
     });
 

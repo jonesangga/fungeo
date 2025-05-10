@@ -324,7 +324,6 @@ let tempNames: TempNames = {
 function resolveLocal(compiler: Compiler, name: string): number {
     for (let i = compiler.locals.length - 1; i >= 0; i--) {
         let local = compiler.locals[i];
-        console.log(local);
         if (name === local.name) {
             return i;
         }
@@ -364,7 +363,7 @@ function set_local(name: string): void {
             break;
         }
         if (name === local.name) {
-            error("already a variable with this name in this scope");
+            error(`${ name } already defined in this scope`);
         }
     }
     add_local(name);
@@ -426,15 +425,11 @@ function get_name(name: string): void {
 }
 
 function matchType(expected: (Set<number> | Kind), actual: Kind): boolean {
-    console.log(expected, actual);
     if (expected === Kind.Any) {
-        console.log("type any");
         return true;
     } else if (typeof expected === "number") {
-        console.log("type number");
         return actual === expected;
     } else {
-        console.log("type Set");
         return expected.has(actual);
     }
 }
@@ -448,13 +443,11 @@ function setToKinds(set_: Set<number>): string[] {
 }
 
 function global_callable(name_: string): void {
-    console.log("in global_callable()");
     if (!canParseArgument) {
         lastType = nativeNames[name_];
         return;
     }
     canParseArgument = match(TokenT.Dollar);
-    console.log("can parse argument");
 
     let name    = nativeNames[name_];
     // let version = name.version as Version[];
@@ -485,7 +478,6 @@ function global_callable(name_: string): void {
             expression();
             gotTypes.push(lastType.kind);
             if (!matchType(inputVersion[k], lastType.kind)) {
-                console.log(`inputVersion[${k}] is ${inputVersion[k]}`);
                 checkNextVersion = true;
                 success = false;
                 break;
