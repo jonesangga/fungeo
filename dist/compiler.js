@@ -29,27 +29,27 @@ const rules = {
     [1500]: { prefix: null, infix: null, precedence: 100 },
     [1505]: { prefix: null, infix: eq, precedence: 230 },
     [2200]: { prefix: null, infix: null, precedence: 100 },
-    [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
+    [1600]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [1520]: { prefix: null, infix: compare, precedence: 250 },
     [1525]: { prefix: null, infix: compare, precedence: 250 },
-    [1120]: { prefix: null, infix: null, precedence: 100 },
-    [600]: { prefix: null, infix: null, precedence: 100 },
+    [300]: { prefix: null, infix: null, precedence: 100 },
+    [400]: { prefix: null, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: compare, precedence: 250 },
     [1555]: { prefix: null, infix: compare, precedence: 250 },
-    [400]: { prefix: grouping, infix: null, precedence: 100 },
-    [800]: { prefix: negate, infix: binary, precedence: 300 },
-    [1600]: { prefix: parse_name, infix: null, precedence: 100 },
-    [1700]: { prefix: parse_number, infix: null, precedence: 100 },
+    [500]: { prefix: grouping, infix: null, precedence: 100 },
+    [600]: { prefix: negate, infix: binary, precedence: 300 },
+    [1700]: { prefix: parse_name, infix: null, precedence: 100 },
+    [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
     [1590]: { prefix: null, infix: binary_str, precedence: 300 },
-    [1130]: { prefix: null, infix: null, precedence: 100 },
+    [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
-    [500]: { prefix: null, infix: null, precedence: 100 },
-    [300]: { prefix: null, infix: null, precedence: 100 },
+    [800]: { prefix: null, infix: null, precedence: 100 },
+    [900]: { prefix: null, infix: null, precedence: 100 },
     [1000]: { prefix: null, infix: binary, precedence: 400 },
     [1100]: { prefix: null, infix: binary, precedence: 400 },
-    [1800]: { prefix: parse_string, infix: null, precedence: 100 },
-    [1900]: { prefix: parse_boolean, infix: null, precedence: 100 },
+    [1900]: { prefix: parse_string, infix: null, precedence: 100 },
+    [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
 };
 let current = { locals: [], scopeDepth: 0 };
 let invalidToken = { kind: 2100, line: -1, lexeme: "" };
@@ -129,7 +129,7 @@ function makeConstant(value) {
 function grouping() {
     canParseArgument = true;
     expression();
-    consume(500, "expect ')' after grouping");
+    consume(800, "expect ')' after grouping");
 }
 function not() {
     parsePrecedence(500);
@@ -195,7 +195,7 @@ function binary() {
         case 1585:
             emitByte(100);
             break;
-        case 800:
+        case 600:
             emitByte(1500);
             break;
         case 1100:
@@ -221,7 +221,7 @@ function binary_str() {
     emitByte(120);
 }
 function parse_boolean() {
-    if (parser.previous.kind === 1900)
+    if (parser.previous.kind === 2000)
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
@@ -458,17 +458,17 @@ function declaration() {
     statement();
 }
 function statement() {
-    if (match(1600)) {
+    if (match(1700)) {
         canParseArgument = true;
         canAssign = true;
         parse_name();
     }
-    else if (match(1120)) {
+    else if (match(300)) {
         beginScope();
         block();
         endScope();
     }
-    else if (match(300)) {
+    else if (match(900)) {
     }
     else {
         error_at_current(`cannot start statement with ${TokenTName[parser.current.kind]}`);
@@ -481,10 +481,10 @@ function beginScope() {
     current.scopeDepth++;
 }
 function block() {
-    while (!check(1130) && !check(2100)) {
+    while (!check(695) && !check(2100)) {
         declaration();
     }
-    consume(1130, "expect '}' after block");
+    consume(695, "expect '}' after block");
 }
 function endScope() {
     current.scopeDepth--;

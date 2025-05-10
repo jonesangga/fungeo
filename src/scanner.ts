@@ -1,21 +1,21 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
-// TODO: Parse negative number instead of TokenT.Minus + TokenT.Number.
-//       Support comment.
+// TODO: Support comment single and multiline.
+//       Add token # for list and string length.
 
 const enum TokenT {
     Comma = 100,      // Single character.
     Dollar = 200,
-    Semicolon = 300,
-    LParen = 400,
-    RParen = 500,
-    LBracket = 600,
+    LBrace = 300,
+    LBracket = 400,
+    LParen = 500,
+    Minus = 600,
+    RBrace = 695,
     RBracket = 700,
-    Minus = 800,
+    RParen = 800,
+    Semicolon = 900,
     Slash = 1000,
     Star = 1100,
-    LBrace = 1120,
-    RBrace = 1130,
     Bang = 1200,       // One or more characters.
     BangEq = 1210,
     Colon = 1300,
@@ -28,11 +28,11 @@ const enum TokenT {
     LessEq = 1555,
     Plus = 1585,
     PlusPlus = 1590,
-    Name = 1600,       // Literals.
-    Number = 1700,
-    String = 1800,
-    True = 1900,
-    False = 2000,
+    False = 1600,      // Literals.
+    Name = 1700,
+    Number = 1800,
+    String = 1900,
+    True = 2000,
     EOF = 2100,        // Other.
     Error = 2200,
 };

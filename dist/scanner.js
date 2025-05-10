@@ -2,16 +2,16 @@ var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
     TokenT[TokenT["Dollar"] = 200] = "Dollar";
-    TokenT[TokenT["Semicolon"] = 300] = "Semicolon";
-    TokenT[TokenT["LParen"] = 400] = "LParen";
-    TokenT[TokenT["RParen"] = 500] = "RParen";
-    TokenT[TokenT["LBracket"] = 600] = "LBracket";
+    TokenT[TokenT["LBrace"] = 300] = "LBrace";
+    TokenT[TokenT["LBracket"] = 400] = "LBracket";
+    TokenT[TokenT["LParen"] = 500] = "LParen";
+    TokenT[TokenT["Minus"] = 600] = "Minus";
+    TokenT[TokenT["RBrace"] = 695] = "RBrace";
     TokenT[TokenT["RBracket"] = 700] = "RBracket";
-    TokenT[TokenT["Minus"] = 800] = "Minus";
+    TokenT[TokenT["RParen"] = 800] = "RParen";
+    TokenT[TokenT["Semicolon"] = 900] = "Semicolon";
     TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
-    TokenT[TokenT["LBrace"] = 1120] = "LBrace";
-    TokenT[TokenT["RBrace"] = 1130] = "RBrace";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
@@ -24,11 +24,11 @@ var TokenT;
     TokenT[TokenT["LessEq"] = 1555] = "LessEq";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
-    TokenT[TokenT["Name"] = 1600] = "Name";
-    TokenT[TokenT["Number"] = 1700] = "Number";
-    TokenT[TokenT["String"] = 1800] = "String";
-    TokenT[TokenT["True"] = 1900] = "True";
-    TokenT[TokenT["False"] = 2000] = "False";
+    TokenT[TokenT["False"] = 1600] = "False";
+    TokenT[TokenT["Name"] = 1700] = "Name";
+    TokenT[TokenT["Number"] = 1800] = "Number";
+    TokenT[TokenT["String"] = 1900] = "String";
+    TokenT[TokenT["True"] = 2000] = "True";
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
 })(TokenT || (TokenT = {}));
@@ -44,27 +44,27 @@ const TokenTName = {
     [1500]: "Eq",
     [1505]: "EqEq",
     [2200]: "Error",
-    [2000]: "False",
+    [1600]: "False",
     [1520]: "Greater",
     [1525]: "GreaterEq",
-    [1120]: "LBrace",
-    [600]: "LBracket",
+    [300]: "LBrace",
+    [400]: "LBracket",
     [1550]: "Less",
     [1555]: "LessEq",
-    [400]: "LParen",
-    [800]: "Minus",
-    [1600]: "Name",
-    [1700]: "Number",
+    [500]: "LParen",
+    [600]: "Minus",
+    [1700]: "Name",
+    [1800]: "Number",
     [1585]: "Plus",
     [1590]: "PlusPlus",
-    [1130]: "RBrace",
+    [695]: "RBrace",
     [700]: "RBracket",
-    [500]: "RParen",
-    [300]: "Semicolon",
+    [800]: "RParen",
+    [900]: "Semicolon",
     [1000]: "Slash",
     [1100]: "Star",
-    [1800]: "String",
-    [1900]: "True",
+    [1900]: "String",
+    [2000]: "True",
 };
 let source = "";
 let start = 0;
@@ -112,10 +112,10 @@ function token_error(errorMessage) {
 }
 function name_type() {
     switch (source.slice(start, current)) {
-        case "false": return 2000;
-        case "true": return 1900;
+        case "false": return 1600;
+        case "true": return 2000;
     }
-    return 1600;
+    return 1700;
 }
 function name() {
     while (is_alpha(peek()) || is_digit(peek()))
@@ -130,7 +130,7 @@ function number_() {
         while (is_digit(peek()))
             advance();
     }
-    return token_lexeme(1700);
+    return token_lexeme(1800);
 }
 function string_() {
     while (peek() != '"' && !is_at_end()) {
@@ -141,7 +141,7 @@ function string_() {
     if (is_at_end())
         return token_error("unterminated string");
     advance();
-    return token_string(1800);
+    return token_string(1900);
 }
 function skip_whitespace() {
     for (;;) {
@@ -179,16 +179,16 @@ const scanner = {
         if (is_alpha(c))
             return name();
         switch (c) {
-            case '(': return token_lexeme(400);
-            case ')': return token_lexeme(500);
-            case '[': return token_lexeme(600);
+            case '(': return token_lexeme(500);
+            case ')': return token_lexeme(800);
+            case '[': return token_lexeme(400);
             case ']': return token_lexeme(700);
-            case '{': return token_lexeme(1120);
-            case '}': return token_lexeme(1130);
+            case '{': return token_lexeme(300);
+            case '}': return token_lexeme(695);
             case '$': return token_lexeme(200);
-            case ';': return token_lexeme(300);
+            case ';': return token_lexeme(900);
             case ',': return token_lexeme(100);
-            case '-': return token_lexeme(800);
+            case '-': return token_lexeme(600);
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
             case '"': return string_();

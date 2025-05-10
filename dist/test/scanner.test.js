@@ -47,32 +47,32 @@ describe("scanner", () => {
             lexeme: "=",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 2000,
+            kind: 1600,
             line: 1,
             lexeme: "false",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 600,
+            kind: 400,
             line: 1,
             lexeme: "[",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 400,
+            kind: 500,
             line: 1,
             lexeme: "(",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 800,
+            kind: 600,
             line: 1,
             lexeme: "-",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 1600,
+            kind: 1700,
             line: 1,
             lexeme: "abc",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 1700,
+            kind: 1800,
             line: 1,
             lexeme: "123.456",
         });
@@ -87,12 +87,12 @@ describe("scanner", () => {
             lexeme: "]",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 500,
+            kind: 800,
             line: 1,
             lexeme: ")",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 300,
+            kind: 900,
             line: 1,
             lexeme: ";",
         });
@@ -107,12 +107,12 @@ describe("scanner", () => {
             lexeme: "*",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 1800,
+            kind: 1900,
             line: 1,
             lexeme: "real",
         });
         assert.deepEqual(scanner.next(), {
-            kind: 1900,
+            kind: 2000,
             line: 1,
             lexeme: "true",
         });

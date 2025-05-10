@@ -2,6 +2,7 @@
 
 #### 10-05-25
 
+- make TokenType sorted alphabetically
 - fixed.
 - bug: compiler.test compare()
 - change `parse_callable()` to `global_callable()`
