@@ -2,6 +2,7 @@
 
 #### 10-05-25
 
+- test Op.GetLoc and Op.SetLoc
 - compiler.test: block error: local duplicate
 - compiler.test: block
 - scanner.test: change scanner error message unexpecter character to include the character
