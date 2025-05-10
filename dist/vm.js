@@ -131,6 +131,18 @@ function run() {
             case 390:
                 compare(geq);
                 break;
+            case 615: {
+                let offset = read_byte();
+                ip += offset;
+                break;
+            }
+            case 620: {
+                let offset = read_byte();
+                let cond = peek(0);
+                if (!cond.value)
+                    ip += offset;
+                break;
+            }
             case 800: {
                 push(read_constant());
                 break;

@@ -152,6 +152,20 @@ function run(): boolean {
             case Op.GT: compare(gt); break;
             case Op.GEq: compare(geq); break;
 
+            case Op.Jmp: {
+                let offset = read_byte();
+                ip += offset;
+                break;
+            }
+
+            case Op.JmpF: {
+                let offset = read_byte();
+                let cond = peek(0) as FGBoolean;
+                if (!cond.value)
+                    ip += offset;
+                break;
+            }
+
             case Op.Load: {
                 push(read_constant());
                 break;

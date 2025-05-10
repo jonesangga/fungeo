@@ -35,6 +35,8 @@ const enum TokenT {
     True = 2000,
     EOF = 2100,        // Other.
     Error = 2200,
+    Else = 2300,       // Keywords.
+    If = 2400,
 };
 
 const TokenTName: { [key in TokenT]: string } = {
@@ -44,6 +46,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
     [TokenT.Dollar]: "Dollar",
+    [TokenT.Else]: "Else",
     [TokenT.EOF]: "EOF",
     [TokenT.Eq]: "Eq",
     [TokenT.EqEq]: "EqEq",
@@ -51,6 +54,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.False]: "False",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
+    [TokenT.If]: "If",
     [TokenT.LBrace]: "LBrace",
     [TokenT.LBracket]: "LBracket",
     [TokenT.Less]: "Less",
@@ -132,7 +136,9 @@ function token_error(errorMessage: string): Token {
 
 function name_type(): TokenT {
     switch (source.slice(start, current)) {
+        case "else":    return TokenT.Else;
         case "false":   return TokenT.False;
+        case "if":      return TokenT.If;
         case "true":    return TokenT.True;
     }
 

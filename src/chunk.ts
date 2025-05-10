@@ -14,6 +14,8 @@ const enum Op {
     GetUsr = 500,   // Get userNames.
     GT = 530,
     Index = 600,
+    Jmp = 615,
+    JmpF = 620,
     LEq = 690,
     List = 700,
     Load = 800,
@@ -41,6 +43,8 @@ const OpName: { [key in Op]: string } = {
     [Op.GetUsr]: "GetUsr",
     [Op.GT]: "GT",
     [Op.Index]: "Index",
+    [Op.Jmp]: "Jmp",
+    [Op.JmpF]: "JmpF",
     [Op.LEq]: "LEq",
     [Op.List]: "List",
     [Op.Load]: "Load",
@@ -108,6 +112,13 @@ class Chunk {
             case Op.Load: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
+                return [result, offset + 2];
+            }
+
+            case Op.Jmp:
+            case Op.JmpF: {
+                let jump = this.code[offset + 1];
+                result += `${ padr7(name) } ${ padl4(offset) } -> ${ offset + 2 + jump }\n`;
                 return [result, offset + 2];
             }
 

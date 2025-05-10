@@ -2,6 +2,9 @@
 
 #### 10-05-25
 
+- if stmt support
+- new Op: Jmp, JmpF
+- new Token: If, Else
 - vm.test Op.GetLoc and Op.SetLoc
 - chunk.test Op.GetLoc and Op.SetLoc
 - compiler.test: block error: local duplicate

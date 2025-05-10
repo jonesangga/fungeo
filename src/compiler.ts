@@ -39,6 +39,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Else]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Eq]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EqEq]      : {prefix: null,            infix: eq,      precedence: Precedence.Equality},
@@ -46,6 +47,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
     [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
+    [TokenT.If]        : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.LBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Less]      : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
@@ -518,6 +520,35 @@ function add_local(name: string): void {
     current.locals.push(local);
 }
 
+function emitJump(instruction: number): number {
+    emitByte(instruction);
+    emitByte(0);
+    return currentChunk().code.length - 1;
+}
+
+function patchJump(offset: number): void {
+    // -1 to adjust for the bytecode for the jump offset itself.
+    let jump = currentChunk().code.length - offset - 1;
+    currentChunk().code[offset] = jump;
+}
+
+// test boolean type!!!
+//
+function parse_if(): void {
+    expression();
+    let thenJump = emitJump(Op.JmpF);
+    emitByte(Op.Pop);
+    statement();
+
+    let elseJump = emitJump(Op.Jmp);
+    patchJump(thenJump);
+    emitByte(Op.Pop);
+
+    if (match(TokenT.Else))
+        statement();
+    patchJump(elseJump);
+}
+
 function parsePrecedence(precedence: Precedence): void {
     // prev();
     // curr();
@@ -569,6 +600,8 @@ function statement(): void {
         beginScope();
         block();
         endScope();
+    } else if (match(TokenT.If)) {
+        parse_if();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {

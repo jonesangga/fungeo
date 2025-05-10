@@ -25,6 +25,7 @@ const rules = {
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
     [200]: { prefix: null, infix: null, precedence: 100 },
+    [2300]: { prefix: null, infix: null, precedence: 100 },
     [2100]: { prefix: null, infix: null, precedence: 100 },
     [1500]: { prefix: null, infix: null, precedence: 100 },
     [1505]: { prefix: null, infix: eq, precedence: 230 },
@@ -32,6 +33,7 @@ const rules = {
     [1600]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [1520]: { prefix: null, infix: compare, precedence: 250 },
     [1525]: { prefix: null, infix: compare, precedence: 250 },
+    [2400]: { prefix: null, infix: compare, precedence: 250 },
     [300]: { prefix: null, infix: null, precedence: 100 },
     [400]: { prefix: null, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: compare, precedence: 250 },
@@ -416,6 +418,27 @@ function add_local(name) {
     let local = { name, type: invalidType, depth: current.scopeDepth };
     current.locals.push(local);
 }
+function emitJump(instruction) {
+    emitByte(instruction);
+    emitByte(0);
+    return currentChunk().code.length - 1;
+}
+function patchJump(offset) {
+    let jump = currentChunk().code.length - offset - 1;
+    currentChunk().code[offset] = jump;
+}
+function parse_if() {
+    expression();
+    let thenJump = emitJump(620);
+    emitByte(1200);
+    statement();
+    let elseJump = emitJump(615);
+    patchJump(thenJump);
+    emitByte(1200);
+    if (match(2300))
+        statement();
+    patchJump(elseJump);
+}
 function parsePrecedence(precedence) {
     advance();
     let prefixRule = rules[parser.previous.kind].prefix;
@@ -459,6 +482,9 @@ function statement() {
         beginScope();
         block();
         endScope();
+    }
+    else if (match(2400)) {
+        parse_if();
     }
     else if (match(900)) {
     }

@@ -12,6 +12,8 @@ var Op;
     Op[Op["GetUsr"] = 500] = "GetUsr";
     Op[Op["GT"] = 530] = "GT";
     Op[Op["Index"] = 600] = "Index";
+    Op[Op["Jmp"] = 615] = "Jmp";
+    Op[Op["JmpF"] = 620] = "JmpF";
     Op[Op["LEq"] = 690] = "LEq";
     Op[Op["List"] = 700] = "List";
     Op[Op["Load"] = 800] = "Load";
@@ -39,6 +41,8 @@ const OpName = {
     [500]: "GetUsr",
     [530]: "GT",
     [600]: "Index",
+    [615]: "Jmp",
+    [620]: "JmpF",
     [690]: "LEq",
     [700]: "List",
     [800]: "Load",
@@ -100,6 +104,12 @@ class Chunk {
             case 800: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
+                return [result, offset + 2];
+            }
+            case 615:
+            case 620: {
+                let jump = this.code[offset + 1];
+                result += `${padr7(name)} ${padl4(offset)} -> ${offset + 2 + jump}\n`;
                 return [result, offset + 2];
             }
             case 395: {

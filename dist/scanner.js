@@ -31,6 +31,8 @@ var TokenT;
     TokenT[TokenT["True"] = 2000] = "True";
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
+    TokenT[TokenT["Else"] = 2300] = "Else";
+    TokenT[TokenT["If"] = 2400] = "If";
 })(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
@@ -40,6 +42,7 @@ const TokenTName = {
     [1400]: "ColonEq",
     [100]: "Comma",
     [200]: "Dollar",
+    [2300]: "Else",
     [2100]: "EOF",
     [1500]: "Eq",
     [1505]: "EqEq",
@@ -47,6 +50,7 @@ const TokenTName = {
     [1600]: "False",
     [1520]: "Greater",
     [1525]: "GreaterEq",
+    [2400]: "If",
     [300]: "LBrace",
     [400]: "LBracket",
     [1550]: "Less",
@@ -112,7 +116,9 @@ function token_error(errorMessage) {
 }
 function name_type() {
     switch (source.slice(start, current)) {
+        case "else": return 2300;
         case "false": return 1600;
+        case "if": return 2400;
         case "true": return 2000;
     }
     return 1700;
