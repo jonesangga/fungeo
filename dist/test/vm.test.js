@@ -313,4 +313,33 @@ describe("vm:stack", () => {
             new FGBoolean(false)
         ]);
     });
+    it("Op.SetLoc, Op.GetLoc, Op.Pop", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "{a = 123 b = a}";
+        let result = compiler.compile(source, chunk);
+        vm.set(chunk);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[0]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[0]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+        vm.step();
+        assert.deepEqual(stack.slice(0, stackTop), []);
+    });
 });
