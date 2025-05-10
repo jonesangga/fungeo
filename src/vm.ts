@@ -193,6 +193,21 @@ function run(): boolean {
                 break;
             }
 
+            case Op.GetLoc: {
+                push(stack[ read_byte() ]);
+                break;
+            }
+
+            // Nothing to do for now. Because all name is immutable.
+            case Op.SetLoc: {
+                break;
+            }
+
+            case Op.Pop: {
+                pop();
+                break;
+            }
+
             case Op.Ret: {
                 return true;
             }

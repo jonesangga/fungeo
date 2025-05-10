@@ -32,7 +32,8 @@ const rules = {
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [1520]: { prefix: null, infix: compare, precedence: 250 },
     [1525]: { prefix: null, infix: compare, precedence: 250 },
-    [600]: { prefix: grouping, infix: null, precedence: 100 },
+    [1120]: { prefix: null, infix: null, precedence: 100 },
+    [600]: { prefix: null, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: compare, precedence: 250 },
     [1555]: { prefix: null, infix: compare, precedence: 250 },
     [400]: { prefix: grouping, infix: null, precedence: 100 },
@@ -41,6 +42,7 @@ const rules = {
     [1700]: { prefix: parse_number, infix: null, precedence: 100 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
     [1590]: { prefix: null, infix: binary_str, precedence: 300 },
+    [1130]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
     [500]: { prefix: null, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
@@ -49,6 +51,7 @@ const rules = {
     [1800]: { prefix: parse_string, infix: null, precedence: 100 },
     [1900]: { prefix: parse_boolean, infix: null, precedence: 100 },
 };
+let current = { locals: [], scopeDepth: 0 };
 let invalidToken = { kind: 2100, line: -1, lexeme: "" };
 let parser = {
     current: invalidToken,
@@ -57,6 +60,11 @@ let parser = {
 let compilingChunk;
 function currentChunk() {
     return compilingChunk;
+}
+function init_compiler(compiler) {
+    compiler.locals = [];
+    compiler.scopeDepth = 0;
+    current = compiler;
 }
 function error_at_current(message) {
     error_at(parser.current, message);
@@ -229,43 +237,99 @@ function parse_string() {
     lastType = { kind: 600 };
 }
 let tempNames = {};
+function resolveLocal(compiler, name) {
+    for (let i = compiler.locals.length - 1; i >= 0; i--) {
+        let local = compiler.locals[i];
+        console.log(local);
+        if (name === local.name) {
+            return i;
+        }
+    }
+    return -1;
+}
 function parse_name() {
     let name = parser.previous.lexeme;
-    if (Object.hasOwn(nativeNames, name)) {
-        canAssign = false;
-        if (check(1500))
-            error(`${name} already defined`);
-        if (nativeNames[name].kind === 400)
-            parse_callable(name);
-        else
-            parse_non_callable(nativeNames, name, true);
-    }
-    else if (Object.hasOwn(userNames, name)) {
-        canAssign = false;
-        if (check(1500))
-            error(`${name} already defined`);
-        if (userNames[name].kind === 400)
-            parse_callable(name);
-        else
-            parse_non_callable(userNames, name, false);
-    }
-    else if (Object.hasOwn(tempNames, name)) {
-        canAssign = false;
-        if (check(1500))
-            error(`${name} already defined`);
-        if (tempNames[name].kind === 400)
-            parse_callable(name);
-        else
-            parse_non_callable(tempNames, name, false);
-    }
-    else {
-        if (!canAssign) {
-            error(`undefined name ${name}`);
+    if (match(1500)) {
+        if (canAssign) {
+            canAssign = false;
+            set_name(name);
         }
         else {
-            canAssign = false;
-            parse_definition(name);
+            error(`cannot assign ${name}`);
         }
+    }
+    else {
+        canAssign = false;
+        get_name(name);
+    }
+}
+function set_name(name) {
+    if (current.scopeDepth > 0) {
+        set_local(name);
+    }
+    else {
+        set_global(name);
+    }
+}
+function set_local(name) {
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+            break;
+        }
+        if (name === local.name) {
+            error("already a variable with this name in this scope");
+        }
+    }
+    add_local(name);
+    lastType = invalidType;
+    canParseArgument = true;
+    expression();
+    emitByte(1410);
+    current.locals[current.locals.length - 1].type = { kind: lastType.kind };
+    lastType = invalidType;
+}
+function set_global(name) {
+    if (Object.hasOwn(nativeNames, name)
+        || Object.hasOwn(userNames, name)
+        || Object.hasOwn(tempNames, name)) {
+        error(`${name} already defined`);
+    }
+    let index = makeConstant(new FGString(name));
+    lastType = invalidType;
+    canParseArgument = true;
+    expression();
+    emitBytes(1400, index);
+    emitByte(lastType.kind);
+    tempNames[name] = { kind: lastType.kind };
+    lastType = invalidType;
+}
+function get_name(name) {
+    let arg = resolveLocal(current, name);
+    if (arg != -1) {
+        emitBytes(395, arg);
+        lastType = current.locals[arg].type;
+    }
+    else if (Object.hasOwn(nativeNames, name)) {
+        if (nativeNames[name].kind === 400)
+            global_callable(name);
+        else
+            global_non_callable(nativeNames, name, true);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        if (userNames[name].kind === 400)
+            global_callable(name);
+        else
+            global_non_callable(userNames, name, false);
+    }
+    else if (Object.hasOwn(tempNames, name)) {
+        if (tempNames[name].kind === 400)
+            global_callable(name);
+        else
+            global_non_callable(tempNames, name, false);
+    }
+    else {
+        error(`undefined name ${name}`);
     }
 }
 function matchType(expected, actual) {
@@ -290,8 +354,8 @@ function setToKinds(set_) {
     }
     return s;
 }
-function parse_callable(name_) {
-    console.log("in parse_callable()");
+function global_callable(name_) {
+    console.log("in global_callable()");
     if (!canParseArgument) {
         lastType = nativeNames[name_];
         return;
@@ -348,25 +412,17 @@ function parse_callable(name_) {
         lastType = { kind: version[i].output };
     }
 }
-function parse_non_callable(table, name, native) {
+function global_non_callable(table, name, native) {
     let index = makeConstant(new FGString(name));
     if (native)
         emitBytes(400, index);
     else
         emitBytes(500, index);
     lastType = { kind: table[name].kind };
-    console.log("in parse_non_callable() lastType = ", lastType);
 }
-function parse_definition(name) {
-    let index = makeConstant(new FGString(name));
-    consume(1500, "expect '=' after variable declaration");
-    lastType = invalidType;
-    canParseArgument = true;
-    expression();
-    emitBytes(1400, index);
-    emitByte(lastType.kind);
-    tempNames[name] = { kind: lastType.kind };
-    lastType = invalidType;
+function add_local(name) {
+    let local = { name, type: invalidType, depth: current.scopeDepth };
+    current.locals.push(local);
 }
 function parsePrecedence(precedence) {
     advance();
@@ -407,6 +463,11 @@ function statement() {
         canAssign = true;
         parse_name();
     }
+    else if (match(1120)) {
+        beginScope();
+        block();
+        endScope();
+    }
     else if (match(300)) {
     }
     else {
@@ -416,11 +477,30 @@ function statement() {
         error("forbidden expression statement");
     }
 }
+function beginScope() {
+    current.scopeDepth++;
+}
+function block() {
+    while (!check(1130) && !check(2100)) {
+        declaration();
+    }
+    consume(1130, "expect '}' after block");
+}
+function endScope() {
+    current.scopeDepth--;
+    while (current.locals.length > 0 &&
+        current.locals[current.locals.length - 1].depth > current.scopeDepth) {
+        emitByte(1200);
+        current.locals.pop();
+    }
+}
 class CompileError extends Error {
 }
 const compiler = {
     compile(source, chunk) {
         scanner.init(source);
+        let comp = { locals: [], scopeDepth: 0 };
+        init_compiler(comp);
         compilingChunk = chunk;
         tempNames = {};
         parser.previous = invalidToken;

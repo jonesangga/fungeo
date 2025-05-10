@@ -188,7 +188,7 @@ describe("compiler:eq", () => {
 
 });
 
-describe.only("compiler:neq", () => {
+describe("compiler:neq", () => {
 
     it("!=", () => {
         let chunk = new Chunk("test chunk");
@@ -206,41 +206,41 @@ describe("compiler:compare", () => {
 
     it("<", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 < 34";
+        let source = "a = 12 < 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.LT,
-            Op.Set, 0, Kind.Number, Op.Ret,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
         ]);
     });
 
     it("<=", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 <= 34";
+        let source = "a = 12 <= 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.LEq,
-            Op.Set, 0, Kind.Number, Op.Ret,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
         ]);
     });
 
     it(">", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 > 34";
+        let source = "a = 12 > 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.GT,
-            Op.Set, 0, Kind.Number, Op.Ret,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
         ]);
     });
 
     it(">=", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 >= 34";
+        let source = "a = 12 >= 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.GEq,
-            Op.Set, 0, Kind.Number, Op.Ret,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
         ]);
     });
 });
@@ -374,7 +374,7 @@ describe("compiler:assignment", () => {
         let source = "num = 123.456 num = 2";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at 'num': num already defined\n"
+            success: false, message: "1: at '=': num already defined\n"
         });
     });
 

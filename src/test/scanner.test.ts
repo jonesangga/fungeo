@@ -192,7 +192,7 @@ describe("scanner", () => {
     });
 
     it("error: unexpected character", () => {
-        let code = "a = {1}";
+        let code = "a = @1%";
         scanner.init(code);
         scanner.next(); // a
         scanner.next(); // =

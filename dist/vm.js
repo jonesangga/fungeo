@@ -166,6 +166,17 @@ function run() {
                 userNames[name] = { kind, value };
                 break;
             }
+            case 395: {
+                push(stack[read_byte()]);
+                break;
+            }
+            case 1410: {
+                break;
+            }
+            case 1200: {
+                pop();
+                break;
+            }
             case 1300: {
                 return true;
             }

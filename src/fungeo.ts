@@ -4,7 +4,7 @@ import { compiler } from "./compiler.js"
 import { Chunk } from "./chunk.js"
 import { vm } from "./vm.js"
 
-repl.place(100, 100);
+repl.place(100, 400);
 
 // let source = "a = 2\nprint a\nl = L 100 100 200 200; draw l";
 // let source = ` ! : := , $ = false [ ( - abc 123.456 + ] ) ; / * "real" true `;

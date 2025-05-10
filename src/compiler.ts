@@ -46,7 +46,8 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
     [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
-    [TokenT.LBracket]  : {prefix: grouping,        infix: null,    precedence: Precedence.None},
+    [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.LBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Less]      : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.LessEq]    : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
@@ -55,6 +56,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
+    [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RParen]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Semicolon] : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -63,6 +65,20 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.String]    : {prefix: parse_string,    infix: null,    precedence: Precedence.None},
     [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
 }
+
+
+interface Local {
+    name: string;
+    type: Types;
+    depth: number;
+}
+
+interface Compiler {
+    locals: Local[];
+    scopeDepth: number;
+}
+
+let current: Compiler = {locals: [], scopeDepth: 0};
 
 let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
 
@@ -75,6 +91,12 @@ let compilingChunk: Chunk;
 
 function currentChunk(): Chunk {
     return compilingChunk;
+}
+
+function init_compiler(compiler: Compiler): void {
+    compiler.locals = [];
+    compiler.scopeDepth = 0;
+    current = compiler;
 }
 
 //--------------------------------------------------------------------
@@ -299,47 +321,107 @@ interface TempNames {
 let tempNames: TempNames = {
 };
 
-// TODO: clean up this.
+function resolveLocal(compiler: Compiler, name: string): number {
+    for (let i = compiler.locals.length - 1; i >= 0; i--) {
+        let local = compiler.locals[i];
+        console.log(local);
+        if (name === local.name) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 function parse_name(): void {
     let name = parser.previous.lexeme;
 
-    if (Object.hasOwn(nativeNames, name)) {
+    if (match(TokenT.Eq)) {
+        if (canAssign) {
+            canAssign = false;
+            set_name(name);
+        } else {
+            error(`cannot assign ${name}`);
+        }
+    } else {
         canAssign = false;
-        if (check(TokenT.Eq))
-            error(`${ name } already defined`);
+        get_name(name);
+    }
+}
 
+function set_name(name: string): void {
+    if (current.scopeDepth > 0) {
+        set_local(name);
+    } else {
+        set_global(name);
+    }
+}
+
+function set_local(name: string): void {
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+            break;
+        }
+        if (name === local.name) {
+            error("already a variable with this name in this scope");
+        }
+    }
+    add_local(name);
+
+    lastType = invalidType;
+    canParseArgument = true;
+    expression();
+
+    emitByte(Op.SetLoc);
+    current.locals[current.locals.length - 1].type = { kind: lastType.kind };
+    lastType = invalidType;
+}
+
+function set_global(name: string): void {
+    if (Object.hasOwn(nativeNames, name)
+            || Object.hasOwn(userNames, name)
+            || Object.hasOwn(tempNames, name)) {
+        error(`${ name } already defined`);
+    }
+
+    let index = makeConstant(new FGString(name));
+    lastType = invalidType;
+    canParseArgument = true;
+    expression();
+
+    emitBytes(Op.Set, index);
+    emitByte(lastType.kind);
+    tempNames[name] = { kind: lastType.kind };
+    lastType = invalidType;
+}
+
+function get_name(name: string): void {
+    let arg = resolveLocal(current, name);
+    if (arg != -1) {
+        emitBytes(Op.GetLoc, arg);
+        lastType = current.locals[arg].type;
+    }
+    else if (Object.hasOwn(nativeNames, name)) {
         if (nativeNames[name].kind === Kind.Callable)
-            parse_callable(name);
+            global_callable(name);
         else
-            parse_non_callable(nativeNames, name, true);
+            global_non_callable(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        canAssign = false;
-        if (check(TokenT.Eq))
-            error(`${ name } already defined`);
-
         if (userNames[name].kind === Kind.Callable)
-            parse_callable(name);
+            global_callable(name);
         else
-            parse_non_callable(userNames, name, false);
+            global_non_callable(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        canAssign = false;
-        if (check(TokenT.Eq))
-            error(`${ name } already defined`);
-
         if (tempNames[name].kind === Kind.Callable)
-            parse_callable(name);
+            global_callable(name);
         else
-            parse_non_callable(tempNames, name, false);
+            global_non_callable(tempNames, name, false);
     }
     else {
-        if (!canAssign) {
-            error(`undefined name ${name}`);
-        } else {
-            canAssign = false;
-            parse_definition(name);
-        }
+        error(`undefined name ${name}`);
     }
 }
 
@@ -365,8 +447,8 @@ function setToKinds(set_: Set<number>): string[] {
     return s;
 }
 
-function parse_callable(name_: string): void {
-    console.log("in parse_callable()");
+function global_callable(name_: string): void {
+    console.log("in global_callable()");
     if (!canParseArgument) {
         lastType = nativeNames[name_];
         return;
@@ -429,36 +511,19 @@ function parse_callable(name_: string): void {
     }
 }
 
-function parse_non_callable(table: any, name: string, native: boolean): void {
+function global_non_callable(table: any, name: string, native: boolean): void {
     let index = makeConstant(new FGString(name));
     if (native)
         emitBytes(Op.GetNat, index);
     else
         emitBytes(Op.GetUsr, index);
-    // if (table[name].kind === Kind.List) {
-        // lastType = {kind: table[name].kind, listKind: table[name].listKind};
-    // } else {
-        lastType = {kind: table[name].kind};
-    // }
-    console.log("in parse_non_callable() lastType = ", lastType);
+
+    lastType = {kind: table[name].kind};
 }
 
-function parse_definition(name: string): void {
-    let index = makeConstant(new FGString(name));
-    consume(TokenT.Eq, "expect '=' after variable declaration");
-
-    lastType = invalidType;
-    canParseArgument = true;
-    expression();
-
-    // if (isGeoKind(lastType.kind)) {
-        // emitBytes(Op.AssignGObj, index);
-    // } else {
-        emitBytes(Op.Set, index);
-    // }
-    emitByte(lastType.kind);
-    tempNames[name] = {kind: lastType.kind};
-    lastType = invalidType;
+function add_local(name: string): void {
+    let local: Local = { name, type: invalidType, depth: current.scopeDepth };
+    current.locals.push(local);
 }
 
 function parsePrecedence(precedence: Precedence): void {
@@ -508,6 +573,10 @@ function statement(): void {
         canParseArgument = true;
         canAssign = true;
         parse_name();
+    } else if (match(TokenT.LBrace)) {
+        beginScope();
+        block();
+        endScope();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {
@@ -516,6 +585,29 @@ function statement(): void {
 
     if (lastType !== invalidType) {
         error("forbidden expression statement");
+    }
+}
+
+function beginScope(): void {
+    current.scopeDepth++;
+}
+
+function block(): void {
+    while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
+        declaration();
+    }
+    consume(TokenT.RBrace, "expect '}' after block");
+}
+
+// TODO: should we use variable localCount so we don't need pop()?
+function endScope(): void {
+    current.scopeDepth--;
+
+    while (current.locals.length > 0 &&
+        current.locals[current.locals.length - 1].depth > current.scopeDepth
+    ) {
+        emitByte(Op.Pop);
+        current.locals.pop();
     }
 }
 
@@ -529,6 +621,9 @@ class CompileError extends Error {}
 const compiler = {
     compile(source: string, chunk: Chunk): CompilerResult {
         scanner.init(source);
+        let comp: Compiler = {locals: [], scopeDepth: 0};
+        init_compiler(comp);
+
         compilingChunk = chunk;
         tempNames = {};
         parser.previous = invalidToken;

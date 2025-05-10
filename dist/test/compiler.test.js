@@ -161,7 +161,7 @@ describe("compiler:eq", () => {
         ]);
     });
 });
-describe.only("compiler:neq", () => {
+describe("compiler:neq", () => {
     it("!=", () => {
         let chunk = new Chunk("test chunk");
         let source = "num = 2 != 3";
@@ -175,38 +175,38 @@ describe.only("compiler:neq", () => {
 describe("compiler:compare", () => {
     it("<", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 < 34";
+        let source = "a = 12 < 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 1, 800, 2, 810,
-            1400, 0, 500, 1300,
+            1400, 0, 300, 1300,
         ]);
     });
     it("<=", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 <= 34";
+        let source = "a = 12 <= 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 1, 800, 2, 690,
-            1400, 0, 500, 1300,
+            1400, 0, 300, 1300,
         ]);
     });
     it(">", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 > 34";
+        let source = "a = 12 > 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 1, 800, 2, 530,
-            1400, 0, 500, 1300,
+            1400, 0, 300, 1300,
         ]);
     });
     it(">=", () => {
         let chunk = new Chunk("test chunk");
-        let source = "num = 12 >= 34";
+        let source = "a = 12 >= 34";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 1, 800, 2, 390,
-            1400, 0, 500, 1300,
+            1400, 0, 300, 1300,
         ]);
     });
 });
@@ -324,7 +324,7 @@ describe("compiler:assignment", () => {
         let source = "num = 123.456 num = 2";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at 'num': num already defined\n"
+            success: false, message: "1: at '=': num already defined\n"
         });
     });
 });

@@ -10,6 +10,8 @@ var TokenT;
     TokenT[TokenT["Minus"] = 800] = "Minus";
     TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
+    TokenT[TokenT["LBrace"] = 1120] = "LBrace";
+    TokenT[TokenT["RBrace"] = 1130] = "RBrace";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
@@ -45,6 +47,7 @@ const TokenTName = {
     [2000]: "False",
     [1520]: "Greater",
     [1525]: "GreaterEq",
+    [1120]: "LBrace",
     [600]: "LBracket",
     [1550]: "Less",
     [1555]: "LessEq",
@@ -54,6 +57,7 @@ const TokenTName = {
     [1700]: "Number",
     [1585]: "Plus",
     [1590]: "PlusPlus",
+    [1130]: "RBrace",
     [700]: "RBracket",
     [500]: "RParen",
     [300]: "Semicolon",
@@ -179,6 +183,8 @@ const scanner = {
             case ')': return token_lexeme(500);
             case '[': return token_lexeme(600);
             case ']': return token_lexeme(700);
+            case '{': return token_lexeme(1120);
+            case '}': return token_lexeme(1130);
             case '$': return token_lexeme(200);
             case ';': return token_lexeme(300);
             case ',': return token_lexeme(100);

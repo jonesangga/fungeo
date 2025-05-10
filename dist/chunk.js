@@ -7,6 +7,7 @@ var Op;
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
+    Op[Op["GetLoc"] = 395] = "GetLoc";
     Op[Op["GetNat"] = 400] = "GetNat";
     Op[Op["GetUsr"] = 500] = "GetUsr";
     Op[Op["GT"] = 530] = "GT";
@@ -22,6 +23,7 @@ var Op;
     Op[Op["Pop"] = 1200] = "Pop";
     Op[Op["Ret"] = 1300] = "Ret";
     Op[Op["Set"] = 1400] = "Set";
+    Op[Op["SetLoc"] = 1410] = "SetLoc";
     Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
 ;
@@ -32,6 +34,7 @@ const OpName = {
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
+    [395]: "GetLoc",
     [400]: "GetNat",
     [500]: "GetUsr",
     [530]: "GT",
@@ -47,6 +50,7 @@ const OpName = {
     [1200]: "Pop",
     [1300]: "Ret",
     [1400]: "Set",
+    [1410]: "SetLoc",
     [1500]: "Sub",
 };
 class Chunk {
@@ -98,6 +102,11 @@ class Chunk {
                 result += `${padr7(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];
             }
+            case 395: {
+                let index = this.code[offset + 1];
+                result += `${padr7(name)} ${padl4(index)}\n`;
+                return [result, offset + 2];
+            }
             case 100:
             case 120:
             case 300:
@@ -110,7 +119,9 @@ class Chunk {
             case 1000:
             case 1010:
             case 1100:
+            case 1200:
             case 1300:
+            case 1410:
             case 1500: {
                 result += name + "\n";
                 return [result, offset + 1];

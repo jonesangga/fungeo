@@ -14,6 +14,8 @@ const enum TokenT {
     Minus = 800,
     Slash = 1000,
     Star = 1100,
+    LBrace = 1120,
+    RBrace = 1130,
     Bang = 1200,       // One or more characters.
     BangEq = 1210,
     Colon = 1300,
@@ -49,6 +51,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.False]: "False",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
+    [TokenT.LBrace]: "LBrace",
     [TokenT.LBracket]: "LBracket",
     [TokenT.Less]: "Less",
     [TokenT.LessEq]: "LessEq",
@@ -58,6 +61,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Number]: "Number",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
+    [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
     [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
@@ -211,6 +215,8 @@ const scanner = {
             case ')': return token_lexeme(TokenT.RParen);
             case '[': return token_lexeme(TokenT.LBracket);
             case ']': return token_lexeme(TokenT.RBracket);
+            case '{': return token_lexeme(TokenT.LBrace);
+            case '}': return token_lexeme(TokenT.RBrace);
             case '$': return token_lexeme(TokenT.Dollar);
             case ';': return token_lexeme(TokenT.Semicolon);
             case ',': return token_lexeme(TokenT.Comma);

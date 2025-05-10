@@ -200,10 +200,10 @@ const repl = {
 const terminal = document.createElement("pre");
 container.appendChild(terminal);
 terminal.style.position   = "absolute";
-terminal.style.top        = "-100px";
+terminal.style.top        = "-400px";
 terminal.style.left       = "15px";
 terminal.style.width      = "220px";
-terminal.style.height     = "90px";
+terminal.style.height     = "390px";
 terminal.style.border     = "1px solid #000";
 terminal.style.fontSize   = "11px";
 terminal.style.background = "#eee";

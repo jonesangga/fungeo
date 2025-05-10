@@ -9,6 +9,7 @@ const enum Op {
     Div = 300,
     Eq = 380,
     GEq = 390,
+    GetLoc = 395,
     GetNat = 400,   // Get nativeNames.
     GetUsr = 500,   // Get userNames.
     GT = 530,
@@ -24,6 +25,7 @@ const enum Op {
     Pop = 1200,
     Ret = 1300,
     Set = 1400,
+    SetLoc = 1410,
     Sub = 1500,
 };
 
@@ -34,6 +36,7 @@ const OpName: { [key in Op]: string } = {
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
+    [Op.GetLoc]: "GetLoc",
     [Op.GetNat]: "GetNat",
     [Op.GetUsr]: "GetUsr",
     [Op.GT]: "GT",
@@ -49,6 +52,7 @@ const OpName: { [key in Op]: string } = {
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
+    [Op.SetLoc]: "SetLoc",
     [Op.Sub]: "Sub",
 };
 
@@ -107,6 +111,12 @@ class Chunk {
                 return [result, offset + 2];
             }
 
+            case Op.GetLoc: {
+                let index = this.code[offset + 1];
+                result += `${ padr7(name) } ${ padl4(index) }\n`;
+                return [result, offset + 2];
+            }
+
             case Op.Add:
             case Op.AddStr:
             case Op.Div:
@@ -119,7 +129,9 @@ class Chunk {
             case Op.Neg:
             case Op.NEq:
             case Op.Not:
+            case Op.Pop:
             case Op.Ret:
+            case Op.SetLoc:
             case Op.Sub: {
                 result += name + "\n";
                 return [result, offset + 1];

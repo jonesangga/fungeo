@@ -1,5 +1,18 @@
 # Log
 
+#### 10-05-25
+
+- fixed.
+- bug: compiler.test compare()
+- change `parse_callable()` to `global_callable()`
+- change `parse_non_callable()` to `global_non_callable()`
+- refactor `parse_name()`
+- vm instruction for SetLoc
+- change Local.name type from Token to string
+- add type property in Local
+- add `{` and `}` in tokentype
+- add block statement support
+
 #### 09-05-25
 
 - fixed
