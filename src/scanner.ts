@@ -239,7 +239,7 @@ const scanner = {
                 match('+') ? TokenT.PlusPlus : TokenT.Plus);
         }
      
-        return token_error("unexpected character");
+        return token_error(`unexpected character ${c}`);
     },
 
     all(): Token[] {

@@ -199,7 +199,7 @@ const scanner = {
             case '!': return token_lexeme(match('=') ? 1210 : 1200);
             case '+': return token_lexeme(match('+') ? 1590 : 1585);
         }
-        return token_error("unexpected character");
+        return token_error(`unexpected character ${c}`);
     },
     all() {
         let result = [];

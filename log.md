@@ -2,6 +2,8 @@
 
 #### 10-05-25
 
+- scanner.test: change scanner error message unexpecter character to include the character
+- scanner.test: add test for `{` and `}` lexemes.
 - make TokenType sorted alphabetically
 - fixed.
 - bug: compiler.test compare()
