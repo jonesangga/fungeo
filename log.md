@@ -2,6 +2,7 @@
 
 #### 11-05-25
 
+- scanner.test: Amp, AmpAmp, Pipe, PipePipe token types.
 - fixed
 - bug: conditional expression accept non boolean type
 - scanner: add Amp, AmpAmp, Pipe, PipePipe lexemes
