@@ -3,8 +3,6 @@ import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value, 
 import { nativeNames, userNames } from "./names.js"
 import { compiler } from "./compiler.js"
 
-const TESTING = false;
-
 export let stack: Value[] = [];
 export let stackTop = 0;
 
@@ -236,6 +234,8 @@ interface VMResult {
     message: string;
 }
 
+let TESTING = true;
+
 const vm = {
     init(): void {
         resetStack();
@@ -245,6 +245,7 @@ const vm = {
     },
 
     interpret(chunk_: Chunk): VMResult {
+        TESTING = false;
         chunk = chunk_;
         ip = 0;
         output = "";
@@ -258,6 +259,7 @@ const vm = {
     },
 
     set(chunk_: Chunk): void {
+        TESTING = true;
         chunk = chunk_;
         ip = 0;
     },

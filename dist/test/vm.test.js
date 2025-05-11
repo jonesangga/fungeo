@@ -407,3 +407,24 @@ describe("vm:stack", () => {
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
 });
+describe("vm:output: && and ||", () => {
+    function t(code, expect) {
+        vm.init();
+        let chunk = new Chunk("");
+        let result = compiler.compile(code, chunk);
+        if (!result.success)
+            assert.fail("compile error: " + result.message);
+        let vmresult = vm.interpret(chunk);
+        assert.equal(vmresult.message, expect);
+    }
+    it("&&", () => {
+        t("Print true && true", "true\n");
+        t("Print true && false", "false\n");
+        t("Print false && true", "false\n");
+        t("Print false && false", "false\n");
+        t("Print true || true", "true\n");
+        t("Print true || false", "true\n");
+        t("Print false || true", "true\n");
+        t("Print false || false", "false\n");
+    });
+});

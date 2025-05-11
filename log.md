@@ -2,6 +2,7 @@
 
 #### 11-05-25
 
+- vm.test: all combination of a || b and a && b
 - compiler.test: error in parse_if, conditional is not boolean
 - compiler.test: error in a || b and a && b
 - compiler.test: a || b and a && b

@@ -1,7 +1,6 @@
 import { Chunk } from "./chunk.js";
 import { FGBoolean } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
-const TESTING = false;
 export let stack = [];
 export let stackTop = 0;
 export function push(value) {
@@ -197,6 +196,7 @@ function run() {
             return true;
     }
 }
+let TESTING = true;
 const vm = {
     init() {
         resetStack();
@@ -205,6 +205,7 @@ const vm = {
         }
     },
     interpret(chunk_) {
+        TESTING = false;
         chunk = chunk_;
         ip = 0;
         output = "";
@@ -217,6 +218,7 @@ const vm = {
         }
     },
     set(chunk_) {
+        TESTING = true;
         chunk = chunk_;
         ip = 0;
     },
