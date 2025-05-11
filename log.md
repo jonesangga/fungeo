@@ -1,5 +1,9 @@
 # Log
 
+#### 11-05-25
+
+- scanner.test: If, Else tokens
+
 #### 10-05-25
 
 - color red for error, green otherwise
