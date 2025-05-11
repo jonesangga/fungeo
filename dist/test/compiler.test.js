@@ -238,6 +238,18 @@ describe("compiler:negate", () => {
         });
     });
 });
+describe("compiler:if", () => {
+    it("==", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "if 1 < 2 Print \"correct\" else Print \"wrong\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 0, 800, 1, 810, 620, 8, 1200,
+            800, 2, 200, 3, 0, 615, 6, 1200,
+            800, 4, 200, 5, 0, 1300
+        ]);
+    });
+});
 describe("compiler:grouping", () => {
     it("()", () => {
         let chunk = new Chunk("test chunk");

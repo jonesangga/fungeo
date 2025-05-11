@@ -278,6 +278,21 @@ describe("compiler:negate", () => {
 
 });
 
+describe("compiler:if", () => {
+
+    it("==", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "if 1 < 2 Print \"correct\" else Print \"wrong\"";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 0, Op.Load, 1, Op.LT, Op.JmpF, 8, Op.Pop,
+            Op.Load, 2, Op.CallNat, 3, 0, Op.Jmp, 6, Op.Pop,
+            Op.Load, 4, Op.CallNat, 5, 0, Op.Ret
+        ]);
+    });
+
+});
+
 describe("compiler:grouping", () => {
 
     it("()", () => {
