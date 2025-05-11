@@ -6,6 +6,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
 import { Kind, FGNumber, FGString } from "../value.js"
+import { compiler } from "../compiler.js"
 
 describe("chunk", () => {
 
@@ -121,6 +122,59 @@ describe("chunk:disassemble_instr", () => {
         [result, offset] = chunk.disassemble_instr(offset);
         assert.deepEqual(result, "0007    | Pop\n");
         assert.equal(offset, 8);
+    });
+
+    it("Op.Jmp, Op.JmpF", () => {
+        let chunk = new Chunk("");
+        compiler.compile("if 1 < 2 Print \"correct\" else Print \"wrong\"", chunk);
+        console.log(chunk);
+
+        let result = "";
+        let offset = 0;
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0000    1 Load       0 '1'\n");
+        assert.equal(offset, 2);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0002    | Load       1 '2'\n");
+        assert.equal(offset, 4);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0004    | LT\n");
+        assert.equal(offset, 5);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0005    | JmpF       5 -> 15\n");
+        assert.equal(offset, 7);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0007    | Pop\n");
+        assert.equal(offset, 8);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0008    | Load       2 'correct'\n");
+        assert.equal(offset, 10);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0010    | CallNat    3 'v0'\n");
+        assert.equal(offset, 13);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0013    | Jmp       13 -> 21\n");
+        assert.equal(offset, 15);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0015    | Pop\n");
+        assert.equal(offset, 16);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0016    | Load       4 'wrong'\n");
+        assert.equal(offset, 18);
+
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0018    | CallNat    5 'v0'\n");
+        assert.equal(offset, 21);
+
     });
 
     it("Op.CallNat", () => {

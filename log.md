@@ -2,6 +2,7 @@
 
 #### 11-05-25
 
+- chunk.test: Op.Jmp, Op.JmpF
 - scanner.test: If, Else tokens
 
 #### 10-05-25
