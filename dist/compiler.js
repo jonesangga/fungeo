@@ -33,7 +33,7 @@ const rules = {
     [1600]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [1520]: { prefix: null, infix: compare, precedence: 250 },
     [1525]: { prefix: null, infix: compare, precedence: 250 },
-    [2400]: { prefix: null, infix: compare, precedence: 250 },
+    [2400]: { prefix: null, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
     [400]: { prefix: null, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: compare, precedence: 250 },
@@ -161,7 +161,7 @@ function compare() {
     let operator = parser.previous.kind;
     let left = lastType.kind;
     if (left !== 500 && left !== 600)
-        error("can only coompare strings or numbers");
+        error("can only compare strings or numbers");
     parsePrecedence(250 + 1);
     if (lastType.kind !== left)
         error("type not match");

@@ -2,6 +2,11 @@
 
 #### 11-05-25
 
+- fixed: it is because I copy paste a rule and change that to If but
+  forgot to change the infix and precendence
+- bug: cannot surround conditional expression with parentheses in a nested if
+       it should be allwed
+- fix: small typo in compare().
 - vm.test: Op.Jmp, Op.JmpF
 - compiler.test: `parse_if`.
 - chunk.test: Op.Jmp, Op.JmpF

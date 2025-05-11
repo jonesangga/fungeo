@@ -47,7 +47,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
     [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
-    [TokenT.If]        : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
+    [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.LBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Less]      : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
@@ -229,7 +229,7 @@ function compare(): void {
     let operator = parser.previous.kind;
     let left = lastType.kind;
     if (left !== Kind.Number && left !== Kind.String)
-        error("can only coompare strings or numbers");
+        error("can only compare strings or numbers");
 
     parsePrecedence(Precedence.Comparison + 1);
     if (lastType.kind !== left)
