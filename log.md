@@ -2,6 +2,7 @@
 
 #### 11-05-25
 
+- vm.test: Op.Jmp, Op.JmpF
 - compiler.test: `parse_if`.
 - chunk.test: Op.Jmp, Op.JmpF
 - scanner.test: If, Else tokens

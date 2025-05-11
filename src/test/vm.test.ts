@@ -416,4 +416,85 @@ describe("vm:stack", () => {
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
 
+    it("Op.Jmp, Op.JmpF: if branch", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "if 1 < 2 Print \"correct\" else Print \"wrong\"";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[1]
+        ]);
+
+        vm.step();      // Op.LT
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+
+        vm.step();      // Op.JmpF
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+
+        vm.step();      // Op.Pop
+        assert.deepEqual(stack.slice(0, stackTop), []);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[2]
+        ]);
+
+        vm.step();      // Op.CallNat
+        assert.deepEqual(stack.slice(0, stackTop), []);
+
+        vm.step();      // Op.Jmp
+        assert.deepEqual(stack.slice(0, stackTop), []);
+    });
+
+    it("Op.Jmp, Op.JmpF: else branch", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "if 1 > 2 Print \"correct\" else Print \"wrong\"";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[1]
+        ]);
+
+        vm.step();      // Op.LT
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(false)
+        ]);
+
+        vm.step();      // Op.JmpF
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(false)
+        ]);
+
+        vm.step();      // Op.Pop
+        assert.deepEqual(stack.slice(0, stackTop), []);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[4]
+        ]);
+
+        vm.step();      // Op.CallNat
+        assert.deepEqual(stack.slice(0, stackTop), []);
+    });
+
 });
