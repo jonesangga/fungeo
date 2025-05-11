@@ -577,7 +577,7 @@ function and_(): void {
 
 function or_(): void {
     if (lastType.kind !== Kind.Boolean) {
-        error("operands of '&&' must be boolean");
+        error("operands of '||' must be boolean");
     }
 
     let elseJump = emitJump(Op.JmpF);
@@ -588,7 +588,7 @@ function or_(): void {
 
     parsePrecedence(Precedence.Or);
     if (lastType.kind !== Kind.Boolean) {
-        error("operands of '&&' must be boolean");
+        error("operands of '||' must be boolean");
     }
 
     patchJump(endJump);

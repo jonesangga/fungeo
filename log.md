@@ -2,6 +2,9 @@
 
 #### 11-05-25
 
+- compiler.test: error in parse_if, conditional is not boolean
+- compiler.test: error in a || b and a && b
+- compiler.test: a || b and a && b
 - scanner.test: Amp, AmpAmp, Pipe, PipePipe token types.
 - fixed
 - bug: conditional expression accept non boolean type

@@ -239,7 +239,7 @@ describe("compiler:negate", () => {
     });
 });
 describe("compiler:if", () => {
-    it("==", () => {
+    it("success", () => {
         let chunk = new Chunk("test chunk");
         let source = "if 1 < 2 Print \"correct\" else Print \"wrong\"";
         let result = compiler.compile(source, chunk);
@@ -248,6 +248,68 @@ describe("compiler:if", () => {
             800, 2, 200, 3, 0, 615, 6, 1200,
             800, 4, 200, 5, 0, 1300
         ]);
+    });
+    it("error", () => {
+        let chunk = new Chunk("test chunk");
+        let source = 'if "real" Print "correct" else Print "wrong"';
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'real': conditional expression must be boolean\n"
+        });
+    });
+});
+describe("compiler:&&", () => {
+    it("success", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a = true && true";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 620, 3, 1200,
+            800, 2, 1400, 0, 300, 1300
+        ]);
+    });
+    it("error: left", () => {
+        let chunk = new Chunk("test chunk");
+        let source = 'a = "real" && false';
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '&&': operands of '&&' must be boolean\n"
+        });
+    });
+    it("error: right", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a = true && 2";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': operands of '&&' must be boolean\n"
+        });
+    });
+});
+describe("compiler:||", () => {
+    it("success", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a = true || true";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 620, 2, 615, 3, 1200,
+            800, 2, 1400, 0, 300, 1300
+        ]);
+    });
+    it("error: left", () => {
+        let chunk = new Chunk("test chunk");
+        let source = 'a = "real" || true';
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '||': operands of '||' must be boolean\n"
+        });
+    });
+    it("error: right", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "a = true || 2";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': operands of '||' must be boolean\n"
+        });
     });
 });
 describe("compiler:grouping", () => {

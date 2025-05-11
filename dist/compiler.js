@@ -462,7 +462,7 @@ function and_() {
 }
 function or_() {
     if (lastType.kind !== 300) {
-        error("operands of '&&' must be boolean");
+        error("operands of '||' must be boolean");
     }
     let elseJump = emitJump(620);
     let endJump = emitJump(615);
@@ -470,7 +470,7 @@ function or_() {
     emitByte(1200);
     parsePrecedence(210);
     if (lastType.kind !== 300) {
-        error("operands of '&&' must be boolean");
+        error("operands of '||' must be boolean");
     }
     patchJump(endJump);
 }
