@@ -16,7 +16,9 @@ const enum TokenT {
     Semicolon = 900,
     Slash = 1000,
     Star = 1100,
-    Bang = 1200,       // One or more characters.
+    Amp = 1180,       // One or more characters.
+    AmpAmp = 1190,
+    Bang = 1200,
     BangEq = 1210,
     Colon = 1300,
     ColonEq = 1400,
@@ -26,6 +28,8 @@ const enum TokenT {
     GreaterEq = 1525,
     Less = 1550,
     LessEq = 1555,
+    Pipe = 1575,
+    PipePipe = 1580,
     Plus = 1585,
     PlusPlus = 1590,
     False = 1600,      // Literals.
@@ -40,6 +44,8 @@ const enum TokenT {
 };
 
 const TokenTName: { [key in TokenT]: string } = {
+    [TokenT.Amp]: "Amp",
+    [TokenT.AmpAmp]: "AmpAmp",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
     [TokenT.Colon]: "Colon",
@@ -63,6 +69,8 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Minus]: "Minus",
     [TokenT.Name]: "Name",
     [TokenT.Number]: "Number",
+    [TokenT.Pipe]: "Pipe",
+    [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
     [TokenT.RBrace]: "RBrace",
@@ -231,6 +239,10 @@ const scanner = {
             case '*': return token_lexeme(TokenT.Star);
             case '"': return string_();
 
+            case '|': return token_lexeme(
+                match('|') ? TokenT.PipePipe : TokenT.Pipe);
+            case '&': return token_lexeme(
+                match('&') ? TokenT.AmpAmp : TokenT.Amp);
             case ':': return token_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
             case '<': return token_lexeme(

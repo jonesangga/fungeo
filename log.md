@@ -2,6 +2,10 @@
 
 #### 11-05-25
 
+- fixed
+- bug: conditional expression accept non boolean type
+- scanner: add Amp, AmpAmp, Pipe, PipePipe lexemes
+- update docs to include block, if, else
 - fixed: it is because I copy paste a rule and change that to If but
   forgot to change the infix and precendence
 - bug: cannot surround conditional expression with parentheses in a nested if

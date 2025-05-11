@@ -10,6 +10,8 @@ var Precedence;
 (function (Precedence) {
     Precedence[Precedence["None"] = 100] = "None";
     Precedence[Precedence["Assignment"] = 200] = "Assignment";
+    Precedence[Precedence["Or"] = 210] = "Or";
+    Precedence[Precedence["And"] = 220] = "And";
     Precedence[Precedence["Equality"] = 230] = "Equality";
     Precedence[Precedence["Comparison"] = 250] = "Comparison";
     Precedence[Precedence["Term"] = 300] = "Term";
@@ -19,6 +21,8 @@ var Precedence;
     Precedence[Precedence["Primary"] = 700] = "Primary";
 })(Precedence || (Precedence = {}));
 const rules = {
+    [1180]: { prefix: null, infix: null, precedence: 100 },
+    [1190]: { prefix: null, infix: and_, precedence: 220 },
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
@@ -42,6 +46,8 @@ const rules = {
     [600]: { prefix: negate, infix: binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
+    [1575]: { prefix: null, infix: null, precedence: 300 },
+    [1580]: { prefix: null, infix: or_, precedence: 210 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
     [1590]: { prefix: null, infix: binary_str, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
@@ -429,6 +435,9 @@ function patchJump(offset) {
 }
 function parse_if() {
     expression();
+    if (lastType.kind !== 300) {
+        error(`conditional expression must be boolean`);
+    }
     let thenJump = emitJump(620);
     emitByte(1200);
     statement();
@@ -438,6 +447,32 @@ function parse_if() {
     if (match(2300))
         statement();
     patchJump(elseJump);
+}
+function and_() {
+    if (lastType.kind !== 300) {
+        error("operands of '&&' must be boolean");
+    }
+    let endJump = emitJump(620);
+    emitByte(1200);
+    parsePrecedence(220);
+    if (lastType.kind !== 300) {
+        error("operands of '&&' must be boolean");
+    }
+    patchJump(endJump);
+}
+function or_() {
+    if (lastType.kind !== 300) {
+        error("operands of '&&' must be boolean");
+    }
+    let elseJump = emitJump(620);
+    let endJump = emitJump(615);
+    patchJump(elseJump);
+    emitByte(1200);
+    parsePrecedence(210);
+    if (lastType.kind !== 300) {
+        error("operands of '&&' must be boolean");
+    }
+    patchJump(endJump);
 }
 function parsePrecedence(precedence) {
     advance();

@@ -12,6 +12,8 @@ var TokenT;
     TokenT[TokenT["Semicolon"] = 900] = "Semicolon";
     TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
+    TokenT[TokenT["Amp"] = 1180] = "Amp";
+    TokenT[TokenT["AmpAmp"] = 1190] = "AmpAmp";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
@@ -22,6 +24,8 @@ var TokenT;
     TokenT[TokenT["GreaterEq"] = 1525] = "GreaterEq";
     TokenT[TokenT["Less"] = 1550] = "Less";
     TokenT[TokenT["LessEq"] = 1555] = "LessEq";
+    TokenT[TokenT["Pipe"] = 1575] = "Pipe";
+    TokenT[TokenT["PipePipe"] = 1580] = "PipePipe";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
     TokenT[TokenT["False"] = 1600] = "False";
@@ -36,6 +40,8 @@ var TokenT;
 })(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
+    [1180]: "Amp",
+    [1190]: "AmpAmp",
     [1200]: "Bang",
     [1210]: "BangEq",
     [1300]: "Colon",
@@ -59,6 +65,8 @@ const TokenTName = {
     [600]: "Minus",
     [1700]: "Name",
     [1800]: "Number",
+    [1575]: "Pipe",
+    [1580]: "PipePipe",
     [1585]: "Plus",
     [1590]: "PlusPlus",
     [695]: "RBrace",
@@ -198,6 +206,8 @@ const scanner = {
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
             case '"': return string_();
+            case '|': return token_lexeme(match('|') ? 1580 : 1575);
+            case '&': return token_lexeme(match('&') ? 1190 : 1180);
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
             case '<': return token_lexeme(match('=') ? 1555 : 1550);
             case '>': return token_lexeme(match('=') ? 1525 : 1520);

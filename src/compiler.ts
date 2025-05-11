@@ -17,6 +17,8 @@ let canAssign = false;
 const enum Precedence {
     None = 100,
     Assignment = 200, // =
+    Or = 210,         // ||
+    And = 220,        // &&
     Equality = 230,   // == !=
     Comparison = 250, // < > <= >=
     Term = 300,       // + -
@@ -33,6 +35,8 @@ interface ParseRule {
 }
 
 const rules: { [key in TokenT]: ParseRule } = {
+    [TokenT.Amp]       : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.AmpAmp]    : {prefix: null,            infix: and_,    precedence: Precedence.And},
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -56,6 +60,8 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Minus]     : {prefix: negate,          infix: binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
+    [TokenT.Pipe]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
+    [TokenT.PipePipe]  : {prefix: null,            infix: or_,     precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -536,6 +542,10 @@ function patchJump(offset: number): void {
 //
 function parse_if(): void {
     expression();
+    if (lastType.kind !== Kind.Boolean) {
+        error(`conditional expression must be boolean`);
+    }
+
     let thenJump = emitJump(Op.JmpF);
     emitByte(Op.Pop);
     statement();
@@ -547,6 +557,41 @@ function parse_if(): void {
     if (match(TokenT.Else))
         statement();
     patchJump(elseJump);
+}
+
+function and_(): void {
+    if (lastType.kind !== Kind.Boolean) {
+        error("operands of '&&' must be boolean");
+    }
+
+    let endJump = emitJump(Op.JmpF);
+    emitByte(Op.Pop);
+
+    parsePrecedence(Precedence.And);
+    if (lastType.kind !== Kind.Boolean) {
+        error("operands of '&&' must be boolean");
+    }
+
+    patchJump(endJump);
+}
+
+function or_(): void {
+    if (lastType.kind !== Kind.Boolean) {
+        error("operands of '&&' must be boolean");
+    }
+
+    let elseJump = emitJump(Op.JmpF);
+    let endJump = emitJump(Op.Jmp);
+
+    patchJump(elseJump);
+    emitByte(Op.Pop);
+
+    parsePrecedence(Precedence.Or);
+    if (lastType.kind !== Kind.Boolean) {
+        error("operands of '&&' must be boolean");
+    }
+
+    patchJump(endJump);
 }
 
 function parsePrecedence(precedence: Precedence): void {
