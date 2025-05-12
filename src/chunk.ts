@@ -6,6 +6,7 @@ const enum Op {
     Add = 100,
     AddStr = 120,
     CallNat = 200,
+    Cond = 210,
     Div = 300,
     Eq = 380,
     GEq = 390,
@@ -13,8 +14,11 @@ const enum Op {
     GetNat = 400,   // Get nativeNames.
     GetUsr = 500,   // Get userNames.
     GT = 530,
+    Inc = 595,
     Index = 600,
+    IsDiv = 610,
     Jmp = 615,
+    JmpBack = 616,
     JmpF = 620,
     LEq = 690,
     List = 700,
@@ -35,6 +39,7 @@ const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
     [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
+    [Op.Cond]: "Cond",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
@@ -42,8 +47,11 @@ const OpName: { [key in Op]: string } = {
     [Op.GetNat]: "GetNat",
     [Op.GetUsr]: "GetUsr",
     [Op.GT]: "GT",
+    [Op.Inc]: "Inc",
     [Op.Index]: "Index",
+    [Op.IsDiv]: "IsDiv",
     [Op.Jmp]: "Jmp",
+    [Op.JmpBack]: "JmpBack",
     [Op.JmpF]: "JmpF",
     [Op.LEq]: "LEq",
     [Op.List]: "List",
@@ -116,6 +124,7 @@ class Chunk {
             }
 
             case Op.Jmp:
+            case Op.JmpBack:
             case Op.JmpF: {
                 let jump = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(offset) } -> ${ offset + 2 + jump }\n`;
@@ -130,10 +139,13 @@ class Chunk {
 
             case Op.Add:
             case Op.AddStr:
+            case Op.Cond:
             case Op.Div:
             case Op.Eq:
             case Op.GEq:
             case Op.GT:
+            case Op.Inc:
+            case Op.IsDiv:
             case Op.LEq:
             case Op.LT:
             case Op.Mul:

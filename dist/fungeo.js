@@ -12,6 +12,7 @@ vm.init();
 function main(source) {
     let chunk = new Chunk("program");
     let result = compiler.compile(source, chunk);
+    console.log(chunk.disassemble());
     if (result.success) {
         console.log(chunk.disassemble());
         let vmresult = vm.interpret(chunk);

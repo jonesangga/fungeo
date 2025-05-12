@@ -3,6 +3,7 @@ import { KindName, FGBoolean, FGNumber, FGString } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
 let invalidType = { kind: 100 };
 let numberType = { kind: 500 };
+let booleanType = { kind: 300 };
 let lastType = invalidType;
 let canParseArgument = false;
 let canAssign = false;
@@ -23,6 +24,7 @@ var Precedence;
 const rules = {
     [1180]: { prefix: null, infix: null, precedence: 100 },
     [1190]: { prefix: null, infix: and_, precedence: 220 },
+    [1195]: { prefix: null, infix: null, precedence: 100 },
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
@@ -46,7 +48,7 @@ const rules = {
     [600]: { prefix: negate, infix: binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
-    [1575]: { prefix: null, infix: null, precedence: 300 },
+    [1575]: { prefix: null, infix: binary, precedence: 300 },
     [1580]: { prefix: null, infix: or_, precedence: 210 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
     [1590]: { prefix: null, infix: binary_str, precedence: 300 },
@@ -200,6 +202,10 @@ function binary() {
         error(`'${operator}' only for numbers`);
     }
     switch (operatorType) {
+        case 1575:
+            emitByte(610);
+            lastType = booleanType;
+            break;
         case 1585:
             emitByte(100);
             break;
@@ -426,7 +432,7 @@ function add_local(name) {
 }
 function emitJump(instruction) {
     emitByte(instruction);
-    emitByte(0);
+    emitByte(-1);
     return currentChunk().code.length - 1;
 }
 function patchJump(offset) {
@@ -447,6 +453,47 @@ function parse_if() {
     if (match(2300))
         statement();
     patchJump(elseJump);
+}
+function emitLoop(loopStart) {
+    emitByte(616);
+    let offset = currentChunk().code.length - loopStart + 1;
+    emitByte(-offset);
+}
+function parse_loop() {
+    beginScope();
+    expression();
+    consume(100, "expect ',' in range");
+    expression();
+    consume(700, "expect ']' at the end of range");
+    consume(1195, "expect '->' after range");
+    if (!match(1700)) {
+        error("expect name for iterator");
+    }
+    let name = parser.previous.lexeme;
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+            break;
+        }
+        if (name === local.name) {
+            error(`${name} already defined in this scope`);
+        }
+    }
+    let local = { name, type: numberType, depth: current.scopeDepth };
+    current.locals.push(local);
+    emitByte(1410);
+    let loopStart = currentChunk().code.length;
+    emitByte(210);
+    let exitJump = emitJump(620);
+    emitByte(1200);
+    statement();
+    emitByte(595);
+    emitLoop(loopStart);
+    patchJump(exitJump);
+    emitByte(1200);
+    emitByte(1200);
+    endScope();
+    lastType = invalidType;
 }
 function and_() {
     if (lastType.kind !== 300) {
@@ -520,6 +567,9 @@ function statement() {
     }
     else if (match(2400)) {
         parse_if();
+    }
+    else if (match(400)) {
+        parse_loop();
     }
     else if (match(900)) {
     }

@@ -1,5 +1,16 @@
 # Log
 
+#### 12-05-25
+
+- add show function
+- create printf function
+- make Pipe as mod `if 2|4`
+- change Jmp used for backward to be JmpBack
+- delete Op.Loop
+- change Loop to use Jmp with negative
+- add TokenT.Arrow
+- Add loop.
+
 #### 11-05-25
 
 - vm.test: all combination of a || b and a && b

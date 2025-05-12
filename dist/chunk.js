@@ -4,6 +4,7 @@ var Op;
     Op[Op["Add"] = 100] = "Add";
     Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
+    Op[Op["Cond"] = 210] = "Cond";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
@@ -11,8 +12,11 @@ var Op;
     Op[Op["GetNat"] = 400] = "GetNat";
     Op[Op["GetUsr"] = 500] = "GetUsr";
     Op[Op["GT"] = 530] = "GT";
+    Op[Op["Inc"] = 595] = "Inc";
     Op[Op["Index"] = 600] = "Index";
+    Op[Op["IsDiv"] = 610] = "IsDiv";
     Op[Op["Jmp"] = 615] = "Jmp";
+    Op[Op["JmpBack"] = 616] = "JmpBack";
     Op[Op["JmpF"] = 620] = "JmpF";
     Op[Op["LEq"] = 690] = "LEq";
     Op[Op["List"] = 700] = "List";
@@ -33,6 +37,7 @@ const OpName = {
     [100]: "Add",
     [120]: "AddStr",
     [200]: "CallNat",
+    [210]: "Cond",
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
@@ -40,8 +45,11 @@ const OpName = {
     [400]: "GetNat",
     [500]: "GetUsr",
     [530]: "GT",
+    [595]: "Inc",
     [600]: "Index",
+    [610]: "IsDiv",
     [615]: "Jmp",
+    [616]: "JmpBack",
     [620]: "JmpF",
     [690]: "LEq",
     [700]: "List",
@@ -107,6 +115,7 @@ class Chunk {
                 return [result, offset + 2];
             }
             case 615:
+            case 616:
             case 620: {
                 let jump = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(offset)} -> ${offset + 2 + jump}\n`;
@@ -119,10 +128,13 @@ class Chunk {
             }
             case 100:
             case 120:
+            case 210:
             case 300:
             case 380:
             case 390:
             case 530:
+            case 595:
+            case 610:
             case 690:
             case 810:
             case 900:

@@ -3,7 +3,7 @@
 // TODO: Clean up this.
 
 import { Kind, type Value } from "./value.js"
-import { Print, Type } from "./vmfunction.js"
+import { Print, Printf, Show, Type } from "./vmfunction.js"
 
 export interface Types {
     kind:     Kind;
@@ -21,6 +21,8 @@ export let userNames: Names = {};
 export let nativeNames: Names = {
 
     "Print": { kind:  Kind.Callable, value: Print },
+    "Printf": { kind:  Kind.Callable, value: Printf },
+    "Show": { kind:  Kind.Callable, value: Show },
     "Type": { kind:  Kind.Callable, value: Type },
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.

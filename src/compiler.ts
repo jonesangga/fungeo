@@ -7,6 +7,7 @@ import { type Types, nativeNames, userNames } from "./names.js"
 
 let invalidType: Types = { kind: Kind.Nothing };
 let numberType: Types = { kind: Kind.Number };
+let booleanType: Types = { kind: Kind.Boolean };
 let lastType: Types = invalidType;
 
 // To distinguish function as argument vs function call.
@@ -37,6 +38,7 @@ interface ParseRule {
 const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Amp]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.AmpAmp]    : {prefix: null,            infix: and_,    precedence: Precedence.And},
+    [TokenT.Arrow]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -60,7 +62,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Minus]     : {prefix: negate,          infix: binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
-    [TokenT.Pipe]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
+    [TokenT.Pipe]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PipePipe]  : {prefix: null,            infix: or_,     precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
@@ -269,6 +271,7 @@ function binary(): void {
     }
 
     switch (operatorType) {
+        case TokenT.Pipe:   emitByte(Op.IsDiv); lastType = booleanType; break;
         case TokenT.Plus:   emitByte(Op.Add); break;
         case TokenT.Minus:  emitByte(Op.Sub); break;
         case TokenT.Star:   emitByte(Op.Mul); break;
@@ -528,7 +531,7 @@ function add_local(name: string): void {
 
 function emitJump(instruction: number): number {
     emitByte(instruction);
-    emitByte(0);
+    emitByte(-1);            // Dummy number. See patchJump().
     return currentChunk().code.length - 1;
 }
 
@@ -558,6 +561,107 @@ function parse_if(): void {
         statement();
     patchJump(elseJump);
 }
+
+function emitLoop(loopStart: number): void {
+    emitByte(Op.JmpBack);
+    let offset = currentChunk().code.length - loopStart + 1;
+    emitByte(-offset);
+}
+
+function parse_loop(): void {
+    beginScope();
+
+    expression();
+    consume(TokenT.Comma, "expect ',' in range");
+
+    expression();
+    consume(TokenT.RBracket, "expect ']' at the end of range");
+    consume(TokenT.Arrow, "expect '->' after range");
+
+    if (!match(TokenT.Name)) {
+        error("expect name for iterator");
+    }
+
+    let name = parser.previous.lexeme;
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+            break;
+        }
+        if (name === local.name) {
+            error(`${ name } already defined in this scope`);
+        }
+    }
+    let local: Local = { name, type: numberType, depth: current.scopeDepth };
+    current.locals.push(local);
+    emitByte(Op.SetLoc);
+
+    let loopStart = currentChunk().code.length;
+
+    emitByte(Op.Cond);
+    let exitJump = emitJump(Op.JmpF);
+    emitByte(Op.Pop);   // Result of Op.Cond.
+
+    statement();
+
+    emitByte(Op.Inc);
+    emitLoop(loopStart);
+
+    patchJump(exitJump);
+    emitByte(Op.Pop);   // for false.
+    emitByte(Op.Pop);   // for upper buond.
+    endScope();         // for lower bound.
+    lastType = invalidType;
+}
+
+// function parse_for(): void {
+    // beginScope();
+    // if (match(TokenT.Semicolon)) {
+        // // No initializer.
+    // } else if (match(TokenT.Name)) {
+        // canParseArgument = true;
+        // canAssign = true;
+        // parse_name();
+        // // varDeclaration();
+    // } else {
+        // error("Need initializer in for loop");
+        // // expressionStatement();
+    // }
+
+    // let loopStart = currentChunk().code.length;
+
+    // let exitJump = -1;
+    // if (!match(TokenT.Semicolon)) {
+        // expression();
+        // consume(TokenT.Semicolon, "expect ';' after loop condition");
+
+        // // Jump out of the loop if the condition is false.
+        // exitJump = emitJump(Op.JmpF);
+        // emitByte(Op.Pop); // Condition.
+    // }
+
+    // if (!match(TokenT.RParen)) {
+        // let bodyJump = emitJump(Op.Jmp);
+        // let incrementStart = currentChunk().code.length;
+        // expression();
+        // emitByte(Op.Pop);
+        // consume(TokenT.RParen, "expect ')' after for clauses");
+
+        // emitLoop(loopStart);
+        // loopStart = incrementStart;
+        // patchJump(bodyJump);
+    // }
+
+    // statement();
+    // emitLoop(loopStart);
+
+    // if (exitJump != -1) {
+        // patchJump(exitJump);
+        // emitByte(Op.Pop); // Condition.
+    // }
+
+    // endScope();
+// }
 
 function and_(): void {
     if (lastType.kind !== Kind.Boolean) {
@@ -647,6 +751,8 @@ function statement(): void {
         endScope();
     } else if (match(TokenT.If)) {
         parse_if();
+    } else if (match(TokenT.LBracket)) {
+        parse_loop();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {

@@ -14,6 +14,7 @@ var TokenT;
     TokenT[TokenT["Star"] = 1100] = "Star";
     TokenT[TokenT["Amp"] = 1180] = "Amp";
     TokenT[TokenT["AmpAmp"] = 1190] = "AmpAmp";
+    TokenT[TokenT["Arrow"] = 1195] = "Arrow";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
@@ -42,6 +43,7 @@ var TokenT;
 const TokenTName = {
     [1180]: "Amp",
     [1190]: "AmpAmp",
+    [1195]: "Arrow",
     [1200]: "Bang",
     [1210]: "BangEq",
     [1300]: "Colon",
@@ -202,10 +204,10 @@ const scanner = {
             case '$': return token_lexeme(200);
             case ';': return token_lexeme(900);
             case ',': return token_lexeme(100);
-            case '-': return token_lexeme(600);
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
             case '"': return string_();
+            case '-': return token_lexeme(match('>') ? 1195 : 600);
             case '|': return token_lexeme(match('|') ? 1580 : 1575);
             case '&': return token_lexeme(match('&') ? 1190 : 1180);
             case ':': return token_lexeme(match('=') ? 1400 : 1300);

@@ -18,6 +18,7 @@ const enum TokenT {
     Star = 1100,
     Amp = 1180,       // One or more characters.
     AmpAmp = 1190,
+    Arrow = 1195,
     Bang = 1200,
     BangEq = 1210,
     Colon = 1300,
@@ -46,6 +47,7 @@ const enum TokenT {
 const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Amp]: "Amp",
     [TokenT.AmpAmp]: "AmpAmp",
+    [TokenT.Arrow]: "Arrow",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
     [TokenT.Colon]: "Colon",
@@ -234,11 +236,12 @@ const scanner = {
             case '$': return token_lexeme(TokenT.Dollar);
             case ';': return token_lexeme(TokenT.Semicolon);
             case ',': return token_lexeme(TokenT.Comma);
-            case '-': return token_lexeme(TokenT.Minus);
             case '/': return token_lexeme(TokenT.Slash);
             case '*': return token_lexeme(TokenT.Star);
             case '"': return string_();
 
+            case '-': return token_lexeme(
+                match('>') ? TokenT.Arrow : TokenT.Minus);
             case '|': return token_lexeme(
                 match('|') ? TokenT.PipePipe : TokenT.Pipe);
             case '&': return token_lexeme(

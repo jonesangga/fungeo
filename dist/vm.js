@@ -94,6 +94,19 @@ function run() {
                 push(a.div(b));
                 break;
             }
+            case 610: {
+                let b = pop();
+                let a = pop();
+                if (b.value === 0) {
+                    error("division by zero");
+                    return false;
+                }
+                if (b.value % a.value === 0)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
             case 900: {
                 let b = pop();
                 let a = pop();
@@ -130,6 +143,21 @@ function run() {
             case 390:
                 compare(geq);
                 break;
+            case 210: {
+                let b = peek(0);
+                let a = peek(1);
+                if (a.value <= b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case 595: {
+                let a = peek(1);
+                a.value++;
+                break;
+            }
+            case 616:
             case 615: {
                 let offset = read_byte();
                 ip += offset;

@@ -119,6 +119,20 @@ function run(): boolean {
                 break;
             }
 
+            case Op.IsDiv: {
+                let b = pop() as FGNumber;
+                let a = pop() as FGNumber;
+                if (b.value === 0) {
+                    error("division by zero");
+                    return false;
+                }
+                if (b.value % a.value === 0)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+
             case Op.Mul: {
                 let b = pop() as FGNumber;
                 let a = pop() as FGNumber;
@@ -150,6 +164,24 @@ function run(): boolean {
             case Op.GT: compare(gt); break;
             case Op.GEq: compare(geq); break;
 
+            case Op.Cond: {
+                let b = peek(0) as FGNumber;
+                let a = peek(1) as FGNumber;
+                if (a.value <= b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+
+            // TODO: generalizes.
+            case Op.Inc: {
+                let a = peek(1) as FGNumber;
+                a.value++;
+                break;
+            }
+
+            case Op.JmpBack:
             case Op.Jmp: {
                 let offset = read_byte();
                 ip += offset;
