@@ -43,6 +43,15 @@ describe("compiler:binary", () => {
             1400, 0, 500, 1300,
         ]);
     });
+    it("|", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "multipleOf2 = 2 | 6";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 1, 800, 2, 610,
+            1400, 0, 300, 1300,
+        ]);
+    });
     it("prec: +-", () => {
         let chunk = new Chunk("test chunk");
         let source = "num = 12 + 34 - 56";
@@ -363,6 +372,20 @@ describe("compiler:grouping", () => {
         assert.deepEqual(result, {
             success: false, message: "1: at ')': '!' is only for boolean\n"
         });
+    });
+});
+describe("compiler:loop", () => {
+    it("success", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,5] -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            800, 0, 800, 1, 1410,
+            210, 620, 9, 1200,
+            395, 0, 200, 2, 0,
+            595, 616, -12,
+            1200, 1200, 1200, 1300,
+        ]);
     });
 });
 describe("compiler:assignment", () => {

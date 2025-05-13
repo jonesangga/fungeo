@@ -2,6 +2,7 @@
 
 #### 13-05-25
 
+- compiler.test: parse_loop() (Cond, Inc, JmpBack), binary() (IsDiv)
 - chunk.test: Cond, Inc, JmpBack, IsDiv
 - scanner.test: TokenT.Arrow
 

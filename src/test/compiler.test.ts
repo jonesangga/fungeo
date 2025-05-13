@@ -51,6 +51,16 @@ describe("compiler:binary", () => {
         ]);
     });
 
+    it("|", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "multipleOf2 = 2 | 6";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 1, Op.Load, 2, Op.IsDiv,
+            Op.Set, 0, Kind.Boolean, Op.Ret,
+        ]);
+    });
+
     it("prec: +-", () => {
         let chunk = new Chunk("test chunk");
         let source = "num = 12 + 34 - 56";
@@ -423,6 +433,22 @@ describe("compiler:grouping", () => {
         });
     });
 
+});
+
+describe("compiler:loop", () => {
+
+    it("success", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,5] -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(chunk.code, [
+            Op.Load, 0, Op.Load, 1, Op.SetLoc,
+            Op.Cond, Op.JmpF, 9, Op.Pop,
+            Op.GetLoc, 0, Op.CallNat, 2, 0,
+            Op.Inc, Op.JmpBack, -12,
+            Op.Pop, Op.Pop, Op.Pop, Op.Ret,
+        ]);
+    });
 });
 
 describe("compiler:assignment", () => {
