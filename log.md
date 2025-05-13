@@ -1,5 +1,9 @@
 # Log
 
+#### 13-05-25
+
+- scanner.test: TokenT.Arrow
+
 #### 12-05-25
 
 - add show function
