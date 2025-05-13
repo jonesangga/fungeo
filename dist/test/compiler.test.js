@@ -387,6 +387,22 @@ describe("compiler:loop", () => {
             1200, 1200, 1200, 1300,
         ]);
     });
+    it("error: start not number", () => {
+        let chunk = new Chunk("test chunk");
+        let source = '["a", 2] -> i Print i';
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'a': start of range must be number\n"
+        });
+    });
+    it("error: end not number", () => {
+        let chunk = new Chunk("test chunk");
+        let source = '[2, false] -> i Print i';
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'false': end of range must be number\n"
+        });
+    });
     it("error: no comma", () => {
         let chunk = new Chunk("test chunk");
         let source = "[1] -> i Print i";

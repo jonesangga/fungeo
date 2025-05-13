@@ -2,6 +2,8 @@
 
 #### 13-05-25
 
+- compiler.test error: start and end not number
+- start and end of range in loop should be number
 - change chunk.test: Inc, Cond
 
 - test compiler error

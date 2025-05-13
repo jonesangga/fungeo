@@ -461,12 +461,20 @@ function emitLoop(loopStart) {
 }
 function parse_loop() {
     beginScope();
+    lastType = invalidType;
     expression();
+    if (lastType.kind !== 500) {
+        error("start of range must be number");
+    }
     consume(100, "expect ',' between start and end");
     let start = current.locals.length;
     let startRange = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
+    lastType = invalidType;
     expression();
+    if (lastType.kind !== 500) {
+        error("end of range must be number");
+    }
     consume(700, "expect ']' in range");
     consume(1195, "expect '->' after range");
     let endRange = { name: "_End", type: numberType, depth: current.scopeDepth };

@@ -571,14 +571,22 @@ function emitLoop(loopStart: number): void {
 function parse_loop(): void {
     beginScope();
 
+    lastType = invalidType;
     expression();
+    if (lastType.kind !== Kind.Number) {
+        error("start of range must be number");
+    }
     consume(TokenT.Comma, "expect ',' between start and end");
 
     let start = current.locals.length;
     let startRange: Local = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
 
+    lastType = invalidType;
     expression();
+    if (lastType.kind !== Kind.Number) {
+        error("end of range must be number");
+    }
     consume(TokenT.RBracket, "expect ']' in range");
     consume(TokenT.Arrow, "expect '->' after range");
 
