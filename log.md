@@ -2,6 +2,7 @@
 
 #### 13-05-25
 
+- chunk.test: Cond, Inc, JmpBack, IsDiv
 - scanner.test: TokenT.Arrow
 
 #### 12-05-25
