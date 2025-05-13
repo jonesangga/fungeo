@@ -178,6 +178,30 @@ describe("vm:stack", () => {
         ]);
     });
 
+    it("Op.IsDiv", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "isDiv = 5 | 10";
+        let result = compiler.compile(source, chunk);
+        console.log(chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1]
+        ]);
+
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.IsDiv
+        assert.deepEqual(stack.slice(0, stackTop), [
+            new FGBoolean(true)
+        ]);
+    });
+
     it("error: Op.Div", () => {
         vm.init();
         let chunk = new Chunk("test chunk");
@@ -497,6 +521,68 @@ describe("vm:stack", () => {
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
 
+    it("loop", () => {
+        vm.init();
+        let chunk = new Chunk("test chunk");
+        let source = "[0,3] -> i Print i";
+        let result = compiler.compile(source, chunk);
+
+        vm.set(chunk);
+        vm.step();      // Op.Load
+        vm.step();      // Op.Load
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[1]
+        ]);
+
+        vm.step();      // Op.SetLoc
+
+        for (let i = 0; i <= 3; i++) {
+            vm.step();      // Op.Cond
+            assert.deepEqual(stack.slice(0, stackTop), [
+                chunk.values[0], chunk.values[1], new FGBoolean(true)
+            ]);
+
+            vm.step();      // Op.JmpF
+            vm.step();      // Op.Pop
+            assert.deepEqual(stack.slice(0, stackTop), [
+                chunk.values[0], chunk.values[1]
+            ]);
+
+            vm.step();      // Op.GetLoc
+            assert.deepEqual(stack.slice(0, stackTop), [
+                chunk.values[0], chunk.values[1], chunk.values[0]
+            ]);
+
+            vm.step();      // Op.CallNat
+            assert.deepEqual(stack.slice(0, stackTop), [
+                chunk.values[0], chunk.values[1]
+            ]);
+
+            vm.step();      // Op.Inc
+            assert.deepEqual(stack.slice(0, stackTop), [
+                new FGNumber(i+1), chunk.values[1]
+            ]);
+
+            vm.step();      // Op.JmpBack
+        }
+
+        vm.step();      // Op.Cond
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[1], new FGBoolean(false)
+        ]);
+
+        vm.step();      // Op.JmpF
+        vm.step();      // Op.Pop
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0], chunk.values[1]
+        ]);
+        vm.step();      // Op.Pop
+        assert.deepEqual(stack.slice(0, stackTop), [
+            chunk.values[0]
+        ]);
+        vm.step();      // Op.Pop
+        assert.deepEqual(stack.slice(0, stackTop), []);
+    });
 });
 
 describe("vm:output: && and ||", () => {
