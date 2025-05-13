@@ -178,7 +178,8 @@ function run(): boolean {
             case Op.Inc: {
                 let pos = read_byte();
                 let a = stack[pos] as FGNumber;
-                a.value++;
+                let step = stack[pos+2] as FGNumber;
+                a.value += step.value;
                 break;
             }
 

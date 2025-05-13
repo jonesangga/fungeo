@@ -156,7 +156,8 @@ function run() {
             case 595: {
                 let pos = read_byte();
                 let a = stack[pos];
-                a.value++;
+                let step = stack[pos + 2];
+                a.value += step.value;
                 break;
             }
             case 616:

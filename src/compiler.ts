@@ -576,22 +576,33 @@ function parse_loop(): void {
     if (lastType.kind !== Kind.Number) {
         error("start of range must be number");
     }
-    consume(TokenT.Comma, "expect ',' between start and end");
-
     let start = current.locals.length;
     let startRange: Local = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
+
+    consume(TokenT.Comma, "expect ',' between start and end");
 
     lastType = invalidType;
     expression();
     if (lastType.kind !== Kind.Number) {
         error("end of range must be number");
     }
+    let endRange: Local = { name: "_End", type: numberType, depth: current.scopeDepth };
+    current.locals.push(endRange);
+
+    // Parse optional step.
+    if (match(TokenT.Comma)) {
+        expression();
+    } else {
+        // Manually add step. Default is 1.
+        emitConstant(new FGNumber(1));
+    }
+    let stepRange: Local = { name: "_Step", type: numberType, depth: current.scopeDepth };
+    current.locals.push(stepRange);
+
     consume(TokenT.RBracket, "expect ']' in range");
     consume(TokenT.Arrow, "expect '->' after range");
 
-    let endRange: Local = { name: "_End", type: numberType, depth: current.scopeDepth };
-    current.locals.push(endRange);
 
     if (!match(TokenT.Name)) {
         error_at_current("expect name for iterator");
@@ -622,7 +633,7 @@ function parse_loop(): void {
         consume(TokenT.RBrace, "expect '}' after block");
 
         // Pop additional locals from the stack.
-        while (current.locals.length > start + 2) {
+        while (current.locals.length > start + 3) {
             emitByte(Op.Pop);
             current.locals.pop();
         }
@@ -777,7 +788,8 @@ function statement(): void {
         endScope();
     } else if (match(TokenT.If)) {
         parse_if();
-    } else if (match(TokenT.LBracket)) {
+    } else if (match(TokenT.LBracket)
+            || match(TokenT.LParen)) {
         parse_loop();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.

@@ -2,6 +2,9 @@
 
 #### 13-05-25
 
+- mandatory step local
+- pass amount to increent
+- support step [a,b,step]
 - compiler.test error: start and end not number
 - start and end of range in loop should be number
 - change chunk.test: Inc, Cond

@@ -466,19 +466,27 @@ function parse_loop() {
     if (lastType.kind !== 500) {
         error("start of range must be number");
     }
-    consume(100, "expect ',' between start and end");
     let start = current.locals.length;
     let startRange = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
+    consume(100, "expect ',' between start and end");
     lastType = invalidType;
     expression();
     if (lastType.kind !== 500) {
         error("end of range must be number");
     }
-    consume(700, "expect ']' in range");
-    consume(1195, "expect '->' after range");
     let endRange = { name: "_End", type: numberType, depth: current.scopeDepth };
     current.locals.push(endRange);
+    if (match(100)) {
+        expression();
+    }
+    else {
+        emitConstant(new FGNumber(1));
+    }
+    let stepRange = { name: "_Step", type: numberType, depth: current.scopeDepth };
+    current.locals.push(stepRange);
+    consume(700, "expect ']' in range");
+    consume(1195, "expect '->' after range");
     if (!match(1700)) {
         error_at_current("expect name for iterator");
     }
@@ -501,7 +509,7 @@ function parse_loop() {
             declaration();
         }
         consume(695, "expect '}' after block");
-        while (current.locals.length > start + 2) {
+        while (current.locals.length > start + 3) {
             emitByte(1200);
             current.locals.pop();
         }
@@ -589,7 +597,8 @@ function statement() {
     else if (match(2400)) {
         parse_if();
     }
-    else if (match(400)) {
+    else if (match(400)
+        || match(500)) {
         parse_loop();
     }
     else if (match(900)) {

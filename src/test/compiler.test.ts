@@ -442,11 +442,11 @@ describe("compiler:loop", () => {
         let source = "[1,5] -> i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            Op.Load, 0, Op.Load, 1, Op.SetLoc,
+            Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
             Op.Cond, 0, Op.JmpF, 10, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 2, 0,
+            Op.GetLoc, 0, Op.CallNat, 3, 0,
             Op.Inc, 0, Op.JmpBack, -14,
-            Op.Pop, Op.Pop, Op.Pop, Op.Ret,
+            Op.Pop, Op.Pop, Op.Pop, Op.Pop, Op.Ret,
         ]);
     });
 
