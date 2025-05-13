@@ -370,7 +370,7 @@ function set_name(name: string): void {
 function set_local(name: string): void {
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
-        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+        if (local.depth < current.scopeDepth) {
             break;
         }
         if (name === local.name) {
@@ -572,45 +572,63 @@ function parse_loop(): void {
     beginScope();
 
     expression();
-    consume(TokenT.Comma, "expect ',' in range");
+    consume(TokenT.Comma, "expect ',' between start and end");
+
+    let start = current.locals.length;
+    let startRange: Local = { name: "_Start", type: numberType, depth: current.scopeDepth };
+    current.locals.push(startRange);
 
     expression();
-    consume(TokenT.RBracket, "expect ']' at the end of range");
+    consume(TokenT.RBracket, "expect ']' in range");
     consume(TokenT.Arrow, "expect '->' after range");
 
+    let endRange: Local = { name: "_End", type: numberType, depth: current.scopeDepth };
+    current.locals.push(endRange);
+
     if (!match(TokenT.Name)) {
-        error("expect name for iterator");
+        error_at_current("expect name for iterator");
     }
 
     let name = parser.previous.lexeme;
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
-        if (local.depth !== -1 && local.depth < current.scopeDepth) {
-            break;
-        }
-        if (name === local.name) {
+        if (local.depth < current.scopeDepth) break;
+        if (name === local.name)
             error(`${ name } already defined in this scope`);
-        }
     }
-    let local: Local = { name, type: numberType, depth: current.scopeDepth };
-    current.locals.push(local);
+    current.locals[start].name = name;
     emitByte(Op.SetLoc);
 
     let loopStart = currentChunk().code.length;
 
-    emitByte(Op.Cond);
+    emitBytes(Op.Cond, start);
+
     let exitJump = emitJump(Op.JmpF);
-    emitByte(Op.Pop);   // Result of Op.Cond.
+    emitByte(Op.Pop);                   // Discard the result of Op.Cond.
 
-    statement();
+    // Parse the body. Handle new block.
+    if (match(TokenT.LBrace)) {
+        while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
+            declaration();
+        }
+        consume(TokenT.RBrace, "expect '}' after block");
 
-    emitByte(Op.Inc);
+        // Pop additional locals from the stack.
+        while (current.locals.length > start + 2) {
+            emitByte(Op.Pop);
+            current.locals.pop();
+        }
+    } else {
+        statement();
+    }
+
+    // Increment the iterator.
+    emitBytes(Op.Inc, start);
     emitLoop(loopStart);
 
     patchJump(exitJump);
-    emitByte(Op.Pop);   // for false.
-    emitByte(Op.Pop);   // for upper buond.
-    endScope();         // for lower bound.
+    emitByte(Op.Pop);   // For false.
+    endScope();         // For lower bound.
     lastType = invalidType;
 }
 

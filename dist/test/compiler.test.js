@@ -375,17 +375,57 @@ describe("compiler:grouping", () => {
     });
 });
 describe("compiler:loop", () => {
-    it("success", () => {
+    it("success: single", () => {
         let chunk = new Chunk("test chunk");
         let source = "[1,5] -> i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 0, 800, 1, 1410,
-            210, 620, 9, 1200,
+            210, 0, 620, 10, 1200,
             395, 0, 200, 2, 0,
-            595, 616, -12,
+            595, 0, 616, -14,
             1200, 1200, 1200, 1300,
         ]);
+    });
+    it("error: no comma", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1] -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at ']': expect ',' between start and end\n"
+        });
+    });
+    it("error: no ]", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3 -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '->': expect ']' in range\n"
+        });
+    });
+    it("error: no ->", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'i': expect '->' after range\n"
+        });
+    });
+    it("error: no name", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] -> 2 Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': expect name for iterator\n"
+        });
+    });
+    it("error: reassignment to iterator", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] -> i { i = 3 Print i }";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '=': i already defined in this scope\n"
+        });
     });
 });
 describe("compiler:assignment", () => {

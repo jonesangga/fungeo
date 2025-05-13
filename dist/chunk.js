@@ -121,19 +121,19 @@ class Chunk {
                 result += `${padr7(name)} ${padl4(offset)} -> ${offset + 2 + jump}\n`;
                 return [result, offset + 2];
             }
-            case 395: {
+            case 210:
+            case 395:
+            case 595: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
             }
             case 100:
             case 120:
-            case 210:
             case 300:
             case 380:
             case 390:
             case 530:
-            case 595:
             case 610:
             case 690:
             case 810:

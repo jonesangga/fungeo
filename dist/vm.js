@@ -144,8 +144,9 @@ function run() {
                 compare(geq);
                 break;
             case 210: {
-                let b = peek(0);
-                let a = peek(1);
+                let pos = read_byte();
+                let a = stack[pos];
+                let b = stack[pos + 1];
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -153,7 +154,8 @@ function run() {
                 break;
             }
             case 595: {
-                let a = peek(1);
+                let pos = read_byte();
+                let a = stack[pos];
                 a.value++;
                 break;
             }

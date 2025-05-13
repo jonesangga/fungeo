@@ -2,6 +2,37 @@
 
 #### 13-05-25
 
+- change chunk.test: Inc, Cond
+
+- test compiler error
+  no ,
+  no ]
+  no ->
+  no iterator
+  reassignment to iterator
+
+- solved
+- bug: if there is assignment in body loop it is not popped after assignment
+  normally it is popped in endScope()
+  should simulate endScope() but the scopeDepth is not incremented here
+  solution: iterate and pop locals in current.locals UNTIL start+1
+
+- I thinkk I should add dummy locals in each loop
+  _Start, and _End correpond to start and end of range
+  and when parsing the iterator name, manually change the _Start name to it
+
+- solved
+- bug: same as Inc below, Cond must have arg
+
+- update Inc in chunk related to below bug
+- bug: when there is another local in loop body, Inc operator will increment the END of the range
+  should add arg (START of the range) for Inc to look and change
+
+- solved
+- bug: if there is a block in loop body it will scopeDepth will be incremented
+  this make local variable can be reassigned since the check for duplicates fail
+  should parse `{` before the body and `}` after the body
+
 - vm.test: JmpBack, Inc, Cond, IsDiv
 - compiler.test: parse_loop() (Cond, Inc, JmpBack), binary() (IsDiv)
 - chunk.test: Cond, Inc, JmpBack, IsDiv

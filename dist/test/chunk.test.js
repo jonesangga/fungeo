@@ -39,12 +39,10 @@ describe("chunk:disassemble_instr", () => {
     it("all op with no arg", () => {
         t(100, "0000  123 Add\n");
         t(120, "0000  123 AddStr\n");
-        t(210, "0000  123 Cond\n");
         t(300, "0000  123 Div\n");
         t(380, "0000  123 Eq\n");
         t(390, "0000  123 GEq\n");
         t(530, "0000  123 GT\n");
-        t(595, "0000  123 Inc\n");
         t(610, "0000  123 IsDiv\n");
         t(690, "0000  123 LEq\n");
         t(810, "0000  123 LT\n");
@@ -69,6 +67,19 @@ describe("chunk:disassemble_instr", () => {
         s(400, "0000  100 GetNat     0 '123'\n");
         s(500, "0000  100 GetUsr     0 '123'\n");
         s(800, "0000  100 Load       0 '123'\n");
+    });
+    function r(op, expect) {
+        let chunk = new Chunk("");
+        let start = 3;
+        chunk.write(op, 100);
+        chunk.write(start, 100);
+        let [result, offset] = chunk.disassemble_instr(0);
+        assert.deepEqual(result, expect);
+        assert.equal(offset, 2);
+    }
+    it("Cond and Inc", () => {
+        r(210, "0000  100 Cond       3\n");
+        r(595, "0000  100 Inc        3\n");
     });
     it("Op.GetLoc, Op.SetLoc, Op.Pop", () => {
         let chunk = new Chunk("");
@@ -159,38 +170,38 @@ describe("chunk:disassemble_instr", () => {
         assert.deepEqual(result, "0004    | SetLoc\n");
         assert.equal(offset, 5);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0005    | Cond\n");
-        assert.equal(offset, 6);
+        assert.deepEqual(result, "0005    | Cond       0\n");
+        assert.equal(offset, 7);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0006    | JmpF       6 -> 17\n");
-        assert.equal(offset, 8);
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0008    | Pop\n");
+        assert.deepEqual(result, "0007    | JmpF       7 -> 19\n");
         assert.equal(offset, 9);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0009    | GetLoc     0\n");
-        assert.equal(offset, 11);
+        assert.deepEqual(result, "0009    | Pop\n");
+        assert.equal(offset, 10);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0011    | CallNat    2 'v0'\n");
-        assert.equal(offset, 14);
+        assert.deepEqual(result, "0010    | GetLoc     0\n");
+        assert.equal(offset, 12);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0014    | Inc\n");
+        assert.deepEqual(result, "0012    | CallNat    2 'v0'\n");
         assert.equal(offset, 15);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0015    | JmpBack   15 -> 5\n");
+        assert.deepEqual(result, "0015    | Inc        0\n");
         assert.equal(offset, 17);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0017    | Pop\n");
-        assert.equal(offset, 18);
-        [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0018    | Pop\n");
+        assert.deepEqual(result, "0017    | JmpBack   17 -> 5\n");
         assert.equal(offset, 19);
         [result, offset] = chunk.disassemble_instr(offset);
         assert.deepEqual(result, "0019    | Pop\n");
         assert.equal(offset, 20);
         [result, offset] = chunk.disassemble_instr(offset);
-        assert.deepEqual(result, "0020    | Ret\n");
+        assert.deepEqual(result, "0020    | Pop\n");
         assert.equal(offset, 21);
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0021    | Pop\n");
+        assert.equal(offset, 22);
+        [result, offset] = chunk.disassemble_instr(offset);
+        assert.deepEqual(result, "0022    | Ret\n");
+        assert.equal(offset, 23);
     });
     it("Op.CallNat", () => {
         let chunk = new Chunk("test chunk");

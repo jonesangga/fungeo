@@ -437,17 +437,62 @@ describe("compiler:grouping", () => {
 
 describe("compiler:loop", () => {
 
-    it("success", () => {
+    it("success: single", () => {
         let chunk = new Chunk("test chunk");
         let source = "[1,5] -> i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             Op.Load, 0, Op.Load, 1, Op.SetLoc,
-            Op.Cond, Op.JmpF, 9, Op.Pop,
+            Op.Cond, 0, Op.JmpF, 10, Op.Pop,
             Op.GetLoc, 0, Op.CallNat, 2, 0,
-            Op.Inc, Op.JmpBack, -12,
+            Op.Inc, 0, Op.JmpBack, -14,
             Op.Pop, Op.Pop, Op.Pop, Op.Ret,
         ]);
+    });
+
+    it("error: no comma", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1] -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at ']': expect ',' between start and end\n"
+        });
+    });
+
+    it("error: no ]", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3 -> i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '->': expect ']' in range\n"
+        });
+    });
+
+    it("error: no ->", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] i Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at 'i': expect '->' after range\n"
+        });
+    });
+
+    it("error: no name", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] -> 2 Print i";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '2': expect name for iterator\n"
+        });
+    });
+
+    it("error: reassignment to iterator", () => {
+        let chunk = new Chunk("test chunk");
+        let source = "[1,3] -> i { i = 3 Print i }";
+        let result = compiler.compile(source, chunk);
+        assert.deepEqual(result, {
+            success: false, message: "1: at '=': i already defined in this scope\n"
+        });
     });
 });
 

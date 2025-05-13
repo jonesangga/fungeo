@@ -165,8 +165,9 @@ function run(): boolean {
             case Op.GEq: compare(geq); break;
 
             case Op.Cond: {
-                let b = peek(0) as FGNumber;
-                let a = peek(1) as FGNumber;
+                let pos = read_byte();
+                let a = stack[pos] as FGNumber;
+                let b = stack[pos + 1] as FGNumber;
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -174,9 +175,9 @@ function run(): boolean {
                 break;
             }
 
-            // TODO: generalizes.
             case Op.Inc: {
-                let a = peek(1) as FGNumber;
+                let pos = read_byte();
+                let a = stack[pos] as FGNumber;
                 a.value++;
                 break;
             }

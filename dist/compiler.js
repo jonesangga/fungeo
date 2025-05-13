@@ -287,7 +287,7 @@ function set_name(name) {
 function set_local(name) {
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
-        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+        if (local.depth < current.scopeDepth) {
             break;
         }
         if (name === local.name) {
@@ -462,35 +462,48 @@ function emitLoop(loopStart) {
 function parse_loop() {
     beginScope();
     expression();
-    consume(100, "expect ',' in range");
+    consume(100, "expect ',' between start and end");
+    let start = current.locals.length;
+    let startRange = { name: "_Start", type: numberType, depth: current.scopeDepth };
+    current.locals.push(startRange);
     expression();
-    consume(700, "expect ']' at the end of range");
+    consume(700, "expect ']' in range");
     consume(1195, "expect '->' after range");
+    let endRange = { name: "_End", type: numberType, depth: current.scopeDepth };
+    current.locals.push(endRange);
     if (!match(1700)) {
-        error("expect name for iterator");
+        error_at_current("expect name for iterator");
     }
     let name = parser.previous.lexeme;
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
-        if (local.depth !== -1 && local.depth < current.scopeDepth) {
+        if (local.depth < current.scopeDepth)
             break;
-        }
-        if (name === local.name) {
+        if (name === local.name)
             error(`${name} already defined in this scope`);
-        }
     }
-    let local = { name, type: numberType, depth: current.scopeDepth };
-    current.locals.push(local);
+    current.locals[start].name = name;
     emitByte(1410);
     let loopStart = currentChunk().code.length;
-    emitByte(210);
+    emitBytes(210, start);
     let exitJump = emitJump(620);
     emitByte(1200);
-    statement();
-    emitByte(595);
+    if (match(300)) {
+        while (!check(695) && !check(2100)) {
+            declaration();
+        }
+        consume(695, "expect '}' after block");
+        while (current.locals.length > start + 2) {
+            emitByte(1200);
+            current.locals.pop();
+        }
+    }
+    else {
+        statement();
+    }
+    emitBytes(595, start);
     emitLoop(loopStart);
     patchJump(exitJump);
-    emitByte(1200);
     emitByte(1200);
     endScope();
     lastType = invalidType;
