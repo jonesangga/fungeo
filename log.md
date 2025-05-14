@@ -2,6 +2,7 @@
 
 #### 14-05-25
 
+- change parser.previous to prevTok, parser.current to currTok
 - make Padl function
   Padl "a" 4 " " -> "  a"
 - support open right interval

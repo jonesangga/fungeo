@@ -63,10 +63,8 @@ const rules = {
 };
 let current = { locals: [], scopeDepth: 0 };
 let invalidToken = { kind: 2100, line: -1, lexeme: "" };
-let parser = {
-    current: invalidToken,
-    previous: invalidToken,
-};
+let currTok = invalidToken;
+let prevTok = invalidToken;
 let compilingChunk;
 function currentChunk() {
     return compilingChunk;
@@ -77,10 +75,10 @@ function init_compiler(compiler) {
     current = compiler;
 }
 function error_at_current(message) {
-    error_at(parser.current, message);
+    error_at(currTok, message);
 }
 function error(message) {
-    error_at(parser.previous, message);
+    error_at(prevTok, message);
 }
 function error_at(token, message) {
     let result = token.line + "";
@@ -94,31 +92,31 @@ function error_at(token, message) {
     throw new CompileError(result);
 }
 function advance() {
-    parser.previous = parser.current;
-    parser.current = scanner.next();
-    if (parser.current.kind === 2200) {
-        error_at_current(parser.current.lexeme);
+    prevTok = currTok;
+    currTok = scanner.next();
+    if (currTok.kind === 2200) {
+        error_at_current(currTok.lexeme);
     }
 }
 function check(kind) {
-    return parser.current.kind === kind;
+    return currTok.kind === kind;
 }
 function match(kind) {
-    if (parser.current.kind === kind) {
+    if (currTok.kind === kind) {
         advance();
         return true;
     }
     return false;
 }
 function consume(kind, message) {
-    if (parser.current.kind === kind) {
+    if (currTok.kind === kind) {
         advance();
         return;
     }
     error_at_current(message);
 }
 function emitByte(byte) {
-    currentChunk().write(byte, parser.previous.line);
+    currentChunk().write(byte, prevTok.line);
 }
 function emitBytes(byte1, byte2) {
     emitByte(byte1);
@@ -166,7 +164,7 @@ function neq() {
     lastType = { kind: 300 };
 }
 function compare() {
-    let operator = parser.previous.kind;
+    let operator = prevTok.kind;
     let left = lastType.kind;
     if (left !== 500 && left !== 600)
         error("can only compare strings or numbers");
@@ -191,11 +189,11 @@ function compare() {
     lastType = { kind: 300 };
 }
 function binary() {
-    let operator = parser.previous.lexeme;
+    let operator = prevTok.lexeme;
     if (lastType.kind !== 500) {
         error(`'${operator}' only for numbers`);
     }
-    let operatorType = parser.previous.kind;
+    let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
     if (lastType.kind !== 500) {
@@ -222,11 +220,11 @@ function binary() {
     }
 }
 function binary_str() {
-    let operator = parser.previous.lexeme;
+    let operator = prevTok.lexeme;
     if (lastType.kind !== 600) {
         error(`'${operator}' only for strings`);
     }
-    let operatorType = parser.previous.kind;
+    let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
     if (lastType.kind !== 600) {
@@ -235,19 +233,19 @@ function binary_str() {
     emitByte(120);
 }
 function parse_boolean() {
-    if (parser.previous.kind === 2000)
+    if (prevTok.kind === 2000)
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
     lastType = { kind: 300 };
 }
 function parse_number() {
-    let value = Number(parser.previous.lexeme);
+    let value = Number(prevTok.lexeme);
     emitConstant(new FGNumber(value));
     lastType = numberType;
 }
 function parse_string() {
-    emitConstant(new FGString(parser.previous.lexeme));
+    emitConstant(new FGString(prevTok.lexeme));
     lastType = { kind: 600 };
 }
 let tempNames = {};
@@ -261,7 +259,7 @@ function resolveLocal(compiler, name) {
     return -1;
 }
 function parse_name() {
-    let name = parser.previous.lexeme;
+    let name = prevTok.lexeme;
     if (match(1500)) {
         if (canAssign) {
             canAssign = false;
@@ -499,7 +497,7 @@ function parse_loop() {
     if (!match(1700)) {
         error_at_current("expect name for iterator");
     }
-    let name = parser.previous.lexeme;
+    let name = prevTok.lexeme;
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
         if (local.depth < current.scopeDepth)
@@ -561,15 +559,15 @@ function or_() {
 }
 function parsePrecedence(precedence) {
     advance();
-    let prefixRule = rules[parser.previous.kind].prefix;
+    let prefixRule = rules[prevTok.kind].prefix;
     if (prefixRule === null) {
         error("expect expression");
         return;
     }
     prefixRule();
-    while (precedence <= rules[parser.current.kind].precedence) {
+    while (precedence <= rules[currTok.kind].precedence) {
         advance();
-        let infixRule = rules[parser.previous.kind].infix;
+        let infixRule = rules[prevTok.kind].infix;
         if (infixRule === null) {
             error("expect infix operator");
             return;
@@ -584,10 +582,10 @@ function identifierConstant(name) {
     return makeConstant(new FGString(name.lexeme));
 }
 function prev() {
-    console.log(TokenTName[parser.previous.kind]);
+    console.log(TokenTName[prevTok.kind]);
 }
 function curr() {
-    console.log(TokenTName[parser.current.kind]);
+    console.log(TokenTName[currTok.kind]);
 }
 function declaration() {
     statement();
@@ -613,7 +611,7 @@ function statement() {
     else if (match(900)) {
     }
     else {
-        error_at_current(`cannot start statement with ${TokenTName[parser.current.kind]}`);
+        error_at_current(`cannot start statement with ${TokenTName[currTok.kind]}`);
     }
     if (lastType !== invalidType) {
         error("forbidden expression statement");
@@ -645,8 +643,8 @@ const compiler = {
         init_compiler(comp);
         compilingChunk = chunk;
         tempNames = {};
-        parser.previous = invalidToken;
-        parser.current = invalidToken;
+        prevTok = invalidToken;
+        currTok = invalidToken;
         try {
             advance();
             while (!match(2100)) {
