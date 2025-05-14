@@ -7,6 +7,7 @@ export const enum Kind {
     Callable = 400,
     Number = 500,
     String = 600,
+    Type = 650,
     Point = 700,      // Geometry.
 };
 
@@ -18,12 +19,25 @@ export const KindName: { [key in Kind]: string } = {
     [Kind.Number]: "Number",
     [Kind.Point]: "Point",
     [Kind.String]: "String",
+    [Kind.Type]: "Type",
 };
 
-export class FGBoolean {
+interface FG {
+    kind: Kind;
+    to_str(): string;
+    equal(other: FG): boolean;
+}
+
+export class FGBoolean implements FG {
     kind: Kind.Boolean = Kind.Boolean;
     constructor(public value: boolean) {}
     to_str(): string { return this.value.toString(); }
+    equal(other: FG): boolean {
+        if (this.kind !== other.kind) return false;
+        if ("value" in other)
+            return this.value === other.value;
+        return false;
+    }
 }
 
 export interface Version {
@@ -31,7 +45,7 @@ export interface Version {
     output:  Kind;
 }
 
-export class FGCallable {
+export class FGCallable implements FG {
     kind: Kind.Callable = Kind.Callable;
     constructor(
         public value: (n: number) => void,
@@ -39,9 +53,10 @@ export class FGCallable {
     ) {}
 
     to_str(): string { return "fn(n: number): void"; }
+    equal(other: FG) { return false; }
 }
 
-export class FGNumber {
+export class FGNumber implements FG {
     kind: Kind.Number = Kind.Number;
     constructor(public value: number) {}
     to_str(): string { return this.value + ""; }
@@ -58,9 +73,15 @@ export class FGNumber {
     sub(other: FGNumber): FGNumber {
         return new FGNumber(this.value - other.value);
     }
+    equal(other: FG): boolean {
+        if (this.kind !== other.kind) return false;
+        if ("value" in other)
+            return this.value === other.value;
+        return false;
+    }
 }
 
-export class FGString {
+export class FGString implements FG {
     kind: Kind.String = Kind.String;
     constructor(public value: string) {}
     to_str(): string { return this.value; }
@@ -68,8 +89,26 @@ export class FGString {
     add(other: FGString): FGString {
         return new FGString(this.value + other.value);
     }
+    equal(other: FG): boolean {
+        if (this.kind !== other.kind) return false;
+        if ("value" in other)
+            return this.value === other.value;
+        return false;
+    }
 }
 
-type LitObj = FGBoolean | FGNumber | FGString | FGCallable;
+export class FGType implements FG {
+    kind: Kind.Type = Kind.Type;
+    constructor(public base: Kind) {}
+    to_str(): string { return KindName[this.base]; }
+    equal(other: FG): boolean {
+        if (this.kind !== other.kind) return false;
+        if ("base" in other)
+            return this.base === other.base;
+        return false;
+    }
+}
+
+type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType;
 export type Value  = LitObj;
 export type Comparable = FGNumber | FGString;

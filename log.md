@@ -2,6 +2,9 @@
 
 #### 14-05-25
 
+- make equal() method fo each class
+- change Op.Eq implementation to use equal() method
+- new FGType
 - change parser.previous to prevTok, parser.current to currTok
 - make Padl function
   Padl "a" 4 " " -> "  a"

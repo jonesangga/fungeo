@@ -40,13 +40,6 @@ function compare(f) {
     let a = pop();
     push(new FGBoolean(f(a.value, b.value)));
 }
-function equal(a, b) {
-    if (a.kind !== b.kind)
-        return false;
-    if (a.kind === 500 || a.kind === 600 || a.kind === 300)
-        return a.value === b.value;
-    return false;
-}
 const lt = (a, b) => a < b;
 const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
@@ -122,13 +115,13 @@ function run() {
             case 380: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean(equal(a, b)));
+                push(new FGBoolean(a.equal(b)));
                 break;
             }
             case 1010: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean(!equal(a, b)));
+                push(new FGBoolean(!a.equal(b)));
                 break;
             }
             case 810:
