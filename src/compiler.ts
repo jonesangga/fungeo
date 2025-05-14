@@ -600,8 +600,6 @@ function parse_loop(): void {
     } else {
         consume(TokenT.RBracket, "expect ']' in range");
     }
-    consume(TokenT.Arrow, "expect '->' after range");
-
 
     if (!match(TokenT.Name)) {
         error_at_current("expect name for iterator");

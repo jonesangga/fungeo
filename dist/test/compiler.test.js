@@ -377,7 +377,7 @@ describe("compiler:grouping", () => {
 describe("compiler:loop", () => {
     it("success: single", () => {
         let chunk = new Chunk("test chunk");
-        let source = "[1,5] -> i Print i";
+        let source = "[1,5] i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
             800, 0, 800, 1, 800, 2, 100, 800, 3, 1410,
@@ -413,23 +413,15 @@ describe("compiler:loop", () => {
     });
     it("error: no ]", () => {
         let chunk = new Chunk("test chunk");
-        let source = "[1,3 -> i Print i";
+        let source = "[1,3 i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
-            success: false, message: "1: at '->': expect ']' in range\n"
-        });
-    });
-    it("error: no ->", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1,3] i Print i";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'i': expect '->' after range\n"
+            success: false, message: "1: at 'i': expect ']' in range\n"
         });
     });
     it("error: no name", () => {
         let chunk = new Chunk("test chunk");
-        let source = "[1,3] -> 2 Print i";
+        let source = "[1,3] 2 Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
             success: false, message: "1: at '2': expect name for iterator\n"
@@ -437,7 +429,7 @@ describe("compiler:loop", () => {
     });
     it("error: reassignment to iterator", () => {
         let chunk = new Chunk("test chunk");
-        let source = "[1,3] -> i { i = 3 Print i }";
+        let source = "[1,3] i { i = 3 Print i }";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(result, {
             success: false, message: "1: at '=': i already defined in this scope\n"

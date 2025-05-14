@@ -481,7 +481,6 @@ function parse_loop() {
     else {
         consume(700, "expect ']' in range");
     }
-    consume(1195, "expect '->' after range");
     if (!match(1700)) {
         error_at_current("expect name for iterator");
     }
