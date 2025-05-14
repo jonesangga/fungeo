@@ -1,5 +1,11 @@
 # Log
 
+#### 14-05-25
+
+- make Padl function
+  Padl "a" 4 " " -> "  a"
+- support open right interval
+
 #### 13-05-25
 
 - mandatory step local

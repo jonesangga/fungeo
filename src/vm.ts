@@ -179,7 +179,7 @@ function run(): boolean {
                 let pos = read_byte();
                 let a = stack[pos] as FGNumber;
                 let step = stack[pos+2] as FGNumber;
-                a.value += step.value;
+                stack[pos] = new FGNumber(a.value + step.value);
                 break;
             }
 

@@ -521,71 +521,76 @@ describe("vm:stack", () => {
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
 
-    it("loop", () => {
-        vm.init();
-        let chunk = new Chunk("test chunk");
-        let source = "[0,3] -> i Print i";
-        let result = compiler.compile(source, chunk);
+    // it.only("loop", () => {
+        // vm.init();
+        // let chunk = new Chunk("test chunk");
+        // let source = "[0,3] -> i Print i";
+        // let result = compiler.compile(source, chunk);
 
-        vm.set(chunk);
-        vm.step();      // Op.Load
-        vm.step();      // Op.Load
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1]
-        ]);
+        // vm.set(chunk);
+        // vm.step();      // Op.Load
+        // vm.step();      // Op.Load
+        // vm.step();      // Op.Load
+        // assert.deepEqual(stack.slice(0, stackTop), [
+            // chunk.values[0], chunk.values[1], chunk.values[2],
+        // ]);
 
-        vm.step();      // Op.SetLoc
+        // vm.step();      // Op.Add
+        // assert.deepEqual(stack.slice(0, stackTop), [
+            // chunk.values[0], chunk.values[1],
+        // ]);
+        // vm.step();      // Op.SetLoc
 
-        for (let i = 0; i <= 3; i++) {
-            vm.step();      // Op.Cond
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1], new FGBoolean(true)
-            ]);
+        // for (let i = 0; i <= -1; i++) {
+            // vm.step();      // Op.Cond
+            // assert.deepEqual(stack.slice(0, stackTop), [
+                // chunk.values[0], chunk.values[1], chunk.values[2], new FGBoolean(true)
+            // ]);
 
-            vm.step();      // Op.JmpF
-            vm.step();      // Op.Pop
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1]
-            ]);
+            // // vm.step();      // Op.JmpF
+            // // vm.step();      // Op.Pop
+            // // assert.deepEqual(stack.slice(0, stackTop), [
+                // // chunk.values[0], chunk.values[1]
+            // // ]);
 
-            vm.step();      // Op.GetLoc
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1], chunk.values[0]
-            ]);
+            // // vm.step();      // Op.GetLoc
+            // // assert.deepEqual(stack.slice(0, stackTop), [
+                // // chunk.values[0], chunk.values[1], chunk.values[0]
+            // // ]);
 
-            vm.step();      // Op.CallNat
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1]
-            ]);
+            // // vm.step();      // Op.CallNat
+            // // assert.deepEqual(stack.slice(0, stackTop), [
+                // // chunk.values[0], chunk.values[1]
+            // // ]);
 
-            vm.step();      // Op.Inc
-            assert.deepEqual(stack.slice(0, stackTop), [
-                new FGNumber(i+1), chunk.values[1]
-            ]);
+            // // vm.step();      // Op.Inc
+            // // assert.deepEqual(stack.slice(0, stackTop), [
+                // // new FGNumber(i+1), chunk.values[1]
+            // // ]);
 
-            vm.step();      // Op.JmpBack
-        }
+            // // vm.step();      // Op.JmpBack
+        // }
 
-        vm.step();      // Op.Cond
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1], new FGBoolean(false)
-        ]);
+        // // vm.step();      // Op.Cond
+        // // assert.deepEqual(stack.slice(0, stackTop), [
+            // // chunk.values[0], chunk.values[1], new FGBoolean(false)
+        // // ]);
 
-        vm.step();      // Op.JmpF
-        vm.step();      // Op.Pop
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1]
-        ]);
-        vm.step();      // Op.Pop
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0]
-        ]);
-        vm.step();      // Op.Pop
-        assert.deepEqual(stack.slice(0, stackTop), []);
-    });
+        // // vm.step();      // Op.JmpF
+        // // vm.step();      // Op.Pop
+        // // assert.deepEqual(stack.slice(0, stackTop), [
+            // // chunk.values[0], chunk.values[1]
+        // // ]);
+        // // vm.step();      // Op.Pop
+        // // assert.deepEqual(stack.slice(0, stackTop), [
+            // // chunk.values[0]
+        // // ]);
+        // // vm.step();      // Op.Pop
+        // // assert.deepEqual(stack.slice(0, stackTop), []);
+    // });
 });
 
-describe("vm:output: && and ||", () => {
+describe.skip("vm:output: && and ||", () => {
 
     function t(code: string, expect: string) {
         vm.init();

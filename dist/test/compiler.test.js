@@ -380,9 +380,9 @@ describe("compiler:loop", () => {
         let source = "[1,5] -> i Print i";
         let result = compiler.compile(source, chunk);
         assert.deepEqual(chunk.code, [
-            800, 0, 800, 1, 800, 2, 1410,
+            800, 0, 800, 1, 800, 2, 100, 800, 3, 1410,
             210, 0, 620, 10, 1200,
-            395, 0, 200, 3, 0,
+            395, 0, 200, 4, 0,
             595, 0, 616, -14,
             1200, 1200, 1200, 1200, 1300,
         ]);

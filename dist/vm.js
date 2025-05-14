@@ -1,5 +1,5 @@
 import { Chunk } from "./chunk.js";
-import { FGBoolean } from "./value.js";
+import { FGBoolean, FGNumber } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
 export let stack = [];
 export let stackTop = 0;
@@ -157,7 +157,7 @@ function run() {
                 let pos = read_byte();
                 let a = stack[pos];
                 let step = stack[pos + 2];
-                a.value += step.value;
+                stack[pos] = new FGNumber(a.value + step.value);
                 break;
             }
             case 616:

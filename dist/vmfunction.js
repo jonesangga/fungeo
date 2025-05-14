@@ -30,6 +30,19 @@ export let Show = new FGCallable(_Show, [
         output: 600,
     },
 ]);
+function _Padl(n) {
+    let filler = pop().value;
+    let width = pop().value;
+    let text = pop().value;
+    let result = (filler.repeat(width) + text).slice(-width);
+    push(new FGString(result));
+}
+export let Padl = new FGCallable(_Padl, [
+    {
+        input: [600, 500, 600],
+        output: 600,
+    },
+]);
 function _Type(n) {
     let value = pop();
     push(new FGString(KindName[value.kind]));

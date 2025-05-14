@@ -324,6 +324,7 @@ function get_name(name) {
         lastType = current.locals[arg].type;
     }
     else if (Object.hasOwn(nativeNames, name)) {
+        console.log("in nativeNames");
         if (nativeNames[name].kind === 400)
             global_callable(name);
         else
@@ -391,7 +392,7 @@ function global_callable(name_) {
             continue;
         for (let k = j; k < inputVersion.length; k++) {
             lastType = invalidType;
-            expression();
+            parsePrecedence(600);
             gotTypes.push(lastType.kind);
             if (!matchType(inputVersion[k], lastType.kind)) {
                 checkNextVersion = true;
@@ -475,6 +476,9 @@ function parse_loop() {
     if (lastType.kind !== 500) {
         error("end of range must be number");
     }
+    let openRightId = currentChunk().values.length;
+    emitConstant(new FGNumber(0));
+    emitByte(100);
     let endRange = { name: "_End", type: numberType, depth: current.scopeDepth };
     current.locals.push(endRange);
     if (match(100)) {
@@ -485,7 +489,12 @@ function parse_loop() {
     }
     let stepRange = { name: "_Step", type: numberType, depth: current.scopeDepth };
     current.locals.push(stepRange);
-    consume(700, "expect ']' in range");
+    if (match(800)) {
+        currentChunk().values[openRightId] = new FGNumber(-1);
+    }
+    else {
+        consume(700, "expect ']' in range");
+    }
     consume(1195, "expect '->' after range");
     if (!match(1700)) {
         error_at_current("expect name for iterator");

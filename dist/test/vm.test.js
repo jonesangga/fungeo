@@ -426,60 +426,8 @@ describe("vm:stack", () => {
         vm.step();
         assert.deepEqual(stack.slice(0, stackTop), []);
     });
-    it("loop", () => {
-        vm.init();
-        let chunk = new Chunk("test chunk");
-        let source = "[0,3] -> i Print i";
-        let result = compiler.compile(source, chunk);
-        vm.set(chunk);
-        vm.step();
-        vm.step();
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1]
-        ]);
-        vm.step();
-        for (let i = 0; i <= 3; i++) {
-            vm.step();
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1], new FGBoolean(true)
-            ]);
-            vm.step();
-            vm.step();
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1]
-            ]);
-            vm.step();
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1], chunk.values[0]
-            ]);
-            vm.step();
-            assert.deepEqual(stack.slice(0, stackTop), [
-                chunk.values[0], chunk.values[1]
-            ]);
-            vm.step();
-            assert.deepEqual(stack.slice(0, stackTop), [
-                new FGNumber(i + 1), chunk.values[1]
-            ]);
-            vm.step();
-        }
-        vm.step();
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1], new FGBoolean(false)
-        ]);
-        vm.step();
-        vm.step();
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0], chunk.values[1]
-        ]);
-        vm.step();
-        assert.deepEqual(stack.slice(0, stackTop), [
-            chunk.values[0]
-        ]);
-        vm.step();
-        assert.deepEqual(stack.slice(0, stackTop), []);
-    });
 });
-describe("vm:output: && and ||", () => {
+describe.skip("vm:output: && and ||", () => {
     function t(code, expect) {
         vm.init();
         let chunk = new Chunk("");

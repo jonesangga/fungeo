@@ -413,6 +413,7 @@ function get_name(name: string): void {
         lastType = current.locals[arg].type;
     }
     else if (Object.hasOwn(nativeNames, name)) {
+        console.log("in nativeNames");
         if (nativeNames[name].kind === Kind.Callable)
             global_callable(name);
         else
@@ -486,7 +487,7 @@ function global_callable(name_: string): void {
 
         for (let k = j; k < inputVersion.length; k++) {
             lastType = invalidType;
-            expression();
+            parsePrecedence(Precedence.Call);
             gotTypes.push(lastType.kind);
             if (!matchType(inputVersion[k], lastType.kind)) {
                 checkNextVersion = true;
@@ -587,6 +588,9 @@ function parse_loop(): void {
     if (lastType.kind !== Kind.Number) {
         error("end of range must be number");
     }
+    let openRightId = currentChunk().values.length;
+    emitConstant(new FGNumber(0));
+    emitByte(Op.Add);
     let endRange: Local = { name: "_End", type: numberType, depth: current.scopeDepth };
     current.locals.push(endRange);
 
@@ -600,7 +604,11 @@ function parse_loop(): void {
     let stepRange: Local = { name: "_Step", type: numberType, depth: current.scopeDepth };
     current.locals.push(stepRange);
 
-    consume(TokenT.RBracket, "expect ']' in range");
+    if (match(TokenT.RParen)) {
+        currentChunk().values[openRightId] = new FGNumber(-1);
+    } else {
+        consume(TokenT.RBracket, "expect ']' in range");
+    }
     consume(TokenT.Arrow, "expect '->' after range");
 
 
