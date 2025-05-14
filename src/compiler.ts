@@ -3,12 +3,24 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
-import { type Types, nativeNames, userNames } from "./names.js"
+import { type Info, nativeNames, userNames } from "./names.js"
 
-let invalidType: Types = { kind: Kind.Nothing };
-let numberType: Types = { kind: Kind.Number };
-let booleanType: Types = { kind: Kind.Boolean };
-let lastType: Types = invalidType;
+let numberType: Info = { kind: Kind.Number };
+
+type TypeCheck = {
+    base: Kind;
+}
+
+let booleanT = { base: Kind.Boolean };
+let numberT  = { base: Kind.Number };
+let stringT  = { base: Kind.String };
+let nothingT  = { base: Kind.Nothing };
+let lastT = nothingT;
+
+function assertT(actual: TypeCheck, expect: TypeCheck, msg: string): void {
+    if (actual.base !== expect.base)
+        error(msg);
+}
 
 // To distinguish function as argument vs function call.
 let canParseArgument = false;
@@ -79,7 +91,7 @@ const rules: { [key in TokenT]: ParseRule } = {
 
 interface Local {
     name: string;
-    type: Types;
+    type: Info;
     depth: number;
 }
 
@@ -203,42 +215,38 @@ function grouping(): void {
 
 function not(): void {
     parsePrecedence(Precedence.Unary);
-    if (lastType.kind !== Kind.Boolean) {
-        error(`'!' is only for boolean`);
-    }
+    assertT(lastT, booleanT, "'!' is only for boolean");
     emitByte(Op.Not);
 }
 
 function negate(): void {
     parsePrecedence(Precedence.Unary);
-    if (lastType.kind !== Kind.Number) {
-        error(`'-' is only for number`);
-    }
+    assertT(lastT, numberT, "'-' is only for number");
     emitByte(Op.Neg);
 }
 
 function eq(): void {
     parsePrecedence(Precedence.Equality + 1);
     emitByte(Op.Eq);
-    lastType = {kind: Kind.Boolean};
+    lastT = booleanT;
 }
 
 function neq(): void {
     parsePrecedence(Precedence.Equality + 1);
     emitByte(Op.NEq);
-    lastType = {kind: Kind.Boolean};
+    lastT = booleanT;
 }
 
 // Can only compare 2 numbers or 2 string for now.
 
 function compare(): void {
     let operator = prevTok.kind;
-    let left = lastType.kind;
+    let left = lastT.base;
     if (left !== Kind.Number && left !== Kind.String)
         error("can only compare strings or numbers");
 
     parsePrecedence(Precedence.Comparison + 1);
-    if (lastType.kind !== left)
+    if (lastT.base !== left)
         error("type not match");
 
     switch (operator) {
@@ -248,7 +256,7 @@ function compare(): void {
         case TokenT.GreaterEq: emitByte(Op.GEq); break;
         default:               error("unhandled camparison op");
     }
-    lastType = {kind: Kind.Boolean};
+    lastT = booleanT;
 }
 
 // Only for numbers.
@@ -256,20 +264,16 @@ function compare(): void {
 
 function binary(): void {
     let operator = prevTok.lexeme;
-    if (lastType.kind !== Kind.Number) {
-        error(`'${ operator }' only for numbers`);
-    }
+    assertT(lastT, numberT, `'${ operator }' only for numbers`);
 
     let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
 
-    if (lastType.kind !== Kind.Number) {
-        error(`'${ operator }' only for numbers`);
-    }
+    assertT(lastT, numberT, `'${ operator }' only for numbers`);
 
     switch (operatorType) {
-        case TokenT.Pipe:   emitByte(Op.IsDiv); lastType = booleanType; break;
+        case TokenT.Pipe:   emitByte(Op.IsDiv); lastT = booleanT; break;
         case TokenT.Plus:   emitByte(Op.Add); break;
         case TokenT.Minus:  emitByte(Op.Sub); break;
         case TokenT.Star:   emitByte(Op.Mul); break;
@@ -280,18 +284,13 @@ function binary(): void {
 
 function binary_str(): void {
     let operator = prevTok.lexeme;
-    if (lastType.kind !== Kind.String) {
-        error(`'${ operator }' only for strings`);
-    }
+    assertT(lastT, stringT, `'${ operator }' only for strings`);
 
     let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
 
-    if (lastType.kind !== Kind.String) {
-        error(`'${ operator }' only for strings`);
-    }
-
+    assertT(lastT, stringT, `'${ operator }' only for strings`);
     emitByte(Op.AddStr);
 }
 
@@ -303,18 +302,18 @@ function parse_boolean(): void {
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
-    lastType = {kind: Kind.Boolean};
+    lastT = booleanT;
 }
 
 function parse_number(): void {
     let value = Number(prevTok.lexeme);
     emitConstant(new FGNumber(value));
-    lastType = numberType;
+    lastT = numberT;
 }
 
 function parse_string(): void {
     emitConstant(new FGString(prevTok.lexeme));
-    lastType = {kind: Kind.String};
+    lastT = stringT;
 }
 
 //--------------------------------------------------------------------
@@ -377,13 +376,13 @@ function set_local(name: string): void {
     }
     add_local(name);
 
-    lastType = invalidType;
+    lastT = nothingT;
     canParseArgument = true;
     expression();
 
     emitByte(Op.SetLoc);
-    current.locals[current.locals.length - 1].type = { kind: lastType.kind };
-    lastType = invalidType;
+    current.locals[current.locals.length - 1].type = { kind: lastT.base };
+    lastT = nothingT;
 }
 
 function set_global(name: string): void {
@@ -394,21 +393,21 @@ function set_global(name: string): void {
     }
 
     let index = makeConstant(new FGString(name));
-    lastType = invalidType;
+    lastT = nothingT;
     canParseArgument = true;
     expression();
 
     emitBytes(Op.Set, index);
-    emitByte(lastType.kind);
-    tempNames[name] = { kind: lastType.kind };
-    lastType = invalidType;
+    emitByte(lastT.base);
+    tempNames[name] = { kind: lastT.base };
+    lastT = nothingT;
 }
 
 function get_name(name: string): void {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
         emitBytes(Op.GetLoc, arg);
-        lastType = current.locals[arg].type;
+        lastT = {base: current.locals[arg].type.kind};
     }
     else if (Object.hasOwn(nativeNames, name)) {
         console.log("in nativeNames");
@@ -454,7 +453,7 @@ function setToKinds(set_: Set<number>): string[] {
 
 function global_callable(name_: string): void {
     if (!canParseArgument) {
-        lastType = nativeNames[name_];
+        lastT = {base: nativeNames[name_].kind };
         return;
     }
     canParseArgument = match(TokenT.Dollar);
@@ -484,10 +483,10 @@ function global_callable(name_: string): void {
         if (!success) continue;
 
         for (let k = j; k < inputVersion.length; k++) {
-            lastType = invalidType;
+            lastT = nothingT;
             parsePrecedence(Precedence.Call);
-            gotTypes.push(lastType.kind);
-            if (!matchType(inputVersion[k], lastType.kind)) {
+            gotTypes.push(lastT.base);
+            if (!matchType(inputVersion[k], lastT.base)) {
                 checkNextVersion = true;
                 success = false;
                 break;
@@ -507,9 +506,9 @@ function global_callable(name_: string): void {
     emitBytes(Op.CallNat, index);
     emitByte(i);
     if (version[i].output === Kind.Nothing) {
-        lastType = invalidType;
+        lastT = nothingT;
     } else {
-        lastType = {kind: version[i].output as Kind};
+        lastT = {base: version[i].output as Kind};
     }
 }
 
@@ -520,11 +519,11 @@ function global_non_callable(table: any, name: string, native: boolean): void {
     else
         emitBytes(Op.GetUsr, index);
 
-    lastType = {kind: table[name].kind};
+    lastT = {base: table[name].kind};
 }
 
 function add_local(name: string): void {
-    let local: Local = { name, type: invalidType, depth: current.scopeDepth };
+    let local: Local = { name, type: {kind: Kind.Nothing}, depth: current.scopeDepth };
     current.locals.push(local);
 }
 
@@ -544,9 +543,7 @@ function patchJump(offset: number): void {
 //
 function parse_if(): void {
     expression();
-    if (lastType.kind !== Kind.Boolean) {
-        error(`conditional expression must be boolean`);
-    }
+    assertT(lastT, booleanT, "conditional expression must be boolean");
 
     let thenJump = emitJump(Op.JmpF);
     emitByte(Op.Pop);
@@ -570,22 +567,18 @@ function emitLoop(loopStart: number): void {
 function parse_loop(): void {
     beginScope();
 
-    lastType = invalidType;
+    lastT = nothingT;
     expression();
-    if (lastType.kind !== Kind.Number) {
-        error("start of range must be number");
-    }
+    assertT(lastT, numberT, "start of range must be number");
     let start = current.locals.length;
     let startRange: Local = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
 
     consume(TokenT.Comma, "expect ',' between start and end");
 
-    lastType = invalidType;
+    lastT = nothingT;
     expression();
-    if (lastType.kind !== Kind.Number) {
-        error("end of range must be number");
-    }
+    assertT(lastT, numberT, "end of range must be number");
     let openRightId = currentChunk().values.length;
     emitConstant(new FGNumber(0));
     emitByte(Op.Add);
@@ -654,7 +647,7 @@ function parse_loop(): void {
     patchJump(exitJump);
     emitByte(Op.Pop);   // For false.
     endScope();         // For lower bound.
-    lastType = invalidType;
+    lastT = nothingT;
 }
 
 // function parse_for(): void {
@@ -707,25 +700,19 @@ function parse_loop(): void {
 // }
 
 function and_(): void {
-    if (lastType.kind !== Kind.Boolean) {
-        error("operands of '&&' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '&&' must be boolean");
 
     let endJump = emitJump(Op.JmpF);
     emitByte(Op.Pop);
 
     parsePrecedence(Precedence.And);
-    if (lastType.kind !== Kind.Boolean) {
-        error("operands of '&&' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '&&' must be boolean");
 
     patchJump(endJump);
 }
 
 function or_(): void {
-    if (lastType.kind !== Kind.Boolean) {
-        error("operands of '||' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '||' must be boolean");
 
     let elseJump = emitJump(Op.JmpF);
     let endJump = emitJump(Op.Jmp);
@@ -734,9 +721,7 @@ function or_(): void {
     emitByte(Op.Pop);
 
     parsePrecedence(Precedence.Or);
-    if (lastType.kind !== Kind.Boolean) {
-        error("operands of '||' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '||' must be boolean");
 
     patchJump(endJump);
 }
@@ -803,9 +788,7 @@ function statement(): void {
         error_at_current(`cannot start statement with ${ TokenTName[currTok.kind] }`);
     }
 
-    if (lastType !== invalidType) {
-        error("forbidden expression statement");
-    }
+    assertT(lastT, nothingT, "forbidden expression statement");
 }
 
 function beginScope(): void {

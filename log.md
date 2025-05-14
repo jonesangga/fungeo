@@ -2,6 +2,8 @@
 
 #### 14-05-25
 
+- new assertT() for type check
+- change interface Types to type Info
 - make equal() method fo each class
 - change Op.Eq implementation to use equal() method
 - new FGType

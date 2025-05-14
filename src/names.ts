@@ -5,15 +5,15 @@
 import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type } from "./vmfunction.js"
 
-export interface Types {
-    kind:     Kind;
-    value?:   Value;
-    listKind?: Kind;
-    drawn?:   boolean;
-}
+export type Info = {
+    kind:     Kind,
+    value?:   Value,
+    listKind?: Kind,
+    drawn?:   boolean,
+};
 
 interface Names {
-    [name: string]: Types;
+    [name: string]: Info;
 }
 
 export let userNames: Names = {};

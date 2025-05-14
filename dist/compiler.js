@@ -1,10 +1,16 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { KindName, FGBoolean, FGNumber, FGString } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
-let invalidType = { kind: 100 };
 let numberType = { kind: 500 };
-let booleanType = { kind: 300 };
-let lastType = invalidType;
+let booleanT = { base: 300 };
+let numberT = { base: 500 };
+let stringT = { base: 600 };
+let nothingT = { base: 100 };
+let lastT = nothingT;
+function assertT(actual, expect, msg) {
+    if (actual.base !== expect.base)
+        error(msg);
+}
 let canParseArgument = false;
 let canAssign = false;
 var Precedence;
@@ -141,35 +147,31 @@ function grouping() {
 }
 function not() {
     parsePrecedence(500);
-    if (lastType.kind !== 300) {
-        error(`'!' is only for boolean`);
-    }
+    assertT(lastT, booleanT, "'!' is only for boolean");
     emitByte(1100);
 }
 function negate() {
     parsePrecedence(500);
-    if (lastType.kind !== 500) {
-        error(`'-' is only for number`);
-    }
+    assertT(lastT, numberT, "'-' is only for number");
     emitByte(1000);
 }
 function eq() {
     parsePrecedence(230 + 1);
     emitByte(380);
-    lastType = { kind: 300 };
+    lastT = booleanT;
 }
 function neq() {
     parsePrecedence(230 + 1);
     emitByte(1010);
-    lastType = { kind: 300 };
+    lastT = booleanT;
 }
 function compare() {
     let operator = prevTok.kind;
-    let left = lastType.kind;
+    let left = lastT.base;
     if (left !== 500 && left !== 600)
         error("can only compare strings or numbers");
     parsePrecedence(250 + 1);
-    if (lastType.kind !== left)
+    if (lastT.base !== left)
         error("type not match");
     switch (operator) {
         case 1550:
@@ -186,23 +188,19 @@ function compare() {
             break;
         default: error("unhandled camparison op");
     }
-    lastType = { kind: 300 };
+    lastT = booleanT;
 }
 function binary() {
     let operator = prevTok.lexeme;
-    if (lastType.kind !== 500) {
-        error(`'${operator}' only for numbers`);
-    }
+    assertT(lastT, numberT, `'${operator}' only for numbers`);
     let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
-    if (lastType.kind !== 500) {
-        error(`'${operator}' only for numbers`);
-    }
+    assertT(lastT, numberT, `'${operator}' only for numbers`);
     switch (operatorType) {
         case 1575:
             emitByte(610);
-            lastType = booleanType;
+            lastT = booleanT;
             break;
         case 1585:
             emitByte(100);
@@ -221,15 +219,11 @@ function binary() {
 }
 function binary_str() {
     let operator = prevTok.lexeme;
-    if (lastType.kind !== 600) {
-        error(`'${operator}' only for strings`);
-    }
+    assertT(lastT, stringT, `'${operator}' only for strings`);
     let operatorType = prevTok.kind;
     let rule = rules[operatorType];
     parsePrecedence(rule.precedence + 1);
-    if (lastType.kind !== 600) {
-        error(`'${operator}' only for strings`);
-    }
+    assertT(lastT, stringT, `'${operator}' only for strings`);
     emitByte(120);
 }
 function parse_boolean() {
@@ -237,16 +231,16 @@ function parse_boolean() {
         emitConstant(new FGBoolean(true));
     else
         emitConstant(new FGBoolean(false));
-    lastType = { kind: 300 };
+    lastT = booleanT;
 }
 function parse_number() {
     let value = Number(prevTok.lexeme);
     emitConstant(new FGNumber(value));
-    lastType = numberType;
+    lastT = numberT;
 }
 function parse_string() {
     emitConstant(new FGString(prevTok.lexeme));
-    lastType = { kind: 600 };
+    lastT = stringT;
 }
 let tempNames = {};
 function resolveLocal(compiler, name) {
@@ -293,12 +287,12 @@ function set_local(name) {
         }
     }
     add_local(name);
-    lastType = invalidType;
+    lastT = nothingT;
     canParseArgument = true;
     expression();
     emitByte(1410);
-    current.locals[current.locals.length - 1].type = { kind: lastType.kind };
-    lastType = invalidType;
+    current.locals[current.locals.length - 1].type = { kind: lastT.base };
+    lastT = nothingT;
 }
 function set_global(name) {
     if (Object.hasOwn(nativeNames, name)
@@ -307,19 +301,19 @@ function set_global(name) {
         error(`${name} already defined`);
     }
     let index = makeConstant(new FGString(name));
-    lastType = invalidType;
+    lastT = nothingT;
     canParseArgument = true;
     expression();
     emitBytes(1400, index);
-    emitByte(lastType.kind);
-    tempNames[name] = { kind: lastType.kind };
-    lastType = invalidType;
+    emitByte(lastT.base);
+    tempNames[name] = { kind: lastT.base };
+    lastT = nothingT;
 }
 function get_name(name) {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
         emitBytes(395, arg);
-        lastType = current.locals[arg].type;
+        lastT = { base: current.locals[arg].type.kind };
     }
     else if (Object.hasOwn(nativeNames, name)) {
         console.log("in nativeNames");
@@ -364,7 +358,7 @@ function setToKinds(set_) {
 }
 function global_callable(name_) {
     if (!canParseArgument) {
-        lastType = nativeNames[name_];
+        lastT = { base: nativeNames[name_].kind };
         return;
     }
     canParseArgument = match(200);
@@ -389,10 +383,10 @@ function global_callable(name_) {
         if (!success)
             continue;
         for (let k = j; k < inputVersion.length; k++) {
-            lastType = invalidType;
+            lastT = nothingT;
             parsePrecedence(600);
-            gotTypes.push(lastType.kind);
-            if (!matchType(inputVersion[k], lastType.kind)) {
+            gotTypes.push(lastT.base);
+            if (!matchType(inputVersion[k], lastT.base)) {
                 checkNextVersion = true;
                 success = false;
                 break;
@@ -411,10 +405,10 @@ function global_callable(name_) {
     emitBytes(200, index);
     emitByte(i);
     if (version[i].output === 100) {
-        lastType = invalidType;
+        lastT = nothingT;
     }
     else {
-        lastType = { kind: version[i].output };
+        lastT = { base: version[i].output };
     }
 }
 function global_non_callable(table, name, native) {
@@ -423,10 +417,10 @@ function global_non_callable(table, name, native) {
         emitBytes(400, index);
     else
         emitBytes(500, index);
-    lastType = { kind: table[name].kind };
+    lastT = { base: table[name].kind };
 }
 function add_local(name) {
-    let local = { name, type: invalidType, depth: current.scopeDepth };
+    let local = { name, type: { kind: 100 }, depth: current.scopeDepth };
     current.locals.push(local);
 }
 function emitJump(instruction) {
@@ -440,9 +434,7 @@ function patchJump(offset) {
 }
 function parse_if() {
     expression();
-    if (lastType.kind !== 300) {
-        error(`conditional expression must be boolean`);
-    }
+    assertT(lastT, booleanT, "conditional expression must be boolean");
     let thenJump = emitJump(620);
     emitByte(1200);
     statement();
@@ -460,20 +452,16 @@ function emitLoop(loopStart) {
 }
 function parse_loop() {
     beginScope();
-    lastType = invalidType;
+    lastT = nothingT;
     expression();
-    if (lastType.kind !== 500) {
-        error("start of range must be number");
-    }
+    assertT(lastT, numberT, "start of range must be number");
     let start = current.locals.length;
     let startRange = { name: "_Start", type: numberType, depth: current.scopeDepth };
     current.locals.push(startRange);
     consume(100, "expect ',' between start and end");
-    lastType = invalidType;
+    lastT = nothingT;
     expression();
-    if (lastType.kind !== 500) {
-        error("end of range must be number");
-    }
+    assertT(lastT, numberT, "end of range must be number");
     let openRightId = currentChunk().values.length;
     emitConstant(new FGNumber(0));
     emitByte(100);
@@ -529,32 +517,24 @@ function parse_loop() {
     patchJump(exitJump);
     emitByte(1200);
     endScope();
-    lastType = invalidType;
+    lastT = nothingT;
 }
 function and_() {
-    if (lastType.kind !== 300) {
-        error("operands of '&&' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '&&' must be boolean");
     let endJump = emitJump(620);
     emitByte(1200);
     parsePrecedence(220);
-    if (lastType.kind !== 300) {
-        error("operands of '&&' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '&&' must be boolean");
     patchJump(endJump);
 }
 function or_() {
-    if (lastType.kind !== 300) {
-        error("operands of '||' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '||' must be boolean");
     let elseJump = emitJump(620);
     let endJump = emitJump(615);
     patchJump(elseJump);
     emitByte(1200);
     parsePrecedence(210);
-    if (lastType.kind !== 300) {
-        error("operands of '||' must be boolean");
-    }
+    assertT(lastT, booleanT, "operands of '||' must be boolean");
     patchJump(endJump);
 }
 function parsePrecedence(precedence) {
@@ -613,9 +593,7 @@ function statement() {
     else {
         error_at_current(`cannot start statement with ${TokenTName[currTok.kind]}`);
     }
-    if (lastType !== invalidType) {
-        error("forbidden expression statement");
-    }
+    assertT(lastT, nothingT, "forbidden expression statement");
 }
 function beginScope() {
     current.scopeDepth++;
