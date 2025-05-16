@@ -228,10 +228,16 @@ function run() {
                 break;
             }
             case 1300: {
-                let result = pop();
+                let arg = read_byte();
+                let returns = [];
+                for (let i = 0; i < arg; i++) {
+                    returns.push(pop());
+                }
                 frameCount--;
                 stackTop = frame.slots;
-                push(result);
+                for (let i = 0; i < arg; i++) {
+                    push(returns.pop());
+                }
                 frame = frames[frameCount - 1];
                 break;
             }

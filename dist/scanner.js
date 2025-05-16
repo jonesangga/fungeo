@@ -40,7 +40,8 @@ var TokenT;
     TokenT[TokenT["Fn"] = 2320] = "Fn";
     TokenT[TokenT["If"] = 2400] = "If";
     TokenT[TokenT["Ifx"] = 2405] = "Ifx";
-    TokenT[TokenT["NumT"] = 260] = "NumT";
+    TokenT[TokenT["NumT"] = 2600] = "NumT";
+    TokenT[TokenT["Proc"] = 2750] = "Proc";
     TokenT[TokenT["Return"] = 2800] = "Return";
     TokenT[TokenT["StrT"] = 2900] = "StrT";
     TokenT[TokenT["Then"] = 3000] = "Then";
@@ -75,11 +76,12 @@ const TokenTName = {
     [600]: "Minus",
     [1700]: "Name",
     [1800]: "Number",
-    [260]: "NumT",
+    [2600]: "NumT",
     [1575]: "Pipe",
     [1580]: "PipePipe",
     [1585]: "Plus",
     [1590]: "PlusPlus",
+    [2750]: "Proc",
     [695]: "RBrace",
     [700]: "RBracket",
     [2800]: "Return",
@@ -143,7 +145,8 @@ function name_type() {
         case "fn": return 2320;
         case "if": return 2400;
         case "ifx": return 2405;
-        case "Num": return 260;
+        case "Num": return 2600;
+        case "proc": return 2750;
         case "return": return 2800;
         case "Str": return 2900;
         case "then": return 3000;

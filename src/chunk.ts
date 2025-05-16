@@ -138,7 +138,8 @@ class Chunk {
 
             case Op.Cond:
             case Op.GetLoc:
-            case Op.Inc: {
+            case Op.Inc:
+            case Op.Ret: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];
@@ -159,7 +160,6 @@ class Chunk {
             case Op.Not:
             case Op.Ok:
             case Op.Pop:
-            case Op.Ret:
             case Op.SetLoc:
             case Op.Sub: {
                 result += name + "\n";

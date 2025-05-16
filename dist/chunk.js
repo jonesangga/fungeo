@@ -128,7 +128,8 @@ class Chunk {
             }
             case 210:
             case 395:
-            case 595: {
+            case 595:
+            case 1300: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
@@ -148,7 +149,6 @@ class Chunk {
             case 1100:
             case 1290:
             case 1200:
-            case 1300:
             case 1410:
             case 1500: {
                 result += name + "\n";

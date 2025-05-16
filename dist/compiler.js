@@ -57,11 +57,12 @@ const rules = {
     [600]: { prefix: negate, infix: binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
-    [260]: { prefix: null, infix: null, precedence: 100 },
+    [2600]: { prefix: null, infix: null, precedence: 100 },
     [1575]: { prefix: null, infix: binary, precedence: 300 },
     [1580]: { prefix: null, infix: or_, precedence: 210 },
     [1585]: { prefix: null, infix: binary, precedence: 300 },
     [1590]: { prefix: null, infix: binary_str, precedence: 300 },
+    [2750]: { prefix: null, infix: binary_str, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
     [2800]: { prefix: null, infix: null, precedence: 100 },
@@ -338,7 +339,7 @@ function set_global(name) {
 function parse_type() {
     advance();
     switch (prevTok.kind) {
-        case 260:
+        case 2600:
             return { base: 500 };
         case 2900:
             return { base: 600 };
@@ -381,12 +382,39 @@ function fn() {
     tempNames[name] = { kind: 400, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();
-    emitByte(1300);
+    emitBytes(1300, 1);
     assertT(lastT, t, "return type not match");
     let fn = endCompiler();
     emitConstant(fn);
     emitBytes(1400, index);
     emitByte(400);
+}
+function proc() {
+    consume(1700, "expect procedure name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+    let comp = {};
+    init_compiler(comp, 0, name);
+    beginScope();
+    do {
+        parse_params();
+    } while (match(100));
+    console.log(current.fn);
+    current.fn.version[0].output = 100;
+    tempNames[name] = { kind: 400, value: current.fn };
+    consume(300, "expect '{' before proc body");
+    procBody();
+    emitBytes(1300, 0);
+    consume(695, "expect '}' after proc body");
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(1400, index);
+    emitByte(400);
+}
+function procBody() {
+    while (!check(695) && !check(2100)) {
+        statement();
+    }
 }
 function get_name(name) {
     let arg = resolveLocal(current, name);
@@ -669,6 +697,9 @@ function curr() {
 function declaration() {
     if (match(2320)) {
         fn();
+    }
+    else if (match(2750)) {
+        proc();
     }
     else {
         statement();

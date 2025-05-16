@@ -44,7 +44,8 @@ const enum TokenT {
     Fn = 2320,
     If = 2400,
     Ifx = 2405,
-    NumT = 260,
+    NumT = 2600,
+    Proc = 2750,
     Return = 2800,
     StrT = 2900,
     Then = 3000,
@@ -84,6 +85,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
+    [TokenT.Proc]: "Proc",
     [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
     [TokenT.Return]: "Return",
@@ -164,6 +166,7 @@ function name_type(): TokenT {
         case "if":      return TokenT.If;
         case "ifx":      return TokenT.Ifx;
         case "Num":  return TokenT.NumT;
+        case "proc":  return TokenT.Proc;
         case "return":  return TokenT.Return;
         case "Str":  return TokenT.StrT;
         case "then":    return TokenT.Then;

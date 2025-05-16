@@ -272,10 +272,16 @@ function run(): boolean {
             }
 
             case Op.Ret: {
-                let result = pop();
+                let arg = read_byte();
+                let returns: Value[] = [];
+                for (let i = 0; i < arg; i++) {
+                    returns.push(pop());
+                }
                 frameCount--;
                 stackTop = frame.slots;
-                push(result);
+                for (let i = 0; i < arg; i++) {
+                    push(returns.pop() as Value);
+                }
                 frame = frames[frameCount - 1];
                 break;
             }

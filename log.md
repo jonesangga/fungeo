@@ -2,6 +2,9 @@
 
 #### 16-05-25
 
+- Ret op takes one arg: how many slot to pop and push back
+- support procedure
+- new Token Proc
 - fix bug: undefined name when doing recursive
   set canParseArgument to true
 - add ifx for if expression

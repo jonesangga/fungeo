@@ -81,6 +81,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.PipePipe]  : {prefix: null,            infix: or_,     precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
+    [TokenT.Proc]      : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Return]    : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -493,13 +494,49 @@ function fn(): void {
     consume(TokenT.Eq, "expect '=' before fn body");
 
     expression();
-    emitByte(Op.Ret);
+    emitBytes(Op.Ret, 1);
     assertT(lastT, t, "return type not match");
 
     let fn = endCompiler();
     emitConstant(fn);
     emitBytes(Op.Set, index);
     emitByte(Kind.Callable);
+}
+
+function proc(): void {
+    consume(TokenT.Name, "expect procedure name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+
+    let comp: Compiler = {} as Compiler;
+    init_compiler(comp, FnT.Function, name);
+    beginScope();
+
+    do {
+        parse_params();
+    } while (match(TokenT.Comma));
+    console.log(current.fn);
+
+    current.fn.version[0].output = Kind.Nothing;
+    tempNames[name] = { kind: Kind.Callable, value: current.fn };
+
+    consume(TokenT.LBrace, "expect '{' before proc body");
+
+    procBody();
+    emitBytes(Op.Ret, 0);
+
+    consume(TokenT.RBrace, "expect '}' after proc body");
+
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(Op.Set, index);
+    emitByte(Kind.Callable);
+}
+
+function procBody(): void {
+    while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
+        statement();
+    }
 }
 
 function get_name(name: string): void {
@@ -891,6 +928,8 @@ function curr() {
 function declaration(): void {
     if (match(TokenT.Fn)) {
         fn();
+    } else if (match(TokenT.Proc)) {
+        proc();
     } else {
         statement();
     }
