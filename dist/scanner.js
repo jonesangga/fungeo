@@ -37,7 +37,11 @@ var TokenT;
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
     TokenT[TokenT["Else"] = 2300] = "Else";
+    TokenT[TokenT["Fn"] = 2320] = "Fn";
     TokenT[TokenT["If"] = 2400] = "If";
+    TokenT[TokenT["NumT"] = 260] = "NumT";
+    TokenT[TokenT["Return"] = 2800] = "Return";
+    TokenT[TokenT["StrT"] = 2900] = "StrT";
 })(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
@@ -56,6 +60,7 @@ const TokenTName = {
     [1505]: "EqEq",
     [2200]: "Error",
     [1600]: "False",
+    [2320]: "Fn",
     [1520]: "Greater",
     [1525]: "GreaterEq",
     [2400]: "If",
@@ -67,17 +72,20 @@ const TokenTName = {
     [600]: "Minus",
     [1700]: "Name",
     [1800]: "Number",
+    [260]: "NumT",
     [1575]: "Pipe",
     [1580]: "PipePipe",
     [1585]: "Plus",
     [1590]: "PlusPlus",
     [695]: "RBrace",
     [700]: "RBracket",
+    [2800]: "Return",
     [800]: "RParen",
     [900]: "Semicolon",
     [1000]: "Slash",
     [1100]: "Star",
     [1900]: "String",
+    [2900]: "StrT",
     [2000]: "True",
 };
 let source = "";
@@ -128,7 +136,11 @@ function name_type() {
     switch (source.slice(start, current)) {
         case "else": return 2300;
         case "false": return 1600;
+        case "fn": return 2320;
         case "if": return 2400;
+        case "Num": return 260;
+        case "return": return 2800;
+        case "Str": return 2900;
         case "true": return 2000;
     }
     return 1700;

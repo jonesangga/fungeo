@@ -1,5 +1,18 @@
 # Log
 
+#### 16-05-25
+
+- match fn return type with return expression type
+- new parse_params() and parse_type()
+- For now only pure function
+  later will add procedure like pascal
+- new CallUsr
+- there is a diff between calling native fn vs user-dfn
+- new fun() in compiler
+- syntax for fn decl is different
+- new Token Fn, NumT, StrT, Return
+- new FGFunction
+
 #### 14-05-25
 
 - remove arrow

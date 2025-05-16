@@ -1,10 +1,12 @@
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, type Value, type Comparable } from "./value.js"
+import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
 import { nativeNames, userNames } from "./names.js"
 import { compiler } from "./compiler.js"
 
 export let stack: Value[] = [];
 export let stackTop = 0;
+let frames: CallFrame[] = [];
+let frameCount = 0;
 
 export function push(value: Value): void {
     stack[stackTop++] = value;
@@ -20,6 +22,7 @@ function peek(distance: number): Value {
 
 function resetStack(): void {
     stackTop = 0;
+    frameCount = 0;
 }
 
 export let output = "";
@@ -27,21 +30,24 @@ export function vmoutput(str: string): void {
     output += str;
 }
 
-let chunk = new Chunk("vm");
-let ip    = 0;     // Index of current instruction in chunk.code array.
+let frame: CallFrame;
+// let ip    = 0;     // Index of current instruction in frame.fn.chunk.code array.
 
 function error(msg: string): void {
-    let line = chunk.lines[ip - 1];
+    // let line = chunk.lines[ip - 1];
+    let line = frame.fn.chunk.lines[frame.ip - 1];
     output += `${ line }: in script: ${ msg }\n`;
     resetStack();
 }
 
 function read_byte(): number {
-    return chunk.code[ip++];
+    // return chunk.code[ip++];
+    return frame.fn.chunk.code[frame.ip++];
 }
 
 function read_constant(): Value {
-    return chunk.values[read_byte()];
+    // return chunk.values[read_byte()];
+    return frame.fn.chunk.values[read_byte()];
 }
 
 function read_string(): string {
@@ -49,6 +55,11 @@ function read_string(): string {
 }
 
 type NumStr = number | string;
+
+function call(fn: FGFunction, argCount: number) {
+    let frame = {fn, ip: 0, slots: stackTop - argCount};
+    frames[frameCount++] = frame;
+}
 
 function compare(
     f: (a: NumStr, b: NumStr) => boolean
@@ -66,8 +77,10 @@ const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 const debug = true;
 
 function run(): boolean {
+    frame = frames[frameCount -1];
     for (;;) {
         if (debug) {
+            // console.log(stackTop, ...stack);
             let str = "      ";
             for (let slot = 0; slot < stackTop; slot++) {
                 str += "[ ";
@@ -75,7 +88,8 @@ function run(): boolean {
                 str += " ]";
             }
             str += "\n";
-            let [result, ] = chunk.disassemble_instr(ip);
+            // let [result, ] = chunk.disassemble_instr(ip);
+            let [result, ] = frame.fn.chunk.disassemble_instr(frame.ip);
             console.log(str + result);
         }
 
@@ -98,6 +112,14 @@ function run(): boolean {
                 let name = read_constant() as FGCallable;
                 let ver = read_byte();
                 name.value(ver);
+                break;
+            }
+            case Op.CallUsr: {
+                let name = read_constant() as FGFunction;
+                let ver = read_byte();
+                let arity = name.version[0].input.length;
+                call(name, arity);
+                frame = frames[frameCount - 1];
                 break;
             }
 
@@ -179,7 +201,7 @@ function run(): boolean {
             case Op.JmpBack:
             case Op.Jmp: {
                 let offset = read_byte();
-                ip += offset;
+                frame.ip += offset;
                 break;
             }
 
@@ -187,7 +209,7 @@ function run(): boolean {
                 let offset = read_byte();
                 let cond = peek(0) as FGBoolean;
                 if (!cond.value)
-                    ip += offset;
+                    frame.ip += offset;
                 break;
             }
 
@@ -233,7 +255,9 @@ function run(): boolean {
             }
 
             case Op.GetLoc: {
-                push(stack[ read_byte() ]);
+                // push(stack[ read_byte() ]);
+                console.log("frame.slots = " + frame.slots);
+                push(stack[frame.slots + read_byte() ]);
                 break;
             }
 
@@ -248,6 +272,16 @@ function run(): boolean {
             }
 
             case Op.Ret: {
+                let result = pop();
+                frameCount--;
+                stackTop = frame.slots;
+                push(result);
+                frame = frames[frameCount - 1];
+                break;
+            }
+
+            case Op.Ok: {
+                pop();
                 return true;
             }
         }
@@ -261,6 +295,12 @@ interface VMResult {
     message: string;
 }
 
+interface CallFrame {
+    fn: FGFunction;
+    ip: number;
+    slots: number;   // First slot of stack this frame can use.
+}
+
 let TESTING = true;
 
 const vm = {
@@ -271,12 +311,13 @@ const vm = {
         }
     },
 
-    interpret(chunk_: Chunk): VMResult {
+    interpret(fn: FGFunction): VMResult {
         TESTING = false;
-        chunk = chunk_;
-        ip = 0;
         output = "";
 
+        push(fn);
+        let frame = {fn, ip: 0, slots: 1};
+        frames[frameCount++] = frame;
         let result = run();
         if (result) {
             return {success: true, message: output};
@@ -287,8 +328,8 @@ const vm = {
 
     set(chunk_: Chunk): void {
         TESTING = true;
-        chunk = chunk_;
-        ip = 0;
+        // chunk = chunk_;
+        // ip = 0;
     },
 
     step(): VMResult {

@@ -41,7 +41,11 @@ const enum TokenT {
     EOF = 2100,        // Other.
     Error = 2200,
     Else = 2300,       // Keywords.
+    Fn = 2320,
     If = 2400,
+    NumT = 260,
+    Return = 2800,
+    StrT = 2900,
 };
 
 const TokenTName: { [key in TokenT]: string } = {
@@ -60,6 +64,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.EqEq]: "EqEq",
     [TokenT.Error]: "Error",
     [TokenT.False]: "False",
+    [TokenT.Fn]: "Fn",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
     [TokenT.If]: "If",
@@ -71,17 +76,20 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Minus]: "Minus",
     [TokenT.Name]: "Name",
     [TokenT.Number]: "Number",
+    [TokenT.NumT]: "NumT",
     [TokenT.Pipe]: "Pipe",
     [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
     [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
+    [TokenT.Return]: "Return",
     [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
     [TokenT.Slash]: "Slash",
     [TokenT.Star]: "Star",
     [TokenT.String]: "String",
+    [TokenT.StrT]: "StrT",
     [TokenT.True]: "True",
 };
 
@@ -148,7 +156,11 @@ function name_type(): TokenT {
     switch (source.slice(start, current)) {
         case "else":    return TokenT.Else;
         case "false":   return TokenT.False;
+        case "fn":     return TokenT.Fn;
         case "if":      return TokenT.If;
+        case "Num":  return TokenT.NumT;
+        case "return":  return TokenT.Return;
+        case "Str":  return TokenT.StrT;
         case "true":    return TokenT.True;
     }
 

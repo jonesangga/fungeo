@@ -4,6 +4,7 @@ var Op;
     Op[Op["Add"] = 100] = "Add";
     Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
+    Op[Op["CallUsr"] = 205] = "CallUsr";
     Op[Op["Cond"] = 210] = "Cond";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
@@ -26,6 +27,7 @@ var Op;
     Op[Op["Neg"] = 1000] = "Neg";
     Op[Op["NEq"] = 1010] = "NEq";
     Op[Op["Not"] = 1100] = "Not";
+    Op[Op["Ok"] = 1290] = "Ok";
     Op[Op["Pop"] = 1200] = "Pop";
     Op[Op["Ret"] = 1300] = "Ret";
     Op[Op["Set"] = 1400] = "Set";
@@ -37,6 +39,7 @@ const OpName = {
     [100]: "Add",
     [120]: "AddStr",
     [200]: "CallNat",
+    [205]: "CallUsr",
     [210]: "Cond",
     [300]: "Div",
     [380]: "Eq",
@@ -59,6 +62,7 @@ const OpName = {
     [1000]: "Neg",
     [1010]: "NEq",
     [1100]: "Not",
+    [1290]: "Ok",
     [1200]: "Pop",
     [1300]: "Ret",
     [1400]: "Set",
@@ -101,7 +105,8 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction];
         switch (instruction) {
-            case 200: {
+            case 200:
+            case 205: {
                 let index = this.code[offset + 1];
                 let ver = this.code[offset + 2];
                 result += `${padr7(name)} ${padl4(index)} 'v${ver}'\n`;
@@ -141,6 +146,7 @@ class Chunk {
             case 1000:
             case 1010:
             case 1100:
+            case 1290:
             case 1200:
             case 1300:
             case 1410:

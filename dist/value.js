@@ -4,6 +4,7 @@ export var Kind;
     Kind[Kind["Any"] = 200] = "Any";
     Kind[Kind["Boolean"] = 300] = "Boolean";
     Kind[Kind["Callable"] = 400] = "Callable";
+    Kind[Kind["Function"] = 450] = "Function";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
@@ -14,6 +15,7 @@ export const KindName = {
     [200]: "Any",
     [300]: "Boolean",
     [400]: "Callable",
+    [450]: "Function",
     [100]: "Nothing",
     [500]: "Number",
     [700]: "Point",
@@ -44,6 +46,21 @@ export class FGCallable {
         this.version = version;
     }
     to_str() { return "fn(n: number): void"; }
+    equal(other) { return false; }
+}
+export class FGFunction {
+    name;
+    version;
+    chunk;
+    kind = 450;
+    constructor(name, version, chunk) {
+        this.name = name;
+        this.version = version;
+        this.chunk = chunk;
+    }
+    to_str() {
+        return `fn ${this.name}`;
+    }
     equal(other) { return false; }
 }
 export class FGNumber {

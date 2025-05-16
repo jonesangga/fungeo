@@ -6,6 +6,7 @@ const enum Op {
     Add = 100,
     AddStr = 120,
     CallNat = 200,
+    CallUsr = 205,
     Cond = 210,
     Div = 300,
     Eq = 380,
@@ -28,6 +29,7 @@ const enum Op {
     Neg = 1000,
     NEq = 1010,
     Not = 1100,
+    Ok = 1290,
     Pop = 1200,
     Ret = 1300,
     Set = 1400,
@@ -39,6 +41,7 @@ const OpName: { [key in Op]: string } = {
     [Op.Add]: "Add",
     [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
+    [Op.CallUsr]: "CallUsr",
     [Op.Cond]: "Cond",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
@@ -61,6 +64,7 @@ const OpName: { [key in Op]: string } = {
     [Op.Neg]: "Neg",
     [Op.NEq]: "NEq",
     [Op.Not]: "Not",
+    [Op.Ok]: "Ok",
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
@@ -108,7 +112,8 @@ class Chunk {
         let instruction = this.code[offset];
         let name = OpName[instruction as Op];
         switch (instruction) {
-            case Op.CallNat: {
+            case Op.CallNat:
+            case Op.CallUsr: {
                 let index = this.code[offset + 1];
                 let ver = this.code[offset + 2];
                 result += `${ padr7(name) } ${ padl4(index) } 'v${ ver }'\n`;
@@ -152,6 +157,7 @@ class Chunk {
             case Op.Neg:
             case Op.NEq:
             case Op.Not:
+            case Op.Ok:
             case Op.Pop:
             case Op.Ret:
             case Op.SetLoc:

@@ -1,8 +1,9 @@
-import { Chunk } from "./chunk.js";
 import { FGBoolean, FGNumber } from "./value.js";
 import { nativeNames, userNames } from "./names.js";
 export let stack = [];
 export let stackTop = 0;
+let frames = [];
+let frameCount = 0;
 export function push(value) {
     stack[stackTop++] = value;
 }
@@ -14,26 +15,30 @@ function peek(distance) {
 }
 function resetStack() {
     stackTop = 0;
+    frameCount = 0;
 }
 export let output = "";
 export function vmoutput(str) {
     output += str;
 }
-let chunk = new Chunk("vm");
-let ip = 0;
+let frame;
 function error(msg) {
-    let line = chunk.lines[ip - 1];
+    let line = frame.fn.chunk.lines[frame.ip - 1];
     output += `${line}: in script: ${msg}\n`;
     resetStack();
 }
 function read_byte() {
-    return chunk.code[ip++];
+    return frame.fn.chunk.code[frame.ip++];
 }
 function read_constant() {
-    return chunk.values[read_byte()];
+    return frame.fn.chunk.values[read_byte()];
 }
 function read_string() {
     return read_constant().value;
+}
+function call(fn, argCount) {
+    let frame = { fn, ip: 0, slots: stackTop - argCount };
+    frames[frameCount++] = frame;
 }
 function compare(f) {
     let b = pop();
@@ -46,6 +51,7 @@ const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
 const debug = true;
 function run() {
+    frame = frames[frameCount - 1];
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -55,7 +61,7 @@ function run() {
                 str += " ]";
             }
             str += "\n";
-            let [result,] = chunk.disassemble_instr(ip);
+            let [result,] = frame.fn.chunk.disassemble_instr(frame.ip);
             console.log(str + result);
         }
         switch (read_byte()) {
@@ -75,6 +81,14 @@ function run() {
                 let name = read_constant();
                 let ver = read_byte();
                 name.value(ver);
+                break;
+            }
+            case 205: {
+                let name = read_constant();
+                let ver = read_byte();
+                let arity = name.version[0].input.length;
+                call(name, arity);
+                frame = frames[frameCount - 1];
                 break;
             }
             case 300: {
@@ -156,14 +170,14 @@ function run() {
             case 616:
             case 615: {
                 let offset = read_byte();
-                ip += offset;
+                frame.ip += offset;
                 break;
             }
             case 620: {
                 let offset = read_byte();
                 let cond = peek(0);
                 if (!cond.value)
-                    ip += offset;
+                    frame.ip += offset;
                 break;
             }
             case 800: {
@@ -202,7 +216,8 @@ function run() {
                 break;
             }
             case 395: {
-                push(stack[read_byte()]);
+                console.log("frame.slots = " + frame.slots);
+                push(stack[frame.slots + read_byte()]);
                 break;
             }
             case 1410: {
@@ -213,6 +228,15 @@ function run() {
                 break;
             }
             case 1300: {
+                let result = pop();
+                frameCount--;
+                stackTop = frame.slots;
+                push(result);
+                frame = frames[frameCount - 1];
+                break;
+            }
+            case 1290: {
+                pop();
                 return true;
             }
         }
@@ -228,11 +252,12 @@ const vm = {
             delete userNames[name];
         }
     },
-    interpret(chunk_) {
+    interpret(fn) {
         TESTING = false;
-        chunk = chunk_;
-        ip = 0;
         output = "";
+        push(fn);
+        let frame = { fn, ip: 0, slots: 1 };
+        frames[frameCount++] = frame;
         let result = run();
         if (result) {
             return { success: true, message: output };
@@ -243,8 +268,6 @@ const vm = {
     },
     set(chunk_) {
         TESTING = true;
-        chunk = chunk_;
-        ip = 0;
     },
     step() {
         let result = run();

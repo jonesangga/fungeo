@@ -1,10 +1,13 @@
 // @jonesangga, 12-04-2025, MIT License.
 
+import { Chunk } from "./chunk.js"
+
 export const enum Kind {
     Nothing = 100,
     Any = 200,
     Boolean = 300,    // Literal.
     Callable = 400,
+    Function = 450,
     Number = 500,
     String = 600,
     Type = 650,
@@ -15,6 +18,7 @@ export const KindName: { [key in Kind]: string } = {
     [Kind.Any]: "Any",
     [Kind.Boolean]: "Boolean",
     [Kind.Callable]: "Callable",
+    [Kind.Function]: "Function",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Point]: "Point",
@@ -53,6 +57,20 @@ export class FGCallable implements FG {
     ) {}
 
     to_str(): string { return "fn(n: number): void"; }
+    equal(other: FG) { return false; }
+}
+
+export class FGFunction implements FG {
+    kind: Kind.Function = Kind.Function;
+    constructor(
+        public name: string,
+        public version: Version[],
+        public chunk: Chunk,
+    ) {}
+
+    to_str(): string {
+        return `fn ${this.name}`;
+    }
     equal(other: FG) { return false; }
 }
 
@@ -109,6 +127,6 @@ export class FGType implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType;
+type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType | FGFunction;
 export type Value  = LitObj;
 export type Comparable = FGNumber | FGString;

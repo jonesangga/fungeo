@@ -2,7 +2,7 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, type Value } from "./value.js"
+import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value } from "./value.js"
 import { type Info, nativeNames, userNames } from "./names.js"
 
 let numberType: Info = { kind: Kind.Number };
@@ -63,6 +63,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.EqEq]      : {prefix: null,            infix: eq,      precedence: Precedence.Equality},
     [TokenT.Error]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.False]     : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
+    [TokenT.Fn]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -74,17 +75,20 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Minus]     : {prefix: negate,          infix: binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
+    [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Pipe]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PipePipe]  : {prefix: null,            infix: or_,     precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: binary_str,  precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Return]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RParen]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Semicolon] : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Slash]     : {prefix: null,            infix: binary,  precedence: Precedence.Factor},
     [TokenT.Star]      : {prefix: null,            infix: binary,  precedence: Precedence.Factor},
     [TokenT.String]    : {prefix: parse_string,    infix: null,    precedence: Precedence.None},
+    [TokenT.StrT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
 }
 
@@ -95,28 +99,49 @@ interface Local {
     depth: number;
 }
 
+const enum FnT {
+    Function,
+    Script,
+}
+
 interface Compiler {
+    enclosing: Compiler | null;
+    fn: FGFunction,
+    type: FnT,
     locals: Local[];
     scopeDepth: number;
 }
 
-let current: Compiler = {locals: [], scopeDepth: 0};
+let current: Compiler;
 
 let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
 
 let currTok = invalidToken;
 let prevTok = invalidToken;
 
-let compilingChunk: Chunk;
-
 function currentChunk(): Chunk {
-    return compilingChunk;
+    return current.fn.chunk;
 }
 
-function init_compiler(compiler: Compiler): void {
+function init_compiler(compiler: Compiler, type: FnT, name: string): void {
+    compiler.enclosing = current;
+    compiler.fn = new FGFunction(name, [{input: [], output: Kind.Nothing}], new Chunk(name));
+    compiler.type = type;
+
     compiler.locals = [];
     compiler.scopeDepth = 0;
     current = compiler;
+
+    // let local: Local = { name: "", type: {kind: Kind.Nothing}, depth: 0};
+    // current.locals.push(local);
+}
+
+function endCompiler(): FGFunction {
+    emitReturn();
+    let fn = current.fn;
+    console.log( currentChunk().disassemble() );
+    current = current.enclosing as Compiler;
+    return fn;
 }
 
 //--------------------------------------------------------------------
@@ -191,15 +216,10 @@ function emitConstant(value: Value): void {
 }
 
 function emitReturn(): void {
-    emitByte(Op.Ret);
+    emitByte(Op.Ok);
 }
 
 //--------------------------------------------------------------------
-
-function endCompiler(): void {
-    emitReturn();
-    // disassembleChunk(currentChunk(), "code");
-}
 
 function makeConstant(value: Value) {
     return currentChunk().add_value(value);
@@ -316,6 +336,15 @@ function parse_string(): void {
     lastT = stringT;
 }
 
+function parse_return(): {base: Kind} {
+    console.log("in parse_return()");
+    expression();
+    emitByte(Op.Ret);
+    let resultT = lastT;
+    lastT = nothingT;
+    return resultT;
+}
+
 //--------------------------------------------------------------------
 
 interface TempTypes {
@@ -403,6 +432,72 @@ function set_global(name: string): void {
     lastT = nothingT;
 }
 
+function parse_type(): {base: Kind} {
+    advance();
+    switch (prevTok.kind) {
+        case TokenT.NumT:
+            return {base: Kind.Number};
+        case TokenT.StrT:
+            return {base: Kind.String};
+        default:
+            error("expect parameter type");
+            return {base: Kind.Nothing};
+    }
+}
+
+function parse_params(): void {
+    consume(TokenT.Name, "expect parameter name");
+    let name = prevTok.lexeme;
+
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth < current.scopeDepth) break;
+        if (name === local.name)
+            error(`${ name } already defined in this scope`);
+    }
+    add_local(name);
+
+    consume(TokenT.Colon, "expect `:` after parameter name");
+    let t = parse_type();
+
+    current.locals[current.locals.length - 1].type = { kind: t.base };
+    current.fn.version[0].input.push(t.base);
+    lastT = nothingT;
+}
+
+function fn(): void {
+    consume(TokenT.Name, "expect function name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+
+    let comp: Compiler = {} as Compiler;
+    init_compiler(comp, FnT.Function, name);
+    beginScope();
+
+    do {
+        parse_params();
+    } while (match(TokenT.Comma));
+    console.log(current.fn);
+
+    // return type
+    consume(TokenT.Arrow, "expect `->` after list of params");
+    let t = parse_type();
+
+    current.fn.version[0].output = t.base;
+    tempNames[name] = { kind: t.base };
+
+    consume(TokenT.Eq, "expect '=' before fn body");
+
+    expression();
+    emitByte(Op.Ret);
+    assertT(lastT, t, "return type not match");
+
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(Op.Set, index);
+    emitByte(Kind.Callable);
+}
+
 function get_name(name: string): void {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
@@ -412,19 +507,20 @@ function get_name(name: string): void {
     else if (Object.hasOwn(nativeNames, name)) {
         console.log("in nativeNames");
         if (nativeNames[name].kind === Kind.Callable)
-            global_callable(name);
+            global_callable(name, nativeNames, true);
         else
             global_non_callable(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
+        console.log("has userNames");
         if (userNames[name].kind === Kind.Callable)
-            global_callable(name);
+            global_callable(name, userNames, false);
         else
             global_non_callable(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
         if (tempNames[name].kind === Kind.Callable)
-            global_callable(name);
+            global_callable(name, nativeNames, false);
         else
             global_non_callable(tempNames, name, false);
     }
@@ -451,14 +547,15 @@ function setToKinds(set_: Set<number>): string[] {
     return s;
 }
 
-function global_callable(name_: string): void {
+function global_callable(name_: string, table: any, native: boolean): void {
     if (!canParseArgument) {
-        lastT = {base: nativeNames[name_].kind };
+        lastT = {base: table[name_].kind };
         return;
     }
     canParseArgument = match(TokenT.Dollar);
 
-    let name    = nativeNames[name_];
+    let name    = table[name_];
+    console.log(name);
     // let version = name.version as Version[];
     let version = (name.value as FGCallable).version;
     let inputVersion: (Set<number> | Kind)[] = [];
@@ -503,8 +600,12 @@ function global_callable(name_: string): void {
     }
 
     let index = makeConstant(name.value as FGCallable);
-    emitBytes(Op.CallNat, index);
+    if (native)
+        emitBytes(Op.CallNat, index);
+    else
+        emitBytes(Op.CallUsr, index);
     emitByte(i);
+
     if (version[i].output === Kind.Nothing) {
         lastT = nothingT;
     } else {
@@ -763,7 +864,11 @@ function curr() {
 }
 
 function declaration(): void {
-    statement();
+    if (match(TokenT.Fn)) {
+        fn();
+    } else {
+        statement();
+    }
 }
 
 function statement(): void {
@@ -780,6 +885,8 @@ function statement(): void {
     } else if (match(TokenT.LBracket)
             || match(TokenT.LParen)) {
         parse_loop();
+    } else if (match(TokenT.Return)) {
+        parse_return();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {
@@ -815,17 +922,17 @@ function endScope(): void {
 interface CompilerResult {
     success: boolean;
     message?: string;
+    result?: FGFunction,
 }
 
 class CompileError extends Error {}
 
 const compiler = {
-    compile(source: string, chunk: Chunk): CompilerResult {
+    compile(source: string): CompilerResult {
         scanner.init(source);
-        let comp: Compiler = {locals: [], scopeDepth: 0};
-        init_compiler(comp);
+        let comp: Compiler = {enclosing: null, fn: new FGFunction("test", [], new Chunk("")), type: FnT.Function, locals: [], scopeDepth: 0};
+        init_compiler(comp, FnT.Script, "TOP");
 
-        compilingChunk = chunk;
         tempNames = {};
         prevTok = invalidToken;
         currTok = invalidToken;
@@ -835,17 +942,16 @@ const compiler = {
             while (!match(TokenT.EOF)) {
                 declaration();
             }
-            endCompiler();
-            return { success: true };
+            return { success: true, result: endCompiler() };
         }
         catch(error: unknown) {
             if (error instanceof CompileError) {
                 // console.log("catch CompileError");
-                // console.log(error);
+                console.log(error);
                 return { success: false, message: error.message };
             } else {
                 // console.log("catch Error");
-                // console.log(error);
+                console.log(error);
                 return { success: false, message: (error as Error).message };
             }
         }
