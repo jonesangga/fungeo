@@ -39,9 +39,11 @@ var TokenT;
     TokenT[TokenT["Else"] = 2300] = "Else";
     TokenT[TokenT["Fn"] = 2320] = "Fn";
     TokenT[TokenT["If"] = 2400] = "If";
+    TokenT[TokenT["Ifx"] = 2405] = "Ifx";
     TokenT[TokenT["NumT"] = 260] = "NumT";
     TokenT[TokenT["Return"] = 2800] = "Return";
     TokenT[TokenT["StrT"] = 2900] = "StrT";
+    TokenT[TokenT["Then"] = 3000] = "Then";
 })(TokenT || (TokenT = {}));
 ;
 const TokenTName = {
@@ -64,6 +66,7 @@ const TokenTName = {
     [1520]: "Greater",
     [1525]: "GreaterEq",
     [2400]: "If",
+    [2405]: "Ifx",
     [300]: "LBrace",
     [400]: "LBracket",
     [1550]: "Less",
@@ -86,6 +89,7 @@ const TokenTName = {
     [1100]: "Star",
     [1900]: "String",
     [2900]: "StrT",
+    [3000]: "Then",
     [2000]: "True",
 };
 let source = "";
@@ -138,9 +142,11 @@ function name_type() {
         case "false": return 1600;
         case "fn": return 2320;
         case "if": return 2400;
+        case "ifx": return 2405;
         case "Num": return 260;
         case "return": return 2800;
         case "Str": return 2900;
+        case "then": return 3000;
         case "true": return 2000;
     }
     return 1700;

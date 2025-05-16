@@ -43,9 +43,11 @@ const enum TokenT {
     Else = 2300,       // Keywords.
     Fn = 2320,
     If = 2400,
+    Ifx = 2405,
     NumT = 260,
     Return = 2800,
     StrT = 2900,
+    Then = 3000,
 };
 
 const TokenTName: { [key in TokenT]: string } = {
@@ -68,6 +70,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
     [TokenT.If]: "If",
+    [TokenT.Ifx]: "Ifx",
     [TokenT.LBrace]: "LBrace",
     [TokenT.LBracket]: "LBracket",
     [TokenT.Less]: "Less",
@@ -90,6 +93,7 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.Star]: "Star",
     [TokenT.String]: "String",
     [TokenT.StrT]: "StrT",
+    [TokenT.Then]: "Then",
     [TokenT.True]: "True",
 };
 
@@ -158,9 +162,11 @@ function name_type(): TokenT {
         case "false":   return TokenT.False;
         case "fn":     return TokenT.Fn;
         case "if":      return TokenT.If;
+        case "ifx":      return TokenT.Ifx;
         case "Num":  return TokenT.NumT;
         case "return":  return TokenT.Return;
         case "Str":  return TokenT.StrT;
+        case "then":    return TokenT.Then;
         case "true":    return TokenT.True;
     }
 

@@ -48,6 +48,7 @@ const rules = {
     [1520]: { prefix: null, infix: compare, precedence: 250 },
     [1525]: { prefix: null, infix: compare, precedence: 250 },
     [2400]: { prefix: null, infix: null, precedence: 100 },
+    [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
     [400]: { prefix: null, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: compare, precedence: 250 },
@@ -70,6 +71,7 @@ const rules = {
     [1100]: { prefix: null, infix: binary, precedence: 400 },
     [1900]: { prefix: parse_string, infix: null, precedence: 100 },
     [2900]: { prefix: null, infix: null, precedence: 100 },
+    [3000]: { prefix: null, infix: null, precedence: 100 },
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
 };
 var FnT;
@@ -376,7 +378,7 @@ function fn() {
     consume(1195, "expect `->` after list of params");
     let t = parse_type();
     current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: t.base };
+    tempNames[name] = { kind: 400, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();
     emitByte(1300);
@@ -400,7 +402,6 @@ function get_name(name) {
             global_non_callable(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        console.log("has userNames");
         if (userNames[name].kind === 400)
             global_callable(name, userNames, false);
         else
@@ -408,7 +409,7 @@ function get_name(name) {
     }
     else if (Object.hasOwn(tempNames, name)) {
         if (tempNames[name].kind === 400)
-            global_callable(name, nativeNames, false);
+            global_callable(name, tempNames, false);
         else
             global_non_callable(tempNames, name, false);
     }
@@ -525,6 +526,23 @@ function parse_if() {
     emitByte(1200);
     if (match(2300))
         statement();
+    patchJump(elseJump);
+}
+function parse_ifx() {
+    expression();
+    assertT(lastT, booleanT, "conditional expression must be boolean");
+    let thenJump = emitJump(620);
+    emitByte(1200);
+    consume(3000, "then is missing");
+    expression();
+    let trueT = lastT;
+    let elseJump = emitJump(615);
+    patchJump(thenJump);
+    emitByte(1200);
+    consume(2300, "else is missing");
+    canParseArgument = true;
+    expression();
+    assertT(trueT, lastT, "true and false branch didn't match");
     patchJump(elseJump);
 }
 function emitLoop(loopStart) {

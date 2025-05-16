@@ -2,6 +2,10 @@
 
 #### 16-05-25
 
+- fix bug: undefined name when doing recursive
+  set canParseArgument to true
+- add ifx for if expression
+- add Then token
 - fix bug: infinite loop because Cond and Inc
 - match fn return type with return expression type
 - new parse_params() and parse_type()

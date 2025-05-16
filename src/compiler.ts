@@ -67,6 +67,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Greater]   : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
     [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Ifx]       : {prefix: parse_ifx,       infix: null,    precedence: Precedence.None},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.LBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Less]      : {prefix: null,            infix: compare, precedence: Precedence.Comparison},
@@ -89,6 +90,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Star]      : {prefix: null,            infix: binary,  precedence: Precedence.Factor},
     [TokenT.String]    : {prefix: parse_string,    infix: null,    precedence: Precedence.None},
     [TokenT.StrT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Then]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
 }
 
@@ -349,6 +351,7 @@ function parse_return(): {base: Kind} {
 
 interface TempTypes {
     kind:     Kind;
+    value?:   Value,
 }
 
 interface TempNames {
@@ -357,6 +360,7 @@ interface TempNames {
 
 let tempNames: TempNames = {
 };
+
 
 function resolveLocal(compiler: Compiler, name: string): number {
     for (let i = compiler.locals.length - 1; i >= 0; i--) {
@@ -484,7 +488,7 @@ function fn(): void {
     let t = parse_type();
 
     current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: t.base };
+    tempNames[name] = { kind: Kind.Callable, value: current.fn };
 
     consume(TokenT.Eq, "expect '=' before fn body");
 
@@ -512,7 +516,6 @@ function get_name(name: string): void {
             global_non_callable(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        console.log("has userNames");
         if (userNames[name].kind === Kind.Callable)
             global_callable(name, userNames, false);
         else
@@ -520,7 +523,7 @@ function get_name(name: string): void {
     }
     else if (Object.hasOwn(tempNames, name)) {
         if (tempNames[name].kind === Kind.Callable)
-            global_callable(name, nativeNames, false);
+            global_callable(name, tempNames, false);
         else
             global_non_callable(tempNames, name, false);
     }
@@ -656,6 +659,28 @@ function parse_if(): void {
 
     if (match(TokenT.Else))
         statement();
+    patchJump(elseJump);
+}
+
+function parse_ifx(): void {
+    expression();
+    assertT(lastT, booleanT, "conditional expression must be boolean");
+
+    let thenJump = emitJump(Op.JmpF);
+    emitByte(Op.Pop);
+    consume(TokenT.Then, "then is missing");
+    expression();
+    let trueT = lastT;
+
+    let elseJump = emitJump(Op.Jmp);
+    patchJump(thenJump);
+    emitByte(Op.Pop);
+
+    consume(TokenT.Else, "else is missing");
+    canParseArgument = true;
+    expression();
+    assertT(trueT, lastT, "true and false branch didn't match");
+
     patchJump(elseJump);
 }
 
