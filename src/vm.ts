@@ -181,8 +181,8 @@ function run(): boolean {
 
             case Op.Cond: {
                 let pos = read_byte();
-                let a = stack[pos] as FGNumber;
-                let b = stack[pos + 1] as FGNumber;
+                let a = stack[frame.slots + pos] as FGNumber;
+                let b = stack[frame.slots + pos + 1] as FGNumber;
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -192,9 +192,9 @@ function run(): boolean {
 
             case Op.Inc: {
                 let pos = read_byte();
-                let a = stack[pos] as FGNumber;
-                let step = stack[pos+2] as FGNumber;
-                stack[pos] = new FGNumber(a.value + step.value);
+                let a = stack[frame.slots + pos] as FGNumber;
+                let step = stack[frame.slots + pos+2] as FGNumber;
+                stack[frame.slots + pos] = new FGNumber(a.value + step.value);
                 break;
             }
 

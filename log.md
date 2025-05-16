@@ -2,6 +2,7 @@
 
 #### 16-05-25
 
+- fix bug: infinite loop because Cond and Inc
 - match fn return type with return expression type
 - new parse_params() and parse_type()
 - For now only pure function

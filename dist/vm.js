@@ -152,8 +152,8 @@ function run() {
                 break;
             case 210: {
                 let pos = read_byte();
-                let a = stack[pos];
-                let b = stack[pos + 1];
+                let a = stack[frame.slots + pos];
+                let b = stack[frame.slots + pos + 1];
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -162,9 +162,9 @@ function run() {
             }
             case 595: {
                 let pos = read_byte();
-                let a = stack[pos];
-                let step = stack[pos + 2];
-                stack[pos] = new FGNumber(a.value + step.value);
+                let a = stack[frame.slots + pos];
+                let step = stack[frame.slots + pos + 2];
+                stack[frame.slots + pos] = new FGNumber(a.value + step.value);
                 break;
             }
             case 616:
