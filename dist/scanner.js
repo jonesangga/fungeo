@@ -1,4 +1,4 @@
-var TokenT;
+export var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
     TokenT[TokenT["Dollar"] = 200] = "Dollar";
@@ -47,7 +47,7 @@ var TokenT;
     TokenT[TokenT["Then"] = 3000] = "Then";
 })(TokenT || (TokenT = {}));
 ;
-const TokenTName = {
+export const TokenTName = {
     [1180]: "Amp",
     [1190]: "AmpAmp",
     [1195]: "Arrow",
@@ -107,10 +107,9 @@ function is_alpha(c) {
         c === '_';
 }
 function advance() {
-    current++;
-    return source[current - 1];
+    return source[current++];
 }
-function is_at_end() {
+function is_eof() {
     return current === source.length;
 }
 function peek() {
@@ -120,7 +119,7 @@ function peek_next() {
     return source[current + 1];
 }
 function match(expected) {
-    if (is_at_end())
+    if (is_eof())
         return false;
     if (source[current] !== expected)
         return false;
@@ -135,8 +134,8 @@ function token_string(kind) {
     let lexeme = source.slice(start + 1, current - 1);
     return { kind, lexeme, line };
 }
-function token_error(errorMessage) {
-    return { kind: 2200, lexeme: errorMessage, line };
+function token_error(message) {
+    return { kind: 2200, lexeme: message, line };
 }
 function name_type() {
     switch (source.slice(start, current)) {
@@ -170,12 +169,12 @@ function number_() {
     return token_lexeme(1800);
 }
 function string_() {
-    while (peek() != '"' && !is_at_end()) {
+    while (peek() != '"' && !is_eof()) {
         if (peek() == '\n')
             line++;
         advance();
     }
-    if (is_at_end())
+    if (is_eof())
         return token_error("unterminated string");
     advance();
     return token_string(1900);
@@ -198,7 +197,7 @@ function skip_whitespace() {
         }
     }
 }
-const scanner = {
+export const scanner = {
     init(source_) {
         source = source_;
         start = 0;
@@ -208,7 +207,7 @@ const scanner = {
     next() {
         skip_whitespace();
         start = current;
-        if (is_at_end())
+        if (is_eof())
             return token_lexeme(2100);
         let c = advance();
         if (is_digit(c))
@@ -242,9 +241,8 @@ const scanner = {
     },
     all() {
         let result = [];
-        do {
+        while (!is_eof())
             result.push(this.next());
-        } while (!is_at_end());
         result.push(this.next());
         return result;
     },
@@ -273,4 +271,3 @@ function pad9(str) {
 function pad4(n) {
     return ('   ' + n).slice(-4);
 }
-export { TokenT, TokenTName, scanner };

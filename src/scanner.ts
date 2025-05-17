@@ -3,55 +3,57 @@
 // TODO: Support comment single and multiline.
 //       Add token # for list and string length.
 
-const enum TokenT {
-    Comma = 100,      // Single character.
-    Dollar = 200,
-    LBrace = 300,
-    LBracket = 400,
-    LParen = 500,
-    Minus = 600,
-    RBrace = 695,
-    RBracket = 700,
-    RParen = 800,
+export const enum TokenT {
+    Comma     = 100,    // Single character.
+    Dollar    = 200,
+    LBrace    = 300,
+    LBracket  = 400,
+    LParen    = 500,
+    Minus     = 600,
+    RBrace    = 695,
+    RBracket  = 700,
+    RParen    = 800,
     Semicolon = 900,
-    Slash = 1000,
-    Star = 1100,
-    Amp = 1180,       // One or more characters.
-    AmpAmp = 1190,
-    Arrow = 1195,
-    Bang = 1200,
-    BangEq = 1210,
-    Colon = 1300,
-    ColonEq = 1400,
-    Eq = 1500,
-    EqEq = 1505,
-    Greater = 1520,
+    Slash     = 1000,
+    Star      = 1100,
+    Amp       = 1180,   // One or more characters.
+    AmpAmp    = 1190,
+    Arrow     = 1195,
+    Bang      = 1200,
+    BangEq    = 1210,
+    Colon     = 1300,
+    ColonEq   = 1400,
+    Eq        = 1500,
+    EqEq      = 1505,
+    Greater   = 1520,
     GreaterEq = 1525,
-    Less = 1550,
-    LessEq = 1555,
-    Pipe = 1575,
-    PipePipe = 1580,
-    Plus = 1585,
-    PlusPlus = 1590,
-    False = 1600,      // Literals.
-    Name = 1700,
-    Number = 1800,
-    String = 1900,
-    True = 2000,
-    EOF = 2100,        // Other.
-    Error = 2200,
-    Else = 2300,       // Keywords.
-    Fn = 2320,
-    If = 2400,
-    Ifx = 2405,
-    NumT = 2600,
-    Proc = 2750,
-    Return = 2800,
-    StrT = 2900,
-    Then = 3000,
+    Less      = 1550,
+    LessEq    = 1555,
+    Pipe      = 1575,
+    PipePipe  = 1580,
+    Plus      = 1585,
+    PlusPlus  = 1590,
+    False     = 1600,   // Literals.
+    Name      = 1700,
+    Number    = 1800,
+    String    = 1900,
+    True      = 2000,
+    EOF       = 2100,   // Other.
+    Error     = 2200,
+    Else      = 2300,   // Keywords.
+    Fn        = 2320,
+    If        = 2400,
+    Ifx       = 2405,
+    NumT      = 2600,
+    Proc      = 2750,
+    Return    = 2800,
+    StrT      = 2900,
+    Then      = 3000,
 };
 
-const TokenTName: { [key in TokenT]: string } = {
+export const TokenTName: {
+    [N in (keyof typeof TokenT) as (typeof TokenT)[N]]: N
+} = {
     [TokenT.Amp]: "Amp",
     [TokenT.AmpAmp]: "AmpAmp",
     [TokenT.Arrow]: "Arrow",
@@ -99,11 +101,11 @@ const TokenTName: { [key in TokenT]: string } = {
     [TokenT.True]: "True",
 };
 
-interface Token {
-    kind:          TokenT;
-    line:          number;
-    lexeme:        string;
-}
+export type Token = {
+    kind:   TokenT,
+    lexeme: string,
+    line:   number,
+};
 
 let source  = "";
 let start   = 0;
@@ -121,11 +123,10 @@ function is_alpha(c: string): boolean {
 }
 
 function advance(): string {
-    current++;
-    return source[current - 1];
+    return source[current++];
 }
 
-function is_at_end(): boolean {
+function is_eof(): boolean {
     return current === source.length;
 }
 
@@ -138,7 +139,7 @@ function peek_next(): string {
 }
 
 function match(expected: string): boolean {
-    if (is_at_end()) return false;
+    if (is_eof()) return false;
     if (source[current] !== expected) return false;
     current++;
     return true;
@@ -154,25 +155,24 @@ function token_string(kind: TokenT): Token {
     return { kind, lexeme, line };
 }
 
-function token_error(errorMessage: string): Token {
-    return { kind: TokenT.Error, lexeme: errorMessage, line };
+function token_error(message: string): Token {
+    return { kind: TokenT.Error, lexeme: message, line };
 }
 
 function name_type(): TokenT {
     switch (source.slice(start, current)) {
-        case "else":    return TokenT.Else;
-        case "false":   return TokenT.False;
+        case "else":   return TokenT.Else;
+        case "false":  return TokenT.False;
         case "fn":     return TokenT.Fn;
-        case "if":      return TokenT.If;
-        case "ifx":      return TokenT.Ifx;
-        case "Num":  return TokenT.NumT;
-        case "proc":  return TokenT.Proc;
-        case "return":  return TokenT.Return;
-        case "Str":  return TokenT.StrT;
-        case "then":    return TokenT.Then;
-        case "true":    return TokenT.True;
+        case "if":     return TokenT.If;
+        case "ifx":    return TokenT.Ifx;
+        case "Num":    return TokenT.NumT;
+        case "proc":   return TokenT.Proc;
+        case "return": return TokenT.Return;
+        case "Str":    return TokenT.StrT;
+        case "then":   return TokenT.Then;
+        case "true":   return TokenT.True;
     }
-
     return TokenT.Name;
 }
 
@@ -197,14 +197,13 @@ function number_(): Token {
 }
 
 function string_(): Token {
-    while (peek() != '"' && !is_at_end()) {
+    while (peek() != '"' && !is_eof()) {
         if (peek() == '\n')
             line++;
         advance();
     }
 
-    if (is_at_end())
-        return token_error("unterminated string");
+    if (is_eof()) return token_error("unterminated string");
 
     advance();          // Consume the closing quote.
     return token_string(TokenT.String);
@@ -229,7 +228,7 @@ function skip_whitespace(): void {
     }
 }
 
-const scanner = {
+export const scanner = {
     init(source_: string): void {
         source  = source_;
         start   = 0;
@@ -241,7 +240,7 @@ const scanner = {
         skip_whitespace();
         start = current;
 
-        if (is_at_end()) return token_lexeme(TokenT.EOF);
+        if (is_eof()) return token_lexeme(TokenT.EOF);
 
         let c = advance();
         if (is_digit(c)) return number_();
@@ -286,10 +285,8 @@ const scanner = {
 
     all(): Token[] {
         let result = [];
-        do {
+        while (!is_eof())
             result.push(this.next());
-        } while (!is_at_end());
-
         result.push(this.next());       // Get the EOF token.
         return result;
     },
@@ -315,6 +312,7 @@ const scanner = {
 }
 
 // Helpers for formating.
+
 function pad9(str: string): string {
     return (str+'         ').slice(0, 9);
 }
@@ -322,5 +320,3 @@ function pad9(str: string): string {
 function pad4(n: number): string {
     return ('   '+n).slice(-4);
 }
-
-export { TokenT, TokenTName, Token, scanner };

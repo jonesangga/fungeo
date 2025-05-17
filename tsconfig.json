@@ -110,5 +110,9 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "exclude": ["src/test"]
+  "exclude": [
+      "src/test/vm.test.ts",
+      "src/test/compiler.test.ts",
+      "src/test/chunk.test.ts"
+  ]
 }

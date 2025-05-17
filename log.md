@@ -1,5 +1,12 @@
 # Log
 
+#### 17-05-25
+
+- update scanner.test
+- clean up scanner.ts
+- update TokenTName type
+- change Token interface to type
+
 #### 16-05-25
 
 - Ret op takes one arg: how many slot to pop and push back
