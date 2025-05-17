@@ -983,16 +983,14 @@ function endScope(): void {
     }
 }
 
-interface CompilerResult {
-    success: boolean;
-    message?: string;
-    result?: FGFunction,
-}
-
 class CompileError extends Error {}
 
+type Result<T, E = Error> =
+    | { ok: true, value: T }
+    | { ok: false, error: E };
+
 const compiler = {
-    compile(source: string): CompilerResult {
+    compile(source: string): Result<FGFunction, Error> {
         scanner.init(source);
         let comp: Compiler = {enclosing: null, fn: new FGFunction("test", [], new Chunk("")), type: FnT.Function, locals: [], scopeDepth: 0};
         init_compiler(comp, FnT.Script, "TOP");
@@ -1006,18 +1004,12 @@ const compiler = {
             while (!match(TokenT.EOF)) {
                 declaration();
             }
-            return { success: true, result: endCompiler() };
+            return { ok: true, value: endCompiler() };
         }
         catch(error: unknown) {
-            if (error instanceof CompileError) {
-                // console.log("catch CompileError");
-                console.log(error);
-                return { success: false, message: error.message };
-            } else {
-                // console.log("catch Error");
-                console.log(error);
-                return { success: false, message: (error as Error).message };
-            }
+            if (error instanceof Error)
+                return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     }
 };

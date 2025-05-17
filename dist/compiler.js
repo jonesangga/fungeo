@@ -763,17 +763,12 @@ const compiler = {
             while (!match(2100)) {
                 declaration();
             }
-            return { success: true, result: endCompiler() };
+            return { ok: true, value: endCompiler() };
         }
         catch (error) {
-            if (error instanceof CompileError) {
-                console.log(error);
-                return { success: false, message: error.message };
-            }
-            else {
-                console.log(error);
-                return { success: false, message: error.message };
-            }
+            if (error instanceof Error)
+                return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     }
 };
