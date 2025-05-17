@@ -1,43 +1,65 @@
 // @jonesangga, 05-05-2025, MIT License.
+//
+// TODO: test FGType
+//       test version in FGCallable and FGFunction
 
 import { describe, it } from "node:test";
-import assert from "node:assert/strict";
-import { Kind, FGBoolean, FGCallable, FGNumber, FGString } from "../value.js"
+import { equal, deepEqual } from "node:assert/strict";
+import { Kind, FGBoolean, FGCallable, FGFunction, FGNumber, FGString } from "../value.js"
+import { Chunk } from "../chunk.js"
 
 describe("value", () => {
 
     it("FGBoolean", () => {
         let b = new FGBoolean(false);
-        assert.equal(b.kind, Kind.Boolean);
-        assert.equal(b.value, false);
-        assert.equal(b.to_str(), "false");
+
+        equal(b.kind, Kind.Boolean);
+        equal(b.value, false);
+        equal(b.to_str(), "false");
     });
 
     it("FGCallable", () => {
         let f = (n: number) => {return;};
-        let b = new FGCallable(f, [
+        let b = new FGCallable("f", f, [
             {
                 input: [Kind.Number],
                 output: Kind.Number,
             }
         ]);
-        assert.equal(b.kind, Kind.Callable);
-        assert.deepEqual(b.value, f);
-        assert.equal(b.to_str(), "fn(n: number): void");
+
+        equal(b.kind, Kind.Callable);
+        equal(b.name, "f");
+        deepEqual(b.value, f);
+        equal(b.to_str(), "fn(n: number): void");
+    });
+
+    it("FGFunction", () => {
+        let b = new FGFunction("testfn", [
+            {
+                input: [Kind.Number],
+                output: Kind.Number,
+            }
+        ], new Chunk(""));
+
+        equal(b.kind, Kind.Function);
+        equal(b.name, "testfn");
+        equal(b.to_str(), "fn testfn");
     });
 
     it("FGNumber", () => {
         let b = new FGNumber(123);
-        assert.equal(b.kind, Kind.Number);
-        assert.equal(b.value, 123);
-        assert.equal(b.to_str(), "123");
+
+        equal(b.kind, Kind.Number);
+        equal(b.value, 123);
+        equal(b.to_str(), "123");
     });
 
     it("FGString", () => {
         let b = new FGString("real");
-        assert.equal(b.kind, Kind.String);
-        assert.equal(b.value, "real");
-        assert.equal(b.to_str(), "real");
+
+        equal(b.kind, Kind.String);
+        equal(b.value, "real");
+        equal(b.to_str(), "real");
     });
 
 });
