@@ -1,6 +1,6 @@
 # FunGeo - Fun Geometry
 
-Status: Still experimenting. No user-defined function yet.
+Status: Still experimenting. WIP.
 
 - [Live](https://jonesangga.github.io/fungeo/)
 - [Documentation](https://jonesangga.github.io/fungeo-doc/)
