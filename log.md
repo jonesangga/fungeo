@@ -2,6 +2,8 @@
 
 #### 17-05-25
 
+- clean up chunk.ts
+- clean up chunk.test
 - scanner.test: match kind in each token test
 - update scanner.test
 - clean up scanner.ts

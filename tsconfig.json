@@ -112,7 +112,6 @@
   },
   "exclude": [
       "src/test/vm.test.ts",
-      "src/test/compiler.test.ts",
-      "src/test/chunk.test.ts"
+      "src/test/compiler.test.ts"
   ]
 }

@@ -668,9 +668,11 @@ function add_local(name: string): void {
     current.locals.push(local);
 }
 
+// Return the index of jump argument. The argument will be overwritten in patchJump().
+//
 function emitJump(instruction: number): number {
     emitByte(instruction);
-    emitByte(-1);            // Dummy number. See patchJump().
+    emitByte(-1);            // Dummy number. Will be overwritten in patchJump().
     return currentChunk().code.length - 1;
 }
 
@@ -723,7 +725,7 @@ function parse_ifx(): void {
 
 function emitLoop(loopStart: number): void {
     emitByte(Op.JmpBack);
-    let offset = currentChunk().code.length - loopStart + 1;
+    let offset = currentChunk().code.length - loopStart + 1;    // +1 for for the Op.JmpBack itself.
     emitByte(-offset);
 }
 

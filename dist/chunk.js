@@ -1,5 +1,5 @@
 import { KindName } from "./value.js";
-var Op;
+export var Op;
 (function (Op) {
     Op[Op["Add"] = 100] = "Add";
     Op[Op["AddStr"] = 120] = "AddStr";
@@ -35,7 +35,7 @@ var Op;
     Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
 ;
-const OpName = {
+export const OpName = {
     [100]: "Add",
     [120]: "AddStr",
     [200]: "CallNat",
@@ -69,7 +69,7 @@ const OpName = {
     [1410]: "SetLoc",
     [1500]: "Sub",
 };
-class Chunk {
+export class Chunk {
     name;
     code = [];
     lines = [];
@@ -96,15 +96,33 @@ class Chunk {
     }
     disassemble_instr(offset) {
         let result = zpad4(offset) + " ";
-        if (offset > 0 && this.lines[offset] === this.lines[offset - 1]) {
+        if (offset > 0 && this.lines[offset] === this.lines[offset - 1])
             result += "   | ";
-        }
-        else {
+        else
             result += padl4(this.lines[offset]) + " ";
-        }
         let instruction = this.code[offset];
         let name = OpName[instruction];
         switch (instruction) {
+            case 100:
+            case 120:
+            case 300:
+            case 380:
+            case 390:
+            case 530:
+            case 610:
+            case 690:
+            case 810:
+            case 900:
+            case 1000:
+            case 1010:
+            case 1100:
+            case 1290:
+            case 1200:
+            case 1410:
+            case 1500: {
+                result += name + "\n";
+                return [result, offset + 1];
+            }
             case 200:
             case 205: {
                 let index = this.code[offset + 1];
@@ -134,26 +152,6 @@ class Chunk {
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
             }
-            case 100:
-            case 120:
-            case 300:
-            case 380:
-            case 390:
-            case 530:
-            case 610:
-            case 690:
-            case 810:
-            case 900:
-            case 1000:
-            case 1010:
-            case 1100:
-            case 1290:
-            case 1200:
-            case 1410:
-            case 1500: {
-                result += name + "\n";
-                return [result, offset + 1];
-            }
             case 1400: {
                 let nameId = this.code[offset + 1];
                 let kind = this.code[offset + 2];
@@ -178,4 +176,3 @@ function padl4(n) {
 function padr7(s) {
     return (s + '       ').slice(0, 7);
 }
-export { Op, OpName, Chunk };
