@@ -39,7 +39,7 @@ describe("scanner handling EOF", () => {
 
 describe("scanner each token type", () => {
     const tests: {
-        [key in TokenT]: [string, Token]
+        [key in TokenT]: [string, { kind: key, line: number, lexeme: string }]
     } = {
         [TokenT.Amp]: ["&", { kind: TokenT.Amp, line: 1, lexeme: "&" }],
         [TokenT.AmpAmp]: ["&&", { kind: TokenT.AmpAmp, line: 1, lexeme: "&&" }],

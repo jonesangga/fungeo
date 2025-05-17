@@ -2,6 +2,7 @@
 
 #### 17-05-25
 
+- scanner.test: match kind in each token test
 - update scanner.test
 - clean up scanner.ts
 - update TokenTName type
