@@ -482,7 +482,6 @@ function fn(): void {
     do {
         parse_params();
     } while (match(TokenT.Comma));
-    console.log(current.fn);
 
     // return type
     consume(TokenT.Arrow, "expect `->` after list of params");
@@ -595,7 +594,6 @@ function global_callable(name_: string, table: any, native: boolean): void {
     canParseArgument = match(TokenT.Dollar);
 
     let name    = table[name_];
-    console.log(name);
     // let version = name.version as Version[];
     let version = (name.value as FGCallable).version;
     let inputVersion: (Set<number> | Kind)[] = [];

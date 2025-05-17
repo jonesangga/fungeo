@@ -38,10 +38,12 @@ export class FGBoolean {
     }
 }
 export class FGCallable {
+    name;
     value;
     version;
     kind = 400;
-    constructor(value, version) {
+    constructor(name, value, version) {
+        this.name = name;
         this.value = value;
         this.version = version;
     }

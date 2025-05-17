@@ -1,7 +1,8 @@
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { OpName, Chunk } from "../chunk.js";
-import { FGNumber, FGString } from "../value.js";
+import { FGNumber, FGString, FGFunction } from "../value.js";
+import { nativeNames } from "../names.js";
 describe("chunk", () => {
     it("constructor()", () => {
         let chunk = new Chunk("test chunk");
@@ -129,24 +130,26 @@ describe("chunk disassemble op jumps", () => {
 describe("chunk disassemble op calls", () => {
     it("Op.CallNat", () => {
         let chunk = new Chunk("test chunk");
-        let index = 3;
-        let ver = 2;
+        let fn = nativeNames["Print"].value;
+        let id = chunk.add_value(fn);
+        let ver = 1;
         chunk.write(200, 123);
-        chunk.write(index, 123);
+        chunk.write(id, 123);
         chunk.write(ver, 123);
         let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallNat    3 'v2'\n");
+        deepEqual(result, "0000  123 CallNat    0 'Print v1'\n");
         equal(offset, 3);
     });
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
-        let index = 3;
-        let ver = 2;
+        let fn = new FGFunction("dummy", [], new Chunk("dummy chunk"));
+        let id = chunk.add_value(fn);
+        let ver = 1;
         chunk.write(205, 123);
-        chunk.write(index, 123);
+        chunk.write(id, 123);
         chunk.write(ver, 123);
         let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallUsr    3 'v2'\n");
+        deepEqual(result, "0000  123 CallUsr    0 'dummy v1'\n");
         equal(offset, 3);
     });
 });

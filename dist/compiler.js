@@ -375,7 +375,6 @@ function fn() {
     do {
         parse_params();
     } while (match(100));
-    console.log(current.fn);
     consume(1195, "expect `->` after list of params");
     let t = parse_type();
     current.fn.version[0].output = t.base;
@@ -470,7 +469,6 @@ function global_callable(name_, table, native) {
     }
     canParseArgument = match(200);
     let name = table[name_];
-    console.log(name);
     let version = name.value.version;
     let inputVersion = [];
     let gotTypes = [];

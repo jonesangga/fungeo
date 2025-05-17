@@ -1,6 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind, KindName, type Value } from "./value.js"
+import { Kind, KindName, FGFunction, type Value } from "./value.js"
 
 export const enum Op {
     Add     = 100,
@@ -137,8 +137,9 @@ export class Chunk {
             case Op.CallNat:
             case Op.CallUsr: {
                 let index = this.code[offset + 1];
+                let fn = this.values[index] as FGFunction;
                 let ver = this.code[offset + 2];
-                result += `${ padr7(name) } ${ padl4(index) } 'v${ ver }'\n`;
+                result += `${ padr7(name) } ${ padl4(index) } '${ fn.name } v${ ver }'\n`;
                 return [result, offset + 3];
             }
 

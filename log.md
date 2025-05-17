@@ -2,6 +2,9 @@
 
 #### 17-05-25
 
+- update chunk.test according to below update
+- add name field to FGCallable
+- display function name in disassembler
 - clean up chunk.ts
 - clean up chunk.test
 - scanner.test: match kind in each token test

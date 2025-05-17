@@ -52,6 +52,7 @@ export interface Version {
 export class FGCallable implements FG {
     kind: Kind.Callable = Kind.Callable;
     constructor(
+        public name: string,
         public value: (n: number) => void,
         public version: Version[]
     ) {}
