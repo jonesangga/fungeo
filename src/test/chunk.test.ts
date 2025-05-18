@@ -77,7 +77,8 @@ describe("chunk disassemble op with no arg", () => {
 
 describe("chunk disassemble op arg", () => {
     const tests: [Op, string][] = [
-        [Op.Cond, "0000  100 Cond       2\n"],
+        [Op.CkExc, "0000  100 CkExc      2\n"],
+        [Op.CkInc, "0000  100 CkInc      2\n"],
         [Op.GetLoc, "0000  100 GetLoc     2\n"],
         [Op.Inc, "0000  100 Inc        2\n"],
         [Op.Ret, "0000  100 Ret        2\n"],

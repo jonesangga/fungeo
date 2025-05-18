@@ -5,7 +5,10 @@ export var Op;
     Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["CallUsr"] = 205] = "CallUsr";
-    Op[Op["Cond"] = 210] = "Cond";
+    Op[Op["CkExc"] = 210] = "CkExc";
+    Op[Op["CkExcD"] = 212] = "CkExcD";
+    Op[Op["CkInc"] = 215] = "CkInc";
+    Op[Op["CkIncD"] = 217] = "CkIncD";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
@@ -22,6 +25,7 @@ export var Op;
     Op[Op["LEq"] = 690] = "LEq";
     Op[Op["List"] = 700] = "List";
     Op[Op["Load"] = 800] = "Load";
+    Op[Op["Loop"] = 805] = "Loop";
     Op[Op["LT"] = 810] = "LT";
     Op[Op["Mul"] = 900] = "Mul";
     Op[Op["Neg"] = 1000] = "Neg";
@@ -40,7 +44,10 @@ export const OpName = {
     [120]: "AddStr",
     [200]: "CallNat",
     [205]: "CallUsr",
-    [210]: "Cond",
+    [210]: "CkExc",
+    [212]: "CkExcD",
+    [215]: "CkInc",
+    [217]: "CkIncD",
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
@@ -57,6 +64,7 @@ export const OpName = {
     [690]: "LEq",
     [700]: "List",
     [800]: "Load",
+    [805]: "Loop",
     [810]: "LT",
     [900]: "Mul",
     [1000]: "Neg",
@@ -111,6 +119,7 @@ export class Chunk {
             case 530:
             case 610:
             case 690:
+            case 805:
             case 810:
             case 900:
             case 1000:
@@ -146,6 +155,9 @@ export class Chunk {
                 return [result, offset + 2];
             }
             case 210:
+            case 212:
+            case 215:
+            case 217:
             case 395:
             case 595:
             case 1300: {

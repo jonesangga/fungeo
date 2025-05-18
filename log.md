@@ -1,5 +1,23 @@
 # Log
 
+#### 18-05-25
+
+- reset lastT in compiler.compile()
+- handle infinite loop
+- new Op: CkExcD, CkIncD, Loop
+- step is mandatory for decreasing range
+- fix bug: [0.5,3)i Print i
+  => 0.5
+     1.5
+  should be
+     0.5
+     1.5
+     2.5
+
+- change compare to boolean_compare
+- fix bug: this should not be error
+  Print $ 2 + 3
+
 #### 17-05-25
 
 - update chunk.test according to below update

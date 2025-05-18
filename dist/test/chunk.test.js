@@ -60,7 +60,8 @@ describe("chunk disassemble op with no arg", () => {
 });
 describe("chunk disassemble op arg", () => {
     const tests = [
-        [210, "0000  100 Cond       2\n"],
+        [210, "0000  100 CkExc      2\n"],
+        [215, "0000  100 CkInc      2\n"],
         [395, "0000  100 GetLoc     2\n"],
         [595, "0000  100 Inc        2\n"],
         [1300, "0000  100 Ret        2\n"],

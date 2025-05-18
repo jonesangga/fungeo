@@ -7,7 +7,10 @@ export const enum Op {
     AddStr  = 120,
     CallNat = 200,
     CallUsr = 205,
-    Cond    = 210,
+    CkExc   = 210,
+    CkExcD  = 212,
+    CkInc   = 215,
+    CkIncD  = 217,
     Div     = 300,
     Eq      = 380,
     GEq     = 390,
@@ -24,6 +27,7 @@ export const enum Op {
     LEq     = 690,
     List    = 700,
     Load    = 800,
+    Loop    = 805,
     LT      = 810,
     Mul     = 900,
     Neg     = 1000,
@@ -44,7 +48,10 @@ export const OpName: {
     [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
     [Op.CallUsr]: "CallUsr",
-    [Op.Cond]: "Cond",
+    [Op.CkExc]: "CkExc",
+    [Op.CkExcD]: "CkExcD",
+    [Op.CkInc]: "CkInc",
+    [Op.CkIncD]: "CkIncD",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
@@ -61,6 +68,7 @@ export const OpName: {
     [Op.LEq]: "LEq",
     [Op.List]: "List",
     [Op.Load]: "Load",
+    [Op.Loop]: "Loop",
     [Op.LT]: "LT",
     [Op.Mul]: "Mul",
     [Op.Neg]: "Neg",
@@ -121,6 +129,7 @@ export class Chunk {
             case Op.GT:
             case Op.IsDiv:
             case Op.LEq:
+            case Op.Loop:
             case Op.LT:
             case Op.Mul:
             case Op.Neg:
@@ -159,7 +168,10 @@ export class Chunk {
                 return [result, offset + 2];
             }
 
-            case Op.Cond:
+            case Op.CkExc:
+            case Op.CkExcD:
+            case Op.CkInc:
+            case Op.CkIncD:
             case Op.GetLoc:
             case Op.Inc:
             case Op.Ret: {

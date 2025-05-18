@@ -22,6 +22,7 @@ function main(source: string): void {
     }
     else {
         repl.error(result.error.message);
+        console.log(result.error);
     }
 }
 

@@ -1,593 +1,592 @@
 import { describe, it } from "node:test";
-import assert from "node:assert/strict";
-import { Chunk } from "../chunk.js";
-import { FGBoolean, FGNumber, FGString } from "../value.js";
+import { deepEqual, fail } from "node:assert/strict";
+import { FGNumber, FGString } from "../value.js";
 import { compiler } from "../compiler.js";
-describe("compiler:binary", () => {
-    it("+", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 100,
-            1400, 0, 500, 1300,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGString("num"));
-        assert.deepEqual(chunk.values[1], new FGNumber(12));
-        assert.deepEqual(chunk.values[2], new FGNumber(34));
-    });
-    it("-", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 - 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 1500,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("*", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 900,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("/", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 / 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 300,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("|", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "multipleOf2 = 2 | 6";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 610,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it("prec: +-", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34 - 56";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 100,
-            800, 3, 1500,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("prec: */", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * 34 / 56";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 900,
-            800, 3, 300,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("prec: +-*/", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 + 34 * 56 - 78 / 9";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 800, 3,
-            900, 100, 800, 4, 800, 5, 300, 1500,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("with variable", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 b = a + 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1400, 0, 500, 500, 3,
-            800, 4, 100,
-            1400, 2, 500, 1300,
-        ]);
-    });
-    it("error: string + number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = \"real\" + 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '+': '+' only for numbers\n"
-        });
-    });
-    it("error: num * string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 12 * \"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': '*' only for numbers\n"
-        });
-    });
-});
-describe("compiler:binary_str", () => {
-    it("++", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "str = \"so \" ++ \"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 120,
-            1400, 0, 600, 1300,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGString("str"));
-        assert.deepEqual(chunk.values[1], new FGString("so "));
-        assert.deepEqual(chunk.values[2], new FGString("real"));
-    });
-    it("error: string ++ number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "str = \"real\" ++ 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': '++' only for strings\n"
-        });
-    });
-});
-describe("compiler:not", () => {
-    it("!", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !false";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1100,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it("double unary: !!", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !!false";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1100, 1100,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it("error: !number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "truth = !2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': '!' is only for boolean\n"
-        });
-    });
-});
-describe("compiler:eq", () => {
-    it("==", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 2 == 3";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 380,
-            1400, 0, 300, 1300,
-        ]);
-    });
-});
-describe("compiler:neq", () => {
-    it("!=", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 2 != 3";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 1010,
-            1400, 0, 300, 1300,
-        ]);
-    });
-});
-describe("compiler:compare", () => {
-    it("<", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 < 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 810,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it("<=", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 <= 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 690,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it(">", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 > 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 530,
-            1400, 0, 300, 1300,
-        ]);
-    });
-    it(">=", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 12 >= 34";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 390,
-            1400, 0, 300, 1300,
-        ]);
-    });
-});
-describe("compiler:negate", () => {
-    it("-", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1000,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("double unary: --", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = --123";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1000, 1000,
-            1400, 0, 500, 1300,
-        ]);
-    });
-    it("error: -string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -\"real\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': '-' is only for number\n"
-        });
-    });
-});
-describe("compiler:if", () => {
-    it("success", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "if 1 < 2 Print \"correct\" else Print \"wrong\"";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 0, 800, 1, 810, 620, 8, 1200,
-            800, 2, 200, 3, 0, 615, 6, 1200,
-            800, 4, 200, 5, 0, 1300
-        ]);
-    });
-    it("error", () => {
-        let chunk = new Chunk("test chunk");
-        let source = 'if "real" Print "correct" else Print "wrong"';
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'real': conditional expression must be boolean\n"
-        });
-    });
-});
-describe("compiler:&&", () => {
-    it("success", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = true && true";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 620, 3, 1200,
-            800, 2, 1400, 0, 300, 1300
-        ]);
-    });
-    it("error: left", () => {
-        let chunk = new Chunk("test chunk");
-        let source = 'a = "real" && false';
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '&&': operands of '&&' must be boolean\n"
-        });
-    });
-    it("error: right", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = true && 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': operands of '&&' must be boolean\n"
-        });
-    });
-});
-describe("compiler:||", () => {
-    it("success", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = true || true";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 620, 2, 615, 3, 1200,
-            800, 2, 1400, 0, 300, 1300
-        ]);
-    });
-    it("error: left", () => {
-        let chunk = new Chunk("test chunk");
-        let source = 'a = "real" || true';
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '||': operands of '||' must be boolean\n"
-        });
-    });
-    it("error: right", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = true || 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': operands of '||' must be boolean\n"
-        });
-    });
-});
-describe("compiler:grouping", () => {
-    it("()", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 1 * (2 + 3)";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
+describe("compiler unary grouping", () => {
+    it("() to change precedence", () => {
+        let source = "result = 1 * (2 + 3)";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
             800, 1, 800, 2, 800, 3, 100, 900,
-            1400, 0, 500, 1300,
+            1400, 0, 500, 1290,
         ]);
     });
-    it("error: no ')'", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 1 * (2 + 3";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at end: expect ')' after grouping\n"
-        });
-    });
-    it("-()", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -(2 + 3)";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 800, 2, 100, 1000,
-            1400, 0, 500, 1300,
+    it("((Str))", () => {
+        let source = `result = (("real"))`;
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1400, 0, 600, 1290,
         ]);
     });
-    it("error: -(String)", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = -(\"real\")";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at ')': '-' is only for number\n"
+});
+describe("compiler unary grouping error", () => {
+    const tests = [
+        [
+            "error, when ( not closed",
+            `result = 1 * (2 + 3`,
+            "1: at end: expect ')' after grouping\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
-    });
-    it("!()", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !(false)";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
+    }
+});
+describe("compiler unary !", () => {
+    it("!Bool", () => {
+        let source = "result = !false";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
             800, 1, 1100,
-            1400, 0, 300, 1300,
+            1400, 0, 300, 1290,
         ]);
     });
-    it("error: !(Number)", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = !(2)";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at ')': '!' is only for boolean\n"
-        });
+    it("!!Bool", () => {
+        let source = "result = !!false";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1100, 1100,
+            1400, 0, 300, 1290,
+        ]);
+    });
+    it("!(Bool)", () => {
+        let source = "result = !(false)";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1100,
+            1400, 0, 300, 1290,
+        ]);
     });
 });
-describe("compiler:loop", () => {
-    it("success: single", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1,5] i Print i";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 0, 800, 1, 800, 2, 100, 800, 3, 1410,
-            210, 0, 620, 10, 1200,
-            395, 0, 200, 4, 0,
-            595, 0, 616, -14,
-            1200, 1200, 1200, 1200, 1300,
+describe("compiler unary ! error", () => {
+    const tests = [
+        [
+            "error, when !Num",
+            `result = !2`,
+            "1: at '2': '!' is only for boolean\n"
+        ],
+        [
+            "error, when !Str",
+            `result = !"real"`,
+            "1: at 'real': '!' is only for boolean\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
+});
+describe("compiler unary -", () => {
+    it("-Num", () => {
+        let source = "result = -2";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1000,
+            1400, 0, 500, 1290,
         ]);
     });
-    it("error: start not number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = '["a", 2] -> i Print i';
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'a': start of range must be number\n"
-        });
+    it("--Num", () => {
+        let source = "result = --2";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1000, 1000,
+            1400, 0, 500, 1290,
+        ]);
     });
-    it("error: end not number", () => {
-        let chunk = new Chunk("test chunk");
-        let source = '[2, false] -> i Print i';
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'false': end of range must be number\n"
-        });
-    });
-    it("error: no comma", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1] -> i Print i";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at ']': expect ',' between start and end\n"
-        });
-    });
-    it("error: no ]", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1,3 i Print i";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'i': expect ']' in range\n"
-        });
-    });
-    it("error: no name", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1,3] 2 Print i";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': expect name for iterator\n"
-        });
-    });
-    it("error: reassignment to iterator", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "[1,3] i { i = 3 Print i }";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '=': i already defined in this scope\n"
-        });
+    it("-(Num)", () => {
+        let source = "result = -(2)";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 1000,
+            1400, 0, 500, 1290,
+        ]);
     });
 });
-describe("compiler:assignment", () => {
-    it("number, string, boolean", () => {
-        let chunk = new Chunk("test chunk");
-        let source = `num = 123.456 str = \"real\"
-            c = true
-            d = false`;
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 1, 1400, 0, 500,
-            800, 3, 1400, 2, 600,
-            800, 5, 1400, 4, 300,
-            800, 7, 1400, 6, 300, 1300,
-        ]);
-        assert.deepEqual(chunk.lines, [
-            1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1,
-            2, 2, 2, 2, 2,
-            3, 3, 3, 3, 3, 3,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGString("num"));
-        assert.deepEqual(chunk.values[1], new FGNumber(123.456));
-        assert.deepEqual(chunk.values[2], new FGString("str"));
-        assert.deepEqual(chunk.values[3], new FGString("real"));
-        assert.deepEqual(chunk.values[4], new FGString("c"));
-        assert.deepEqual(chunk.values[5], new FGBoolean(true));
-        assert.deepEqual(chunk.values[6], new FGString("d"));
-        assert.deepEqual(chunk.values[7], new FGBoolean(false));
-    });
-    it("error: reassignment", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 123.456 num = 2";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '=': num already defined\n"
+describe("compiler unary - error", () => {
+    const tests = [
+        [
+            "error, when -Str",
+            `result = -"real"`,
+            "1: at 'real': '-' is only for number\n"
+        ],
+        [
+            "error, when -Bool",
+            `result = -false`,
+            "1: at 'false': '-' is only for number\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
+    }
+});
+describe("compiler boolean equality", () => {
+    const tests = [
+        ["Expr == Expr", "result = 12 == 34", 380],
+        ["Expr != Expr", "result = 12 != 34", 1010],
+    ];
+    for (let [about, source, expectedOp] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, [
+                800, 1, 800, 2, expectedOp,
+                1400, 0, 300, 1290,
+            ]);
+        });
+    }
+});
+describe("compiler boolean |", () => {
+    it("Num | Num", () => {
+        let source = "result = 12 | 34";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 800, 2, 610,
+            1400, 0, 300, 1290,
+        ]);
     });
 });
-describe("compiler:block", () => {
-    it("simple { }, SetLoc", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "{a = 1}";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 0, 1410, 1200, 1300,
+describe("compiler boolean &&", () => {
+    it("Bool && Bool", () => {
+        let source = "result = true && true";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 620, 3, 1200,
+            800, 2, 1400, 0, 300, 1290,
         ]);
-        assert.deepEqual(chunk.values[0], new FGNumber(1));
-    });
-    it("simple { }, GetLoc", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "{a = 1 Print a}";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 0, 1410, 395, 0,
-            200, 1, 0, 1200, 1300,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGNumber(1));
-    });
-    it("nested { }", () => {
-        let chunk = new Chunk("test chunk");
-        let source = `
-            {
-              a = 1
-              {
-                a = 2
-                Print a
-              }
-              Print a
-            }
-        `;
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [
-            800, 0, 1410,
-            800, 1, 1410,
-            395, 1, 200, 2, 0, 1200,
-            395, 0, 200, 3, 0, 1200,
-            1300,
-        ]);
-        assert.deepEqual(chunk.values[0], new FGNumber(1));
-        assert.deepEqual(chunk.values[1], new FGNumber(2));
-    });
-    it("error: duplicate", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "{a = 1 a = 2}";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '=': a already defined in this scope\n"
-        });
     });
 });
-describe("compiler", () => {
-    it("empty string", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(chunk.code, [1300]);
-        assert.deepEqual(chunk.lines, [1]);
-        assert.deepEqual(chunk.values, []);
-    });
-    it("success return", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "num = 123.456";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: true,
+describe("compiler boolean && error", () => {
+    const tests = [
+        [
+            "error, when Bool && Num",
+            `result = true && 2`,
+            "1: at '2': operands of '&&' must be booleans\n"
+        ],
+        [
+            "error, when Num && Bool",
+            `result = 2 && true`,
+            "1: at '&&': operands of '&&' must be booleans\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
+    }
+});
+describe("compiler boolean ||", () => {
+    it("Bool || Bool", () => {
+        let source = "result = true || true";
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 620, 2, 615, 3, 1200,
+            800, 2, 1400, 0, 300, 1290,
+        ]);
     });
-    it("semicolon optional delimiter", () => {
-        let chunk = new Chunk("test chunk");
-        let source = ";num = 123.456; a = 3";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: true,
+});
+describe("compiler boolean || error", () => {
+    const tests = [
+        [
+            "error, when Bool || Num",
+            `result = true || 2`,
+            "1: at '2': operands of '||' must be booleans\n"
+        ],
+        [
+            "error, when Num || Bool",
+            `result = 2 || true`,
+            "1: at '||': operands of '||' must be booleans\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
-    });
-    it("error: undefined name", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = b";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'b': undefined name b\n"
+    }
+});
+describe("compiler boolean compare", () => {
+    const tests = [
+        ["Num < Num", "result = 12 < 34", 810],
+        ["Num <= Num", "result = 12 <= 34", 690],
+        ["Num > Num", "result = 12 > 34", 530],
+        ["Num >= Num", "result = 12 >= 34", 390],
+        ["Str < Str", `result = "so" < "real"`, 810],
+        ["Str <= Str", `result = "so" <= "real"`, 690],
+        ["Str > Str", `result = "so" > "real"`, 530],
+        ["Str >= Str", `result = "so" >= "real"`, 390],
+    ];
+    for (let [about, source, expectedOp] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, [
+                800, 1, 800, 2, expectedOp,
+                1400, 0, 300, 1290,
+            ]);
         });
-    });
-    it("error: scanner: unexpected character", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a % b";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: scanner: unexpected character %\n"
+    }
+});
+describe("compiler boolean compare error", () => {
+    const tests = [
+        [
+            "error, when Str < Num",
+            `result = "real" < 2`,
+            "1: at '2': operands type for comparison didn't match\n"
+        ],
+        [
+            "error, when Num < Str",
+            `result = true < "real"`,
+            "1: at '<': can only compare strings and numbers\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
-    });
-    it("error: start statement", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "2 + 4";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at '2': cannot start statement with Number\n"
+    }
+});
+describe("compiler numeric binary", () => {
+    const tests = [
+        ["Num + Num", "result = 12 + 34", 100],
+        ["Num - Num", "result = 12 - 34", 1500],
+        ["Num * Num", "result = 12 * 34", 900],
+        ["Num / Num", "result = 12 / 34", 300],
+    ];
+    for (let [about, source, expectedOp] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, [
+                800, 1, 800, 2, expectedOp,
+                1400, 0, 500, 1290,
+            ]);
+            deepEqual(chunk.values[0], new FGString("result"));
+            deepEqual(chunk.values[1], new FGNumber(12));
+            deepEqual(chunk.values[2], new FGNumber(34));
         });
-    });
-    it("error: expect expression", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a =";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at end: expect expression\n"
+    }
+});
+describe("compiler numeric binary precedence", () => {
+    const tests = [
+        ["+- term", "result = 12 + 34 - 56", [
+                800, 1, 800, 2, 100,
+                800, 3, 1500,
+                1400, 0, 500, 1290,
+            ]],
+        ["*/ factor", "result = 12 * 34 / 56", [
+                800, 1, 800, 2, 900,
+                800, 3, 300,
+                1400, 0, 500, 1290,
+            ]],
+        ["+-*/ term and factor", "result = 12 + 34 * 56 - 78 / 9", [
+                800, 1, 800, 2, 800, 3, 900, 100,
+                800, 4, 800, 5, 300, 1500,
+                1400, 0, 500, 1290,
+            ]],
+    ];
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
         });
-    });
-    it("error: forbidden expression stmt", () => {
-        let chunk = new Chunk("test chunk");
-        let source = "a = 2 a";
-        let result = compiler.compile(source, chunk);
-        assert.deepEqual(result, {
-            success: false, message: "1: at 'a': forbidden expression statement\n"
+    }
+});
+describe("compiler numeric binary error", () => {
+    const tests = [
+        [
+            "error, when Str + Num",
+            `result = "real" + 2`,
+            "1: at '+': '+' only for numbers\n"
+        ],
+        [
+            "error, when Num + Str",
+            `result = 2 + "real"`,
+            "1: at 'real': '+' only for numbers\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
         });
+    }
+});
+describe("compiler string binary", () => {
+    it("Str ++ Str", () => {
+        let source = `result = "so " ++ "real"`;
+        let result = compiler.compile(source);
+        if (!result.ok)
+            fail();
+        let chunk = result.value.chunk;
+        deepEqual(chunk.code, [
+            800, 1, 800, 2, 120,
+            1400, 0, 600, 1290,
+        ]);
+        deepEqual(chunk.values[0], new FGString("result"));
+        deepEqual(chunk.values[1], new FGString("so "));
+        deepEqual(chunk.values[2], new FGString("real"));
     });
+});
+describe("compiler string binary error", () => {
+    const tests = [
+        [
+            "error, when Str ++ Num",
+            `result = "real" ++ 2`,
+            "1: at '2': '++' only for strings\n"
+        ],
+        [
+            "error, when Num ++ Str",
+            `result = 2 ++ "real"`,
+            "1: at '++': '++' only for strings\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
+});
+describe("compiler block", () => {
+    const tests = [
+        ["empty {}", `{}`, [
+                1290,
+            ]],
+        ["SetLoc in {}", `{a = 2}`, [
+                800, 0, 1410, 1200, 1290,
+            ]],
+        ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
+                800, 0, 1410, 395, 0,
+                200, 1, 0, 1200, 1290,
+            ]],
+        ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
+                800, 0, 1410,
+                800, 1, 1410,
+                395, 1, 200, 2, 0, 1200,
+                395, 0, 200, 3, 0, 1200,
+                1290,
+            ]],
+    ];
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
+        });
+    }
+});
+describe("compiler block error", () => {
+    const tests = [
+        [
+            "error, when reassign local name",
+            `{a = 1 a = 2}`,
+            "1: at '=': a already defined in this scope\n"
+        ],
+        [
+            "error, when no }",
+            `{a = 1`,
+            "1: at end: expect '}' at the end of block\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
+});
+describe("compiler if", () => {
+    const tests = [
+        ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
+                800, 0, 620, 8, 1200,
+                800, 1, 200, 2, 0,
+                615, 6, 1200,
+                800, 3, 200, 4, 0,
+                1290,
+            ]],
+    ];
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
+        });
+    }
+});
+describe("compiler if error", () => {
+    const tests = [
+        [
+            "error, when conditional not Bool",
+            `if "real" Print "correct" else Print "wrong"`,
+            "1: at 'real': conditional expression must be boolean\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
+});
+describe("compiler loop", () => {
+    const tests = [
+        ["closed increasing default loop", `[10,15]i Print i`, [
+                800, 0, 800, 1, 800, 2, 1410,
+                805, 215, 0, 620, 10, 1200,
+                395, 0, 200, 3, 0,
+                595, 0, 616, -14,
+                1200, 1200, 1200, 1200,
+                1290,
+            ]],
+        ["open left increasing default loop", `(10,15]i Print i`, [
+                800, 0, 800, 1, 800, 2, 1410,
+                805, 615, 10, 215, 0, 620, 10, 1200,
+                395, 0, 200, 3, 0,
+                595, 0, 616, -14,
+                1200, 1200, 1200, 1200,
+                1290,
+            ]],
+        ["open right increasing default loop", `[10,15)i Print i`, [
+                800, 0, 800, 1, 800, 2, 1410,
+                805, 210, 0, 620, 10, 1200,
+                395, 0, 200, 3, 0,
+                595, 0, 616, -14,
+                1200, 1200, 1200, 1200,
+                1290,
+            ]],
+        ["open increasing default loop", `(10,15)i Print i`, [
+                800, 0, 800, 1, 800, 2, 1410,
+                805, 615, 10, 210, 0, 620, 10, 1200,
+                395, 0, 200, 3, 0,
+                595, 0, 616, -14,
+                1200, 1200, 1200, 1200,
+                1290,
+            ]],
+    ];
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
+        });
+    }
+});
+describe("compiler loop error", () => {
+    const tests = [
+        [
+            "error, when start is not numeric",
+            `["real", 2]i Print i`,
+            "1: at 'real': start of range must be numeric\n"
+        ],
+        [
+            "error, when no comma between start and end",
+            `[2]i Print i`,
+            "1: at ']': expect ',' between start and end of range\n"
+        ],
+        [
+            "error, when end is not numeric",
+            `[2, "real"]i Print i`,
+            "1: at 'real': end of range must be numeric\n"
+        ],
+        [
+            "error, when no ]",
+            `[2, 5 i Print i`,
+            "1: at 'i': expect ']' in range\n"
+        ],
+        [
+            "error, when no iterator name",
+            `[2, 5] 2 Print i`,
+            "1: at '2': expect name for iterator\n"
+        ],
+        [
+            "error, when reassign to iterator",
+            `[2, 5] i { i = 2 Print i }`,
+            "1: at '=': i already defined in this scope\n"
+        ],
+    ];
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
 });

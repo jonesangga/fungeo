@@ -150,7 +150,63 @@ function run() {
             case 390:
                 compare(geq);
                 break;
+            case 805: {
+                let start = peek(2).value;
+                let end = peek(1).value;
+                let step = peek(0).value;
+                console.log(start, end, step);
+                if (start <= end) {
+                    console.log("increasing");
+                    if (step <= 0) {
+                        error("infinite loop");
+                        return false;
+                    }
+                }
+                else {
+                    console.log("decreasing");
+                    if (step >= 0) {
+                        error("infinite loop");
+                        return false;
+                    }
+                    let nextOp = frame.fn.chunk.code[frame.ip];
+                    if (nextOp === 215)
+                        frame.fn.chunk.code[frame.ip] = 217;
+                    else
+                        frame.fn.chunk.code[frame.ip + 2] = 212;
+                }
+                break;
+            }
+            case 212: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos];
+                let b = stack[frame.slots + pos + 1];
+                if (a.value > b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case 217: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos];
+                let b = stack[frame.slots + pos + 1];
+                if (a.value >= b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
             case 210: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos];
+                let b = stack[frame.slots + pos + 1];
+                if (a.value < b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case 215: {
                 let pos = read_byte();
                 let a = stack[frame.slots + pos];
                 let b = stack[frame.slots + pos + 1];

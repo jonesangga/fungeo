@@ -80,7 +80,6 @@ function run(): boolean {
     frame = frames[frameCount -1];
     for (;;) {
         if (debug) {
-            // console.log(stackTop, ...stack);
             let str = "      ";
             for (let slot = 0; slot < stackTop; slot++) {
                 str += "[ ";
@@ -179,7 +178,65 @@ function run(): boolean {
             case Op.GT: compare(gt); break;
             case Op.GEq: compare(geq); break;
 
-            case Op.Cond: {
+            // Check for infinite loop. Change the loop checking instruction if the range decreasing.
+            case Op.Loop: {
+                let start = (peek(2) as FGNumber).value;
+                let end = (peek(1) as FGNumber).value;
+                let step = (peek(0) as FGNumber).value;
+                console.log(start, end, step);
+                if (start <= end) {
+                    console.log("increasing");
+                    if (step <= 0) {
+                        error("infinite loop");
+                        return false;
+                    }
+                } else {
+                    console.log("decreasing");
+                    if (step >= 0) {
+                        error("infinite loop");
+                        return false;
+                    }
+                    let nextOp = frame.fn.chunk.code[frame.ip];
+                    if (nextOp === Op.CkInc)
+                        frame.fn.chunk.code[frame.ip] = Op.CkIncD;
+                    else
+                        frame.fn.chunk.code[frame.ip + 2] = Op.CkExcD;  // Remember there is Jmp after this.
+                }
+                break;
+            }
+
+            // TODO: Clean up these 4 cases.
+            case Op.CkExcD: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos] as FGNumber;
+                let b = stack[frame.slots + pos + 1] as FGNumber;
+                if (a.value > b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case Op.CkIncD: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos] as FGNumber;
+                let b = stack[frame.slots + pos + 1] as FGNumber;
+                if (a.value >= b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case Op.CkExc: {
+                let pos = read_byte();
+                let a = stack[frame.slots + pos] as FGNumber;
+                let b = stack[frame.slots + pos + 1] as FGNumber;
+                if (a.value < b.value)
+                    push(new FGBoolean(true));
+                else
+                    push(new FGBoolean(false));
+                break;
+            }
+            case Op.CkInc: {
                 let pos = read_byte();
                 let a = stack[frame.slots + pos] as FGNumber;
                 let b = stack[frame.slots + pos + 1] as FGNumber;

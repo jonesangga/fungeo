@@ -15,6 +15,7 @@ function main(source) {
     }
     else {
         repl.error(result.error.message);
+        console.log(result.error);
     }
 }
 repl.set_callback(main);

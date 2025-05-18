@@ -30,7 +30,7 @@ var Precedence;
 })(Precedence || (Precedence = {}));
 const rules = {
     [1180]: { prefix: null, infix: null, precedence: 100 },
-    [1190]: { prefix: null, infix: and_, precedence: 220 },
+    [1190]: { prefix: null, infix: and, precedence: 220 },
     [1195]: { prefix: null, infix: null, precedence: 100 },
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
@@ -45,31 +45,31 @@ const rules = {
     [2200]: { prefix: null, infix: null, precedence: 100 },
     [1600]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [2320]: { prefix: null, infix: null, precedence: 100 },
-    [1520]: { prefix: null, infix: compare, precedence: 250 },
-    [1525]: { prefix: null, infix: compare, precedence: 250 },
+    [1520]: { prefix: null, infix: boolean_compare, precedence: 250 },
+    [1525]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [2400]: { prefix: null, infix: null, precedence: 100 },
     [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
     [400]: { prefix: null, infix: null, precedence: 100 },
-    [1550]: { prefix: null, infix: compare, precedence: 250 },
-    [1555]: { prefix: null, infix: compare, precedence: 250 },
+    [1550]: { prefix: null, infix: boolean_compare, precedence: 250 },
+    [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
-    [600]: { prefix: negate, infix: binary, precedence: 300 },
+    [600]: { prefix: negate, infix: numeric_binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [2600]: { prefix: null, infix: null, precedence: 100 },
-    [1575]: { prefix: null, infix: binary, precedence: 300 },
-    [1580]: { prefix: null, infix: or_, precedence: 210 },
-    [1585]: { prefix: null, infix: binary, precedence: 300 },
-    [1590]: { prefix: null, infix: binary_str, precedence: 300 },
-    [2750]: { prefix: null, infix: binary_str, precedence: 300 },
+    [1575]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
+    [1580]: { prefix: null, infix: or, precedence: 210 },
+    [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
+    [1590]: { prefix: null, infix: string_binary, precedence: 300 },
+    [2750]: { prefix: null, infix: null, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
     [2800]: { prefix: null, infix: null, precedence: 100 },
     [800]: { prefix: null, infix: null, precedence: 100 },
     [900]: { prefix: null, infix: null, precedence: 100 },
-    [1000]: { prefix: null, infix: binary, precedence: 400 },
-    [1100]: { prefix: null, infix: binary, precedence: 400 },
+    [1000]: { prefix: null, infix: numeric_binary, precedence: 400 },
+    [1100]: { prefix: null, infix: numeric_binary, precedence: 400 },
     [1900]: { prefix: parse_string, infix: null, precedence: 100 },
     [2900]: { prefix: null, infix: null, precedence: 100 },
     [3000]: { prefix: null, infix: null, precedence: 100 },
@@ -98,7 +98,6 @@ function init_compiler(compiler, type, name) {
 function endCompiler() {
     emitReturn();
     let fn = current.fn;
-    console.log(currentChunk().disassemble());
     current = current.enclosing;
     return fn;
 }
@@ -184,64 +183,84 @@ function neq() {
     emitByte(1010);
     lastT = booleanT;
 }
-function compare() {
-    let operator = prevTok.kind;
+function and() {
+    assertT(lastT, booleanT, "operands of '&&' must be booleans");
+    let endJump = emitJump(620);
+    emitByte(1200);
+    parsePrecedence(220);
+    assertT(lastT, booleanT, "operands of '&&' must be booleans");
+    patchJump(endJump);
+}
+function or() {
+    assertT(lastT, booleanT, "operands of '||' must be booleans");
+    let elseJump = emitJump(620);
+    let endJump = emitJump(615);
+    patchJump(elseJump);
+    emitByte(1200);
+    parsePrecedence(210);
+    assertT(lastT, booleanT, "operands of '||' must be booleans");
+    patchJump(endJump);
+}
+function boolean_isdiv() {
+    assertT(lastT, numberT, `'|' only for numbers`);
+    parsePrecedence(300 + 1);
+    assertT(lastT, numberT, `'|' only for numbers`);
+    emitByte(610);
+    lastT = booleanT;
+}
+function boolean_compare() {
+    let opType = prevTok.kind;
+    let operator = prevTok.lexeme;
     let left = lastT.base;
     if (left !== 500 && left !== 600)
-        error("can only compare strings or numbers");
+        error("can only compare strings and numbers");
     parsePrecedence(250 + 1);
     if (lastT.base !== left)
-        error("type not match");
-    switch (operator) {
-        case 1550:
-            emitByte(810);
-            break;
+        error("operands type for comparison didn't match");
+    switch (opType) {
         case 1520:
             emitByte(530);
-            break;
-        case 1555:
-            emitByte(690);
             break;
         case 1525:
             emitByte(390);
             break;
-        default: error("unhandled camparison op");
+        case 1550:
+            emitByte(810);
+            break;
+        case 1555:
+            emitByte(690);
+            break;
+        default: error(`unhandled operator ${operator}`);
     }
     lastT = booleanT;
 }
-function binary() {
+function numeric_binary() {
     let operator = prevTok.lexeme;
     assertT(lastT, numberT, `'${operator}' only for numbers`);
-    let operatorType = prevTok.kind;
-    let rule = rules[operatorType];
-    parsePrecedence(rule.precedence + 1);
+    let opType = prevTok.kind;
+    parsePrecedence(rules[opType].precedence + 1);
     assertT(lastT, numberT, `'${operator}' only for numbers`);
-    switch (operatorType) {
-        case 1575:
-            emitByte(610);
-            lastT = booleanT;
+    switch (opType) {
+        case 600:
+            emitByte(1500);
             break;
         case 1585:
             emitByte(100);
             break;
-        case 600:
-            emitByte(1500);
+        case 1000:
+            emitByte(300);
             break;
         case 1100:
             emitByte(900);
             break;
-        case 1000:
-            emitByte(300);
-            break;
-        default: error("unhandled binary op");
+        default: error(`unhandled operator ${operator}`);
     }
 }
-function binary_str() {
+function string_binary() {
     let operator = prevTok.lexeme;
     assertT(lastT, stringT, `'${operator}' only for strings`);
-    let operatorType = prevTok.kind;
-    let rule = rules[operatorType];
-    parsePrecedence(rule.precedence + 1);
+    let opType = prevTok.kind;
+    parsePrecedence(rules[opType].precedence + 1);
     assertT(lastT, stringT, `'${operator}' only for strings`);
     emitByte(120);
 }
@@ -490,7 +509,10 @@ function global_callable(name_, table, native) {
             continue;
         for (let k = j; k < inputVersion.length; k++) {
             lastT = nothingT;
-            parsePrecedence(600);
+            if (canParseArgument)
+                expression();
+            else
+                parsePrecedence(600);
             gotTypes.push(lastT.base);
             if (!matchType(inputVersion[k], lastT.base)) {
                 checkNextVersion = true;
@@ -578,57 +600,47 @@ function emitLoop(loopStart) {
 }
 function parse_loop() {
     beginScope();
-    lastT = nothingT;
+    let openLeft = prevTok.kind === 500;
     expression();
-    assertT(lastT, numberT, "start of range must be number");
+    assertT(lastT, numberT, "start of range must be numeric");
     let start = current.locals.length;
-    let startRange = { name: "_Start", type: numberType, depth: current.scopeDepth };
-    current.locals.push(startRange);
-    consume(100, "expect ',' between start and end");
-    lastT = nothingT;
+    current.locals.push({ name: "_Start", type: numberType, depth: current.scopeDepth });
+    consume(100, "expect ',' between start and end of range");
     expression();
-    assertT(lastT, numberT, "end of range must be number");
-    let openRightId = currentChunk().values.length;
-    emitConstant(new FGNumber(0));
-    emitByte(100);
-    let endRange = { name: "_End", type: numberType, depth: current.scopeDepth };
-    current.locals.push(endRange);
+    assertT(lastT, numberT, "end of range must be numeric");
+    current.locals.push({ name: "_End", type: numberType, depth: current.scopeDepth });
     if (match(100)) {
         expression();
+        assertT(lastT, numberT, "step of range must be numeric");
     }
     else {
         emitConstant(new FGNumber(1));
     }
-    let stepRange = { name: "_Step", type: numberType, depth: current.scopeDepth };
-    current.locals.push(stepRange);
+    current.locals.push({ name: "_Step", type: numberType, depth: current.scopeDepth });
+    let openRight;
     if (match(800)) {
-        currentChunk().values[openRightId] = new FGNumber(-1);
+        openRight = true;
     }
     else {
+        openRight = false;
         consume(700, "expect ']' in range");
     }
-    if (!match(1700)) {
+    if (!match(1700))
         error_at_current("expect name for iterator");
-    }
     let name = prevTok.lexeme;
-    for (let i = current.locals.length - 1; i >= 0; i--) {
-        let local = current.locals[i];
-        if (local.depth < current.scopeDepth)
-            break;
-        if (name === local.name)
-            error(`${name} already defined in this scope`);
-    }
     current.locals[start].name = name;
     emitByte(1410);
+    emitByte(805);
+    let openLeftJump = openLeft ? emitJump(615) : -1;
     let loopStart = currentChunk().code.length;
-    emitBytes(210, start);
+    if (openRight)
+        emitBytes(210, start);
+    else
+        emitBytes(215, start);
     let exitJump = emitJump(620);
     emitByte(1200);
     if (match(300)) {
-        while (!check(695) && !check(2100)) {
-            declaration();
-        }
-        consume(695, "expect '}' after block");
+        block();
         while (current.locals.length > start + 3) {
             emitByte(1200);
             current.locals.pop();
@@ -637,30 +649,14 @@ function parse_loop() {
     else {
         statement();
     }
+    if (openLeftJump !== -1)
+        patchJump(openLeftJump);
     emitBytes(595, start);
     emitLoop(loopStart);
     patchJump(exitJump);
     emitByte(1200);
     endScope();
     lastT = nothingT;
-}
-function and_() {
-    assertT(lastT, booleanT, "operands of '&&' must be boolean");
-    let endJump = emitJump(620);
-    emitByte(1200);
-    parsePrecedence(220);
-    assertT(lastT, booleanT, "operands of '&&' must be boolean");
-    patchJump(endJump);
-}
-function or_() {
-    assertT(lastT, booleanT, "operands of '||' must be boolean");
-    let elseJump = emitJump(620);
-    let endJump = emitJump(615);
-    patchJump(elseJump);
-    emitByte(1200);
-    parsePrecedence(210);
-    assertT(lastT, booleanT, "operands of '||' must be boolean");
-    patchJump(endJump);
 }
 function parsePrecedence(precedence) {
     advance();
@@ -735,10 +731,9 @@ function beginScope() {
     current.scopeDepth++;
 }
 function block() {
-    while (!check(695) && !check(2100)) {
+    while (!check(695) && !check(2100))
         declaration();
-    }
-    consume(695, "expect '}' after block");
+    consume(695, "expect '}' at the end of block");
 }
 function endScope() {
     current.scopeDepth--;
@@ -750,7 +745,7 @@ function endScope() {
 }
 class CompileError extends Error {
 }
-const compiler = {
+export const compiler = {
     compile(source) {
         scanner.init(source);
         let comp = { enclosing: null, fn: new FGFunction("test", [], new Chunk("")), type: 0, locals: [], scopeDepth: 0 };
@@ -758,11 +753,11 @@ const compiler = {
         tempNames = {};
         prevTok = invalidToken;
         currTok = invalidToken;
+        lastT = nothingT;
         try {
             advance();
-            while (!match(2100)) {
+            while (!match(2100))
                 declaration();
-            }
             return { ok: true, value: endCompiler() };
         }
         catch (error) {
@@ -772,4 +767,3 @@ const compiler = {
         }
     }
 };
-export { compiler };
