@@ -13,6 +13,16 @@ function matchCode(tests) {
         });
     }
 }
+function matchError(tests) {
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok)
+                fail();
+            deepEqual(result.error.message, expected);
+        });
+    }
+}
 describe("compiler unary grouping", () => {
     const tests = [
         ["() to change precedence", `result = 1 * (2 + 3)`, [
@@ -33,14 +43,7 @@ describe("compiler unary grouping error", () => {
             "1: at end: expect ')' after grouping\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler unary !", () => {
     const tests = [
@@ -72,14 +75,7 @@ describe("compiler unary ! error", () => {
             "1: at 'real': '!' is only for boolean\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler unary -", () => {
     const tests = [
@@ -111,14 +107,7 @@ describe("compiler unary - error", () => {
             "1: at 'false': '-' is only for number\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler boolean equality", () => {
     const tests = [
@@ -177,14 +166,7 @@ describe("compiler boolean && error", () => {
             "1: at '&&': operands of '&&' must be booleans\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler boolean ||", () => {
     it("Bool || Bool", () => {
@@ -212,14 +194,7 @@ describe("compiler boolean || error", () => {
             "1: at '||': operands of '||' must be booleans\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler boolean compare", () => {
     const tests = [
@@ -258,14 +233,7 @@ describe("compiler boolean compare error", () => {
             "1: at '<': can only compare strings and numbers\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler numeric binary", () => {
     const tests = [
@@ -323,14 +291,7 @@ describe("compiler numeric binary error", () => {
             "1: at 'real': '+' only for numbers\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler string binary", () => {
     it("Str ++ Str", () => {
@@ -361,14 +322,7 @@ describe("compiler string binary error", () => {
             "1: at '++': '++' only for strings\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler block", () => {
     const tests = [
@@ -405,14 +359,7 @@ describe("compiler block error", () => {
             "1: at end: expect '}' at the end of block\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler if", () => {
     const tests = [
@@ -434,14 +381,7 @@ describe("compiler if error", () => {
             "1: at 'real': conditional expression must be boolean\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 describe("compiler loop", () => {
     const tests = [
@@ -513,12 +453,5 @@ describe("compiler loop error", () => {
             "1: at '=': i already defined in this scope\n"
         ],
     ];
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok)
-                fail();
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });

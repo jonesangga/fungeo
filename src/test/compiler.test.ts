@@ -16,6 +16,7 @@ import { compiler } from "../compiler.js"
 // Testing unary operators.
 
 type CodeTest = [string, string, number[]][];
+type ErrorTest = [string, string, string][];
 
 function matchCode(tests: CodeTest) {
     for (let [about, source, code] of tests) {
@@ -25,6 +26,17 @@ function matchCode(tests: CodeTest) {
             let chunk = result.value.chunk;
 
             deepEqual(chunk.code, code);
+        });
+    }
+}
+
+function matchError(tests: ErrorTest) {
+    for (let [about, source, expected] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (result.ok) fail();
+
+            deepEqual(result.error.message, expected);
         });
     }
 }
@@ -43,22 +55,14 @@ describe("compiler unary grouping", () => {
 });
 
 describe("compiler unary grouping error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when ( not closed",
             `result = 1 * (2 + 3`,
             "1: at end: expect ')' after grouping\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler unary !", () => {
@@ -80,7 +84,7 @@ describe("compiler unary !", () => {
 });
 
 describe("compiler unary ! error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when !Num",
             `result = !2`,
@@ -92,15 +96,7 @@ describe("compiler unary ! error", () => {
             "1: at 'real': '!' is only for boolean\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler unary -", () => {
@@ -122,7 +118,7 @@ describe("compiler unary -", () => {
 });
 
 describe("compiler unary - error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when -Str",
             `result = -"real"`,
@@ -134,15 +130,7 @@ describe("compiler unary - error", () => {
             "1: at 'false': '-' is only for number\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 //--------------------------------------------------------------------
@@ -197,7 +185,7 @@ describe("compiler boolean &&", () => {
 });
 
 describe("compiler boolean && error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when Bool && Num",
             `result = true && 2`,
@@ -209,15 +197,7 @@ describe("compiler boolean && error", () => {
             "1: at '&&': operands of '&&' must be booleans\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler boolean ||", () => {
@@ -235,7 +215,7 @@ describe("compiler boolean ||", () => {
 });
 
 describe("compiler boolean || error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when Bool || Num",
             `result = true || 2`,
@@ -247,15 +227,7 @@ describe("compiler boolean || error", () => {
             "1: at '||': operands of '||' must be booleans\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler boolean compare", () => {
@@ -285,7 +257,7 @@ describe("compiler boolean compare", () => {
 });
 
 describe("compiler boolean compare error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when Str < Num",
             `result = "real" < 2`,
@@ -297,15 +269,7 @@ describe("compiler boolean compare error", () => {
             "1: at '<': can only compare strings and numbers\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler numeric binary", () => {
@@ -355,7 +319,7 @@ describe("compiler numeric binary precedence", () => {
 });
 
 describe("compiler numeric binary error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when Str + Num",
             `result = "real" + 2`,
@@ -367,15 +331,7 @@ describe("compiler numeric binary error", () => {
             "1: at 'real': '+' only for numbers\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 describe("compiler string binary", () => {
@@ -396,7 +352,7 @@ describe("compiler string binary", () => {
 });
  
 describe("compiler string binary error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when Str ++ Num",
             `result = "real" ++ 2`,
@@ -408,15 +364,7 @@ describe("compiler string binary error", () => {
             "1: at '++': '++' only for strings\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 //--------------------------------------------------------------------
@@ -446,7 +394,7 @@ describe("compiler block", () => {
 });
 
 describe("compiler block error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when reassign local name",
             `{a = 1 a = 2}`,
@@ -458,15 +406,7 @@ describe("compiler block error", () => {
             "1: at end: expect '}' at the end of block\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 //--------------------------------------------------------------------
@@ -486,22 +426,14 @@ describe("compiler if", () => {
 });
 
 describe("compiler if error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when conditional not Bool",
             `if "real" Print "correct" else Print "wrong"`,
             "1: at 'real': conditional expression must be boolean\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 // TODO: test also the values.
@@ -544,7 +476,7 @@ describe("compiler loop", () => {
 });
 
 describe("compiler loop error", () => {
-    const tests: [string, string, string][] = [
+    const tests: ErrorTest = [
         [
             "error, when start is not numeric",
             `["real", 2]i Print i`,
@@ -576,15 +508,7 @@ describe("compiler loop error", () => {
             "1: at '=': i already defined in this scope\n"
         ],
     ];
-
-    for (let [about, source, expected] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (result.ok) fail();
-
-            deepEqual(result.error.message, expected);
-        });
-    }
+    matchError(tests);
 });
 
 //--------------------------------------------------------------------
