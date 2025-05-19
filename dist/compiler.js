@@ -444,7 +444,6 @@ function get_name(name) {
         lastT = { base: current.locals[arg].type.kind };
     }
     else if (Object.hasOwn(nativeNames, name)) {
-        console.log("in nativeNames");
         if (nativeNames[name].kind === 400)
             global_callable(name, nativeNames, true);
         else

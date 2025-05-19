@@ -2,28 +2,28 @@ import { describe, it } from "node:test";
 import { deepEqual, fail } from "node:assert/strict";
 import { FGNumber, FGString } from "../value.js";
 import { compiler } from "../compiler.js";
+function matchCode(tests) {
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
+        });
+    }
+}
 describe("compiler unary grouping", () => {
-    it("() to change precedence", () => {
-        let source = "result = 1 * (2 + 3)";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 800, 2, 800, 3, 100, 900,
-            1400, 0, 500, 1290,
-        ]);
-    });
-    it("((Str))", () => {
-        let source = `result = (("real"))`;
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1400, 0, 600, 1290,
-        ]);
-    });
+    const tests = [
+        ["() to change precedence", `result = 1 * (2 + 3)`, [
+                800, 1, 800, 2, 800, 3, 100, 900,
+                1400, 0, 500, 1290,
+            ]],
+        ["((Str))", `result = (("real"))`, [
+                800, 1, 1400, 0, 600, 1290,
+            ]],
+    ];
+    matchCode(tests);
 });
 describe("compiler unary grouping error", () => {
     const tests = [
@@ -43,39 +43,29 @@ describe("compiler unary grouping error", () => {
     }
 });
 describe("compiler unary !", () => {
-    it("!Bool", () => {
-        let source = "result = !false";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1100,
-            1400, 0, 300, 1290,
-        ]);
-    });
-    it("!!Bool", () => {
-        let source = "result = !!false";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1100, 1100,
-            1400, 0, 300, 1290,
-        ]);
-    });
-    it("!(Bool)", () => {
-        let source = "result = !(false)";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1100,
-            1400, 0, 300, 1290,
-        ]);
-    });
+    const tests = [
+        ["!Bool", `result = !false`, [
+                800, 1, 1100,
+                1400, 0, 300, 1290,
+            ]],
+        ["!!Bool", `result = !!false`, [
+                800, 1, 1100, 1100,
+                1400, 0, 300, 1290,
+            ]],
+        ["!(Bool)", `result = !(false)`, [
+                800, 1, 1100,
+                1400, 0, 300, 1290,
+            ]],
+    ];
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok)
+                fail();
+            let chunk = result.value.chunk;
+            deepEqual(chunk.code, code);
+        });
+    }
 });
 describe("compiler unary ! error", () => {
     const tests = [

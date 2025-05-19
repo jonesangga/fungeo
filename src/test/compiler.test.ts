@@ -15,29 +15,31 @@ import { compiler } from "../compiler.js"
 //--------------------------------------------------------------------
 // Testing unary operators.
 
-describe("compiler unary grouping", () => {
-    it("() to change precedence", () => {
-        let source = "result = 1 * (2 + 3)";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
+type CodeTest = [string, string, number[]][];
 
-        deepEqual(chunk.code, [
+function matchCode(tests: CodeTest) {
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok) fail();
+            let chunk = result.value.chunk;
+
+            deepEqual(chunk.code, code);
+        });
+    }
+}
+
+describe("compiler unary grouping", () => {
+    const tests: [string, string, number[]][] = [
+        ["() to change precedence", `result = 1 * (2 + 3)`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Add, Op.Mul,
             Op.Set, 0, Kind.Number, Op.Ok,
-        ]);
-    });
-
-    it("((Str))", () => {
-        let source = `result = (("real"))`;
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+        ]],
+        ["((Str))", `result = (("real"))`, [
             Op.Load, 1, Op.Set, 0, Kind.String, Op.Ok,
-        ]);
-    });
+        ]],
+    ];
+    matchCode(tests);
 });
 
 describe("compiler unary grouping error", () => {
@@ -60,41 +62,30 @@ describe("compiler unary grouping error", () => {
 });
 
 describe("compiler unary !", () => {
-    it("!Bool", () => {
-        let source = "result = !false";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+    const tests: [string, string, number[]][] = [
+        ["!Bool", `result = !false`, [
             Op.Load, 1, Op.Not,
             Op.Set, 0, Kind.Boolean, Op.Ok,
-        ]);
-    });
-
-    it("!!Bool", () => {
-        let source = "result = !!false";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+        ]],
+        ["!!Bool", `result = !!false`, [
             Op.Load, 1, Op.Not, Op.Not,
             Op.Set, 0, Kind.Boolean, Op.Ok,
-        ]);
-    });
-
-    it("!(Bool)", () => {
-        let source = "result = !(false)";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+        ]],
+        ["!(Bool)", `result = !(false)`, [
             Op.Load, 1, Op.Not,
             Op.Set, 0, Kind.Boolean, Op.Ok,
-        ]);
-    });
+        ]],
+    ];
+
+    for (let [about, source, code] of tests) {
+        it(about, () => {
+            let result = compiler.compile(source);
+            if (!result.ok) fail();
+            let chunk = result.value.chunk;
+
+            deepEqual(chunk.code, code);
+        });
+    }
 });
 
 describe("compiler unary ! error", () => {
