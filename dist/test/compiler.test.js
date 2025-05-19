@@ -57,15 +57,7 @@ describe("compiler unary !", () => {
                 1400, 0, 300, 1290,
             ]],
     ];
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok)
-                fail();
-            let chunk = result.value.chunk;
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 describe("compiler unary ! error", () => {
     const tests = [
@@ -90,39 +82,21 @@ describe("compiler unary ! error", () => {
     }
 });
 describe("compiler unary -", () => {
-    it("-Num", () => {
-        let source = "result = -2";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1000,
-            1400, 0, 500, 1290,
-        ]);
-    });
-    it("--Num", () => {
-        let source = "result = --2";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1000, 1000,
-            1400, 0, 500, 1290,
-        ]);
-    });
-    it("-(Num)", () => {
-        let source = "result = -(2)";
-        let result = compiler.compile(source);
-        if (!result.ok)
-            fail();
-        let chunk = result.value.chunk;
-        deepEqual(chunk.code, [
-            800, 1, 1000,
-            1400, 0, 500, 1290,
-        ]);
-    });
+    const tests = [
+        ["-Num", `result = -2`, [
+                800, 1, 1000,
+                1400, 0, 500, 1290,
+            ]],
+        ["--Num", `result = --2`, [
+                800, 1, 1000, 1000,
+                1400, 0, 500, 1290,
+            ]],
+        ["-(Num)", `result = -(2)`, [
+                800, 1, 1000,
+                1400, 0, 500, 1290,
+            ]],
+    ];
+    matchCode(tests);
 });
 describe("compiler unary - error", () => {
     const tests = [
@@ -334,15 +308,7 @@ describe("compiler numeric binary precedence", () => {
                 1400, 0, 500, 1290,
             ]],
     ];
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok)
-                fail();
-            let chunk = result.value.chunk;
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 describe("compiler numeric binary error", () => {
     const tests = [
@@ -424,15 +390,7 @@ describe("compiler block", () => {
                 1290,
             ]],
     ];
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok)
-                fail();
-            let chunk = result.value.chunk;
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 describe("compiler block error", () => {
     const tests = [
@@ -466,15 +424,7 @@ describe("compiler if", () => {
                 1290,
             ]],
     ];
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok)
-                fail();
-            let chunk = result.value.chunk;
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 describe("compiler if error", () => {
     const tests = [
@@ -528,15 +478,7 @@ describe("compiler loop", () => {
                 1290,
             ]],
     ];
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok)
-                fail();
-            let chunk = result.value.chunk;
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 describe("compiler loop error", () => {
     const tests = [

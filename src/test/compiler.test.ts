@@ -30,7 +30,7 @@ function matchCode(tests: CodeTest) {
 }
 
 describe("compiler unary grouping", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["() to change precedence", `result = 1 * (2 + 3)`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Add, Op.Mul,
             Op.Set, 0, Kind.Number, Op.Ok,
@@ -62,7 +62,7 @@ describe("compiler unary grouping error", () => {
 });
 
 describe("compiler unary !", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["!Bool", `result = !false`, [
             Op.Load, 1, Op.Not,
             Op.Set, 0, Kind.Boolean, Op.Ok,
@@ -76,16 +76,7 @@ describe("compiler unary !", () => {
             Op.Set, 0, Kind.Boolean, Op.Ok,
         ]],
     ];
-
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok) fail();
-            let chunk = result.value.chunk;
-
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 
 describe("compiler unary ! error", () => {
@@ -113,41 +104,21 @@ describe("compiler unary ! error", () => {
 });
 
 describe("compiler unary -", () => {
-    it("-Num", () => {
-        let source = "result = -2";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+    const tests: CodeTest = [
+        ["-Num", `result = -2`, [
             Op.Load, 1, Op.Neg,
             Op.Set, 0, Kind.Number, Op.Ok,
-        ]);
-    });
-
-    it("--Num", () => {
-        let source = "result = --2";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+        ]],
+        ["--Num", `result = --2`, [
             Op.Load, 1, Op.Neg, Op.Neg,
             Op.Set, 0, Kind.Number, Op.Ok,
-        ]);
-    });
-
-    it("-(Num)", () => {
-        let source = "result = -(2)";
-        let result = compiler.compile(source);
-        if (!result.ok) fail();
-        let chunk = result.value.chunk;
-
-        deepEqual(chunk.code, [
+        ]],
+        ["-(Num)", `result = -(2)`, [
             Op.Load, 1, Op.Neg,
             Op.Set, 0, Kind.Number, Op.Ok,
-        ]);
-    });
+        ]],
+    ];
+    matchCode(tests);
 });
 
 describe("compiler unary - error", () => {
@@ -363,7 +334,7 @@ describe("compiler numeric binary", () => {
 });
 
 describe("compiler numeric binary precedence", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["+- term", "result = 12 + 34 - 56", [
             Op.Load, 1, Op.Load, 2, Op.Add,
             Op.Load, 3, Op.Sub,
@@ -380,16 +351,7 @@ describe("compiler numeric binary precedence", () => {
             Op.Set, 0, Kind.Number, Op.Ok,
         ]],
     ];
-
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok) fail();
-            let chunk = result.value.chunk;
-
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 
 describe("compiler numeric binary error", () => {
@@ -461,7 +423,7 @@ describe("compiler string binary error", () => {
 // Testing block.
 
 describe("compiler block", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["empty {}", `{}`, [
             Op.Ok,
         ]],
@@ -480,16 +442,7 @@ describe("compiler block", () => {
             Op.Ok,
         ]],
     ];
-
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok) fail();
-            let chunk = result.value.chunk;
-
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 
 describe("compiler block error", () => {
@@ -520,7 +473,7 @@ describe("compiler block error", () => {
 // Testing control flow.
 
 describe("compiler if", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
             Op.Load, 0, Op.JmpF, 8, Op.Pop,
             Op.Load, 1, Op.CallNat, 2, 0,
@@ -529,16 +482,7 @@ describe("compiler if", () => {
             Op.Ok,
         ]],
     ];
-
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok) fail();
-            let chunk = result.value.chunk;
-
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 
 describe("compiler if error", () => {
@@ -562,7 +506,7 @@ describe("compiler if error", () => {
 
 // TODO: test also the values.
 describe("compiler loop", () => {
-    const tests: [string, string, number[]][] = [
+    const tests: CodeTest = [
         ["closed increasing default loop", `[10,15]i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
             Op.Loop, Op.CkInc, 0, Op.JmpF, 10, Op.Pop,
@@ -596,16 +540,7 @@ describe("compiler loop", () => {
             Op.Ok,
         ]],
     ];
-
-    for (let [about, source, code] of tests) {
-        it(about, () => {
-            let result = compiler.compile(source);
-            if (!result.ok) fail();
-            let chunk = result.value.chunk;
-
-            deepEqual(chunk.code, code);
-        });
-    }
+    matchCode(tests);
 });
 
 describe("compiler loop error", () => {
