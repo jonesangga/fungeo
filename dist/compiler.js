@@ -78,21 +78,26 @@ const rules = {
 var FnT;
 (function (FnT) {
     FnT[FnT["Function"] = 0] = "Function";
-    FnT[FnT["Script"] = 1] = "Script";
+    FnT[FnT["Top"] = 1] = "Top";
 })(FnT || (FnT = {}));
 let current;
-let invalidToken = { kind: 2100, line: -1, lexeme: "" };
-let currTok = invalidToken;
-let prevTok = invalidToken;
+let invalidTok = { kind: 2100, line: -1, lexeme: "" };
+let currTok = invalidTok;
+let prevTok = invalidTok;
 function currentChunk() {
     return current.fn.chunk;
 }
-function init_compiler(compiler, type, name) {
-    compiler.enclosing = current;
-    compiler.fn = new FGFunction(name, [{ input: [], output: 100 }], new Chunk(name));
-    compiler.type = type;
-    compiler.locals = [];
-    compiler.scopeDepth = 0;
+function begin_compiler(kind, name) {
+    let compiler = {
+        enclosing: current,
+        fn: new FGFunction(name, [{
+                input: [],
+                output: 100
+            }], new Chunk(name)),
+        kind: kind,
+        locals: [],
+        scopeDepth: 0,
+    };
     current = compiler;
 }
 function endCompiler() {
@@ -388,8 +393,7 @@ function fn() {
     consume(1700, "expect function name");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
-    let comp = {};
-    init_compiler(comp, 0, name);
+    begin_compiler(0, name);
     beginScope();
     do {
         parse_params();
@@ -411,8 +415,7 @@ function proc() {
     consume(1700, "expect procedure name");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
-    let comp = {};
-    init_compiler(comp, 0, name);
+    begin_compiler(0, name);
     beginScope();
     do {
         parse_params();
@@ -737,8 +740,8 @@ function block() {
 }
 function endScope() {
     current.scopeDepth--;
-    while (current.locals.length > 0 &&
-        current.locals[current.locals.length - 1].depth > current.scopeDepth) {
+    while (current.locals.length > 0
+        && current.locals[current.locals.length - 1].depth > current.scopeDepth) {
         emitByte(1200);
         current.locals.pop();
     }
@@ -747,13 +750,12 @@ class CompileError extends Error {
 }
 export const compiler = {
     compile(source) {
-        scanner.init(source);
-        let comp = { enclosing: null, fn: new FGFunction("test", [], new Chunk("")), type: 0, locals: [], scopeDepth: 0 };
-        init_compiler(comp, 1, "TOP");
         tempNames = {};
-        prevTok = invalidToken;
-        currTok = invalidToken;
+        prevTok = invalidTok;
+        currTok = invalidTok;
         lastT = nothingT;
+        scanner.init(source);
+        begin_compiler(1, "TOP");
         try {
             advance();
             while (!match(2100))

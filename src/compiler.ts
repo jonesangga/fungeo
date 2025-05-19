@@ -102,41 +102,46 @@ interface Local {
     depth: number;
 }
 
+// TODO: what about Procedure?
 const enum FnT {
     Function,
-    Script,
+    Top,
 }
 
 interface Compiler {
-    enclosing: Compiler | null;
-    fn: FGFunction,
-    type: FnT,
-    locals: Local[];
+    enclosing:  Compiler | null;
+    kind:       FnT,
+    fn:         FGFunction,
+    locals:     Local[];
     scopeDepth: number;
 }
 
 let current: Compiler;
 
-let invalidToken = { kind: TokenT.EOF, line: -1, lexeme: "" };
-
-let currTok = invalidToken;
-let prevTok = invalidToken;
+let invalidTok = { kind: TokenT.EOF, line: -1, lexeme: "" };
+let currTok = invalidTok;
+let prevTok = invalidTok;
 
 function currentChunk(): Chunk {
     return current.fn.chunk;
 }
 
-function init_compiler(compiler: Compiler, type: FnT, name: string): void {
-    compiler.enclosing = current;
-    compiler.fn = new FGFunction(name, [{input: [], output: Kind.Nothing}], new Chunk(name));
-    compiler.type = type;
-
-    compiler.locals = [];
-    compiler.scopeDepth = 0;
+function begin_compiler(kind: FnT, name: string): void {
+    let compiler: Compiler = {
+        enclosing: current,
+        fn: new FGFunction(
+            name,
+            [{
+                input: [],
+                output: Kind.Nothing
+            }],
+            new Chunk(name),
+        ),
+        kind: kind,
+        locals: [],
+        scopeDepth: 0,
+    };
     current = compiler;
-
-    // let local: Local = { name: "", type: {kind: Kind.Nothing}, depth: 0};
-    // current.locals.push(local);
 }
 
 function endCompiler(): FGFunction {
@@ -510,8 +515,7 @@ function fn(): void {
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
-    let comp: Compiler = {} as Compiler;
-    init_compiler(comp, FnT.Function, name);
+    begin_compiler(FnT.Function, name);
     beginScope();
 
     do {
@@ -542,8 +546,7 @@ function proc(): void {
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
-    let comp: Compiler = {} as Compiler;
-    init_compiler(comp, FnT.Function, name);
+    begin_compiler(FnT.Function, name);
     beginScope();
 
     do {
@@ -926,12 +929,10 @@ function block(): void {
     consume(TokenT.RBrace, "expect '}' at the end of block");
 }
 
-// TODO: should we use variable localCount so we don't need pop()?
 function endScope(): void {
     current.scopeDepth--;
-
-    while (current.locals.length > 0 &&
-            current.locals[current.locals.length - 1].depth > current.scopeDepth) {
+    while (current.locals.length > 0
+            && current.locals[current.locals.length - 1].depth > current.scopeDepth) {
         emitByte(Op.Pop);
         current.locals.pop();
     }
@@ -945,14 +946,13 @@ type Result<T, E = Error> =
 
 export const compiler = {
     compile(source: string): Result<FGFunction, Error> {
-        scanner.init(source);
-        let comp: Compiler = {enclosing: null, fn: new FGFunction("test", [], new Chunk("")), type: FnT.Function, locals: [], scopeDepth: 0};
-        init_compiler(comp, FnT.Script, "TOP");
+        tempNames = {};         // Reset temporary name table.
+        prevTok = invalidTok;
+        currTok = invalidTok;
+        lastT = nothingT;       // Reset last type.
 
-        tempNames = {};
-        prevTok = invalidToken;
-        currTok = invalidToken;
-        lastT = nothingT;
+        scanner.init(source);
+        begin_compiler(FnT.Top, "TOP");
 
         try {
             advance();
@@ -961,8 +961,7 @@ export const compiler = {
             return { ok: true, value: endCompiler() };
         }
         catch(error: unknown) {
-            if (error instanceof Error)
-                return { ok: false, error };
+            if (error instanceof Error) return { ok: false, error };
             return { ok: false, error: new Error("unknown error") };
         }
     }
