@@ -455,3 +455,78 @@ describe("compiler loop error", () => {
     ];
     matchError(tests);
 });
+describe("compiler global assignment", () => {
+    const tests = [
+        ["infer Num", `a = 3`, [
+                800, 1, 1400, 0, 500, 1290,
+            ]],
+        ["infer Str", `a = "real"`, [
+                800, 1, 1400, 0, 600, 1290,
+            ]],
+        ["infer Bool", `a = false`, [
+                800, 1, 1400, 0, 300, 1290,
+            ]],
+    ];
+    matchCode(tests);
+});
+describe("compiler global assignment error", () => {
+    const tests = [
+        [
+            "error, when reassign",
+            `a = 123.456 a = 2`,
+            "1: at '=': a already defined\n"
+        ],
+        [
+            "error, when no expression to assign",
+            `a =`,
+            "1: at end: expect expression\n"
+        ],
+    ];
+    matchError(tests);
+});
+describe("compiler general", () => {
+    const tests = [
+        ["empty source", ``, [
+                1290,
+            ]],
+        ["optional delimiter ;", `a = 2; b = 3`, [
+                800, 1, 1400, 0, 500, 800, 3, 1400, 2, 500, 1290,
+            ]],
+    ];
+    matchCode(tests);
+});
+describe("compiler general error", () => {
+    const tests = [
+        [
+            "error, when unexpected character",
+            `a = 4 % 2`,
+            "1: scanner: unexpected character %\n"
+        ],
+        [
+            "error, when undefined name",
+            `a = b`,
+            "1: at 'b': undefined name b\n"
+        ],
+        [
+            "error, when begin statement with Num",
+            `2 + 3`,
+            "1: at '2': cannot start statement with Number\n"
+        ],
+        [
+            "error, when begin statement with Str",
+            `"so" ++ " real"`,
+            "1: at 'so': cannot start statement with String\n"
+        ],
+        [
+            "error, when begin statement with Bool",
+            `false || true`,
+            "1: at 'false': cannot start statement with False\n"
+        ],
+        [
+            "error, when expression statement",
+            `a = 2 a`,
+            "1: at 'a': expression statement is not supported\n"
+        ],
+    ];
+    matchError(tests);
+});

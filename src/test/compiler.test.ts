@@ -514,108 +514,82 @@ describe("compiler loop error", () => {
 //--------------------------------------------------------------------
 // Testing expression.
 
-// describe("compiler:assignment", () => {
-    // it("number, string, boolean", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = `num = 123.456 str = \"real\"
-            // c = true
-            // d = false`;
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(chunk.code, [
-            // Op.Load, 1, Op.Set, 0, Kind.Number,
-            // Op.Load, 3, Op.Set, 2, Kind.String,
-            // Op.Load, 5, Op.Set, 4, Kind.Boolean,
-            // Op.Load, 7, Op.Set, 6, Kind.Boolean, Op.Ret,
-        // ]);
-        // assert.deepEqual(chunk.lines, [
-            // 1, 1, 1, 1, 1,
-            // 1, 1, 1, 1, 1,
-            // 2, 2, 2, 2, 2,
-            // 3, 3, 3, 3, 3, 3,
-        // ]);
-        // assert.deepEqual(chunk.values[0], new FGString("num"));
-        // assert.deepEqual(chunk.values[1], new FGNumber(123.456));
-        // assert.deepEqual(chunk.values[2], new FGString("str"));
-        // assert.deepEqual(chunk.values[3], new FGString("real"));
-        // assert.deepEqual(chunk.values[4], new FGString("c"));
-        // assert.deepEqual(chunk.values[5], new FGBoolean(true));
-        // assert.deepEqual(chunk.values[6], new FGString("d"));
-        // assert.deepEqual(chunk.values[7], new FGBoolean(false));
-    // });
+// TODO: test type annotation when it is implemented.
+describe("compiler global assignment", () => {
+    const tests: CodeTest = [
+        ["infer Num", `a = 3`, [
+            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Ok,
+        ]],
+        ["infer Str", `a = "real"`, [
+            Op.Load, 1, Op.Set, 0, Kind.String, Op.Ok,
+        ]],
+        ["infer Bool", `a = false`, [
+            Op.Load, 1, Op.Set, 0, Kind.Boolean, Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
 
-    // it("error: reassignment", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "num = 123.456 num = 2";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: at '=': num already defined\n"
-        // });
-    // });
+describe("compiler global assignment error", () => {
+    const tests: ErrorTest = [
+        [
+            "error, when reassign",
+            `a = 123.456 a = 2`,
+            "1: at '=': a already defined\n"
+        ],
+        [
+            "error, when no expression to assign",
+            `a =`,
+            "1: at end: expect expression\n"
+        ],
+    ];
+    matchError(tests);
+});
 
-// });
+describe("compiler general", () => {
+    const tests: CodeTest = [
+        ["empty source", ``, [
+            Op.Ok,
+        ]],
+        ["optional delimiter ;", `a = 2; b = 3`, [
+            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Load, 3, Op.Set, 2, Kind.Number, Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
 
-// describe("compiler", () => {
-    // it("empty string", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(chunk.code, [Op.Ret]);
-        // assert.deepEqual(chunk.lines, [1]);
-        // assert.deepEqual(chunk.values, []);
-    // });
-
-    // it("semicolon optional delimiter", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = ";num = 123.456; a = 3";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: true,
-        // });
-    // });
-
-    // it("error: undefined name", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "a = b";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: at 'b': undefined name b\n"
-        // });
-    // });
-
-    // it("error: scanner: unexpected character", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "a % b";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: scanner: unexpected character %\n"
-        // });
-    // });
-
-    // it("error: start statement", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "2 + 4";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: at '2': cannot start statement with Number\n"
-        // });
-    // });
-
-    // it("error: expect expression", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "a =";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: at end: expect expression\n"
-        // });
-    // });
-
-    // it("error: forbidden expression stmt", () => {
-        // let chunk = new Chunk("test chunk");
-        // let source = "a = 2 a";
-        // let result = compiler.compile(source, chunk);
-        // assert.deepEqual(result, {
-            // success: false, message: "1: at 'a': forbidden expression statement\n"
-        // });
-    // });
-
-// });
+describe("compiler general error", () => {
+    const tests: ErrorTest = [
+        [
+            "error, when unexpected character",
+            `a = 4 % 2`,
+            "1: scanner: unexpected character %\n"
+        ],
+        [
+            "error, when undefined name",
+            `a = b`,
+            "1: at 'b': undefined name b\n"
+        ],
+        [
+            "error, when begin statement with Num",
+            `2 + 3`,
+            "1: at '2': cannot start statement with Number\n"
+        ],
+        [
+            "error, when begin statement with Str",
+            `"so" ++ " real"`,
+            "1: at 'so': cannot start statement with String\n"
+        ],
+        [
+            "error, when begin statement with Bool",
+            `false || true`,
+            "1: at 'false': cannot start statement with False\n"
+        ],
+        [
+            "error, when expression statement",
+            `a = 2 a`,
+            "1: at 'a': expression statement is not supported\n"
+        ],
+    ];
+    matchError(tests);
+});

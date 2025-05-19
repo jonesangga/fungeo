@@ -727,7 +727,7 @@ function statement() {
     else {
         error_at_current(`cannot start statement with ${TokenTName[currTok.kind]}`);
     }
-    assertT(lastT, nothingT, "forbidden expression statement");
+    assertT(lastT, nothingT, "expression statement is not supported");
 }
 function beginScope() {
     current.scopeDepth++;

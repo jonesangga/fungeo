@@ -892,6 +892,7 @@ function declaration(): void {
     }
 }
 
+// TODO: change error message in else to output types in FG.
 function statement(): void {
     if (match(TokenT.Name)) {
         canParseArgument = true;
@@ -914,7 +915,7 @@ function statement(): void {
         error_at_current(`cannot start statement with ${ TokenTName[currTok.kind] }`);
     }
 
-    assertT(lastT, nothingT, "forbidden expression statement");
+    assertT(lastT, nothingT, "expression statement is not supported");
 }
 
 function beginScope(): void {
