@@ -30,10 +30,12 @@ export function vmoutput(str: string): void {
 
 let frame: CallFrame;
 
+// TODO: display call stack.
 function error(msg: string): void {
     // let line = chunk.lines[ip - 1];
     let line = frame.fn.chunk.lines[frame.ip - 1];
-    output += `${ line }: in script: ${ msg }\n`;
+    let name = frame.fn.name;
+    output += `${ line }: in ${ name }: ${ msg }\n`;
     resetStack();
 
     throw new RuntimeError(output);
@@ -73,7 +75,7 @@ const gt = (a: NumStr, b: NumStr): boolean => a > b;
 const leq = (a: NumStr, b: NumStr): boolean => a <= b;
 const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
-const debug = true;
+const debug = false;
 
 function run(): boolean {
     for (;;) {
@@ -130,10 +132,11 @@ function run(): boolean {
                 break;
             }
 
+            // TODO: think again about division by zero.
             case Op.IsDiv: {
                 let b = pop() as FGNumber;
                 let a = pop() as FGNumber;
-                if (b.value === 0) {
+                if (a.value === 0) {
                     error("division by zero");
                 }
                 if (b.value % a.value === 0)

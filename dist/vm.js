@@ -22,7 +22,8 @@ export function vmoutput(str) {
 let frame;
 function error(msg) {
     let line = frame.fn.chunk.lines[frame.ip - 1];
-    output += `${line}: in script: ${msg}\n`;
+    let name = frame.fn.name;
+    output += `${line}: in ${name}: ${msg}\n`;
     resetStack();
     throw new RuntimeError(output);
 }
@@ -48,7 +49,7 @@ const lt = (a, b) => a < b;
 const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
-const debug = true;
+const debug = false;
 function run() {
     for (;;) {
         if (debug) {
@@ -102,7 +103,7 @@ function run() {
             case 610: {
                 let b = pop();
                 let a = pop();
-                if (b.value === 0) {
+                if (a.value === 0) {
                     error("division by zero");
                 }
                 if (b.value % a.value === 0)
