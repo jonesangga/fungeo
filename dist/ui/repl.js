@@ -118,7 +118,10 @@ function input_binding(e) {
         e.preventDefault();
     }
 }
-const repl = {
+export const repl = {
+    kind: 2500,
+    to_str() { return "repl"; },
+    equal(other) { return false; },
     callback(source) {
         console.log(source);
     },
@@ -190,4 +193,3 @@ function terminal_add_code(code, type) {
     div.innerHTML = code;
     terminal.appendChild(div);
 }
-export { repl };

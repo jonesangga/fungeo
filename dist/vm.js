@@ -81,7 +81,6 @@ function run() {
                 let ver = read_byte();
                 let fn = peek(arity);
                 fn.value(ver);
-                pop();
                 break;
             }
             case 205: {

@@ -3,7 +3,9 @@
 // TODO: Clean up this.
 
 import { Kind, type Value } from "./value.js"
-import { Print, Printf, Show, Padl, Type } from "./vmfunction.js"
+import { Print, Printf, Show, Padl, Type, Draw, Seg } from "./vmfunction.js"
+import { canvas } from "./ui/canvas.js"
+import { repl } from "./ui/repl.js"
 
 export type Info = {
     kind:     Kind,
@@ -19,12 +21,16 @@ interface Names {
 export let userNames: Names = {};
 
 export let nativeNames: Names = {
+    "canvas": { kind:  Kind.Canvas, value: canvas },
+    "repl": { kind:  Kind.Repl, value: repl },
 
     "Print": { kind:  Kind.Callable, value: Print },
     "Printf": { kind:  Kind.Callable, value: Printf },
     "Show": { kind:  Kind.Callable, value: Show },
     "Padl": { kind:  Kind.Callable, value: Padl },
     "Type": { kind:  Kind.Callable, value: Type },
+    "Draw": { kind:  Kind.Callable, value: Draw },
+    "Seg": { kind:  Kind.Callable, value: Seg },
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
     // "fishp": { kind: Kind.Pic, value: fishp, drawn: true },

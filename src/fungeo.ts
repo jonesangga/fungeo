@@ -1,11 +1,13 @@
 import { repl } from "./ui/repl.js"
+import { canvas } from "./ui/canvas.js"
 import { scanner } from "./scanner.js"
 import { compiler } from "./compiler.js"
 import { Chunk } from "./chunk.js"
 import { vm } from "./vm.js"
 import { FGFunction } from "./value.js"
 
-repl.place(100, 400);
+repl.place(0, 400);
+canvas.place(250, 0);
 
 vm.init();
 

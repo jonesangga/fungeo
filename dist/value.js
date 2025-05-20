@@ -9,16 +9,22 @@ export var Kind;
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
     Kind[Kind["Point"] = 700] = "Point";
+    Kind[Kind["Segment"] = 800] = "Segment";
+    Kind[Kind["Canvas"] = 2000] = "Canvas";
+    Kind[Kind["Repl"] = 2500] = "Repl";
 })(Kind || (Kind = {}));
 ;
 export const KindName = {
     [200]: "Any",
     [300]: "Boolean",
     [400]: "Callable",
+    [2000]: "Canvas",
     [450]: "Function",
     [100]: "Nothing",
     [500]: "Number",
     [700]: "Point",
+    [2500]: "Repl",
+    [800]: "Segment",
     [600]: "String",
     [650]: "Type",
 };

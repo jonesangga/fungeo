@@ -7,6 +7,8 @@
 //  output:     A small console for displaying the executed code output (if any),
 //              and also error message when terminal is hidden. Hidden by default.
 
+import { Kind, type Repl, type FG } from "../value.js"
+
 const container = document.createElement("div");
 document.body.appendChild(container);
 container.style.position   = "absolute";
@@ -142,7 +144,12 @@ function input_binding(e: any): void {
 }
 
 
-const repl = {
+export const repl: Repl = {
+    kind: Kind.Repl,
+
+    to_str(): string { return "repl"; },
+    equal(other: FG) { return false; },
+
     callback(source: string): void {
         console.log(source);
     },
@@ -229,5 +236,3 @@ function terminal_add_code(code: string, type?: number): void {
     div.innerHTML = code;
     terminal.appendChild(div);
 }
-
-export { repl };

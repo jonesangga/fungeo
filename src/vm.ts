@@ -111,7 +111,6 @@ function run(): boolean {
                 let ver = read_byte();
                 let fn = peek(arity) as FGCallable;
                 fn.value(ver);
-                pop();      // Pop the function.
                 break;
             }
             case Op.CallUsr: {

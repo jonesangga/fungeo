@@ -1,5 +1,19 @@
 # Log
 
+#### 20-05-25
+
+- remove interface GeoSegment
+- add Segment
+- add canvas and repl to nativeNames
+- make new type UIObj = Canvas | Repl;
+- add kind to Repl and Canvas
+- change KindName type
+- add Canvas and Repl to Kind enum
+- change canvas to canvasElem
+- for now there is one canvas
+- add canvas element
+- add canvas.ts
+
 #### 19-05-25
 
 - pass argCount to Op.Call

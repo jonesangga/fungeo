@@ -1,32 +1,57 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Chunk } from "./chunk.js"
+import { Segment } from "./geo/segment.js"
 
 export const enum Kind {
     Nothing = 100,
     Any = 200,
-    Boolean = 300,    // Literal.
+    Boolean = 300,      // Literal.
     Callable = 400,
     Function = 450,
     Number = 500,
     String = 600,
     Type = 650,
-    Point = 700,      // Geometry.
+    Point = 700,        // Geometry.
+    Segment = 800,
+    Canvas = 2000,      // UI.
+    Repl = 2500,
 };
 
-export const KindName: { [key in Kind]: string } = {
+export const KindName: {
+    [N in (keyof typeof Kind) as (typeof Kind)[N]]: N
+} = {
     [Kind.Any]: "Any",
     [Kind.Boolean]: "Boolean",
     [Kind.Callable]: "Callable",
+    [Kind.Canvas]: "Canvas",
     [Kind.Function]: "Function",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Point]: "Point",
+    [Kind.Repl]: "Repl",
+    [Kind.Segment]: "Segment",
     [Kind.String]: "String",
     [Kind.Type]: "Type",
 };
 
-interface FG {
+export type Canvas = {
+    kind: Kind.Canvas;
+    to_str(): string;
+    equal(other: FG): boolean;
+    resize(w_: number, h_: number): void;
+    place(x: number, y: number): void;
+}
+
+export type Repl = {
+    kind: Kind.Repl;
+    to_str(): string;
+    equal(other: FG): boolean;
+    place(x: number, y: number): void;
+    [name: string]: any;
+}
+
+export interface FG {
     kind: Kind;
     to_str(): string;
     equal(other: FG): boolean;
@@ -44,10 +69,10 @@ export class FGBoolean implements FG {
     }
 }
 
-export interface Version {
-    input:   (Set<number> | Kind)[];
-    output:  Kind;
-}
+export type Version = {
+    input:  (Set<number> | Kind)[],
+    output: Kind,
+};
 
 export class FGCallable implements FG {
     kind: Kind.Callable = Kind.Callable;
@@ -131,5 +156,7 @@ export class FGType implements FG {
 }
 
 type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType | FGFunction;
-export type Value  = LitObj;
+type UIObj = Canvas | Repl;
+export type GeoObj = Segment;
+export type Value  = LitObj | UIObj | GeoObj;
 export type Comparable = FGNumber | FGString;
