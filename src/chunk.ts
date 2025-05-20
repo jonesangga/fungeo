@@ -146,9 +146,8 @@ export class Chunk {
             case Op.CallNat:
             case Op.CallUsr: {
                 let index = this.code[offset + 1];
-                let fn = this.values[index] as FGFunction;
                 let ver = this.code[offset + 2];
-                result += `${ padr7(name) } ${ padl4(index) } '${ fn.name } v${ ver }'\n`;
+                result += `${ padr7(name) } ${ padl4(index) } 'v${ ver }'\n`;
                 return [result, offset + 3];
             }
 

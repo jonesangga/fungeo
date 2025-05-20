@@ -20,7 +20,7 @@ describe("value", () => {
         equal(b.kind, 400);
         equal(b.name, "f");
         deepEqual(b.value, f);
-        equal(b.to_str(), "fn(n: number): void");
+        equal(b.to_str(), "<fn f>");
     });
     it("FGFunction", () => {
         let b = new FGFunction("testfn", [
@@ -31,7 +31,7 @@ describe("value", () => {
         ], new Chunk(""));
         equal(b.kind, 450);
         equal(b.name, "testfn");
-        equal(b.to_str(), "fn testfn");
+        equal(b.to_str(), "<fn testfn>");
     });
     it("FGNumber", () => {
         let b = new FGNumber(123);

@@ -379,14 +379,14 @@ describe("compiler block", () => {
             Op.Load, 0, Op.SetLoc, Op.Pop, Op.Ok,
         ]],
         ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
-            Op.Load, 0, Op.SetLoc, Op.GetLoc, 0,
+            Op.Load, 0, Op.SetLoc, Op.Load, 1, Op.GetLoc, 0,
             Op.CallNat, 1, 0, Op.Pop, Op.Ok,
         ]],
         ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
             Op.Load, 0, Op.SetLoc,
             Op.Load, 1, Op.SetLoc,
-            Op.GetLoc, 1, Op.CallNat, 2, 0, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 3, 0, Op.Pop,
+            Op.Load, 2, Op.GetLoc, 1, Op.CallNat, 1, 0, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
             Op.Ok,
         ]],
     ];
@@ -415,10 +415,10 @@ describe("compiler block error", () => {
 describe("compiler if", () => {
     const tests: CodeTest = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
-            Op.Load, 0, Op.JmpF, 8, Op.Pop,
-            Op.Load, 1, Op.CallNat, 2, 0,
-            Op.Jmp, 6, Op.Pop,
-            Op.Load, 3, Op.CallNat, 4, 0,
+            Op.Load, 0, Op.JmpF, 10, Op.Pop,
+            Op.Load, 1, Op.Load, 2, Op.CallNat, 1, 0,
+            Op.Jmp, 8, Op.Pop,
+            Op.Load, 3, Op.Load, 4, Op.CallNat, 1, 0,
             Op.Ok,
         ]],
     ];
@@ -441,33 +441,33 @@ describe("compiler loop", () => {
     const tests: CodeTest = [
         ["closed increasing default loop", `[10,15]i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
-            Op.Loop, Op.CkInc, 0, Op.JmpF, 10, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 3, 0,
-            Op.Inc, 0, Op.JmpBack, -14,
+            Op.Loop, Op.CkInc, 0, Op.JmpF, 12, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
+            Op.Inc, 0, Op.JmpBack, -16,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
         ]],
         ["open left increasing default loop", `(10,15]i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
-            Op.Loop, Op.Jmp, 10, Op.CkInc, 0, Op.JmpF, 10, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 3, 0,
-            Op.Inc, 0, Op.JmpBack, -14,
+            Op.Loop, Op.Jmp, 12, Op.CkInc, 0, Op.JmpF, 12, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
+            Op.Inc, 0, Op.JmpBack, -16,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
         ]],
         ["open right increasing default loop", `[10,15)i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
-            Op.Loop, Op.CkExc, 0, Op.JmpF, 10, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 3, 0,
-            Op.Inc, 0, Op.JmpBack, -14,
+            Op.Loop, Op.CkExc, 0, Op.JmpF, 12, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
+            Op.Inc, 0, Op.JmpBack, -16,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
         ]],
         ["open increasing default loop", `(10,15)i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
-            Op.Loop, Op.Jmp, 10, Op.CkExc, 0, Op.JmpF, 10, Op.Pop,
-            Op.GetLoc, 0, Op.CallNat, 3, 0,
-            Op.Inc, 0, Op.JmpBack, -14,
+            Op.Loop, Op.Jmp, 12, Op.CkExc, 0, Op.JmpF, 12, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
+            Op.Inc, 0, Op.JmpBack, -16,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
         ]],

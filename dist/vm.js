@@ -3,7 +3,6 @@ import { nativeNames, userNames } from "./names.js";
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
-let frameCount = 0;
 export function push(value) {
     stack[stackTop++] = value;
 }
@@ -15,7 +14,6 @@ function peek(distance) {
 }
 function resetStack() {
     stackTop = 0;
-    frameCount = 0;
 }
 export let output = "";
 export function vmoutput(str) {
@@ -26,6 +24,7 @@ function error(msg) {
     let line = frame.fn.chunk.lines[frame.ip - 1];
     output += `${line}: in script: ${msg}\n`;
     resetStack();
+    throw new RuntimeError(output);
 }
 function read_byte() {
     return frame.fn.chunk.code[frame.ip++];
@@ -37,8 +36,8 @@ function read_string() {
     return read_constant().value;
 }
 function call(fn, argCount) {
-    let frame = { fn, ip: 0, slots: stackTop - argCount };
-    frames[frameCount++] = frame;
+    frame = { fn, ip: 0, slots: stackTop - argCount };
+    frames.push(frame);
 }
 function compare(f) {
     let b = pop();
@@ -51,7 +50,6 @@ const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
 const debug = true;
 function run() {
-    frame = frames[frameCount - 1];
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -78,17 +76,18 @@ function run() {
                 break;
             }
             case 200: {
-                let name = read_constant();
+                let arity = read_byte();
                 let ver = read_byte();
-                name.value(ver);
+                let fn = peek(arity);
+                fn.value(ver);
+                pop();
                 break;
             }
             case 205: {
-                let name = read_constant();
+                let arity = read_byte();
                 let ver = read_byte();
-                let arity = name.version[0].input.length;
-                call(name, arity);
-                frame = frames[frameCount - 1];
+                let fn = peek(arity);
+                call(fn, arity);
                 break;
             }
             case 300: {
@@ -96,7 +95,6 @@ function run() {
                 let a = pop();
                 if (b.value === 0) {
                     error("division by zero");
-                    return false;
                 }
                 push(a.div(b));
                 break;
@@ -106,7 +104,6 @@ function run() {
                 let a = pop();
                 if (b.value === 0) {
                     error("division by zero");
-                    return false;
                 }
                 if (b.value % a.value === 0)
                     push(new FGBoolean(true));
@@ -159,14 +156,12 @@ function run() {
                     console.log("increasing");
                     if (step <= 0) {
                         error("infinite loop");
-                        return false;
                     }
                 }
                 else {
                     console.log("decreasing");
                     if (step >= 0) {
                         error("infinite loop");
-                        return false;
                     }
                     let nextOp = frame.fn.chunk.code[frame.ip];
                     if (nextOp === 215)
@@ -289,12 +284,12 @@ function run() {
                 for (let i = 0; i < arg; i++) {
                     returns.push(pop());
                 }
-                frameCount--;
-                stackTop = frame.slots;
+                stackTop = frame.slots - 1;
                 for (let i = 0; i < arg; i++) {
                     push(returns.pop());
                 }
-                frame = frames[frameCount - 1];
+                frames.pop();
+                frame = frames[frames.length - 1];
                 break;
             }
             case 1290: {
@@ -307,6 +302,8 @@ function run() {
     }
 }
 let TESTING = true;
+class RuntimeError extends Error {
+}
 const vm = {
     init() {
         resetStack();
@@ -318,26 +315,34 @@ const vm = {
         TESTING = false;
         output = "";
         push(fn);
-        let frame = { fn, ip: 0, slots: 1 };
-        frames[frameCount++] = frame;
-        let result = run();
-        if (result) {
-            return { success: true, message: output };
+        frame = { fn, ip: 0, slots: 1 };
+        frames.push(frame);
+        try {
+            run();
+            return { ok: true, value: output };
         }
-        else {
-            return { success: false, message: output };
+        catch (error) {
+            if (error instanceof Error)
+                return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     },
-    set(chunk_) {
+    set(fn) {
         TESTING = true;
+        output = "";
+        push(fn);
+        frame = { fn, ip: 0, slots: 1 };
+        frames.push(frame);
     },
     step() {
-        let result = run();
-        if (result) {
-            return { success: true, message: output };
+        try {
+            run();
+            return { ok: true, value: output };
         }
-        else {
-            return { success: false, message: output };
+        catch (error) {
+            if (error instanceof Error)
+                return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     }
 };

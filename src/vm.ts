@@ -6,7 +6,6 @@ import { compiler } from "./compiler.js"
 export let stack: Value[] = [];
 export let stackTop = 0;
 let frames: CallFrame[] = [];
-let frameCount = 0;
 
 export function push(value: Value): void {
     stack[stackTop++] = value;
@@ -22,7 +21,6 @@ function peek(distance: number): Value {
 
 function resetStack(): void {
     stackTop = 0;
-    frameCount = 0;
 }
 
 export let output = "";
@@ -31,13 +29,14 @@ export function vmoutput(str: string): void {
 }
 
 let frame: CallFrame;
-// let ip    = 0;     // Index of current instruction in frame.fn.chunk.code array.
 
 function error(msg: string): void {
     // let line = chunk.lines[ip - 1];
     let line = frame.fn.chunk.lines[frame.ip - 1];
     output += `${ line }: in script: ${ msg }\n`;
     resetStack();
+
+    throw new RuntimeError(output);
 }
 
 function read_byte(): number {
@@ -57,8 +56,8 @@ function read_string(): string {
 type NumStr = number | string;
 
 function call(fn: FGFunction, argCount: number) {
-    let frame = {fn, ip: 0, slots: stackTop - argCount};
-    frames[frameCount++] = frame;
+    frame = { fn, ip: 0, slots: stackTop - argCount };
+    frames.push(frame);
 }
 
 function compare(
@@ -77,7 +76,6 @@ const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 const debug = true;
 
 function run(): boolean {
-    frame = frames[frameCount -1];
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -87,7 +85,6 @@ function run(): boolean {
                 str += " ]";
             }
             str += "\n";
-            // let [result, ] = chunk.disassemble_instr(ip);
             let [result, ] = frame.fn.chunk.disassemble_instr(frame.ip);
             console.log(str + result);
         }
@@ -108,17 +105,18 @@ function run(): boolean {
             }
 
             case Op.CallNat: {
-                let name = read_constant() as FGCallable;
+                let arity = read_byte();
                 let ver = read_byte();
-                name.value(ver);
+                let fn = peek(arity) as FGCallable;
+                fn.value(ver);
+                pop();      // Pop the function.
                 break;
             }
             case Op.CallUsr: {
-                let name = read_constant() as FGFunction;
+                let arity = read_byte();
                 let ver = read_byte();
-                let arity = name.version[0].input.length;
-                call(name, arity);
-                frame = frames[frameCount - 1];
+                let fn = peek(arity) as FGFunction;
+                call(fn, arity);
                 break;
             }
 
@@ -127,7 +125,6 @@ function run(): boolean {
                 let a = pop() as FGNumber;
                 if (b.value === 0) {
                     error("division by zero");
-                    return false;
                 }
                 push(a.div(b));
                 break;
@@ -138,7 +135,6 @@ function run(): boolean {
                 let a = pop() as FGNumber;
                 if (b.value === 0) {
                     error("division by zero");
-                    return false;
                 }
                 if (b.value % a.value === 0)
                     push(new FGBoolean(true));
@@ -188,13 +184,11 @@ function run(): boolean {
                     console.log("increasing");
                     if (step <= 0) {
                         error("infinite loop");
-                        return false;
                     }
                 } else {
                     console.log("decreasing");
                     if (step >= 0) {
                         error("infinite loop");
-                        return false;
                     }
                     let nextOp = frame.fn.chunk.code[frame.ip];
                     if (nextOp === Op.CkInc)
@@ -328,18 +322,20 @@ function run(): boolean {
                 break;
             }
 
+            // TODO: think again, can only return one value.
             case Op.Ret: {
                 let arg = read_byte();
                 let returns: Value[] = [];
                 for (let i = 0; i < arg; i++) {
                     returns.push(pop());
                 }
-                frameCount--;
-                stackTop = frame.slots;
+                // TODO: think how about function that doesn't return value?
+                stackTop = frame.slots - 1;
                 for (let i = 0; i < arg; i++) {
                     push(returns.pop() as Value);
                 }
-                frame = frames[frameCount - 1];
+                frames.pop();
+                frame = frames[frames.length - 1];
                 break;
             }
 
@@ -349,13 +345,9 @@ function run(): boolean {
             }
         }
 
+        // Comment this in prod!!!
         if (TESTING) return true;
     }
-}
-
-interface VMResult {
-    success: boolean;
-    message: string;
 }
 
 interface CallFrame {
@@ -366,6 +358,12 @@ interface CallFrame {
 
 let TESTING = true;
 
+class RuntimeError extends Error {}
+
+type Result<T, E = Error> =
+    | { ok: true, value: T }
+    | { ok: false, error: E };
+
 const vm = {
     init(): void {
         resetStack();
@@ -374,33 +372,40 @@ const vm = {
         }
     },
 
-    interpret(fn: FGFunction): VMResult {
+    interpret(fn: FGFunction): Result<string, Error> {
         TESTING = false;
         output = "";
 
         push(fn);
-        let frame = {fn, ip: 0, slots: 1};
-        frames[frameCount++] = frame;
-        let result = run();
-        if (result) {
-            return {success: true, message: output};
-        } else {
-            return {success: false, message: output};
+        frame = { fn, ip: 0, slots: 1 };
+        frames.push(frame);
+
+        try {
+            run();
+            return { ok: true, value: output };
+        }
+        catch (error: unknown) {
+            if (error instanceof Error) return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     },
 
-    set(chunk_: Chunk): void {
+    set(fn: FGFunction): void {
         TESTING = true;
-        // chunk = chunk_;
-        // ip = 0;
+        output = "";
+        push(fn);
+        frame = { fn, ip: 0, slots: 1 };
+        frames.push(frame);
     },
 
-    step(): VMResult {
-        let result = run();
-        if (result) {
-            return {success: true, message: output};
-        } else {
-            return {success: false, message: output};
+    step(): Result<string, Error> {
+        try {
+            run();
+            return { ok: true, value: output };
+        }
+        catch (error: unknown) {
+            if (error instanceof Error) return { ok: false, error };
+            return { ok: false, error: new Error("unknown error") };
         }
     }
 };

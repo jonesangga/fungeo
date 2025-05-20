@@ -490,6 +490,7 @@ function global_callable(name_, table, native) {
     }
     canParseArgument = match(200);
     let name = table[name_];
+    emitConstant(name.value);
     let version = name.value.version;
     let inputVersion = [];
     let gotTypes = [];
@@ -531,18 +532,16 @@ function global_callable(name_, table, native) {
         else
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j])}], got ${KindName[gotTypes[j]]}`);
     }
-    let index = makeConstant(name.value);
+    let arity = version[i].input.length;
     if (native)
-        emitBytes(200, index);
+        emitBytes(200, arity);
     else
-        emitBytes(205, index);
+        emitBytes(205, arity);
     emitByte(i);
-    if (version[i].output === 100) {
+    if (version[i].output === 100)
         lastT = nothingT;
-    }
-    else {
+    else
         lastT = { base: version[i].output };
-    }
 }
 function global_non_callable(table, name, native) {
     let index = makeConstant(new FGString(name));

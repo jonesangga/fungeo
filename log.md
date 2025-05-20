@@ -1,5 +1,13 @@
 # Log
 
+#### 19-05-25
+
+- pass argCount to Op.Call
+- update CallNat and CallUsr disassemble
+- Load function before its args before calling
+- use Result type in vm
+- change init_compiler() to begin_compiler()
+
 #### 18-05-25
 
 - reset lastT in compiler.compile()

@@ -14,11 +14,14 @@ function main(source: string): void {
 
     if (result.ok) {
         console.log(result.value.chunk.disassemble());
+
         let vmresult = vm.interpret(result.value);
-        if (vmresult.success)
-            repl.ok(vmresult.message)
-        else
-            repl.error(vmresult.message)
+        if (vmresult.ok)
+            repl.ok(vmresult.value);
+        else {
+            repl.error(vmresult.error.message);
+            console.log(vmresult.error);
+        }
     }
     else {
         repl.error(result.error.message);

@@ -47,7 +47,9 @@ export class FGCallable {
         this.value = value;
         this.version = version;
     }
-    to_str() { return "fn(n: number): void"; }
+    to_str() {
+        return `<fn ${this.name}>`;
+    }
     equal(other) { return false; }
 }
 export class FGFunction {
@@ -61,7 +63,7 @@ export class FGFunction {
         this.chunk = chunk;
     }
     to_str() {
-        return `fn ${this.name}`;
+        return `<fn ${this.name}>`;
     }
     equal(other) { return false; }
 }

@@ -164,30 +164,30 @@ describe("chunk disassemble op calls", () => {
     it("Op.CallNat", () => {
         let chunk = new Chunk("test chunk");
         let fn = nativeNames["Print"].value as FGCallable;
-        let id = chunk.add_value(fn);
+        let arity = 1;
         let ver = 1;
         chunk.write(Op.CallNat, 123);
-        chunk.write(id, 123);
+        chunk.write(arity, 123);
         chunk.write(ver, 123);
 
         let [result, offset] = chunk.disassemble_instr(0);
 
-        deepEqual(result, "0000  123 CallNat    0 'Print v1'\n");
+        deepEqual(result, "0000  123 CallNat    1 'v1'\n");
         equal(offset, 3);
     });
 
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
         let fn = new FGFunction("dummy", [], new Chunk("dummy chunk"));
-        let id = chunk.add_value(fn);
+        let arity = 1;
         let ver = 1;
         chunk.write(Op.CallUsr, 123);
-        chunk.write(id, 123);
+        chunk.write(arity, 123);
         chunk.write(ver, 123);
 
         let [result, offset] = chunk.disassemble_instr(0);
 
-        deepEqual(result, "0000  123 CallUsr    0 'dummy v1'\n");
+        deepEqual(result, "0000  123 CallUsr    1 'v1'\n");
         equal(offset, 3);
     });
 });

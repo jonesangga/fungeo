@@ -30,7 +30,7 @@ describe("value", () => {
         equal(b.kind, Kind.Callable);
         equal(b.name, "f");
         deepEqual(b.value, f);
-        equal(b.to_str(), "fn(n: number): void");
+        equal(b.to_str(), "<fn f>");
     });
 
     it("FGFunction", () => {
@@ -43,7 +43,7 @@ describe("value", () => {
 
         equal(b.kind, Kind.Function);
         equal(b.name, "testfn");
-        equal(b.to_str(), "fn testfn");
+        equal(b.to_str(), "<fn testfn>");
     });
 
     it("FGNumber", () => {

@@ -631,7 +631,8 @@ function global_callable(name_: string, table: any, native: boolean): void {
     canParseArgument = match(TokenT.Dollar);
 
     let name    = table[name_];
-    // let version = name.version as Version[];
+    emitConstant(name.value as FGCallable);
+
     let version = (name.value as FGCallable).version;
     let inputVersion: (Set<number> | Kind)[] = [];
     let gotTypes: Kind[]     = [];
@@ -677,18 +678,17 @@ function global_callable(name_: string, table: any, native: boolean): void {
             error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j] as Set<number>)}], got ${KindName[gotTypes[j]]}`);
     }
 
-    let index = makeConstant(name.value as FGCallable);
+    let arity = version[i].input.length;
     if (native)
-        emitBytes(Op.CallNat, index);
+        emitBytes(Op.CallNat, arity);
     else
-        emitBytes(Op.CallUsr, index);
+        emitBytes(Op.CallUsr, arity);
     emitByte(i);
 
-    if (version[i].output === Kind.Nothing) {
+    if (version[i].output === Kind.Nothing)
         lastT = nothingT;
-    } else {
+    else
         lastT = {base: version[i].output as Kind};
-    }
 }
 
 function global_non_callable(table: any, name: string, native: boolean): void {

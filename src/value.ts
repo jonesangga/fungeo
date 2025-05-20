@@ -57,7 +57,9 @@ export class FGCallable implements FG {
         public version: Version[]
     ) {}
 
-    to_str(): string { return "fn(n: number): void"; }
+    to_str(): string {
+        return `<fn ${ this.name }>`;
+    }
     equal(other: FG) { return false; }
 }
 
@@ -70,7 +72,7 @@ export class FGFunction implements FG {
     ) {}
 
     to_str(): string {
-        return `fn ${this.name}`;
+        return `<fn ${ this.name }>`;
     }
     equal(other: FG) { return false; }
 }
