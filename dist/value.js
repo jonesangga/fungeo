@@ -133,3 +133,4 @@ export class FGType {
         return false;
     }
 }
+export let geoKind = [700, 800];

@@ -1,6 +1,8 @@
 import { pop, push, vmoutput } from "./vm.js";
-import { KindName, FGCallable, FGString } from "./value.js";
+import { geoKind, KindName, FGCallable, FGString } from "./value.js";
+import Point from "./geo/point.js";
 import Segment from "./geo/segment.js";
+import { canvas } from "./ui/canvas.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -61,25 +63,37 @@ export let Type = new FGCallable("Type", _Type, [
 ]);
 let on_scrn = [];
 function draw_onScreen() {
+    canvas.clear();
     for (let obj of on_scrn) {
-        if (obj.kind === 800)
-            obj.draw();
+        obj.draw();
     }
 }
 function _Draw(n) {
     let v = pop();
     pop();
-    switch (v.kind) {
-        case 800:
-            on_scrn.push(v);
-            break;
-    }
+    on_scrn.push(v);
     draw_onScreen();
 }
 export let Draw = new FGCallable("Draw", _Draw, [
     {
-        input: [800],
+        input: [geoKind],
         output: 100,
+    },
+]);
+function _P(n) {
+    if (n === 0) {
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        let point = new Point(x, y);
+        console.log(point);
+        push(point);
+    }
+}
+export let P = new FGCallable("P", _P, [
+    {
+        input: [500, 500],
+        output: 700,
     },
 ]);
 function _Seg(n) {
@@ -92,10 +106,33 @@ function _Seg(n) {
         let seg = new Segment(x1, y1, x2, y2);
         push(seg);
     }
+    else {
+        let q = pop();
+        let p = pop();
+        pop();
+        let seg = new Segment(p.x, p.y, q.x, q.y);
+        push(seg);
+    }
 }
 export let Seg = new FGCallable("Seg", _Seg, [
     {
         input: [500, 500, 500, 500],
         output: 800,
+    },
+    {
+        input: [700, 700],
+        output: 800,
+    },
+]);
+function _Midpoint(n) {
+    let segment = pop();
+    pop();
+    let point = segment.midpoint();
+    push(point);
+}
+export let Midpoint = new FGCallable("Midpoint", _Midpoint, [
+    {
+        input: [800],
+        output: 700,
     },
 ]);

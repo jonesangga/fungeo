@@ -2,6 +2,10 @@
 
 #### 21-05-25
 
+- implement Midpoint in Segement class
+- overload Seg
+- implement canvas.clear()
+- add Point
 - remove equal method
 - remove FG import
 - tes Segment

@@ -24,10 +24,10 @@ canvasElem.style.border     = "1px solid black";
 export const canvas: Canvas = {
     kind: Kind.Canvas,
 
-    // clear(): void {
-        // c.fillStyle = "#fff";
-        // c.fillRect(0, 0, w, h);
-    // },
+    clear(): void {
+        c.fillStyle = "#fff";
+        c.fillRect(0, 0, w, h);
+    },
 
     to_str(): string { return "canvas"; },
 

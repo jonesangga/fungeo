@@ -1,6 +1,8 @@
 import { pop, push, vmoutput } from "./vm.js"
-import { Kind, GeoObj, KindName, FGCallable, FGNumber, FGString } from "./value.js"
+import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } from "./value.js"
+import Point from "./geo/point.js"
 import Segment from "./geo/segment.js"
+import { canvas } from "./ui/canvas.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -69,29 +71,39 @@ export let Type = new FGCallable("Type", _Type, [
 let on_scrn: GeoObj[] = [];
 
 function draw_onScreen() {
-    // canvas.clear();
+    canvas.clear();
     for (let obj of on_scrn) {
-        if (obj.kind === Kind.Segment)
-            obj.draw();
+        obj.draw();
     }
 }
 
 function _Draw(n: number): void {
     let v = pop() as GeoObj;
     pop();              // The function.
-    switch (v.kind) {
-        case Kind.Segment:
-            on_scrn.push(v);
-            break;
-        // default:
-            // assertNever(v);
-    }
+    on_scrn.push(v);
     draw_onScreen();
 }
 export let Draw = new FGCallable("Draw", _Draw, [
     {
-        input:  [Kind.Segment],
+        input:  [geoKind],
         output: Kind.Nothing,
+    },
+]);
+
+function _P(n: number): void {
+    if (n === 0) {
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        let point = new Point(x, y);
+        console.log(point);
+        push(point);
+    }
+}
+export let P = new FGCallable("P", _P, [
+    {
+        input:  [Kind.Number, Kind.Number],
+        output: Kind.Point,
     },
 ]);
 
@@ -104,11 +116,34 @@ function _Seg(n: number): void {
         pop();              // The function.
         let seg = new Segment(x1, y1, x2, y2);
         push(seg);
+    } else {
+        let q = pop() as Point;
+        let p = pop() as Point;
+        pop();              // The function.
+        let seg = new Segment(p.x, p.y, q.x, q.y);
+        push(seg);
     }
 }
 export let Seg = new FGCallable("Seg", _Seg, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Segment,
+    },
+    {
+        input:  [Kind.Point, Kind.Point],
+        output: Kind.Segment,
+    },
+]);
+
+function _Midpoint(n: number): void {
+    let segment = pop() as Segment;
+    pop();              // The function.
+    let point = segment.midpoint();
+    push(point);
+}
+export let Midpoint = new FGCallable("Midpoint", _Midpoint, [
+    {
+        input:  [Kind.Segment],
+        output: Kind.Point,
     },
 ]);

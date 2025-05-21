@@ -473,7 +473,7 @@ function matchType(expected, actual) {
         return actual === expected;
     }
     else {
-        return expected.has(actual);
+        return expected.includes(actual);
     }
 }
 function setToKinds(set_) {

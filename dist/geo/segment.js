@@ -1,5 +1,6 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
+import Point from "./point.js";
 export default class Segment {
     x1;
     y1;
@@ -23,5 +24,8 @@ export default class Segment {
         c.lineTo(this.x2, this.y2);
         c.strokeStyle = this.strokeStyle;
         c.stroke();
+    }
+    midpoint() {
+        return new Point((this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
     }
 }

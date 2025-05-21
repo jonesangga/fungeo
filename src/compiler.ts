@@ -605,17 +605,17 @@ function get_name(name: string): void {
     }
 }
 
-function matchType(expected: (Set<number> | Kind), actual: Kind): boolean {
+function matchType(expected: (Kind[] | Kind), actual: Kind): boolean {
     if (expected === Kind.Any) {
         return true;
     } else if (typeof expected === "number") {
         return actual === expected;
     } else {
-        return expected.has(actual);
+        return expected.includes(actual);
     }
 }
 
-function setToKinds(set_: Set<number>): string[] {
+function setToKinds(set_: Kind[]): string[] {
     let s = [];
     for (let kind of set_) {
         s.push(KindName[kind as Kind]);
@@ -634,7 +634,7 @@ function global_callable(name_: string, table: any, native: boolean): void {
     emitConstant(name.value as FGCallable);
 
     let version = (name.value as FGCallable).version;
-    let inputVersion: (Set<number> | Kind)[] = [];
+    let inputVersion: (Kind[] | Kind)[] = [];
     let gotTypes: Kind[]     = [];
 
     let success = true;
@@ -675,7 +675,7 @@ function global_callable(name_: string, table: any, native: boolean): void {
         if (typeof inputVersion[j] === "number")
             error(`in ${name_}: expect arg ${j} of type ${KindName[inputVersion[j] as Kind]}, got ${KindName[gotTypes[j]]}`);
         else
-            error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j] as Set<number>)}], got ${KindName[gotTypes[j]]}`);
+            error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j] as Kind[])}], got ${KindName[gotTypes[j]]}`);
     }
 
     let arity = version[i].input.length;

@@ -1,6 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Chunk } from "./chunk.js"
+import Point from "./geo/point.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
@@ -36,18 +37,19 @@ export const KindName: {
 };
 
 export type Canvas = {
-    kind: Kind.Canvas;
-    to_str(): string;
-    resize(w_: number, h_: number): void;
-    place(x: number, y: number): void;
-}
+    kind:   Kind.Canvas,
+    to_str: () => string,
+    resize: (w: number, h: number) => void,
+    place:  (x: number, y: number) => void,
+    clear:  () => void,
+};
 
 export type Repl = {
-    kind: Kind.Repl;
-    to_str(): string;
-    place(x: number, y: number): void;
-    [name: string]: any;
-}
+    kind:   Kind.Repl,
+    to_str: () => string,
+    place:  (x: number, y: number) => void,
+    [name: string]: any,
+};
 
 export interface FG {
     kind: Kind;
@@ -67,7 +69,7 @@ export class FGBoolean implements FG {
 }
 
 export type Version = {
-    input:  (Set<number> | Kind)[],
+    input:  (Kind[] | Kind)[],
     output: Kind,
 };
 
@@ -154,6 +156,8 @@ export class FGType implements FG {
 
 type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType | FGFunction;
 type UIObj = Canvas | Repl;
-export type GeoObj = Segment;
+export type GeoObj = Point | Segment;
 export type Value  = LitObj | UIObj | GeoObj;
 export type Comparable = FGNumber | FGString;
+
+export let geoKind = [Kind.Point, Kind.Segment];

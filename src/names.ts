@@ -3,7 +3,7 @@
 // TODO: Clean up this.
 
 import { Kind, type Value } from "./value.js"
-import { Print, Printf, Show, Padl, Type, Draw, Seg } from "./vmfunction.js"
+import { Print, Printf, Show, Padl, Type, Draw, P, Seg, Midpoint } from "./vmfunction.js"
 import { canvas } from "./ui/canvas.js"
 import { repl } from "./ui/repl.js"
 
@@ -30,7 +30,9 @@ export let nativeNames: Names = {
     "Padl": { kind:  Kind.Callable, value: Padl },
     "Type": { kind:  Kind.Callable, value: Type },
     "Draw": { kind:  Kind.Callable, value: Draw },
+    "P": { kind:  Kind.Callable, value: P },
     "Seg": { kind:  Kind.Callable, value: Seg },
+    "Midpoint": { kind:  Kind.Callable, value: Midpoint },
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
     // "fishp": { kind: Kind.Pic, value: fishp, drawn: true },
@@ -154,16 +156,6 @@ export let nativeNames: Names = {
             // },
         // ],
     // },
-    // "draw": {
-        // kind:    Kind.Callable,
-        // call:    draw,
-        // version: [
-            // {
-                // input:  [geoKindSet],
-                // output: Kind.Nothing,
-            // },
-        // ],
-    // },
     // "bind": {
         // kind:    Kind.Callable,
         // call:    bind_,
@@ -265,40 +257,6 @@ export let nativeNames: Names = {
             // {
                 // input:  [Kind.Number, Kind.Number],
                 // output: Kind.Pic,
-            // },
-        // ],
-    // },
-    // "Midpoint": {
-        // kind:    Kind.Callable,
-        // call:    Midpoint,
-        // version: [
-            // {
-                // input:  [Kind.Segment],
-                // output: Kind.Point,
-            // },
-        // ],
-    // },
-    // "P": {
-        // kind:    Kind.Callable,
-        // call:    P,
-        // version: [
-            // {
-                // input:  [Kind.Number, Kind.Number],
-                // output: Kind.Point,
-            // },
-        // ],
-    // },
-    // "Seg": {
-        // kind:    Kind.Callable,
-        // call:    Seg,
-        // version: [
-            // {
-                // input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
-                // output: Kind.Segment,
-            // },
-            // {
-                // input:  [Kind.Point, Kind.Point],
-                // output: Kind.Segment,
             // },
         // ],
     // },

@@ -7,6 +7,7 @@
 import { c } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
 import { Kind } from "../value.js"
+import Point from "./point.js"
 
 export default class Segment {
     kind: Kind.Segment = Kind.Segment;
@@ -31,7 +32,7 @@ export default class Segment {
         c.stroke();
     }
 
-    // midpoint(): Point {
-        // return new Point( (this.x1 + this.x2)/2, (this.y1 + this.y2)/2 );
-    // }
+    midpoint(): Point {
+        return new Point((this.x1 + this.x2)/2, (this.y1 + this.y2)/2);
+    }
 }

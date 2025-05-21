@@ -15,6 +15,10 @@ canvasElem.style.left = "0px";
 canvasElem.style.border = "1px solid black";
 export const canvas = {
     kind: 2000,
+    clear() {
+        c.fillStyle = "#fff";
+        c.fillRect(0, 0, w, h);
+    },
     to_str() { return "canvas"; },
     resize(w_, h_) {
         w = w_;
