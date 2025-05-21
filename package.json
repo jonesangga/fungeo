@@ -8,7 +8,7 @@
   "main": "fungeo.js",
   "scripts": {
     "start": "http-server -c-1 -p 9999",
-    "test": "node --test ./dist/test/*"
+    "test": "node --test ./dist/test/*.js ./dist/test/**/*.js"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.7",

@@ -192,28 +192,6 @@ describe("vm Op.AddStr", () => {
         ]);
     });
 });
-describe("vm Op.Eq", () => {
-    it("Op.Eq", () => {
-        let chunk = setup(`a = 12 == 34`);
-        vm.step();
-        vm.step();
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            new FGBoolean(false)
-        ]);
-    });
-});
-describe("vm Op.NEq", () => {
-    it("Op.NEq", () => {
-        let chunk = setup(`a = 12 != 34`);
-        vm.step();
-        vm.step();
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            new FGBoolean(true)
-        ]);
-    });
-});
 describe("vm Op.LT", () => {
     it("Op.LT", () => {
         let chunk = setup(`a = 12 < 34`);

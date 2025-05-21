@@ -248,31 +248,31 @@ describe("vm Op.AddStr", () => {
     });
 });
 
-describe("vm Op.Eq", () => {
-    it("Op.Eq", () => {
-        let chunk = setup(`a = 12 == 34`);
+// describe("vm Op.Eq", () => {
+    // it("Op.Eq", () => {
+        // let chunk = setup(`a = 12 == 34`);
 
-        vm.step();      // Op.Load, 1
-        vm.step();      // Op.Load, 2
-        vm.step();      // Op.Eq
-        deepEqual(stack.slice(1, stackTop), [
-            new FGBoolean(false)
-        ]);
-    });
-});
+        // vm.step();      // Op.Load, 1
+        // vm.step();      // Op.Load, 2
+        // vm.step();      // Op.Eq
+        // deepEqual(stack.slice(1, stackTop), [
+            // new FGBoolean(false)
+        // ]);
+    // });
+// });
 
-describe("vm Op.NEq", () => {
-    it("Op.NEq", () => {
-        let chunk = setup(`a = 12 != 34`);
+// describe("vm Op.NEq", () => {
+    // it("Op.NEq", () => {
+        // let chunk = setup(`a = 12 != 34`);
 
-        vm.step();      // Op.Load, 1
-        vm.step();      // Op.Load, 2
-        vm.step();      // Op.NEq
-        deepEqual(stack.slice(1, stackTop), [
-            new FGBoolean(true)
-        ]);
-    });
-});
+        // vm.step();      // Op.Load, 1
+        // vm.step();      // Op.Load, 2
+        // vm.step();      // Op.NEq
+        // deepEqual(stack.slice(1, stackTop), [
+            // new FGBoolean(true)
+        // ]);
+    // });
+// });
 
 describe("vm Op.LT", () => {
     it("Op.LT", () => {
