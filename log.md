@@ -2,6 +2,8 @@
 
 #### 21-05-25
 
+- test Midpoint
+- test Point
 - implement Midpoint in Segement class
 - overload Seg
 - implement canvas.clear()

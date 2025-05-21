@@ -18,4 +18,13 @@ describe("Segment", () => {
         let result = seg.to_str();
         equal(result, "Seg 10 20 30 40");
     });
+    it("midpoint of Segment", () => {
+        let seg = new Segment(10, 20, 30, 40);
+        let p = seg.midpoint();
+        equal(p.kind, 700);
+        equal(p.x, 20);
+        equal(p.y, 30);
+        equal(p.lineWidth, 5);
+        equal(p.strokeStyle, color.black);
+    });
 });
