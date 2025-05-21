@@ -1,3 +1,4 @@
+import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { OpName, Chunk } from "../chunk.js";

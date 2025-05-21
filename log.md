@@ -1,5 +1,11 @@
 # Log
 
+#### 21-05-25
+
+- install canvas
+- install jsdom global-jsdom
+- test dom
+
 #### 20-05-25
 
 - remove interface GeoSegment
