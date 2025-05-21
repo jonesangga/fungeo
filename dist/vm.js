@@ -126,13 +126,13 @@ function run() {
             case 380: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean(a.equal(b)));
+                push(new FGBoolean(false));
                 break;
             }
             case 1010: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean(!a.equal(b)));
+                push(new FGBoolean(false));
                 break;
             }
             case 810:

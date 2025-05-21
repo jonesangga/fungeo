@@ -1,8 +1,14 @@
-import { c } from "../ui/canvas.js"
-import { Color } from "../data/constant.js"
-import { Kind, type FG } from "../value.js"
+// @jonesangga, 2025, MIT License.
+//
+// TODO: lineWidth?
+//       Think about equal() implementation.
+//       Test draw() visually.
 
-export class Segment {
+import { c } from "../ui/canvas.js"
+import { color } from "../data/constant.js"
+import { Kind } from "../value.js"
+
+export default class Segment {
     kind: Kind.Segment = Kind.Segment;
 
     constructor( 
@@ -10,10 +16,8 @@ export class Segment {
         public y1: number,
         public x2: number,
         public y2: number,
-        public strokeStyle: string = Color.BLACK
+        public strokeStyle: string = color.black
     ) {}
-
-    equal(other: FG) { return false; }
 
     to_str(): string {
         return `Seg ${this.x1} ${this.y1} ${this.x2} ${this.y2}`;

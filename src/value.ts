@@ -1,7 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Chunk } from "./chunk.js"
-import { Segment } from "./geo/segment.js"
+import Segment from "./geo/segment.js"
 
 export const enum Kind {
     Nothing = 100,
@@ -38,7 +38,6 @@ export const KindName: {
 export type Canvas = {
     kind: Kind.Canvas;
     to_str(): string;
-    equal(other: FG): boolean;
     resize(w_: number, h_: number): void;
     place(x: number, y: number): void;
 }
@@ -46,7 +45,6 @@ export type Canvas = {
 export type Repl = {
     kind: Kind.Repl;
     to_str(): string;
-    equal(other: FG): boolean;
     place(x: number, y: number): void;
     [name: string]: any;
 }
@@ -54,7 +52,6 @@ export type Repl = {
 export interface FG {
     kind: Kind;
     to_str(): string;
-    equal(other: FG): boolean;
 }
 
 export class FGBoolean implements FG {

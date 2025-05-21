@@ -2,6 +2,9 @@
 
 #### 21-05-25
 
+- remove equal method
+- remove FG import
+- tes Segment
 - install canvas
 - install jsdom global-jsdom
 - test dom

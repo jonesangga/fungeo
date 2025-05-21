@@ -159,16 +159,19 @@ function run(): boolean {
                 break;
             }
 
+            // TODO: implement these ASAP.
             case Op.Eq: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean( a.equal(b) ));
+                // push(new FGBoolean( a.equal(b) ));
+                push(new FGBoolean(false));
                 break;
             }
             case Op.NEq: {
                 let b = pop();
                 let a = pop();
-                push(new FGBoolean( !a.equal(b) ));
+                // push(new FGBoolean( !a.equal(b) ));
+                push(new FGBoolean(false));
                 break;
             }
             case Op.LT: compare(lt); break;

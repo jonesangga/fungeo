@@ -1,6 +1,6 @@
 import { pop, push, vmoutput } from "./vm.js";
 import { KindName, FGCallable, FGString } from "./value.js";
-import { Segment } from "./geo/segment.js";
+import Segment from "./geo/segment.js";
 function _Print(n) {
     let value = pop();
     pop();

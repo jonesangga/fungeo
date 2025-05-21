@@ -16,7 +16,6 @@ canvasElem.style.border = "1px solid black";
 export const canvas = {
     kind: 2000,
     to_str() { return "canvas"; },
-    equal(other) { return false; },
     resize(w_, h_) {
         w = w_;
         h = h_;
