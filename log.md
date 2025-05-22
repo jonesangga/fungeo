@@ -2,6 +2,10 @@
 
 #### 22-05-25
 
+- add map_to
+- add fish data
+- add Paint function
+- add Pic
 - test Circle and Ellipse
 - add Ellipse
 - add Circle

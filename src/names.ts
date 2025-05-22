@@ -7,6 +7,7 @@ import { Print, Printf, Show, Padl, Type, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
+import fish from "./data/fish.js"
 
 export type Info = {
     kind:     Kind,
@@ -24,6 +25,12 @@ export let nativeNames: Names = {
     "canvas": { kind:  Kind.Canvas, value: canvas },
     "repl":   { kind:  Kind.Repl, value: repl },
 
+    // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
+    "fishp": { kind: Kind.Picture, value: fish.p },
+    "fishq": { kind: Kind.Picture, value: fish.q },
+    "fishr": { kind: Kind.Picture, value: fish.r },
+    "fishs": { kind: Kind.Picture, value: fish.s },
+
     "Print":  { kind:  Kind.Callable, value: Print },
     "Printf": { kind:  Kind.Callable, value: Printf },
     "Show":   { kind:  Kind.Callable, value: Show },
@@ -38,12 +45,6 @@ export let nativeNames: Names = {
     "R":      { kind:  Kind.Callable, value: R },
     "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
-
-    // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
-    // "fishp": { kind: Kind.Pic, value: fishp, drawn: true },
-    // "fishq": { kind: Kind.Pic, value: fishq, drawn: true },
-    // "fishr": { kind: Kind.Pic, value: fishr, drawn: true },
-    // "fishs": { kind: Kind.Pic, value: fishs, drawn: true },
 
     // // Color names.
     // "WHITE":  { kind: Kind.Color, value: WHITE },

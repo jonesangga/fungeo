@@ -11,6 +11,7 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Kind, type GeoObj } from "../value.js"
+import Segment from "../geo/segment.js"
 
 export default class Picture {
     x: number = 0;
@@ -38,19 +39,19 @@ export default class Picture {
         c.restore();
     }
 
-    // map_to(to: GeoPic): void {
-        // let scaleX = to.w / this.w;
-        // let scaleY = to.h / this.h;
-        // for (let obj of this.objs) {
-            // switch (obj.kind) {
-                // case Kind.Segment: {
-                    // let t = this.#segment_scale(obj, scaleX, scaleY);
-                    // to.objs.push(t);
-                    // break;
-                // }
-            // }
-        // }
-    // }
+    map_to(target: Picture): void {
+        let scaleX = target.w / this.w;
+        let scaleY = target.h / this.h;
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case Kind.Segment: {
+                    let t = this.#segment_scale(obj, scaleX, scaleY);
+                    target.objs.push(t);
+                    break;
+                }
+            }
+        }
+    }
 
     // cw(): GeoPic {
         // let pic = new Pic(this.w, this.h);
@@ -228,9 +229,9 @@ export default class Picture {
         // return Pic.quartet(p, p.cw(), p.ccw(), p.cw().cw());
     // }
 
-    // #segment_scale(s: Segment, scaleX: number, scaleY: number): Segment {
-        // return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 *scaleX, s.y2 * scaleY, s.strokeStyle);
-    // }
+    #segment_scale(s: Segment, scaleX: number, scaleY: number): Segment {
+        return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 *scaleX, s.y2 * scaleY, s.strokeStyle);
+    }
 
     // #segment_cw(s: Segment): Segment {
         // let c = this.w / 2;

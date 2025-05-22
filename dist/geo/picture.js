@@ -1,5 +1,6 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
+import Segment from "../geo/segment.js";
 export default class Picture {
     w;
     h;
@@ -23,5 +24,21 @@ export default class Picture {
         for (let obj of this.objs)
             obj.draw();
         c.restore();
+    }
+    map_to(target) {
+        let scaleX = target.w / this.w;
+        let scaleY = target.h / this.h;
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case 1000: {
+                    let t = this.#segment_scale(obj, scaleX, scaleY);
+                    target.objs.push(t);
+                    break;
+                }
+            }
+        }
+    }
+    #segment_scale(s, scaleX, scaleY) {
+        return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 * scaleX, s.y2 * scaleY, s.strokeStyle);
     }
 }
