@@ -5,7 +5,8 @@
 import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint,
-         Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle } from "./vmfunction.js"
+         Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle,
+         MapPic } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import fish from "./data/fish.js"
@@ -51,6 +52,7 @@ export let nativeNames: Names = {
     "Beside": { kind:  Kind.Callable, value: Beside },
     "Quartet": { kind:  Kind.Callable, value: Quartet },
     "Cycle":  { kind:  Kind.Callable, value: Cycle },
+    "MapPic": { kind:  Kind.Callable, value: MapPic },
     "R":      { kind:  Kind.Callable, value: R },
     "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
@@ -97,16 +99,6 @@ export let nativeNames: Names = {
         // version: [
             // {
                 // input:  [rectangularSet, Kind.Number, Kind.Number],
-                // output: Kind.Nothing,
-            // },
-        // ],
-    // },
-    // "map": {
-        // kind:    Kind.Callable,
-        // call:    map,
-        // version: [
-            // {
-                // input:  [rectangularSet, rectangularSet],
                 // output: Kind.Nothing,
             // },
         // ],

@@ -1,4 +1,4 @@
-import { Print, Printf, Show, Padl, Type, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle, MapPic } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
@@ -28,6 +28,7 @@ export let nativeNames = {
     "Beside": { kind: 400, value: Beside },
     "Quartet": { kind: 400, value: Quartet },
     "Cycle": { kind: 400, value: Cycle },
+    "MapPic": { kind: 400, value: MapPic },
     "R": { kind: 400, value: R },
     "Seg": { kind: 400, value: Seg },
     "Midpoint": { kind: 400, value: Midpoint },

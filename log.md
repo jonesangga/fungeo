@@ -2,6 +2,8 @@
 
 #### 22-05-25
 
+- create Map funciton
+- clean up data/fish
 - add ratio to Beside and Above
 - add Clear statment
 - add token Clear

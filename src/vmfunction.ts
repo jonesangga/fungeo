@@ -294,6 +294,20 @@ export let Cycle = new FGCallable("Cycle", _Cycle, [
     },
 ]);
 
+function _MapPic(n: number): void {
+    let target = pop() as Picture;
+    let src = pop() as Picture;
+    pop();              // The function.
+    src.map_to(target);
+    draw_onScreen();
+}
+export let MapPic = new FGCallable("MapPic", _MapPic, [
+    {
+        input:  [Kind.Picture, Kind.Picture],
+        output: Kind.Nothing,
+    },
+]);
+
 function _Pic(n: number): void {
     let w = (pop() as FGNumber).value;
     let h = (pop() as FGNumber).value;
