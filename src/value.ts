@@ -2,6 +2,7 @@
 
 import { Chunk } from "./chunk.js"
 import Point from "./geo/point.js"
+import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
@@ -14,6 +15,7 @@ export const enum Kind {
     String = 600,
     Type = 650,
     Point = 700,        // Geometry.
+    Rect = 750,
     Segment = 800,
     Canvas = 2000,      // UI.
     Repl = 2500,
@@ -30,6 +32,7 @@ export const KindName: {
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Point]: "Point",
+    [Kind.Rect]: "Rect",
     [Kind.Repl]: "Repl",
     [Kind.Segment]: "Segment",
     [Kind.String]: "String",
@@ -156,8 +159,8 @@ export class FGType implements FG {
 
 type LitObj = FGBoolean | FGNumber | FGString | FGCallable | FGType | FGFunction;
 type UIObj = Canvas | Repl;
-export type GeoObj = Point | Segment;
+export type GeoObj = Point | Rect | Segment;
 export type Value  = LitObj | UIObj | GeoObj;
 export type Comparable = FGNumber | FGString;
 
-export let geoKind = [Kind.Point, Kind.Segment];
+export let geoKind = [Kind.Point, Kind.Rect, Kind.Segment];

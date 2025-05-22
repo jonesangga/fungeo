@@ -1,8 +1,9 @@
 import { pop, push, vmoutput } from "./vm.js";
 import { geoKind, KindName, FGCallable, FGString } from "./value.js";
-import Point from "./geo/point.js";
-import Segment from "./geo/segment.js";
 import { canvas } from "./ui/canvas.js";
+import Point from "./geo/point.js";
+import Rect from "./geo/rect.js";
+import Segment from "./geo/segment.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -94,6 +95,38 @@ export let P = new FGCallable("P", _P, [
     {
         input: [500, 500],
         output: 700,
+    },
+]);
+function _R(n) {
+    if (n === 0) {
+        let h = pop().value;
+        let w = pop().value;
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        let rect = new Rect(x, y, w, h);
+        push(rect);
+    }
+    else {
+        let q = pop();
+        let p = pop();
+        pop();
+        let x = Math.min(p.x, q.x);
+        let y = Math.min(p.y, q.y);
+        let w = Math.abs(p.x - q.x);
+        let h = Math.abs(p.y - q.y);
+        let rect = new Rect(x, y, w, h);
+        push(rect);
+    }
+}
+export let R = new FGCallable("R", _R, [
+    {
+        input: [500, 500, 500, 500],
+        output: 750,
+    },
+    {
+        input: [700, 700],
+        output: 750,
     },
 ]);
 function _Seg(n) {

@@ -1,8 +1,9 @@
 import { pop, push, vmoutput } from "./vm.js"
 import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } from "./value.js"
-import Point from "./geo/point.js"
-import Segment from "./geo/segment.js"
 import { canvas } from "./ui/canvas.js"
+import Point from "./geo/point.js"
+import Rect from "./geo/rect.js"
+import Segment from "./geo/segment.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -104,6 +105,38 @@ export let P = new FGCallable("P", _P, [
     {
         input:  [Kind.Number, Kind.Number],
         output: Kind.Point,
+    },
+]);
+
+function _R(n: number): void {
+    if (n === 0) {
+        let h = (pop() as FGNumber).value;
+        let w = (pop() as FGNumber).value;
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        let rect = new Rect(x, y, w, h);
+        push(rect);
+    } else {
+        let q = pop() as Point;
+        let p = pop() as Point;
+        pop();              // The function.
+        let x = Math.min(p.x, q.x);
+        let y = Math.min(p.y, q.y);
+        let w = Math.abs(p.x - q.x);
+        let h = Math.abs(p.y - q.y);
+        let rect = new Rect(x, y, w, h);
+        push(rect);
+    }
+}
+export let R = new FGCallable("R", _R, [
+    {
+        input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
+        output: Kind.Rect,
+    },
+    {
+        input:  [Kind.Point, Kind.Point],
+        output: Kind.Rect,
     },
 ]);
 
