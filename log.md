@@ -2,6 +2,7 @@
 
 #### 22-05-25
 
+- add rect.test
 - add Rect
 
 #### 21-05-25
