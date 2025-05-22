@@ -2,6 +2,12 @@
 
 #### 22-05-25
 
+- add ratio to Beside and Above
+- add Clear statment
+- add token Clear
+  this should be a built-in procedure. Change after it support built-in procedure without arg
+- add Quartet and Cycle
+- add beside and above default ratio
 - add flipH and flipV
 - add cw and ccw
 - add map_to

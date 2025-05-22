@@ -1,6 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import Circle from "../geo/circle.js";
+import Ellipse from "../geo/ellipse.js";
 import Rect from "../geo/rect.js";
 import Segment from "../geo/segment.js";
 export default class Picture {
@@ -120,6 +121,86 @@ export default class Picture {
         }
         return pic;
     }
+    static above(rtop, rbottom, top, bottom) {
+        let pic = new Picture(top.w, top.h);
+        let scale = rtop / (rtop + rbottom);
+        for (let obj of top.objs) {
+            switch (obj.kind) {
+                case 700: {
+                    pic.objs.push(Picture.circle_top(scale, obj));
+                    break;
+                }
+                case 1000: {
+                    pic.objs.push(Picture.segment_top(scale, obj));
+                    break;
+                }
+                case 900: {
+                    pic.objs.push(Picture.rect_top(scale, obj));
+                    break;
+                }
+            }
+        }
+        for (let obj of bottom.objs) {
+            switch (obj.kind) {
+                case 700: {
+                    pic.objs.push(Picture.circle_bottom(scale, bottom, obj));
+                    break;
+                }
+                case 1000: {
+                    pic.objs.push(Picture.segment_bottom(scale, bottom, obj));
+                    break;
+                }
+                case 900: {
+                    pic.objs.push(Picture.rect_bottom(scale, bottom, obj));
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
+    static beside(rleft, rright, left, right) {
+        let pic = new Picture(left.w, left.h);
+        let scale = rleft / (rleft + rright);
+        for (let obj of left.objs) {
+            switch (obj.kind) {
+                case 700: {
+                    pic.objs.push(Picture.circle_left(scale, obj));
+                    break;
+                }
+                case 1000: {
+                    pic.objs.push(Picture.segment_left(scale, obj));
+                    break;
+                }
+                case 900: {
+                    pic.objs.push(Picture.rect_left(scale, obj));
+                    break;
+                }
+            }
+        }
+        for (let obj of right.objs) {
+            switch (obj.kind) {
+                case 700: {
+                    pic.objs.push(Picture.circle_right(scale, right, obj));
+                    break;
+                }
+                case 1000: {
+                    pic.objs.push(Picture.segment_right(scale, right, obj));
+                    break;
+                }
+                case 900: {
+                    pic.objs.push(Picture.rect_right(scale, right, obj));
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
+    static quartet(p, q, r, s) {
+        return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
+    }
+    static cycle(p) {
+        return Picture.quartet(p, p.cw(), p.ccw(), p.cw().cw());
+    }
     #segment_scale(s, scaleX, scaleY) {
         return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 * scaleX, s.y2 * scaleY, s.strokeStyle);
     }
@@ -153,6 +234,20 @@ export default class Picture {
         let y2 = -s.y2 + 2 * d;
         return new Segment(s.x1, y1, s.x2, y2, s.strokeStyle);
     }
+    static segment_top(scale, s) {
+        return new Segment(s.x1, s.y1 * scale, s.x2, s.y2 * scale, s.strokeStyle);
+    }
+    static segment_bottom(scale, p, s) {
+        let t = 1 - scale;
+        return new Segment(s.x1, p.h * scale + s.y1 * t, s.x2, p.h * scale + s.y2 * t, s.strokeStyle);
+    }
+    static segment_left(scale, s) {
+        return new Segment(s.x1 * scale, s.y1, s.x2 * scale, s.y2, s.strokeStyle);
+    }
+    static segment_right(scale, p, s) {
+        let t = 1 - scale;
+        return new Segment(p.w * scale + s.x1 * t, s.y1, p.w * scale + s.x2 * t, s.y2, s.strokeStyle);
+    }
     #circle_cw(ci) {
         let c = this.w / 2;
         let d = this.h / 2;
@@ -176,6 +271,20 @@ export default class Picture {
         let d = this.h / 2;
         let y = -ci.y + 2 * d;
         return new Circle(ci.x, y, ci.r, ci.strokeStyle, ci.fillStyle);
+    }
+    static circle_top(scale, ci) {
+        return new Ellipse(ci.x, ci.y * scale, ci.r, ci.r * scale, 0, ci.strokeStyle, ci.fillStyle);
+    }
+    static circle_bottom(scale, p, ci) {
+        let t = 1 - scale;
+        return new Ellipse(ci.x, p.h * scale + ci.y * t, ci.r, ci.r * t, 0, ci.strokeStyle, ci.fillStyle);
+    }
+    static circle_left(scale, ci) {
+        return new Ellipse(ci.x * scale, ci.y, ci.r * scale, ci.r, 0, ci.strokeStyle, ci.fillStyle);
+    }
+    static circle_right(scale, p, ci) {
+        let t = 1 - scale;
+        return new Ellipse(p.w * scale + ci.x * t, ci.y, ci.r * t, ci.r, 0, ci.strokeStyle, ci.fillStyle);
     }
     #rect_cw(r) {
         let c = this.w / 2;
@@ -212,5 +321,19 @@ export default class Picture {
         let y2 = -(r.y + r.h) + 2 * d;
         let h = -r.h;
         return new Rect(r.x, y1, r.w, h, r.strokeStyle, r.fillStyle);
+    }
+    static rect_top(scale, r) {
+        return new Rect(r.x, r.y * scale, r.w, r.h * scale, r.strokeStyle, r.fillStyle);
+    }
+    static rect_bottom(scale, p, r) {
+        let t = 1 - scale;
+        return new Rect(r.x, p.h * scale + r.y * t, r.w, r.h * t, r.strokeStyle, r.fillStyle);
+    }
+    static rect_left(scale, r) {
+        return new Rect(r.x * scale, r.y, r.w * scale, r.h, r.strokeStyle, r.fillStyle);
+    }
+    static rect_right(scale, p, r) {
+        let t = 1 - scale;
+        return new Rect(p.w * scale + r.x * t, r.y, r.w * t, r.h, r.strokeStyle, r.fillStyle);
     }
 }

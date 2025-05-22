@@ -9,6 +9,7 @@ export var Op;
     Op[Op["CkExcD"] = 212] = "CkExcD";
     Op[Op["CkInc"] = 215] = "CkInc";
     Op[Op["CkIncD"] = 217] = "CkIncD";
+    Op[Op["Clear"] = 230] = "Clear";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
@@ -48,6 +49,7 @@ export const OpName = {
     [212]: "CkExcD",
     [215]: "CkInc",
     [217]: "CkIncD",
+    [230]: "Clear",
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
@@ -113,6 +115,7 @@ export class Chunk {
         switch (instruction) {
             case 100:
             case 120:
+            case 230:
             case 300:
             case 380:
             case 390:

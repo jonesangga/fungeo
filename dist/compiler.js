@@ -35,6 +35,7 @@ const rules = {
     [1195]: { prefix: null, infix: null, precedence: 100 },
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
+    [2250]: { prefix: null, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
@@ -718,6 +719,10 @@ function statement() {
     else if (match(400)
         || match(500)) {
         parse_loop();
+    }
+    else if (match(2250)) {
+        advance();
+        emitByte(230);
     }
     else if (match(2800)) {
         parse_return();

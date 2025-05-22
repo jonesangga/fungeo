@@ -7,6 +7,7 @@ import Picture from "./geo/picture.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
+import { on_scrn } from "./vm.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -65,7 +66,6 @@ export let Type = new FGCallable("Type", _Type, [
         output: 600,
     },
 ]);
-let on_scrn = [];
 function draw_onScreen() {
     canvas.clear();
     for (let obj of on_scrn) {
@@ -194,6 +194,83 @@ function _FlipV(n) {
     push(pic.flipv());
 }
 export let FlipV = new FGCallable("FlipV", _FlipV, [
+    {
+        input: [840],
+        output: 840,
+    },
+]);
+function _Above(n) {
+    if (n === 0) {
+        let bottom = pop();
+        let top = pop();
+        pop();
+        push(Picture.above(1, 1, top, bottom));
+    }
+    else {
+        let bottom = pop();
+        let top = pop();
+        let rbottom = pop().value;
+        let rtop = pop().value;
+        pop();
+        push(Picture.above(rtop, rbottom, top, bottom));
+    }
+}
+export let Above = new FGCallable("Above", _Above, [
+    {
+        input: [840, 840],
+        output: 840,
+    },
+    {
+        input: [500, 500, 840, 840],
+        output: 840,
+    },
+]);
+function _Beside(n) {
+    if (n === 0) {
+        let right = pop();
+        let left = pop();
+        pop();
+        push(Picture.beside(1, 1, left, right));
+    }
+    else {
+        let right = pop();
+        let left = pop();
+        let rright = pop().value;
+        let rleft = pop().value;
+        pop();
+        push(Picture.beside(rleft, rright, left, right));
+    }
+}
+export let Beside = new FGCallable("Beside", _Beside, [
+    {
+        input: [840, 840],
+        output: 840,
+    },
+    {
+        input: [500, 500, 840, 840],
+        output: 840,
+    },
+]);
+function _Quartet(n) {
+    let s = pop();
+    let r = pop();
+    let q = pop();
+    let p = pop();
+    pop();
+    push(Picture.quartet(p, q, r, s));
+}
+export let Quartet = new FGCallable("Quartet", _Quartet, [
+    {
+        input: [840, 840, 840, 840],
+        output: 840,
+    },
+]);
+function _Cycle(n) {
+    let p = pop();
+    pop();
+    push(Picture.cycle(p));
+}
+export let Cycle = new FGCallable("Cycle", _Cycle, [
     {
         input: [840],
         output: 840,

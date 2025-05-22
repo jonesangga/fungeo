@@ -1,8 +1,11 @@
 // @jonesangga, 12-04-2025, MIT License.
+//
+// TODO: Remove Op.Clear asap.
 
 import { Op, Chunk } from "./chunk.js"
-import { FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
+import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
+import canvas from "./ui/canvas.js"
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -13,6 +16,8 @@ let currFrame: CallFrame;
 let currChunk: Chunk;
 
 export let userNames: Names = {};
+
+export let on_scrn: GeoObj[] = [];
 
 //--------------------------------------------------------------------
 // Stack functions.
@@ -187,6 +192,12 @@ function run(): boolean {
             case Op.LEq: compare(leq); break;
             case Op.GT: compare(gt); break;
             case Op.GEq: compare(geq); break;
+
+            case Op.Clear: {
+                canvas.clear();
+                on_scrn = [];
+                break;
+            }
 
             // Check for infinite loop. Change the loop checking instruction if the range decreasing.
             case Op.Loop: {

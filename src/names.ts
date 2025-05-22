@@ -5,7 +5,7 @@
 import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint,
-         Cw, Ccw, FlipH, FlipV } from "./vmfunction.js"
+         Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import fish from "./data/fish.js"
@@ -47,6 +47,10 @@ export let nativeNames: Names = {
     "Ccw":    { kind:  Kind.Callable, value: Ccw },
     "FlipH":  { kind:  Kind.Callable, value: FlipH },
     "FlipV":  { kind:  Kind.Callable, value: FlipV },
+    "Above":  { kind:  Kind.Callable, value: Above },
+    "Beside": { kind:  Kind.Callable, value: Beside },
+    "Quartet": { kind:  Kind.Callable, value: Quartet },
+    "Cycle":  { kind:  Kind.Callable, value: Cycle },
     "R":      { kind:  Kind.Callable, value: R },
     "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
@@ -63,54 +67,6 @@ export let nativeNames: Names = {
     // // UI objects.
     // "page": { kind: Kind.Page, value: page },
 
-    // "beside": {
-        // kind:    Kind.Callable,
-        // call:    beside,
-        // version: [
-            // {
-                // input:  [Kind.Pic, Kind.Pic],
-                // output: Kind.Pic,
-            // },
-            // {
-                // input:  [Kind.Number, Kind.Number, Kind.Pic, Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
-    // "above": {
-        // kind:    Kind.Callable,
-        // call:    above,
-        // version: [
-            // {
-                // input:  [Kind.Pic, Kind.Pic],
-                // output: Kind.Pic,
-            // },
-            // {
-                // input:  [Kind.Number, Kind.Number, Kind.Pic, Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
-    // "quartet": {
-        // kind:    Kind.Callable,
-        // call:    quartet,
-        // version: [
-            // {
-                // input:  [Kind.Pic, Kind.Pic, Kind.Pic, Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
-    // "cycle": {
-        // kind:    Kind.Callable,
-        // call:    cycle,
-        // version: [
-            // {
-                // input:  [Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
     // "paint": {
         // kind:    Kind.Callable,
         // call:    paint,

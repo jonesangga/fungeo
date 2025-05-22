@@ -7,6 +7,7 @@ import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
+import { on_scrn } from "./vm.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -71,8 +72,6 @@ export let Type = new FGCallable("Type", _Type, [
         output: Kind.String,
     },
 ]);
-
-let on_scrn: GeoObj[] = [];
 
 function draw_onScreen() {
     canvas.clear();
@@ -210,6 +209,85 @@ function _FlipV(n: number): void {
     push(pic.flipv());
 }
 export let FlipV = new FGCallable("FlipV", _FlipV, [
+    {
+        input:  [Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _Above(n: number): void {
+    if (n === 0) {
+        let bottom = pop() as Picture;
+        let top = pop() as Picture;
+        pop();              // The function.
+        push(Picture.above(1, 1, top, bottom));
+    } else {
+        let bottom = pop() as Picture;
+        let top = pop() as Picture;
+        let rbottom = (pop() as FGNumber).value;
+        let rtop = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(Picture.above(rtop, rbottom, top, bottom));
+    }
+}
+export let Above = new FGCallable("Above", _Above, [
+    {
+        input:  [Kind.Picture, Kind.Picture],
+        output: Kind.Picture,
+    },
+    {
+        input:  [Kind.Number, Kind.Number, Kind.Picture, Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _Beside(n: number): void {
+    if (n === 0) {
+        let right = pop() as Picture;
+        let left = pop() as Picture;
+        pop();              // The function.
+        push(Picture.beside(1, 1, left, right));
+    } else {
+        let right = pop() as Picture;
+        let left = pop() as Picture;
+        let rright = (pop() as FGNumber).value;
+        let rleft = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(Picture.beside(rleft, rright, left, right));
+    }
+}
+export let Beside = new FGCallable("Beside", _Beside, [
+    {
+        input:  [Kind.Picture, Kind.Picture],
+        output: Kind.Picture,
+    },
+    {
+        input:  [Kind.Number, Kind.Number, Kind.Picture, Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _Quartet(n: number): void {
+    let s = pop() as Picture;
+    let r = pop() as Picture;
+    let q = pop() as Picture;
+    let p = pop() as Picture;
+    pop();              // The function.
+    push(Picture.quartet(p, q, r, s));
+}
+export let Quartet = new FGCallable("Quartet", _Quartet, [
+    {
+        input:  [Kind.Picture, Kind.Picture, Kind.Picture, Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _Cycle(n: number): void {
+    let p = pop() as Picture;
+    pop();              // The function.
+    push(Picture.cycle(p));
+}
+export let Cycle = new FGCallable("Cycle", _Cycle, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,

@@ -1,11 +1,13 @@
 import { FGBoolean, FGNumber } from "./value.js";
 import { nativeNames } from "./names.js";
+import canvas from "./ui/canvas.js";
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
 let currFrame;
 let currChunk;
 export let userNames = {};
+export let on_scrn = [];
 export function push(value) {
     stack[stackTop++] = value;
 }
@@ -150,6 +152,11 @@ function run() {
             case 390:
                 compare(geq);
                 break;
+            case 230: {
+                canvas.clear();
+                on_scrn = [];
+                break;
+            }
             case 805: {
                 let start = peek(2).value;
                 let end = peek(1).value;
