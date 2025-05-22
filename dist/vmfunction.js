@@ -3,6 +3,7 @@ import { geoKind, KindName, FGCallable, FGString } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
+import Picture from "./geo/picture.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
@@ -132,7 +133,6 @@ function _P(n) {
         let x = pop().value;
         pop();
         let point = new Point(x, y);
-        console.log(point);
         push(point);
     }
 }
@@ -140,6 +140,32 @@ export let P = new FGCallable("P", _P, [
     {
         input: [500, 500],
         output: 850,
+    },
+]);
+function _Paint(n) {
+    let geo = pop();
+    let pic = pop();
+    pop();
+    pic.objs.push(geo);
+    draw_onScreen();
+}
+export let Paint = new FGCallable("Paint", _Paint, [
+    {
+        input: [840, geoKind],
+        output: 100,
+    },
+]);
+function _Pic(n) {
+    let w = pop().value;
+    let h = pop().value;
+    pop();
+    let pic = new Picture(w, h);
+    push(pic);
+}
+export let Pic = new FGCallable("Pic", _Pic, [
+    {
+        input: [500, 500],
+        output: 840,
     },
 ]);
 function _R(n) {

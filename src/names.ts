@@ -3,7 +3,8 @@
 // TODO: Clean up this.
 
 import { Kind, type Value } from "./value.js"
-import { Print, Printf, Show, Padl, Type, Draw, C, E, P, R, Seg, Midpoint } from "./vmfunction.js"
+import { Print, Printf, Show, Padl, Type, Draw, Paint,
+         C, E, P, Pic, R, Seg, Midpoint } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 
@@ -29,9 +30,11 @@ export let nativeNames: Names = {
     "Padl":   { kind:  Kind.Callable, value: Padl },
     "Type":   { kind:  Kind.Callable, value: Type },
     "Draw":   { kind:  Kind.Callable, value: Draw },
+    "Paint":  { kind:  Kind.Callable, value: Paint },
     "C":      { kind:  Kind.Callable, value: C },
     "E":      { kind:  Kind.Callable, value: E },
     "P":      { kind:  Kind.Callable, value: P },
+    "Pic":    { kind:  Kind.Callable, value: Pic },
     "R":      { kind:  Kind.Callable, value: R },
     "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
@@ -247,16 +250,6 @@ export let nativeNames: Names = {
             // {
                 // input:  [Kind.String],
                 // output: Kind.Color,
-            // },
-        // ],
-    // },
-    // "Pic": {
-        // kind:    Kind.Callable,
-        // call:    Picture,
-        // version: [
-            // {
-                // input:  [Kind.Number, Kind.Number],
-                // output: Kind.Pic,
             // },
         // ],
     // },

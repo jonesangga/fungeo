@@ -3,6 +3,7 @@ import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } 
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
+import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
@@ -143,7 +144,6 @@ function _P(n: number): void {
         let x = (pop() as FGNumber).value;
         pop();              // The function.
         let point = new Point(x, y);
-        console.log(point);
         push(point);
     }
 }
@@ -151,6 +151,34 @@ export let P = new FGCallable("P", _P, [
     {
         input:  [Kind.Number, Kind.Number],
         output: Kind.Point,
+    },
+]);
+
+function _Paint(n: number): void {
+    let geo = pop() as GeoObj;
+    let pic = pop() as Picture;
+    pop();              // The function.
+    pic.objs.push(geo);
+    draw_onScreen();
+}
+export let Paint = new FGCallable("Paint", _Paint, [
+    {
+        input:  [Kind.Picture, geoKind],
+        output: Kind.Nothing,
+    },
+]);
+
+function _Pic(n: number): void {
+    let w = (pop() as FGNumber).value;
+    let h = (pop() as FGNumber).value;
+    pop();              // The function.
+    let pic = new Picture(w, h);
+    push(pic);
+}
+export let Pic = new FGCallable("Pic", _Pic, [
+    {
+        input:  [Kind.Number, Kind.Number],
+        output: Kind.Picture,
     },
 ]);
 

@@ -1,4 +1,4 @@
-import { Print, Printf, Show, Padl, Type, Draw, C, E, P, R, Seg, Midpoint } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 export let nativeNames = {
@@ -10,9 +10,11 @@ export let nativeNames = {
     "Padl": { kind: 400, value: Padl },
     "Type": { kind: 400, value: Type },
     "Draw": { kind: 400, value: Draw },
+    "Paint": { kind: 400, value: Paint },
     "C": { kind: 400, value: C },
     "E": { kind: 400, value: E },
     "P": { kind: 400, value: P },
+    "Pic": { kind: 400, value: Pic },
     "R": { kind: 400, value: R },
     "Seg": { kind: 400, value: Seg },
     "Midpoint": { kind: 400, value: Midpoint },

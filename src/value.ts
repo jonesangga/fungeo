@@ -5,6 +5,7 @@
 import { Chunk } from "./chunk.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
+import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
@@ -20,6 +21,7 @@ export const enum Kind {
     Type     = 650,
     Circle   = 700,     // Geometry.
     Ellipse  = 750,
+    Picture  = 840,
     Point    = 850,
     Rect     = 900,
     Segment  = 1000,
@@ -39,6 +41,7 @@ export const KindName: {
     [Kind.Function]: "Function",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
+    [Kind.Picture]: "Picture",
     [Kind.Point]: "Point",
     [Kind.Rect]: "Rect",
     [Kind.Repl]: "Repl",
@@ -197,9 +200,9 @@ export class FGType implements FG {
 
 type LitObj = FGBoolean | FGCallable | FGFunction | FGNumber | FGString | FGType;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Ellipse | Point | Rect | Segment;
+export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
 
 // This is used for Callable's input types. See Version type in value.ts.
-export let geoKind = [Kind.Circle, Kind.Ellipse, Kind.Point, Kind.Rect, Kind.Segment];
+export let geoKind = [Kind.Circle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.Segment];
