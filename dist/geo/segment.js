@@ -7,7 +7,7 @@ export default class Segment {
     x2;
     y2;
     strokeStyle;
-    kind = 800;
+    kind = 1000;
     constructor(x1, y1, x2, y2, strokeStyle = color.black) {
         this.x1 = x1;
         this.y1 = y1;

@@ -1,6 +1,7 @@
 import { pop, push, vm_output } from "./vm.js";
 import { geoKind, KindName, FGCallable, FGString } from "./value.js";
 import canvas from "./ui/canvas.js";
+import Circle from "./geo/circle.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
@@ -81,6 +82,34 @@ export let Draw = new FGCallable("Draw", _Draw, [
         output: 100,
     },
 ]);
+function _C(n) {
+    if (n === 0) {
+        let r = pop().value;
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        let c = new Circle(x, y, r);
+        push(c);
+    }
+    else {
+        let q = pop();
+        let p = pop();
+        pop();
+        let r = Math.sqrt((q.x - p.x) ** 2 + (q.y - p.y) ** 2);
+        let c = new Circle(p.x, p.y, r);
+        push(c);
+    }
+}
+export let C = new FGCallable("C", _C, [
+    {
+        input: [500, 500, 500],
+        output: 700,
+    },
+    {
+        input: [850, 850],
+        output: 700,
+    },
+]);
 function _P(n) {
     if (n === 0) {
         let y = pop().value;
@@ -94,7 +123,7 @@ function _P(n) {
 export let P = new FGCallable("P", _P, [
     {
         input: [500, 500],
-        output: 700,
+        output: 850,
     },
 ]);
 function _R(n) {
@@ -122,11 +151,11 @@ function _R(n) {
 export let R = new FGCallable("R", _R, [
     {
         input: [500, 500, 500, 500],
-        output: 750,
+        output: 900,
     },
     {
-        input: [700, 700],
-        output: 750,
+        input: [850, 850],
+        output: 900,
     },
 ]);
 function _Seg(n) {
@@ -150,11 +179,11 @@ function _Seg(n) {
 export let Seg = new FGCallable("Seg", _Seg, [
     {
         input: [500, 500, 500, 500],
-        output: 800,
+        output: 1000,
     },
     {
-        input: [700, 700],
-        output: 800,
+        input: [850, 850],
+        output: 1000,
     },
 ]);
 function _Midpoint(n) {
@@ -165,7 +194,7 @@ function _Midpoint(n) {
 }
 export let Midpoint = new FGCallable("Midpoint", _Midpoint, [
     {
-        input: [800],
-        output: 700,
+        input: [1000],
+        output: 850,
     },
 ]);

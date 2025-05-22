@@ -1,6 +1,7 @@
 import { pop, push, vm_output } from "./vm.js"
 import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } from "./value.js"
 import canvas from "./ui/canvas.js"
+import Circle from "./geo/circle.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
@@ -88,6 +89,34 @@ export let Draw = new FGCallable("Draw", _Draw, [
     {
         input:  [geoKind],
         output: Kind.Nothing,
+    },
+]);
+
+function _C(n: number): void {
+    if (n === 0) {
+        let r = (pop() as FGNumber).value;
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        let c = new Circle(x, y, r);
+        push(c);
+    } else {
+        let q = pop() as Point;
+        let p = pop() as Point;
+        pop();              // The function.
+        let r = Math.sqrt((q.x - p.x)**2 + (q.y - p.y)**2);
+        let c = new Circle(p.x, p.y, r);
+        push(c);
+    }
+}
+export let C = new FGCallable("C", _C, [
+    {
+        input:  [Kind.Number, Kind.Number, Kind.Number],
+        output: Kind.Circle,
+    },
+    {
+        input:  [Kind.Point, Kind.Point],
+        output: Kind.Circle,
     },
 ]);
 

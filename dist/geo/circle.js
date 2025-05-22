@@ -1,32 +1,32 @@
 import { c } from "../ui/canvas.js";
-import { color } from "../data/constant.js";
-export default class Rect {
+import { color, TAU } from "../data/constant.js";
+export default class Circle {
     x;
     y;
-    w;
-    h;
+    r;
     strokeStyle;
     fillStyle;
-    kind = 900;
-    constructor(x, y, w, h, strokeStyle = color.black, fillStyle = color.nocolor) {
+    kind = 700;
+    constructor(x, y, r, strokeStyle = color.black, fillStyle = color.nocolor) {
         this.x = x;
         this.y = y;
-        this.w = w;
-        this.h = h;
+        this.r = r;
         this.strokeStyle = strokeStyle;
         this.fillStyle = fillStyle;
     }
     to_str() {
-        return `R ${this.x} ${this.y} ${this.w} ${this.h}`;
+        return `C ${this.x} ${this.y} ${this.r}`;
     }
     draw() {
+        c.beginPath();
+        c.arc(this.x, this.y, this.r, 0, TAU);
         if (this.fillStyle !== "") {
             c.fillStyle = this.fillStyle;
-            c.fillRect(this.x, this.y, this.w, this.h);
+            c.fill();
         }
         if (this.strokeStyle !== "") {
             c.strokeStyle = this.strokeStyle;
-            c.strokeRect(this.x, this.y, this.w, this.h);
+            c.stroke();
         }
     }
 }

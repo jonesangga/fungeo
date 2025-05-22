@@ -8,9 +8,10 @@ export var Kind;
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
-    Kind[Kind["Point"] = 700] = "Point";
-    Kind[Kind["Rect"] = 750] = "Rect";
-    Kind[Kind["Segment"] = 800] = "Segment";
+    Kind[Kind["Circle"] = 700] = "Circle";
+    Kind[Kind["Point"] = 850] = "Point";
+    Kind[Kind["Rect"] = 900] = "Rect";
+    Kind[Kind["Segment"] = 1000] = "Segment";
     Kind[Kind["Canvas"] = 2000] = "Canvas";
     Kind[Kind["Repl"] = 2500] = "Repl";
 })(Kind || (Kind = {}));
@@ -20,13 +21,14 @@ export const KindName = {
     [300]: "Boolean",
     [400]: "Callable",
     [2000]: "Canvas",
+    [700]: "Circle",
     [450]: "Function",
     [100]: "Nothing",
     [500]: "Number",
-    [700]: "Point",
-    [750]: "Rect",
+    [850]: "Point",
+    [900]: "Rect",
     [2500]: "Repl",
-    [800]: "Segment",
+    [1000]: "Segment",
     [600]: "String",
     [650]: "Type",
 };
@@ -147,4 +149,4 @@ export class FGType {
         return false;
     }
 }
-export let geoKind = [700, 750, 800];
+export let geoKind = [700, 850, 900, 1000];

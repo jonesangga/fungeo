@@ -2,6 +2,7 @@
 
 #### 22-05-25
 
+- add Circle
 - rename frame to currFrame
 - add rect.test
 - add Rect

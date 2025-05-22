@@ -5,7 +5,7 @@ export default class Point {
     y;
     lineWidth;
     strokeStyle;
-    kind = 700;
+    kind = 850;
     constructor(x, y, lineWidth = 5, strokeStyle = color.black) {
         this.x = x;
         this.y = y;

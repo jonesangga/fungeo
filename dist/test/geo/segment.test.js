@@ -6,7 +6,7 @@ import Segment from "../../geo/segment.js";
 describe("Segment", () => {
     it("create Segment with default color", () => {
         let seg = new Segment(10, 20, 30, 40);
-        equal(seg.kind, 800);
+        equal(seg.kind, 1000);
         equal(seg.x1, 10);
         equal(seg.y1, 20);
         equal(seg.x2, 30);
@@ -21,7 +21,7 @@ describe("Segment", () => {
     it("midpoint of Segment", () => {
         let seg = new Segment(10, 20, 30, 40);
         let p = seg.midpoint();
-        equal(p.kind, 700);
+        equal(p.kind, 850);
         equal(p.x, 20);
         equal(p.y, 30);
         equal(p.lineWidth, 5);

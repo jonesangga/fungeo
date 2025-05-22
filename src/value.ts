@@ -3,6 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
+import Circle from "./geo/circle.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
@@ -16,9 +17,10 @@ export const enum Kind {
     Number   = 500,
     String   = 600,
     Type     = 650,
-    Point    = 700,     // Geometry.
-    Rect     = 750,
-    Segment  = 800,
+    Circle   = 700,     // Geometry.
+    Point    = 850,     // Geometry.
+    Rect     = 900,
+    Segment  = 1000,
     Canvas   = 2000,    // UI.
     Repl     = 2500,
 };
@@ -30,6 +32,7 @@ export const KindName: {
     [Kind.Boolean]: "Boolean",
     [Kind.Callable]: "Callable",
     [Kind.Canvas]: "Canvas",
+    [Kind.Circle]: "Circle",
     [Kind.Function]: "Function",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
@@ -191,9 +194,9 @@ export class FGType implements FG {
 
 type LitObj = FGBoolean | FGCallable | FGFunction | FGNumber | FGString | FGType;
 type UIObj = Canvas | Repl;
-export type GeoObj = Point | Rect | Segment;
+export type GeoObj = Circle | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
 
 // This is used for Callable's input types. See Version type in value.ts.
-export let geoKind = [Kind.Point, Kind.Rect, Kind.Segment];
+export let geoKind = [Kind.Circle, Kind.Point, Kind.Rect, Kind.Segment];
