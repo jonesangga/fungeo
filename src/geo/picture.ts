@@ -11,6 +11,8 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Kind, type GeoObj } from "../value.js"
+import Circle from "../geo/circle.js"
+import Rect from "../geo/rect.js"
 import Segment from "../geo/segment.js"
 
 export default class Picture {
@@ -53,49 +55,49 @@ export default class Picture {
         }
     }
 
-    // cw(): GeoPic {
-        // let pic = new Pic(this.w, this.h);
+    cw(): Picture {
+        let pic = new Picture(this.w, this.h);
 
-        // for (let obj of this.objs) {
-            // switch (obj.kind) {
-                // case Kind.Circle: {
-                    // pic.objs.push( this.#circle_cw(obj) );
-                    // break;
-                // }
-                // case Kind.Segment: {
-                    // pic.objs.push( this.#segment_cw(obj) );
-                    // break;
-                // }
-                // case Kind.Rect: {
-                    // pic.objs.push( this.#rect_cw(obj) );
-                    // break;
-                // }
-            // }
-        // }
-        // return pic;
-    // }
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case Kind.Circle: {
+                    pic.objs.push( this.#circle_cw(obj) );
+                    break;
+                }
+                case Kind.Segment: {
+                    pic.objs.push( this.#segment_cw(obj) );
+                    break;
+                }
+                case Kind.Rect: {
+                    pic.objs.push( this.#rect_cw(obj) );
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
 
-    // ccw(): GeoPic {
-        // let pic = new Pic(this.w, this.h);
+    ccw(): Picture {
+        let pic = new Picture(this.w, this.h);
 
-        // for (let obj of this.objs) {
-            // switch (obj.kind) {
-                // case Kind.Circle: {
-                    // pic.objs.push( this.#circle_ccw(obj) );
-                    // break;
-                // }
-                // case Kind.Segment: {
-                    // pic.objs.push( this.#segment_ccw(obj) );
-                    // break;
-                // }
-                // case Kind.Rect: {
-                    // pic.objs.push( this.#rect_ccw(obj) );
-                    // break;
-                // }
-            // }
-        // }
-        // return pic;
-    // }
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case Kind.Circle: {
+                    pic.objs.push( this.#circle_ccw(obj) );
+                    break;
+                }
+                case Kind.Segment: {
+                    pic.objs.push( this.#segment_ccw(obj) );
+                    break;
+                }
+                case Kind.Rect: {
+                    pic.objs.push( this.#rect_ccw(obj) );
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
 
     // fliph(): GeoPic {
         // let pic = new Pic(this.w, this.h);
@@ -233,25 +235,25 @@ export default class Picture {
         return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 *scaleX, s.y2 * scaleY, s.strokeStyle);
     }
 
-    // #segment_cw(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 = -s.y1 + c + d;
-        // let y1 =  s.x1 + c - d;
-        // let x2 = -s.y2 + c + d;
-        // let y2 =  s.x2 + c - d;
-        // return new Segment(x1, y1, x2, y2, s.strokeStyle);
-    // }
+    #segment_cw(s: Segment): Segment {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x1 = -s.y1 + c + d;
+        let y1 =  s.x1 + c - d;
+        let x2 = -s.y2 + c + d;
+        let y2 =  s.x2 + c - d;
+        return new Segment(x1, y1, x2, y2, s.strokeStyle);
+    }
 
-    // #segment_ccw(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 =  s.y1 + c - d;
-        // let y1 = -s.x1 + c + d;
-        // let x2 =  s.y2 + c - d;
-        // let y2 = -s.x2 + c + d;
-        // return new Segment(x1, y1, x2, y2, s.strokeStyle);
-    // }
+    #segment_ccw(s: Segment): Segment {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x1 =  s.y1 + c - d;
+        let y1 = -s.x1 + c + d;
+        let x2 =  s.y2 + c - d;
+        let y2 = -s.x2 + c + d;
+        return new Segment(x1, y1, x2, y2, s.strokeStyle);
+    }
 
     // #segment_fliph(s: Segment): Segment {
         // let c = this.w / 2;
@@ -285,21 +287,21 @@ export default class Picture {
         // return new Segment(p.w * scale + s.x1 * t, s.y1, p.w * scale + s.x2 * t, s.y2, s.strokeStyle);
     // }
 
-    // #circle_cw(ci: GeoCircle): GeoCircle {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x = -ci.y + c + d;
-        // let y =  ci.x + c - d;
-        // return new Circle(x, y, ci.r, ci.strokeStyle, ci.fillStyle);
-    // }
+    #circle_cw(ci: Circle): Circle {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x = -ci.y + c + d;
+        let y =  ci.x + c - d;
+        return new Circle(x, y, ci.r, ci.strokeStyle, ci.fillStyle);
+    }
 
-    // #circle_ccw(ci: GeoCircle): GeoCircle {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x =  ci.y + c - d;
-        // let y = -ci.x + c + d;
-        // return new Circle(x, y, ci.r, ci.strokeStyle, ci.fillStyle);
-    // }
+    #circle_ccw(ci: Circle): Circle {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x =  ci.y + c - d;
+        let y = -ci.x + c + d;
+        return new Circle(x, y, ci.r, ci.strokeStyle, ci.fillStyle);
+    }
 
     // #circle_fliph(ci: GeoCircle): GeoCircle {
         // let c = this.w / 2;
@@ -331,29 +333,29 @@ export default class Picture {
         // return new Ellipse(p.w * scale + ci.x * t, ci.y, ci.r * t, ci.r, 0, ci.strokeStyle, ci.fillStyle);
     // }
 
-    // #rect_cw(r: GeoRect): GeoRect {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 = -r.y + c + d;
-        // let y1 =  r.x + c - d;
-        // let x2 = -(r.y + r.h) + c + d;
-        // let y2 =  (r.x + r.w) + c - d;
-        // let w = -r.h;
-        // let h = r.w;
-        // return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
-    // }
+    #rect_cw(r: Rect): Rect {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x1 = -r.y + c + d;
+        let y1 =  r.x + c - d;
+        let x2 = -(r.y + r.h) + c + d;
+        let y2 =  (r.x + r.w) + c - d;
+        let w = -r.h;
+        let h = r.w;
+        return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
+    }
 
-    // #rect_ccw(r: GeoRect): GeoRect {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 =  r.y + c - d;
-        // let y1 = -r.x + c + d;
-        // let x2 =  (r.y + r.h) + c - d;
-        // let y2 = -(r.x + r.w) + c + d;
-        // let w = r.h;
-        // let h = -r.w;
-        // return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
-    // }
+    #rect_ccw(r: Rect): Rect {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x1 =  r.y + c - d;
+        let y1 = -r.x + c + d;
+        let x2 =  (r.y + r.h) + c - d;
+        let y2 = -(r.x + r.w) + c + d;
+        let w = r.h;
+        let h = -r.w;
+        return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
+    }
 
     // #rect_fliph(r: GeoRect): GeoRect {
         // let c = this.w / 2;

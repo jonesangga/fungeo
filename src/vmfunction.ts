@@ -168,6 +168,30 @@ export let Paint = new FGCallable("Paint", _Paint, [
     },
 ]);
 
+function _Cw(n: number): void {
+    let pic = pop() as Picture;
+    pop();              // The function.
+    push(pic.cw());
+}
+export let Cw = new FGCallable("Cw", _Cw, [
+    {
+        input:  [Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _Ccw(n: number): void {
+    let pic = pop() as Picture;
+    pop();              // The function.
+    push(pic.ccw());
+}
+export let Ccw = new FGCallable("Ccw", _Ccw, [
+    {
+        input:  [Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
 function _Pic(n: number): void {
     let w = (pop() as FGNumber).value;
     let h = (pop() as FGNumber).value;

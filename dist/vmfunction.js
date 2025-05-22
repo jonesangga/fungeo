@@ -155,6 +155,28 @@ export let Paint = new FGCallable("Paint", _Paint, [
         output: 100,
     },
 ]);
+function _Cw(n) {
+    let pic = pop();
+    pop();
+    push(pic.cw());
+}
+export let Cw = new FGCallable("Cw", _Cw, [
+    {
+        input: [840],
+        output: 840,
+    },
+]);
+function _Ccw(n) {
+    let pic = pop();
+    pop();
+    push(pic.ccw());
+}
+export let Ccw = new FGCallable("Ccw", _Ccw, [
+    {
+        input: [840],
+        output: 840,
+    },
+]);
 function _Pic(n) {
     let w = pop().value;
     let h = pop().value;

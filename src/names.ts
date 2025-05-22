@@ -4,7 +4,8 @@
 
 import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type, Draw, Paint,
-         C, E, P, Pic, R, Seg, Midpoint } from "./vmfunction.js"
+         C, E, P, Pic, R, Seg, Midpoint,
+         Cw, Ccw } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import fish from "./data/fish.js"
@@ -42,6 +43,8 @@ export let nativeNames: Names = {
     "E":      { kind:  Kind.Callable, value: E },
     "P":      { kind:  Kind.Callable, value: P },
     "Pic":    { kind:  Kind.Callable, value: Pic },
+    "Cw":     { kind:  Kind.Callable, value: Cw },
+    "Ccw":    { kind:  Kind.Callable, value: Ccw },
     "R":      { kind:  Kind.Callable, value: R },
     "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
@@ -58,26 +61,6 @@ export let nativeNames: Names = {
     // // UI objects.
     // "page": { kind: Kind.Page, value: page },
 
-    // "cw": {
-        // kind:    Kind.Callable,
-        // call:    cw,
-        // version: [
-            // {
-                // input:  [Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
-    // "ccw": {
-        // kind:    Kind.Callable,
-        // call:    ccw,
-        // version: [
-            // {
-                // input:  [Kind.Pic],
-                // output: Kind.Pic,
-            // },
-        // ],
-    // },
     // "flipV": {
         // kind:    Kind.Callable,
         // call:    flipV,
