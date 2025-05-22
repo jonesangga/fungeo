@@ -9,7 +9,7 @@ export default class Ellipse {
     strokeStyle;
     fillStyle;
     kind = 750;
-    constructor(x, y, rx, ry, t, strokeStyle = color.black, fillStyle = color.nocolor) {
+    constructor(x, y, rx, ry, t = 0, strokeStyle = color.black, fillStyle = color.nocolor) {
         this.x = x;
         this.y = y;
         this.rx = rx;

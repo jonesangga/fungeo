@@ -1,4 +1,6 @@
 // @jonesangga, 2025, MIT License.
+//
+// TODO: Think about how to set the rotation.
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
@@ -12,7 +14,7 @@ export default class Ellipse {
         public y: number,
         public rx: number,
         public ry: number,
-        public t: number,
+        public t: number = 0,
         public strokeStyle: string = color.black,
         public fillStyle: string = color.nocolor
     ) {}

@@ -2,6 +2,7 @@
 
 #### 22-05-25
 
+- test Circle and Ellipse
 - add Ellipse
 - add Circle
 - rename frame to currFrame

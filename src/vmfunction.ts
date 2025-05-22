@@ -127,7 +127,7 @@ function _E(n: number): void {
     let y  = (pop() as FGNumber).value;
     let x  = (pop() as FGNumber).value;
     pop();              // The function.
-    let e = new Ellipse(x, y, rx, ry, 0);
+    let e = new Ellipse(x, y, rx, ry);
     push(e);
 }
 export let E = new FGCallable("E", _E, [
