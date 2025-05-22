@@ -177,6 +177,28 @@ export let Ccw = new FGCallable("Ccw", _Ccw, [
         output: 840,
     },
 ]);
+function _FlipH(n) {
+    let pic = pop();
+    pop();
+    push(pic.fliph());
+}
+export let FlipH = new FGCallable("FlipH", _FlipH, [
+    {
+        input: [840],
+        output: 840,
+    },
+]);
+function _FlipV(n) {
+    let pic = pop();
+    pop();
+    push(pic.flipv());
+}
+export let FlipV = new FGCallable("FlipV", _FlipV, [
+    {
+        input: [840],
+        output: 840,
+    },
+]);
 function _Pic(n) {
     let w = pop().value;
     let h = pop().value;

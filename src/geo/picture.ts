@@ -99,49 +99,49 @@ export default class Picture {
         return pic;
     }
 
-    // fliph(): GeoPic {
-        // let pic = new Pic(this.w, this.h);
+    fliph(): Picture {
+        let pic = new Picture(this.w, this.h);
 
-        // for (let obj of this.objs) {
-            // switch (obj.kind) {
-                // case Kind.Circle: {
-                    // pic.objs.push( this.#circle_fliph(obj) );
-                    // break;
-                // }
-                // case Kind.Segment: {
-                    // pic.objs.push( this.#segment_fliph(obj) );
-                    // break;
-                // }
-                // case Kind.Rect: {
-                    // pic.objs.push( this.#rect_fliph(obj) );
-                    // break;
-                // }
-            // }
-        // }
-        // return pic;
-    // }
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case Kind.Circle: {
+                    pic.objs.push( this.#circle_fliph(obj) );
+                    break;
+                }
+                case Kind.Segment: {
+                    pic.objs.push( this.#segment_fliph(obj) );
+                    break;
+                }
+                case Kind.Rect: {
+                    pic.objs.push( this.#rect_fliph(obj) );
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
 
-    // flipv(): Pic {
-        // let pic = new Pic(this.w, this.h);
+    flipv(): Picture {
+        let pic = new Picture(this.w, this.h);
 
-        // for (let obj of this.objs) {
-            // switch (obj.kind) {
-                // case Kind.Circle: {
-                    // pic.objs.push( this.#circle_flipv(obj) );
-                    // break;
-                // }
-                // case Kind.Segment: {
-                    // pic.objs.push( this.#segment_flipv(obj) );
-                    // break;
-                // }
-                // case Kind.Rect: {
-                    // pic.objs.push( this.#rect_flipv(obj) );
-                    // break;
-                // }
-            // }
-        // }
-        // return pic;
-    // }
+        for (let obj of this.objs) {
+            switch (obj.kind) {
+                case Kind.Circle: {
+                    pic.objs.push( this.#circle_flipv(obj) );
+                    break;
+                }
+                case Kind.Segment: {
+                    pic.objs.push( this.#segment_flipv(obj) );
+                    break;
+                }
+                case Kind.Rect: {
+                    pic.objs.push( this.#rect_flipv(obj) );
+                    break;
+                }
+            }
+        }
+        return pic;
+    }
 
     // static above(rtop: number, rbottom: number, top: GeoPic, bottom: GeoPic): GeoPic {
         // let pic = new Pic(top.w, top.h);
@@ -255,19 +255,19 @@ export default class Picture {
         return new Segment(x1, y1, x2, y2, s.strokeStyle);
     }
 
-    // #segment_fliph(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let x1 = -s.x1 + 2*c;
-        // let x2 = -s.x2 + 2*c;
-        // return new Segment(x1, s.y1, x2, s.y2, s.strokeStyle);
-    // }
+    #segment_fliph(s: Segment): Segment {
+        let c = this.w / 2;
+        let x1 = -s.x1 + 2*c;
+        let x2 = -s.x2 + 2*c;
+        return new Segment(x1, s.y1, x2, s.y2, s.strokeStyle);
+    }
 
-    // #segment_flipv(s: Segment): Segment {
-        // let d = this.h / 2;
-        // let y1 = -s.y1 + 2*d;
-        // let y2 = -s.y2 + 2*d;
-        // return new Segment(s.x1, y1, s.x2, y2, s.strokeStyle);
-    // }
+    #segment_flipv(s: Segment): Segment {
+        let d = this.h / 2;
+        let y1 = -s.y1 + 2*d;
+        let y2 = -s.y2 + 2*d;
+        return new Segment(s.x1, y1, s.x2, y2, s.strokeStyle);
+    }
 
     // static segment_top(scale: number, s: Segment): Segment {
         // return new Segment(s.x1, s.y1 * scale, s.x2, s.y2 * scale, s.strokeStyle);
@@ -303,17 +303,17 @@ export default class Picture {
         return new Circle(x, y, ci.r, ci.strokeStyle, ci.fillStyle);
     }
 
-    // #circle_fliph(ci: GeoCircle): GeoCircle {
-        // let c = this.w / 2;
-        // let x = -ci.x + 2*c;
-        // return new Circle(x, ci.y, ci.r, ci.strokeStyle, ci.fillStyle);
-    // }
+    #circle_fliph(ci: Circle): Circle {
+        let c = this.w / 2;
+        let x = -ci.x + 2*c;
+        return new Circle(x, ci.y, ci.r, ci.strokeStyle, ci.fillStyle);
+    }
 
-    // #circle_flipv(ci: GeoCircle): GeoCircle {
-        // let d = this.h / 2;
-        // let y = -ci.y + 2*d;
-        // return new Circle(ci.x, y, ci.r, ci.strokeStyle, ci.fillStyle);
-    // }
+    #circle_flipv(ci: Circle): Circle {
+        let d = this.h / 2;
+        let y = -ci.y + 2*d;
+        return new Circle(ci.x, y, ci.r, ci.strokeStyle, ci.fillStyle);
+    }
 
     // static circle_top(scale: number, ci: GeoCircle): GeoEllipse {
         // return new Ellipse(ci.x, ci.y * scale, ci.r, ci.r * scale, 0, ci.strokeStyle, ci.fillStyle);
@@ -357,21 +357,21 @@ export default class Picture {
         return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
     }
 
-    // #rect_fliph(r: GeoRect): GeoRect {
-        // let c = this.w / 2;
-        // let x1 = -r.x + 2*c;
-        // let x2 = -(r.x + r.w) + 2*c;
-        // let w = -r.w;
-        // return new Rect(x1, r.y, w, r.h, r.strokeStyle, r.fillStyle);
-    // }
+    #rect_fliph(r: Rect): Rect {
+        let c = this.w / 2;
+        let x1 = -r.x + 2*c;
+        let x2 = -(r.x + r.w) + 2*c;
+        let w = -r.w;
+        return new Rect(x1, r.y, w, r.h, r.strokeStyle, r.fillStyle);
+    }
 
-    // #rect_flipv(r: GeoRect): GeoRect {
-        // let d = this.h / 2;
-        // let y1 = -r.y + 2*d;
-        // let y2 = -(r.y + r.h) + 2*d;
-        // let h = -r.h;
-        // return new Rect(r.x, y1, r.w, h, r.strokeStyle, r.fillStyle);
-    // }
+    #rect_flipv(r: Rect): Rect {
+        let d = this.h / 2;
+        let y1 = -r.y + 2*d;
+        let y2 = -(r.y + r.h) + 2*d;
+        let h = -r.h;
+        return new Rect(r.x, y1, r.w, h, r.strokeStyle, r.fillStyle);
+    }
 
     // static rect_top(scale: number, r: GeoRect): GeoRect {
         // return new Rect(r.x, r.y * scale, r.w, r.h * scale, r.strokeStyle, r.fillStyle);

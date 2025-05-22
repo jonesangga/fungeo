@@ -192,6 +192,30 @@ export let Ccw = new FGCallable("Ccw", _Ccw, [
     },
 ]);
 
+function _FlipH(n: number): void {
+    let pic = pop() as Picture;
+    pop();              // The function.
+    push(pic.fliph());
+}
+export let FlipH = new FGCallable("FlipH", _FlipH, [
+    {
+        input:  [Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
+function _FlipV(n: number): void {
+    let pic = pop() as Picture;
+    pop();              // The function.
+    push(pic.flipv());
+}
+export let FlipV = new FGCallable("FlipV", _FlipV, [
+    {
+        input:  [Kind.Picture],
+        output: Kind.Picture,
+    },
+]);
+
 function _Pic(n: number): void {
     let w = (pop() as FGNumber).value;
     let h = (pop() as FGNumber).value;
