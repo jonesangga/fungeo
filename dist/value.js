@@ -9,6 +9,7 @@ export var Kind;
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
     Kind[Kind["Circle"] = 700] = "Circle";
+    Kind[Kind["Ellipse"] = 750] = "Ellipse";
     Kind[Kind["Point"] = 850] = "Point";
     Kind[Kind["Rect"] = 900] = "Rect";
     Kind[Kind["Segment"] = 1000] = "Segment";
@@ -22,6 +23,7 @@ export const KindName = {
     [400]: "Callable",
     [2000]: "Canvas",
     [700]: "Circle",
+    [750]: "Ellipse",
     [450]: "Function",
     [100]: "Nothing",
     [500]: "Number",
@@ -149,4 +151,4 @@ export class FGType {
         return false;
     }
 }
-export let geoKind = [700, 850, 900, 1000];
+export let geoKind = [700, 750, 850, 900, 1000];

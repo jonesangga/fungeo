@@ -2,6 +2,7 @@ import { pop, push, vm_output } from "./vm.js";
 import { geoKind, KindName, FGCallable, FGString } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
+import Ellipse from "./geo/ellipse.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
@@ -108,6 +109,21 @@ export let C = new FGCallable("C", _C, [
     {
         input: [850, 850],
         output: 700,
+    },
+]);
+function _E(n) {
+    let ry = pop().value;
+    let rx = pop().value;
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    let e = new Ellipse(x, y, rx, ry, 0);
+    push(e);
+}
+export let E = new FGCallable("E", _E, [
+    {
+        input: [500, 500, 500, 500],
+        output: 750,
     },
 ]);
 function _P(n) {
