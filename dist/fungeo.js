@@ -1,5 +1,5 @@
-import { repl } from "./ui/repl.js";
-import { canvas } from "./ui/canvas.js";
+import repl from "./ui/repl.js";
+import canvas from "./ui/canvas.js";
 import { compiler } from "./compiler.js";
 import { vm } from "./vm.js";
 repl.place(0, 400);

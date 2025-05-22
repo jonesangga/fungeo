@@ -1,8 +1,8 @@
 import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import Segment from "../../geo/segment.js";
 import { color } from "../../data/constant.js";
+import Segment from "../../geo/segment.js";
 describe("Segment", () => {
     it("create Segment with default color", () => {
         let seg = new Segment(10, 20, 30, 40);

@@ -3,7 +3,8 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value } from "./value.js"
-import { type Info, nativeNames, userNames } from "./names.js"
+import { type Info, nativeNames } from "./names.js"
+import { userNames } from "./vm.js"
 
 let numberType: Info = { kind: Kind.Number };
 
@@ -14,7 +15,7 @@ type TypeCheck = {
 let booleanT = { base: Kind.Boolean };
 let numberT  = { base: Kind.Number };
 let stringT  = { base: Kind.String };
-let nothingT  = { base: Kind.Nothing };
+let nothingT = { base: Kind.Nothing };
 let lastT = nothingT;
 
 function assertT(actual: TypeCheck, expect: TypeCheck, msg: string): void {
@@ -155,15 +156,18 @@ function endCompiler(): FGFunction {
 //--------------------------------------------------------------------
 // Compilation error functions.
 
-function error_at_current(message: string): void {
+// Error when dealing with current token.
+function error_at_current(message: string): never {
     error_at(currTok, message);
 }
 
-function error(message: string): void {
+// Error when dealing with previous token.
+function error(message: string): never {
     error_at(prevTok, message);
 }
 
-function error_at(token: Token, message: string): void {
+// The actual error handling function. It will throw error and stop the compilation.
+function error_at(token: Token, message: string): never {
     let result = token.line + "";
 
     if (token.kind === TokenT.EOF)

@@ -1,8 +1,11 @@
 import { FGBoolean, FGNumber } from "./value.js";
-import { nativeNames, userNames } from "./names.js";
+import { nativeNames } from "./names.js";
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
+let currFrame;
+let currChunk;
+export let userNames = {};
 export function push(value) {
     stack[stackTop++] = value;
 }
@@ -12,33 +15,33 @@ export function pop() {
 function peek(distance) {
     return stack[stackTop - 1 - distance];
 }
-function resetStack() {
+function stack_reset() {
     stackTop = 0;
 }
-export let output = "";
-export function vmoutput(str) {
+let output = "";
+export function vm_output(str) {
     output += str;
 }
-let frame;
 function error(msg) {
-    let line = frame.fn.chunk.lines[frame.ip - 1];
-    let name = frame.fn.name;
+    let line = currChunk.lines[currFrame.ip - 1];
+    let name = currFrame.fn.name;
     output += `${line}: in ${name}: ${msg}\n`;
-    resetStack();
+    stack_reset();
     throw new RuntimeError(output);
 }
 function read_byte() {
-    return frame.fn.chunk.code[frame.ip++];
+    return currChunk.code[currFrame.ip++];
 }
 function read_constant() {
-    return frame.fn.chunk.values[read_byte()];
+    return currChunk.values[read_byte()];
 }
 function read_string() {
     return read_constant().value;
 }
 function call(fn, argCount) {
-    frame = { fn, ip: 0, slots: stackTop - argCount };
-    frames.push(frame);
+    currFrame = { fn, ip: 0, slots: stackTop - argCount };
+    currChunk = fn.chunk;
+    frames.push(currFrame);
 }
 function compare(f) {
     let b = pop();
@@ -60,7 +63,7 @@ function run() {
                 str += " ]";
             }
             str += "\n";
-            let [result,] = frame.fn.chunk.disassemble_instr(frame.ip);
+            let [result,] = currChunk.disassemble_instr(currFrame.ip);
             console.log(str + result);
         }
         switch (read_byte()) {
@@ -163,18 +166,18 @@ function run() {
                     if (step >= 0) {
                         error("infinite loop");
                     }
-                    let nextOp = frame.fn.chunk.code[frame.ip];
+                    let nextOp = currChunk.code[currFrame.ip];
                     if (nextOp === 215)
-                        frame.fn.chunk.code[frame.ip] = 217;
+                        currChunk.code[currFrame.ip] = 217;
                     else
-                        frame.fn.chunk.code[frame.ip + 2] = 212;
+                        currChunk.code[currFrame.ip + 2] = 212;
                 }
                 break;
             }
             case 212: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos];
-                let b = stack[frame.slots + pos + 1];
+                let a = stack[currFrame.slots + pos];
+                let b = stack[currFrame.slots + pos + 1];
                 if (a.value > b.value)
                     push(new FGBoolean(true));
                 else
@@ -183,8 +186,8 @@ function run() {
             }
             case 217: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos];
-                let b = stack[frame.slots + pos + 1];
+                let a = stack[currFrame.slots + pos];
+                let b = stack[currFrame.slots + pos + 1];
                 if (a.value >= b.value)
                     push(new FGBoolean(true));
                 else
@@ -193,8 +196,8 @@ function run() {
             }
             case 210: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos];
-                let b = stack[frame.slots + pos + 1];
+                let a = stack[currFrame.slots + pos];
+                let b = stack[currFrame.slots + pos + 1];
                 if (a.value < b.value)
                     push(new FGBoolean(true));
                 else
@@ -203,8 +206,8 @@ function run() {
             }
             case 215: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos];
-                let b = stack[frame.slots + pos + 1];
+                let a = stack[currFrame.slots + pos];
+                let b = stack[currFrame.slots + pos + 1];
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -213,22 +216,22 @@ function run() {
             }
             case 595: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos];
-                let step = stack[frame.slots + pos + 2];
-                stack[frame.slots + pos] = new FGNumber(a.value + step.value);
+                let a = stack[currFrame.slots + pos];
+                let step = stack[currFrame.slots + pos + 2];
+                stack[currFrame.slots + pos] = new FGNumber(a.value + step.value);
                 break;
             }
             case 616:
             case 615: {
                 let offset = read_byte();
-                frame.ip += offset;
+                currFrame.ip += offset;
                 break;
             }
             case 620: {
                 let offset = read_byte();
                 let cond = peek(0);
                 if (!cond.value)
-                    frame.ip += offset;
+                    currFrame.ip += offset;
                 break;
             }
             case 800: {
@@ -267,8 +270,8 @@ function run() {
                 break;
             }
             case 395: {
-                console.log("frame.slots = " + frame.slots);
-                push(stack[frame.slots + read_byte()]);
+                console.log("currFrame.slots = " + currFrame.slots);
+                push(stack[currFrame.slots + read_byte()]);
                 break;
             }
             case 1410: {
@@ -284,12 +287,12 @@ function run() {
                 for (let i = 0; i < arg; i++) {
                     returns.push(pop());
                 }
-                stackTop = frame.slots - 1;
+                stackTop = currFrame.slots - 1;
                 for (let i = 0; i < arg; i++) {
                     push(returns.pop());
                 }
                 frames.pop();
-                frame = frames[frames.length - 1];
+                currFrame = frames[frames.length - 1];
                 break;
             }
             case 1290: {
@@ -304,19 +307,16 @@ function run() {
 let TESTING = true;
 class RuntimeError extends Error {
 }
-const vm = {
+export const vm = {
     init() {
-        resetStack();
-        for (let name in userNames) {
-            delete userNames[name];
-        }
+        stack_reset();
+        userNames = {};
     },
     interpret(fn) {
         TESTING = false;
         output = "";
         push(fn);
-        frame = { fn, ip: 0, slots: 1 };
-        frames.push(frame);
+        call(fn, 0);
         try {
             run();
             return { ok: true, value: output };
@@ -331,8 +331,7 @@ const vm = {
         TESTING = true;
         output = "";
         push(fn);
-        frame = { fn, ip: 0, slots: 1 };
-        frames.push(frame);
+        call(fn, 0);
     },
     step() {
         try {
@@ -346,4 +345,3 @@ const vm = {
         }
     }
 };
-export { vm };

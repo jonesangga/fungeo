@@ -2,10 +2,10 @@
 
 import 'global-jsdom/register'
 import { describe, it } from "node:test";
-import { equal, deepEqual } from "node:assert/strict";
+import { equal } from "node:assert/strict";
 import { Kind } from "../../value.js"
-import Point from "../../geo/point.js"
 import { color } from "../../data/constant.js"
+import Point from "../../geo/point.js"
 
 describe("Point", () => {
     it("create Point with default color", () => {

@@ -1,6 +1,6 @@
-import { pop, push, vmoutput } from "./vm.js"
+import { pop, push, vm_output } from "./vm.js"
 import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } from "./value.js"
-import { canvas } from "./ui/canvas.js"
+import canvas from "./ui/canvas.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
@@ -8,7 +8,7 @@ import Segment from "./geo/segment.js"
 function _Print(n: number): void {
     let value = pop();
     pop();              // The function.
-    vmoutput( value.to_str() + "\n" );
+    vm_output( value.to_str() + "\n" );
 }
 export let Print = new FGCallable("Print", _Print, [
     {
@@ -20,7 +20,7 @@ export let Print = new FGCallable("Print", _Print, [
 function _Printf(n: number): void {
     let value = pop();
     pop();              // The function.
-    vmoutput( value.to_str() );
+    vm_output( value.to_str() );
 }
 export let Printf = new FGCallable("Printf", _Printf, [
     {

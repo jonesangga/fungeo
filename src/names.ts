@@ -4,8 +4,8 @@
 
 import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type, Draw, P, R, Seg, Midpoint } from "./vmfunction.js"
-import { canvas } from "./ui/canvas.js"
-import { repl } from "./ui/repl.js"
+import canvas from "./ui/canvas.js"
+import repl from "./ui/repl.js"
 
 export type Info = {
     kind:     Kind,
@@ -14,25 +14,24 @@ export type Info = {
     drawn?:   boolean,
 };
 
-interface Names {
+export interface Names {
     [name: string]: Info;
 }
 
-export let userNames: Names = {};
-
 export let nativeNames: Names = {
+    // UI objects.
     "canvas": { kind:  Kind.Canvas, value: canvas },
-    "repl": { kind:  Kind.Repl, value: repl },
+    "repl":   { kind:  Kind.Repl, value: repl },
 
-    "Print": { kind:  Kind.Callable, value: Print },
+    "Print":  { kind:  Kind.Callable, value: Print },
     "Printf": { kind:  Kind.Callable, value: Printf },
-    "Show": { kind:  Kind.Callable, value: Show },
-    "Padl": { kind:  Kind.Callable, value: Padl },
-    "Type": { kind:  Kind.Callable, value: Type },
-    "Draw": { kind:  Kind.Callable, value: Draw },
-    "P": { kind:  Kind.Callable, value: P },
-    "R": { kind:  Kind.Callable, value: R },
-    "Seg": { kind:  Kind.Callable, value: Seg },
+    "Show":   { kind:  Kind.Callable, value: Show },
+    "Padl":   { kind:  Kind.Callable, value: Padl },
+    "Type":   { kind:  Kind.Callable, value: Type },
+    "Draw":   { kind:  Kind.Callable, value: Draw },
+    "P":      { kind:  Kind.Callable, value: P },
+    "R":      { kind:  Kind.Callable, value: R },
+    "Seg":    { kind:  Kind.Callable, value: Seg },
     "Midpoint": { kind:  Kind.Callable, value: Midpoint },
 
     // // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
@@ -51,9 +50,7 @@ export let nativeNames: Names = {
     // "PINK":   { kind: Kind.Color, value: PINK },
 
     // // UI objects.
-    // "canvas": { kind: Kind.Canvas, value: canvas },
     // "page": { kind: Kind.Page, value: page },
-    // "repl": { kind: Kind.Repl, value: repl },
 
     // "cw": {
         // kind:    Kind.Callable,
@@ -338,20 +335,6 @@ export let nativeNames: Names = {
             // {
                 // input:  [Kind.Point, Kind.Point, Kind.Point],
                 // output: Kind.Ellipse,
-            // },
-        // ],
-    // },
-    // "R": {
-        // kind:    Kind.Callable,
-        // call:    R,
-        // version: [
-            // {
-                // input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
-                // output: Kind.Rect,
-            // },
-            // {
-                // input:  [Kind.Point, Kind.Point],
-                // output: Kind.Rect,
             // },
         // ],
     // },

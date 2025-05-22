@@ -1,7 +1,8 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
 import { KindName, FGBoolean, FGNumber, FGString, FGFunction } from "./value.js";
-import { nativeNames, userNames } from "./names.js";
+import { nativeNames } from "./names.js";
+import { userNames } from "./vm.js";
 let numberType = { kind: 500 };
 let booleanT = { base: 300 };
 let numberT = { base: 500 };

@@ -1,5 +1,5 @@
-import { repl } from "./ui/repl.js"
-import { canvas } from "./ui/canvas.js"
+import repl from "./ui/repl.js"
+import canvas from "./ui/canvas.js"
 import { scanner } from "./scanner.js"
 import { compiler } from "./compiler.js"
 import { Chunk } from "./chunk.js"

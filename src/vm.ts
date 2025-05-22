@@ -1,11 +1,21 @@
-import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
-import { nativeNames, userNames } from "./names.js"
-import { compiler } from "./compiler.js"
+// @jonesangga, 12-04-2025, MIT License.
 
+import { Op, Chunk } from "./chunk.js"
+import { FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
+import { Names, nativeNames } from "./names.js"
+
+// These are exported only for vm.test.
 export let stack: Value[] = [];
 export let stackTop = 0;
+
 let frames: CallFrame[] = [];
+let currFrame: CallFrame;
+let currChunk: Chunk;
+
+export let userNames: Names = {};
+
+//--------------------------------------------------------------------
+// Stack functions.
 
 export function push(value: Value): void {
     stack[stackTop++] = value;
@@ -19,48 +29,47 @@ function peek(distance: number): Value {
     return stack[stackTop - 1 - distance];
 }
 
-function resetStack(): void {
+function stack_reset(): void {
     stackTop = 0;
 }
 
-export let output = "";
-export function vmoutput(str: string): void {
+//--------------------------------------------------------------------
+
+let output = "";
+export function vm_output(str: string): void {
     output += str;
 }
 
-let frame: CallFrame;
-
+// Throw error and stop the executing bytecode.
 // TODO: display call stack.
-function error(msg: string): void {
-    // let line = chunk.lines[ip - 1];
-    let line = frame.fn.chunk.lines[frame.ip - 1];
-    let name = frame.fn.name;
+function error(msg: string): never {
+    let line = currChunk.lines[currFrame.ip - 1];
+    let name = currFrame.fn.name;
     output += `${ line }: in ${ name }: ${ msg }\n`;
-    resetStack();
+    stack_reset();
 
     throw new RuntimeError(output);
 }
 
 function read_byte(): number {
-    // return chunk.code[ip++];
-    return frame.fn.chunk.code[frame.ip++];
+    return currChunk.code[currFrame.ip++];
 }
 
 function read_constant(): Value {
-    // return chunk.values[read_byte()];
-    return frame.fn.chunk.values[read_byte()];
+    return currChunk.values[read_byte()];
 }
 
 function read_string(): string {
     return (read_constant() as FGString).value;
 }
 
-type NumStr = number | string;
-
 function call(fn: FGFunction, argCount: number) {
-    frame = { fn, ip: 0, slots: stackTop - argCount };
-    frames.push(frame);
+    currFrame = { fn, ip: 0, slots: stackTop - argCount };
+    currChunk = fn.chunk;
+    frames.push(currFrame);
 }
+
+type NumStr = number | string;
 
 function compare(
     f: (a: NumStr, b: NumStr) => boolean
@@ -87,7 +96,7 @@ function run(): boolean {
                 str += " ]";
             }
             str += "\n";
-            let [result, ] = frame.fn.chunk.disassemble_instr(frame.ip);
+            let [result, ] = currChunk.disassemble_instr(currFrame.ip);
             console.log(str + result);
         }
 
@@ -195,11 +204,11 @@ function run(): boolean {
                     if (step >= 0) {
                         error("infinite loop");
                     }
-                    let nextOp = frame.fn.chunk.code[frame.ip];
+                    let nextOp = currChunk.code[currFrame.ip];
                     if (nextOp === Op.CkInc)
-                        frame.fn.chunk.code[frame.ip] = Op.CkIncD;
+                        currChunk.code[currFrame.ip] = Op.CkIncD;
                     else
-                        frame.fn.chunk.code[frame.ip + 2] = Op.CkExcD;  // Remember there is Jmp after this.
+                        currChunk.code[currFrame.ip + 2] = Op.CkExcD;  // Remember there is Jmp after this.
                 }
                 break;
             }
@@ -207,8 +216,8 @@ function run(): boolean {
             // TODO: Clean up these 4 cases.
             case Op.CkExcD: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos] as FGNumber;
-                let b = stack[frame.slots + pos + 1] as FGNumber;
+                let a = stack[currFrame.slots + pos] as FGNumber;
+                let b = stack[currFrame.slots + pos + 1] as FGNumber;
                 if (a.value > b.value)
                     push(new FGBoolean(true));
                 else
@@ -217,8 +226,8 @@ function run(): boolean {
             }
             case Op.CkIncD: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos] as FGNumber;
-                let b = stack[frame.slots + pos + 1] as FGNumber;
+                let a = stack[currFrame.slots + pos] as FGNumber;
+                let b = stack[currFrame.slots + pos + 1] as FGNumber;
                 if (a.value >= b.value)
                     push(new FGBoolean(true));
                 else
@@ -227,8 +236,8 @@ function run(): boolean {
             }
             case Op.CkExc: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos] as FGNumber;
-                let b = stack[frame.slots + pos + 1] as FGNumber;
+                let a = stack[currFrame.slots + pos] as FGNumber;
+                let b = stack[currFrame.slots + pos + 1] as FGNumber;
                 if (a.value < b.value)
                     push(new FGBoolean(true));
                 else
@@ -237,8 +246,8 @@ function run(): boolean {
             }
             case Op.CkInc: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos] as FGNumber;
-                let b = stack[frame.slots + pos + 1] as FGNumber;
+                let a = stack[currFrame.slots + pos] as FGNumber;
+                let b = stack[currFrame.slots + pos + 1] as FGNumber;
                 if (a.value <= b.value)
                     push(new FGBoolean(true));
                 else
@@ -248,16 +257,16 @@ function run(): boolean {
 
             case Op.Inc: {
                 let pos = read_byte();
-                let a = stack[frame.slots + pos] as FGNumber;
-                let step = stack[frame.slots + pos+2] as FGNumber;
-                stack[frame.slots + pos] = new FGNumber(a.value + step.value);
+                let a = stack[currFrame.slots + pos] as FGNumber;
+                let step = stack[currFrame.slots + pos+2] as FGNumber;
+                stack[currFrame.slots + pos] = new FGNumber(a.value + step.value);
                 break;
             }
 
             case Op.JmpBack:
             case Op.Jmp: {
                 let offset = read_byte();
-                frame.ip += offset;
+                currFrame.ip += offset;
                 break;
             }
 
@@ -265,7 +274,7 @@ function run(): boolean {
                 let offset = read_byte();
                 let cond = peek(0) as FGBoolean;
                 if (!cond.value)
-                    frame.ip += offset;
+                    currFrame.ip += offset;
                 break;
             }
 
@@ -311,9 +320,8 @@ function run(): boolean {
             }
 
             case Op.GetLoc: {
-                // push(stack[ read_byte() ]);
-                console.log("frame.slots = " + frame.slots);
-                push(stack[frame.slots + read_byte() ]);
+                console.log("currFrame.slots = " + currFrame.slots);
+                push(stack[currFrame.slots + read_byte() ]);
                 break;
             }
 
@@ -335,12 +343,12 @@ function run(): boolean {
                     returns.push(pop());
                 }
                 // TODO: think how about function that doesn't return value?
-                stackTop = frame.slots - 1;
+                stackTop = currFrame.slots - 1;
                 for (let i = 0; i < arg; i++) {
                     push(returns.pop() as Value);
                 }
                 frames.pop();
-                frame = frames[frames.length - 1];
+                currFrame = frames[frames.length - 1];
                 break;
             }
 
@@ -356,8 +364,8 @@ function run(): boolean {
 }
 
 interface CallFrame {
-    fn: FGFunction;
-    ip: number;
+    fn:    FGFunction;
+    ip:    number;
     slots: number;   // First slot of stack this frame can use.
 }
 
@@ -369,12 +377,10 @@ type Result<T, E = Error> =
     | { ok: true, value: T }
     | { ok: false, error: E };
 
-const vm = {
+export const vm = {
     init(): void {
-        resetStack();
-        for (let name in userNames) {
-            delete userNames[name];
-        }
+        stack_reset();
+        userNames = {};
     },
 
     interpret(fn: FGFunction): Result<string, Error> {
@@ -382,8 +388,7 @@ const vm = {
         output = "";
 
         push(fn);
-        frame = { fn, ip: 0, slots: 1 };
-        frames.push(frame);
+        call(fn, 0);
 
         try {
             run();
@@ -399,8 +404,7 @@ const vm = {
         TESTING = true;
         output = "";
         push(fn);
-        frame = { fn, ip: 0, slots: 1 };
-        frames.push(frame);
+        call(fn, 0);
     },
 
     step(): Result<string, Error> {
@@ -414,5 +418,3 @@ const vm = {
         }
     }
 };
-
-export { vm };

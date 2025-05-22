@@ -21,7 +21,7 @@ canvasElem.style.top        = "0px";
 canvasElem.style.left       = "0px";
 canvasElem.style.border     = "1px solid black";
 
-export const canvas: Canvas = {
+const canvas: Canvas = {
     kind: Kind.Canvas,
 
     clear(): void {
@@ -50,3 +50,5 @@ export const canvas: Canvas = {
         canvasElem.style.top  = y + "px";
     }
 };
+
+export default canvas;

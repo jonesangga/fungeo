@@ -36,7 +36,9 @@ export class FGBoolean {
     constructor(value) {
         this.value = value;
     }
-    to_str() { return this.value.toString(); }
+    to_str() {
+        return this.value.toString();
+    }
     equal(other) {
         if (this.kind !== other.kind)
             return false;
@@ -58,7 +60,9 @@ export class FGCallable {
     to_str() {
         return `<fn ${this.name}>`;
     }
-    equal(other) { return false; }
+    equal(other) {
+        return false;
+    }
 }
 export class FGFunction {
     name;
@@ -73,7 +77,9 @@ export class FGFunction {
     to_str() {
         return `<fn ${this.name}>`;
     }
-    equal(other) { return false; }
+    equal(other) {
+        return false;
+    }
 }
 export class FGNumber {
     value;
@@ -81,7 +87,9 @@ export class FGNumber {
     constructor(value) {
         this.value = value;
     }
-    to_str() { return this.value + ""; }
+    to_str() {
+        return this.value + "";
+    }
     add(other) {
         return new FGNumber(this.value + other.value);
     }
@@ -108,7 +116,9 @@ export class FGString {
     constructor(value) {
         this.value = value;
     }
-    to_str() { return this.value; }
+    to_str() {
+        return this.value;
+    }
     add(other) {
         return new FGString(this.value + other.value);
     }
@@ -126,7 +136,9 @@ export class FGType {
     constructor(base) {
         this.base = base;
     }
-    to_str() { return KindName[this.base]; }
+    to_str() {
+        return KindName[this.base];
+    }
     equal(other) {
         if (this.kind !== other.kind)
             return false;

@@ -145,6 +145,7 @@ function match(expected: string): boolean {
     return true;
 }
 
+// Make token other than String or Error.
 function token_lexeme(kind: TokenT): Token {
     let lexeme = source.slice(start, current);
     return { kind, lexeme, line };

@@ -13,7 +13,7 @@ canvasElem.style.position = "absolute";
 canvasElem.style.top = "0px";
 canvasElem.style.left = "0px";
 canvasElem.style.border = "1px solid black";
-export const canvas = {
+const canvas = {
     kind: 2000,
     clear() {
         c.fillStyle = "#fff";
@@ -38,3 +38,4 @@ export const canvas = {
         canvasElem.style.top = y + "px";
     }
 };
+export default canvas;
