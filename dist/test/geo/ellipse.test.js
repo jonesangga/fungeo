@@ -1,4 +1,3 @@
-import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
 import { color } from "../../data/constant.js";

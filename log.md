@@ -2,6 +2,7 @@
 
 #### 23-05-25
 
+- move call to jsdom to one file
 - change FGCallable to FGCallNative
 - change all FGFunction to FGCallUser
 - make FGCallUser

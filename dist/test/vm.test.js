@@ -1,4 +1,3 @@
-import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { deepEqual, equal, fail } from "node:assert/strict";
 import { FGBoolean, FGNumber, FGString } from "../value.js";

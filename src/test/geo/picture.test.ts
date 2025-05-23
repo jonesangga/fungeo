@@ -1,6 +1,5 @@
 // @jonesangga, 05-05-2025, MIT License.
 
-import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { Kind } from "../../value.js"
