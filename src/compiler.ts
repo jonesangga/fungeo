@@ -4,7 +4,7 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value } from "./value.js"
+import { CallT, Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, FGCallUser, type Value } from "./value.js"
 import { type Info, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
 
@@ -110,13 +110,14 @@ interface Local {
 // TODO: what about Procedure?
 const enum FnT {
     Function,
+    Procedure,
     Top,
 }
 
 interface Compiler {
     enclosing:  Compiler | null;
     kind:       FnT,
-    fn:         FGFunction,
+    fn:         FGCallUser,
     locals:     Local[];
     scopeDepth: number;
 }
@@ -134,8 +135,9 @@ function currentChunk(): Chunk {
 function begin_compiler(kind: FnT, name: string): void {
     let compiler: Compiler = {
         enclosing: current,
-        fn: new FGFunction(
+        fn: new FGCallUser(
             name,
+            CallT.Function,
             [{
                 input: [],
                 output: Kind.Nothing
@@ -149,7 +151,7 @@ function begin_compiler(kind: FnT, name: string): void {
     current = compiler;
 }
 
-function endCompiler(): FGFunction {
+function endCompiler(): FGCallUser {
     emitReturn();
     let fn = current.fn;
     // console.log( currentChunk().disassemble() );
@@ -537,7 +539,7 @@ function fn(): void {
     let t = parse_type();
 
     current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: Kind.Callable, value: current.fn };
+    tempNames[name] = { kind: Kind.CallUser, value: current.fn };
 
     consume(TokenT.Eq, "expect '=' before fn body");
 
@@ -958,7 +960,7 @@ type Result<T, E = Error> =
     | { ok: false, error: E };
 
 export const compiler = {
-    compile(source: string): Result<FGFunction, Error> {
+    compile(source: string): Result<FGCallUser, Error> {
         tempNames = {};         // Reset temporary name table.
         prevTok = invalidTok;
         currTok = invalidTok;

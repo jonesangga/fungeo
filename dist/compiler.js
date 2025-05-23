@@ -1,6 +1,6 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { KindName, FGBoolean, FGNumber, FGString, FGFunction } from "./value.js";
+import { KindName, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
 let numberType = { kind: 500 };
@@ -81,7 +81,8 @@ const rules = {
 var FnT;
 (function (FnT) {
     FnT[FnT["Function"] = 0] = "Function";
-    FnT[FnT["Top"] = 1] = "Top";
+    FnT[FnT["Procedure"] = 1] = "Procedure";
+    FnT[FnT["Top"] = 2] = "Top";
 })(FnT || (FnT = {}));
 let current;
 let invalidTok = { kind: 2100, line: -1, lexeme: "" };
@@ -93,7 +94,7 @@ function currentChunk() {
 function begin_compiler(kind, name) {
     let compiler = {
         enclosing: current,
-        fn: new FGFunction(name, [{
+        fn: new FGCallUser(name, 0, [{
                 input: [],
                 output: 100
             }], new Chunk(name)),
@@ -406,7 +407,7 @@ function fn() {
     consume(1195, "expect `->` after list of params");
     let t = parse_type();
     current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: 400, value: current.fn };
+    tempNames[name] = { kind: 450, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();
     emitBytes(1300, 1);
@@ -762,7 +763,7 @@ export const compiler = {
         currTok = invalidTok;
         lastT = nothingT;
         scanner.init(source);
-        begin_compiler(1, "TOP");
+        begin_compiler(2, "TOP");
         try {
             advance();
             while (!match(2100))

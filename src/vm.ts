@@ -3,7 +3,7 @@
 // TODO: Remove Op.Clear asap.
 
 import { Op, Chunk } from "./chunk.js"
-import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallable, FGFunction, type Value, type Comparable } from "./value.js"
+import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallable, FGCallUser, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
 import canvas from "./ui/canvas.js"
 
@@ -68,7 +68,7 @@ function read_string(): string {
     return (read_constant() as FGString).value;
 }
 
-function call(fn: FGFunction, argCount: number) {
+function call(fn: FGCallUser, argCount: number) {
     currFrame = { fn, ip: 0, slots: stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
@@ -130,7 +130,7 @@ function run(): boolean {
             case Op.CallUsr: {
                 let arity = read_byte();
                 let ver = read_byte();
-                let fn = peek(arity) as FGFunction;
+                let fn = peek(arity) as FGCallUser;
                 call(fn, arity);
                 break;
             }
@@ -376,7 +376,7 @@ function run(): boolean {
 }
 
 interface CallFrame {
-    fn:    FGFunction;
+    fn:    FGCallUser,
     ip:    number;
     slots: number;   // First slot of stack this frame can use.
 }
@@ -395,7 +395,7 @@ export const vm = {
         userNames = {};
     },
 
-    interpret(fn: FGFunction): Result<string, Error> {
+    interpret(fn: FGCallUser): Result<string, Error> {
         TESTING = false;
         output = "";
 
@@ -412,7 +412,7 @@ export const vm = {
         }
     },
 
-    set(fn: FGFunction): void {
+    set(fn: FGCallUser): void {
         TESTING = true;
         output = "";
         push(fn);

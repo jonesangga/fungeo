@@ -2,7 +2,7 @@ import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { OpName, Chunk } from "../chunk.js";
-import { FGNumber, FGString, FGFunction } from "../value.js";
+import { FGNumber, FGString, FGCallUser } from "../value.js";
 import { nativeNames } from "../names.js";
 describe("chunk", () => {
     it("constructor()", () => {
@@ -144,7 +144,7 @@ describe("chunk disassemble op calls", () => {
     });
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
-        let fn = new FGFunction("dummy", [], new Chunk("dummy chunk"));
+        let fn = new FGCallUser("dummy", 0, [], new Chunk("dummy chunk"));
         let arity = 1;
         let ver = 1;
         chunk.write(205, 123);

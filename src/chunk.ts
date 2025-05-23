@@ -2,7 +2,7 @@
 //
 // TODO: Remove Op.Clear asap.
 
-import { Kind, KindName, FGFunction, type Value } from "./value.js"
+import { Kind, KindName, type Value } from "./value.js"
 
 export const enum Op {
     Add     = 100,

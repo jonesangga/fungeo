@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
-import { FGBoolean, FGCallable, FGFunction, FGNumber, FGString } from "../value.js";
+import { FGBoolean, FGCallable, FGCallUser, FGNumber, FGString } from "../value.js";
 import { Chunk } from "../chunk.js";
 describe("value", () => {
     it("FGBoolean", () => {
@@ -22,8 +22,8 @@ describe("value", () => {
         deepEqual(b.value, f);
         equal(b.to_str(), "<fn f>");
     });
-    it("FGFunction", () => {
-        let b = new FGFunction("testfn", [
+    it("FGCallUser", () => {
+        let b = new FGCallUser("testfn", 0, [
             {
                 input: [500],
                 output: 500,
@@ -31,6 +31,7 @@ describe("value", () => {
         ], new Chunk(""));
         equal(b.kind, 450);
         equal(b.name, "testfn");
+        equal(b.callType, 0);
         equal(b.to_str(), "<fn testfn>");
     });
     it("FGNumber", () => {

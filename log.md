@@ -1,5 +1,13 @@
 # Log
 
+#### 23-05-25
+
+- change all FGFunction to FGCallUser
+- make FGCallUser
+- add Bool type
+- fix bug: in Ret forgot to update currChunk
+- basic Picture test
+
 #### 22-05-25
 
 - create Map funciton

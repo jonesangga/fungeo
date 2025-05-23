@@ -4,7 +4,7 @@ export var Kind;
     Kind[Kind["Any"] = 200] = "Any";
     Kind[Kind["Boolean"] = 300] = "Boolean";
     Kind[Kind["Callable"] = 400] = "Callable";
-    Kind[Kind["Function"] = 450] = "Function";
+    Kind[Kind["CallUser"] = 450] = "CallUser";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
@@ -22,10 +22,10 @@ export const KindName = {
     [200]: "Any",
     [300]: "Boolean",
     [400]: "Callable",
+    [450]: "CallUser",
     [2000]: "Canvas",
     [700]: "Circle",
     [750]: "Ellipse",
-    [450]: "Function",
     [100]: "Nothing",
     [500]: "Number",
     [840]: "Picture",
@@ -70,18 +70,29 @@ export class FGCallable {
         return false;
     }
 }
-export class FGFunction {
+export var CallT;
+(function (CallT) {
+    CallT[CallT["Function"] = 0] = "Function";
+    CallT[CallT["Procedure"] = 1] = "Procedure";
+})(CallT || (CallT = {}));
+;
+export class FGCallUser {
     name;
+    callType;
     version;
     chunk;
     kind = 450;
-    constructor(name, version, chunk) {
+    constructor(name, callType, version, chunk) {
         this.name = name;
+        this.callType = callType;
         this.version = version;
         this.chunk = chunk;
     }
     to_str() {
-        return `<fn ${this.name}>`;
+        if (this.callType === 0)
+            return `<fn ${this.name}>`;
+        else
+            return `<proc ${this.name}>`;
     }
     equal(other) {
         return false;

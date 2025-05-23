@@ -6,7 +6,7 @@ import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
-import { Kind, FGNumber, FGString, FGFunction, FGCallable } from "../value.js"
+import { Kind, CallT, FGNumber, FGString, FGCallable, FGCallUser } from "../value.js"
 import { nativeNames } from "../names.js"
 
 describe("chunk", () => {
@@ -179,7 +179,7 @@ describe("chunk disassemble op calls", () => {
 
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
-        let fn = new FGFunction("dummy", [], new Chunk("dummy chunk"));
+        let fn = new FGCallUser("dummy", CallT.Function, [], new Chunk("dummy chunk"));
         let arity = 1;
         let ver = 1;
         chunk.write(Op.CallUsr, 123);

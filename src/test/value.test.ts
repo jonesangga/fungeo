@@ -1,11 +1,11 @@
 // @jonesangga, 05-05-2025, MIT License.
 //
 // TODO: test FGType
-//       test version in FGCallable and FGFunction
+//       test version in FGCallable and FGCallUser
 
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
-import { Kind, FGBoolean, FGCallable, FGFunction, FGNumber, FGString } from "../value.js"
+import { Kind, CallT, FGBoolean, FGCallable, FGCallUser, FGNumber, FGString } from "../value.js"
 import { Chunk } from "../chunk.js"
 
 describe("value", () => {
@@ -33,16 +33,17 @@ describe("value", () => {
         equal(b.to_str(), "<fn f>");
     });
 
-    it("FGFunction", () => {
-        let b = new FGFunction("testfn", [
+    it("FGCallUser", () => {
+        let b = new FGCallUser("testfn", CallT.Function, [
             {
                 input: [Kind.Number],
                 output: Kind.Number,
             }
         ], new Chunk(""));
 
-        equal(b.kind, Kind.Function);
+        equal(b.kind, Kind.CallUser);
         equal(b.name, "testfn");
+        equal(b.callType, CallT.Function);
         equal(b.to_str(), "<fn testfn>");
     });
 

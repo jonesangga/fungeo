@@ -15,7 +15,7 @@ export const enum Kind {
     Any      = 200,
     Boolean  = 300,     // Literal.
     Callable = 400,
-    Function = 450,
+    CallUser = 450,
     Number   = 500,
     String   = 600,
     Type     = 650,
@@ -35,10 +35,10 @@ export const KindName: {
     [Kind.Any]: "Any",
     [Kind.Boolean]: "Boolean",
     [Kind.Callable]: "Callable",
+    [Kind.CallUser]: "CallUser",
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
     [Kind.Ellipse]: "Ellipse",
-    [Kind.Function]: "Function",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Picture]: "Picture",
@@ -111,17 +111,26 @@ export class FGCallable implements FG {
     }
 }
 
-export class FGFunction implements FG {
-    kind: Kind.Function = Kind.Function;
+export const enum CallT {
+    Function,
+    Procedure,
+};
+
+export class FGCallUser implements FG {
+    kind: Kind.CallUser = Kind.CallUser;
 
     constructor(
         public name: string,
+        public callType: CallT,
         public version: Version[],
         public chunk: Chunk,
     ) {}
 
     to_str(): string {
-        return `<fn ${ this.name }>`;
+        if (this.callType === CallT.Function)
+            return `<fn ${ this.name }>`;
+        else
+            return `<proc ${ this.name }>`;
     }
 
     equal(other: FG) {
@@ -198,7 +207,7 @@ export class FGType implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallable | FGFunction | FGNumber | FGString | FGType;
+type LitObj = FGBoolean | FGCallable | FGCallUser | FGNumber | FGString | FGType;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;
