@@ -4,7 +4,7 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { CallT, Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallable, FGCallUser, type Value } from "./value.js"
+import { CallT, Kind, KindName, type Version, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
 import { type Info, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
 
@@ -550,7 +550,7 @@ function fn(): void {
     let fn = endCompiler();
     emitConstant(fn);
     emitBytes(Op.Set, index);
-    emitByte(Kind.Callable);
+    emitByte(Kind.CallNative);
 }
 
 function proc(): void {
@@ -567,7 +567,7 @@ function proc(): void {
     console.log(current.fn);
 
     current.fn.version[0].output = Kind.Nothing;
-    tempNames[name] = { kind: Kind.Callable, value: current.fn };
+    tempNames[name] = { kind: Kind.CallNative, value: current.fn };
 
     consume(TokenT.LBrace, "expect '{' before proc body");
 
@@ -579,7 +579,7 @@ function proc(): void {
     let fn = endCompiler();
     emitConstant(fn);
     emitBytes(Op.Set, index);
-    emitByte(Kind.Callable);
+    emitByte(Kind.CallNative);
 }
 
 function procBody(): void {
@@ -595,19 +595,19 @@ function get_name(name: string): void {
         lastT = {base: current.locals[arg].type.kind};
     }
     else if (Object.hasOwn(nativeNames, name)) {
-        if (nativeNames[name].kind === Kind.Callable)
+        if (nativeNames[name].kind === Kind.CallNative)
             global_callable(name, nativeNames, true);
         else
             global_non_callable(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        if (userNames[name].kind === Kind.Callable)
+        if (userNames[name].kind === Kind.CallNative)
             global_callable(name, userNames, false);
         else
             global_non_callable(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        if (tempNames[name].kind === Kind.Callable)
+        if (tempNames[name].kind === Kind.CallNative)
             global_callable(name, tempNames, false);
         else
             global_non_callable(tempNames, name, false);
@@ -643,9 +643,9 @@ function global_callable(name_: string, table: any, native: boolean): void {
     canParseArgument = match(TokenT.Dollar);
 
     let name    = table[name_];
-    emitConstant(name.value as FGCallable);
+    emitConstant(name.value as FGCallNative);
 
-    let version = (name.value as FGCallable).version;
+    let version = (name.value as FGCallNative).version;
     let inputVersion: (Kind[] | Kind)[] = [];
     let gotTypes: Kind[]     = [];
 

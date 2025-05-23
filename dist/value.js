@@ -3,7 +3,7 @@ export var Kind;
     Kind[Kind["Nothing"] = 100] = "Nothing";
     Kind[Kind["Any"] = 200] = "Any";
     Kind[Kind["Boolean"] = 300] = "Boolean";
-    Kind[Kind["Callable"] = 400] = "Callable";
+    Kind[Kind["CallNative"] = 400] = "CallNative";
     Kind[Kind["CallUser"] = 450] = "CallUser";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
@@ -21,7 +21,7 @@ export var Kind;
 export const KindName = {
     [200]: "Any",
     [300]: "Boolean",
-    [400]: "Callable",
+    [400]: "CallNative",
     [450]: "CallUser",
     [2000]: "Canvas",
     [700]: "Circle",
@@ -53,13 +53,21 @@ export class FGBoolean {
         return false;
     }
 }
-export class FGCallable {
+export var CallT;
+(function (CallT) {
+    CallT[CallT["Function"] = 0] = "Function";
+    CallT[CallT["Procedure"] = 1] = "Procedure";
+})(CallT || (CallT = {}));
+;
+export class FGCallNative {
     name;
+    callType;
     value;
     version;
     kind = 400;
-    constructor(name, value, version) {
+    constructor(name, callType, value, version) {
         this.name = name;
+        this.callType = callType;
         this.value = value;
         this.version = version;
     }
@@ -70,12 +78,6 @@ export class FGCallable {
         return false;
     }
 }
-export var CallT;
-(function (CallT) {
-    CallT[CallT["Function"] = 0] = "Function";
-    CallT[CallT["Procedure"] = 1] = "Procedure";
-})(CallT || (CallT = {}));
-;
 export class FGCallUser {
     name;
     callType;

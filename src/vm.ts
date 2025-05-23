@@ -3,7 +3,7 @@
 // TODO: Remove Op.Clear asap.
 
 import { Op, Chunk } from "./chunk.js"
-import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallable, FGCallUser, type Value, type Comparable } from "./value.js"
+import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
 import canvas from "./ui/canvas.js"
 
@@ -123,7 +123,7 @@ function run(): boolean {
             case Op.CallNat: {
                 let arity = read_byte();
                 let ver = read_byte();
-                let fn = peek(arity) as FGCallable;
+                let fn = peek(arity) as FGCallNative;
                 fn.value(ver);
                 break;
             }

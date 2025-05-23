@@ -14,7 +14,7 @@ export const enum Kind {
     Nothing  = 100,
     Any      = 200,
     Boolean  = 300,     // Literal.
-    Callable = 400,
+    CallNative = 400,
     CallUser = 450,
     Number   = 500,
     String   = 600,
@@ -34,7 +34,7 @@ export const KindName: {
 } = {
     [Kind.Any]: "Any",
     [Kind.Boolean]: "Boolean",
-    [Kind.Callable]: "Callable",
+    [Kind.CallNative]: "CallNative",
     [Kind.CallUser]: "CallUser",
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
@@ -93,11 +93,17 @@ export type Version = {
     output: Kind,
 };
 
-export class FGCallable implements FG {
-    kind: Kind.Callable = Kind.Callable;
+export const enum CallT {
+    Function,
+    Procedure,
+};
+
+export class FGCallNative implements FG {
+    kind: Kind.CallNative = Kind.CallNative;
 
     constructor(
         public name: string,
+        public callType: CallT,
         public value: (n: number) => void,
         public version: Version[]
     ) {}
@@ -110,11 +116,6 @@ export class FGCallable implements FG {
         return false;
     }
 }
-
-export const enum CallT {
-    Function,
-    Procedure,
-};
 
 export class FGCallUser implements FG {
     kind: Kind.CallUser = Kind.CallUser;
@@ -207,7 +208,7 @@ export class FGType implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallable | FGCallUser | FGNumber | FGString | FGType;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;

@@ -2,6 +2,7 @@
 
 #### 23-05-25
 
+- change FGCallable to FGCallNative
 - change all FGFunction to FGCallUser
 - make FGCallUser
 - add Bool type

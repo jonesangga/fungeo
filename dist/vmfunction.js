@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js";
-import { geoKind, KindName, FGCallable, FGString } from "./value.js";
+import { geoKind, KindName, FGCallNative, FGString } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
@@ -13,7 +13,7 @@ function _Print(n) {
     pop();
     vm_output(value.to_str() + "\n");
 }
-export let Print = new FGCallable("Print", _Print, [
+export let Print = new FGCallNative("Print", 0, _Print, [
     {
         input: [200],
         output: 100,
@@ -24,7 +24,7 @@ function _Printf(n) {
     pop();
     vm_output(value.to_str());
 }
-export let Printf = new FGCallable("Printf", _Printf, [
+export let Printf = new FGCallNative("Printf", 0, _Printf, [
     {
         input: [200],
         output: 100,
@@ -35,7 +35,7 @@ function _Show(n) {
     pop();
     push(new FGString(value.to_str()));
 }
-export let Show = new FGCallable("Show", _Show, [
+export let Show = new FGCallNative("Show", 0, _Show, [
     {
         input: [500],
         output: 600,
@@ -49,7 +49,7 @@ function _Padl(n) {
     let result = (filler.repeat(width) + text).slice(-width);
     push(new FGString(result));
 }
-export let Padl = new FGCallable("Padl", _Padl, [
+export let Padl = new FGCallNative("Padl", 0, _Padl, [
     {
         input: [600, 500, 600],
         output: 600,
@@ -60,7 +60,7 @@ function _Type(n) {
     pop();
     push(new FGString(KindName[value.kind]));
 }
-export let Type = new FGCallable("Type", _Type, [
+export let Type = new FGCallNative("Type", 0, _Type, [
     {
         input: [200],
         output: 600,
@@ -78,7 +78,7 @@ function _Draw(n) {
     on_scrn.push(v);
     draw_onScreen();
 }
-export let Draw = new FGCallable("Draw", _Draw, [
+export let Draw = new FGCallNative("Draw", 0, _Draw, [
     {
         input: [geoKind],
         output: 100,
@@ -102,7 +102,7 @@ function _C(n) {
         push(c);
     }
 }
-export let C = new FGCallable("C", _C, [
+export let C = new FGCallNative("C", 0, _C, [
     {
         input: [500, 500, 500],
         output: 700,
@@ -121,7 +121,7 @@ function _E(n) {
     let e = new Ellipse(x, y, rx, ry);
     push(e);
 }
-export let E = new FGCallable("E", _E, [
+export let E = new FGCallNative("E", 0, _E, [
     {
         input: [500, 500, 500, 500],
         output: 750,
@@ -136,7 +136,7 @@ function _P(n) {
         push(point);
     }
 }
-export let P = new FGCallable("P", _P, [
+export let P = new FGCallNative("P", 0, _P, [
     {
         input: [500, 500],
         output: 850,
@@ -149,7 +149,7 @@ function _Paint(n) {
     pic.objs.push(geo);
     draw_onScreen();
 }
-export let Paint = new FGCallable("Paint", _Paint, [
+export let Paint = new FGCallNative("Paint", 0, _Paint, [
     {
         input: [840, geoKind],
         output: 100,
@@ -160,7 +160,7 @@ function _Cw(n) {
     pop();
     push(pic.cw());
 }
-export let Cw = new FGCallable("Cw", _Cw, [
+export let Cw = new FGCallNative("Cw", 0, _Cw, [
     {
         input: [840],
         output: 840,
@@ -171,7 +171,7 @@ function _Ccw(n) {
     pop();
     push(pic.ccw());
 }
-export let Ccw = new FGCallable("Ccw", _Ccw, [
+export let Ccw = new FGCallNative("Ccw", 0, _Ccw, [
     {
         input: [840],
         output: 840,
@@ -182,7 +182,7 @@ function _FlipH(n) {
     pop();
     push(pic.fliph());
 }
-export let FlipH = new FGCallable("FlipH", _FlipH, [
+export let FlipH = new FGCallNative("FlipH", 0, _FlipH, [
     {
         input: [840],
         output: 840,
@@ -193,7 +193,7 @@ function _FlipV(n) {
     pop();
     push(pic.flipv());
 }
-export let FlipV = new FGCallable("FlipV", _FlipV, [
+export let FlipV = new FGCallNative("FlipV", 0, _FlipV, [
     {
         input: [840],
         output: 840,
@@ -215,7 +215,7 @@ function _Above(n) {
         push(Picture.above(rtop, rbottom, top, bottom));
     }
 }
-export let Above = new FGCallable("Above", _Above, [
+export let Above = new FGCallNative("Above", 0, _Above, [
     {
         input: [840, 840],
         output: 840,
@@ -241,7 +241,7 @@ function _Beside(n) {
         push(Picture.beside(rleft, rright, left, right));
     }
 }
-export let Beside = new FGCallable("Beside", _Beside, [
+export let Beside = new FGCallNative("Beside", 0, _Beside, [
     {
         input: [840, 840],
         output: 840,
@@ -259,7 +259,7 @@ function _Quartet(n) {
     pop();
     push(Picture.quartet(p, q, r, s));
 }
-export let Quartet = new FGCallable("Quartet", _Quartet, [
+export let Quartet = new FGCallNative("Quartet", 0, _Quartet, [
     {
         input: [840, 840, 840, 840],
         output: 840,
@@ -270,7 +270,7 @@ function _Cycle(n) {
     pop();
     push(Picture.cycle(p));
 }
-export let Cycle = new FGCallable("Cycle", _Cycle, [
+export let Cycle = new FGCallNative("Cycle", 0, _Cycle, [
     {
         input: [840],
         output: 840,
@@ -283,7 +283,7 @@ function _MapPic(n) {
     src.map_to(target);
     draw_onScreen();
 }
-export let MapPic = new FGCallable("MapPic", _MapPic, [
+export let MapPic = new FGCallNative("MapPic", 0, _MapPic, [
     {
         input: [840, 840],
         output: 100,
@@ -296,7 +296,7 @@ function _Pic(n) {
     let pic = new Picture(w, h);
     push(pic);
 }
-export let Pic = new FGCallable("Pic", _Pic, [
+export let Pic = new FGCallNative("Pic", 0, _Pic, [
     {
         input: [500, 500],
         output: 840,
@@ -324,7 +324,7 @@ function _R(n) {
         push(rect);
     }
 }
-export let R = new FGCallable("R", _R, [
+export let R = new FGCallNative("R", 0, _R, [
     {
         input: [500, 500, 500, 500],
         output: 900,
@@ -352,7 +352,7 @@ function _Seg(n) {
         push(seg);
     }
 }
-export let Seg = new FGCallable("Seg", _Seg, [
+export let Seg = new FGCallNative("Seg", 0, _Seg, [
     {
         input: [500, 500, 500, 500],
         output: 1000,
@@ -368,7 +368,7 @@ function _Midpoint(n) {
     let point = segment.midpoint();
     push(point);
 }
-export let Midpoint = new FGCallable("Midpoint", _Midpoint, [
+export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [
     {
         input: [1000],
         output: 850,

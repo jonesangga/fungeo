@@ -1,11 +1,11 @@
 // @jonesangga, 05-05-2025, MIT License.
 //
 // TODO: test FGType
-//       test version in FGCallable and FGCallUser
+//       test version in FGCallNative and FGCallUser
 
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
-import { Kind, CallT, FGBoolean, FGCallable, FGCallUser, FGNumber, FGString } from "../value.js"
+import { Kind, CallT, FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js"
 import { Chunk } from "../chunk.js"
 
 describe("value", () => {
@@ -18,17 +18,18 @@ describe("value", () => {
         equal(b.to_str(), "false");
     });
 
-    it("FGCallable", () => {
+    it("FGCallNative", () => {
         let f = (n: number) => {return;};
-        let b = new FGCallable("f", f, [
+        let b = new FGCallNative("f", CallT.Function, f, [
             {
                 input: [Kind.Number],
                 output: Kind.Number,
             }
         ]);
 
-        equal(b.kind, Kind.Callable);
+        equal(b.kind, Kind.CallNative);
         equal(b.name, "f");
+        equal(b.callType, CallT.Function);
         deepEqual(b.value, f);
         equal(b.to_str(), "<fn f>");
     });

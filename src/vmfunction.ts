@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js"
-import { Kind, type GeoObj, geoKind, KindName, FGCallable, FGNumber, FGString } from "./value.js"
+import { CallT, Kind, type GeoObj, geoKind, KindName, FGCallNative, FGNumber, FGString } from "./value.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
@@ -14,7 +14,7 @@ function _Print(n: number): void {
     pop();              // The function.
     vm_output( value.to_str() + "\n" );
 }
-export let Print = new FGCallable("Print", _Print, [
+export let Print = new FGCallNative("Print", CallT.Function, _Print, [
     {
         input:  [Kind.Any],
         output: Kind.Nothing,
@@ -26,7 +26,7 @@ function _Printf(n: number): void {
     pop();              // The function.
     vm_output( value.to_str() );
 }
-export let Printf = new FGCallable("Printf", _Printf, [
+export let Printf = new FGCallNative("Printf", CallT.Function, _Printf, [
     {
         input:  [Kind.Any],
         output: Kind.Nothing,
@@ -38,7 +38,7 @@ function _Show(n: number): void {
     pop();              // The function.
     push(new FGString( value.to_str() ));
 }
-export let Show = new FGCallable("Show", _Show, [
+export let Show = new FGCallNative("Show", CallT.Function, _Show, [
     {
         input:  [Kind.Number],
         output: Kind.String,
@@ -54,7 +54,7 @@ function _Padl(n: number): void {
     let result = (filler.repeat(width) + text).slice(-width);
     push(new FGString(result));
 }
-export let Padl = new FGCallable("Padl", _Padl, [
+export let Padl = new FGCallNative("Padl", CallT.Function, _Padl, [
     {
         input:  [Kind.String, Kind.Number, Kind.String],
         output: Kind.String,
@@ -66,7 +66,7 @@ function _Type(n: number): void {
     pop();              // The function.
     push(new FGString(KindName[value.kind]));
 }
-export let Type = new FGCallable("Type", _Type, [
+export let Type = new FGCallNative("Type", CallT.Function, _Type, [
     {
         input:  [Kind.Any],
         output: Kind.String,
@@ -86,7 +86,7 @@ function _Draw(n: number): void {
     on_scrn.push(v);
     draw_onScreen();
 }
-export let Draw = new FGCallable("Draw", _Draw, [
+export let Draw = new FGCallNative("Draw", CallT.Function, _Draw, [
     {
         input:  [geoKind],
         output: Kind.Nothing,
@@ -110,7 +110,7 @@ function _C(n: number): void {
         push(c);
     }
 }
-export let C = new FGCallable("C", _C, [
+export let C = new FGCallNative("C", CallT.Function, _C, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Circle,
@@ -130,7 +130,7 @@ function _E(n: number): void {
     let e = new Ellipse(x, y, rx, ry);
     push(e);
 }
-export let E = new FGCallable("E", _E, [
+export let E = new FGCallNative("E", CallT.Function, _E, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Ellipse,
@@ -146,7 +146,7 @@ function _P(n: number): void {
         push(point);
     }
 }
-export let P = new FGCallable("P", _P, [
+export let P = new FGCallNative("P", CallT.Function, _P, [
     {
         input:  [Kind.Number, Kind.Number],
         output: Kind.Point,
@@ -160,7 +160,7 @@ function _Paint(n: number): void {
     pic.objs.push(geo);
     draw_onScreen();
 }
-export let Paint = new FGCallable("Paint", _Paint, [
+export let Paint = new FGCallNative("Paint", CallT.Function, _Paint, [
     {
         input:  [Kind.Picture, geoKind],
         output: Kind.Nothing,
@@ -172,7 +172,7 @@ function _Cw(n: number): void {
     pop();              // The function.
     push(pic.cw());
 }
-export let Cw = new FGCallable("Cw", _Cw, [
+export let Cw = new FGCallNative("Cw", CallT.Function, _Cw, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,
@@ -184,7 +184,7 @@ function _Ccw(n: number): void {
     pop();              // The function.
     push(pic.ccw());
 }
-export let Ccw = new FGCallable("Ccw", _Ccw, [
+export let Ccw = new FGCallNative("Ccw", CallT.Function, _Ccw, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,
@@ -196,7 +196,7 @@ function _FlipH(n: number): void {
     pop();              // The function.
     push(pic.fliph());
 }
-export let FlipH = new FGCallable("FlipH", _FlipH, [
+export let FlipH = new FGCallNative("FlipH", CallT.Function, _FlipH, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,
@@ -208,7 +208,7 @@ function _FlipV(n: number): void {
     pop();              // The function.
     push(pic.flipv());
 }
-export let FlipV = new FGCallable("FlipV", _FlipV, [
+export let FlipV = new FGCallNative("FlipV", CallT.Function, _FlipV, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,
@@ -230,7 +230,7 @@ function _Above(n: number): void {
         push(Picture.above(rtop, rbottom, top, bottom));
     }
 }
-export let Above = new FGCallable("Above", _Above, [
+export let Above = new FGCallNative("Above", CallT.Function, _Above, [
     {
         input:  [Kind.Picture, Kind.Picture],
         output: Kind.Picture,
@@ -256,7 +256,7 @@ function _Beside(n: number): void {
         push(Picture.beside(rleft, rright, left, right));
     }
 }
-export let Beside = new FGCallable("Beside", _Beside, [
+export let Beside = new FGCallNative("Beside", CallT.Function, _Beside, [
     {
         input:  [Kind.Picture, Kind.Picture],
         output: Kind.Picture,
@@ -275,7 +275,7 @@ function _Quartet(n: number): void {
     pop();              // The function.
     push(Picture.quartet(p, q, r, s));
 }
-export let Quartet = new FGCallable("Quartet", _Quartet, [
+export let Quartet = new FGCallNative("Quartet", CallT.Function, _Quartet, [
     {
         input:  [Kind.Picture, Kind.Picture, Kind.Picture, Kind.Picture],
         output: Kind.Picture,
@@ -287,7 +287,7 @@ function _Cycle(n: number): void {
     pop();              // The function.
     push(Picture.cycle(p));
 }
-export let Cycle = new FGCallable("Cycle", _Cycle, [
+export let Cycle = new FGCallNative("Cycle", CallT.Function, _Cycle, [
     {
         input:  [Kind.Picture],
         output: Kind.Picture,
@@ -301,7 +301,7 @@ function _MapPic(n: number): void {
     src.map_to(target);
     draw_onScreen();
 }
-export let MapPic = new FGCallable("MapPic", _MapPic, [
+export let MapPic = new FGCallNative("MapPic", CallT.Function, _MapPic, [
     {
         input:  [Kind.Picture, Kind.Picture],
         output: Kind.Nothing,
@@ -315,7 +315,7 @@ function _Pic(n: number): void {
     let pic = new Picture(w, h);
     push(pic);
 }
-export let Pic = new FGCallable("Pic", _Pic, [
+export let Pic = new FGCallNative("Pic", CallT.Function, _Pic, [
     {
         input:  [Kind.Number, Kind.Number],
         output: Kind.Picture,
@@ -343,7 +343,7 @@ function _R(n: number): void {
         push(rect);
     }
 }
-export let R = new FGCallable("R", _R, [
+export let R = new FGCallNative("R", CallT.Function, _R, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Rect,
@@ -371,7 +371,7 @@ function _Seg(n: number): void {
         push(seg);
     }
 }
-export let Seg = new FGCallable("Seg", _Seg, [
+export let Seg = new FGCallNative("Seg", CallT.Function, _Seg, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Segment,
@@ -388,7 +388,7 @@ function _Midpoint(n: number): void {
     let point = segment.midpoint();
     push(point);
 }
-export let Midpoint = new FGCallable("Midpoint", _Midpoint, [
+export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint, [
     {
         input:  [Kind.Segment],
         output: Kind.Point,
