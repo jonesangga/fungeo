@@ -36,6 +36,7 @@ export var TokenT;
     TokenT[TokenT["True"] = 2000] = "True";
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
+    TokenT[TokenT["BoolT"] = 2220] = "BoolT";
     TokenT[TokenT["Clear"] = 2250] = "Clear";
     TokenT[TokenT["Else"] = 2300] = "Else";
     TokenT[TokenT["Fn"] = 2320] = "Fn";
@@ -52,6 +53,7 @@ export const TokenTName = {
     [1180]: "Amp",
     [1190]: "AmpAmp",
     [1195]: "Arrow",
+    [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
     [2250]: "Clear",
@@ -141,6 +143,7 @@ function token_error(message) {
 }
 function name_type() {
     switch (source.slice(start, current)) {
+        case "Bool": return 2220;
         case "clear": return 2250;
         case "else": return 2300;
         case "false": return 1600;

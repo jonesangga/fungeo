@@ -41,6 +41,7 @@ export const enum TokenT {
     True      = 2000,
     EOF       = 2100,   // Other.
     Error     = 2200,
+    BoolT     = 2220,
     Clear     = 2250,   // Keywords.
     Else      = 2300,
     Fn        = 2320,
@@ -59,6 +60,7 @@ export const TokenTName: {
     [TokenT.Amp]: "Amp",
     [TokenT.AmpAmp]: "AmpAmp",
     [TokenT.Arrow]: "Arrow",
+    [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
     [TokenT.Clear]: "Clear",
@@ -165,6 +167,7 @@ function token_error(message: string): Token {
 
 function name_type(): TokenT {
     switch (source.slice(start, current)) {
+        case "Bool":   return TokenT.BoolT;
         case "clear":  return TokenT.Clear;
         case "else":   return TokenT.Else;
         case "false":  return TokenT.False;

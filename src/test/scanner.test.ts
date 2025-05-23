@@ -46,6 +46,7 @@ describe("scanner each token type", () => {
         [TokenT.Arrow]: ["->", { kind: TokenT.Arrow, line: 1, lexeme: "->" }],
         [TokenT.Bang]: ["!", { kind: TokenT.Bang, line: 1, lexeme: "!" }],
         [TokenT.BangEq]: ["!=", { kind: TokenT.BangEq, line: 1, lexeme: "!=" }],
+        [TokenT.BoolT]: ["Bool", { kind: TokenT.BoolT, line: 1, lexeme: "Bool" }],
         [TokenT.Clear]: ["clear", { kind: TokenT.Clear, line: 1, lexeme: "clear" }],
         [TokenT.Colon]: [":", { kind: TokenT.Colon, line: 1, lexeme: ":" }],
         [TokenT.ColonEq]: [":=", { kind: TokenT.ColonEq, line: 1, lexeme: ":=" }],

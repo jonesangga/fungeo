@@ -35,6 +35,7 @@ const rules = {
     [1195]: { prefix: null, infix: null, precedence: 100 },
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
+    [2220]: { prefix: null, infix: null, precedence: 100 },
     [2250]: { prefix: null, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
@@ -365,6 +366,8 @@ function set_global(name) {
 function parse_type() {
     advance();
     switch (prevTok.kind) {
+        case 2220:
+            return { base: 300 };
         case 2600:
             return { base: 500 };
         case 2900:

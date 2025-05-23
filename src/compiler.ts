@@ -56,6 +56,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Arrow]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
+    [TokenT.BoolT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Clear]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -487,6 +488,8 @@ function set_global(name: string): void {
 function parse_type(): {base: Kind} {
     advance();
     switch (prevTok.kind) {
+        case TokenT.BoolT:
+            return {base: Kind.Boolean};
         case TokenT.NumT:
             return {base: Kind.Number};
         case TokenT.StrT:
