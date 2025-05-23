@@ -17,9 +17,9 @@ import Rect from "../geo/rect.js"
 import Segment from "../geo/segment.js"
 
 export default class Picture {
+    kind: Kind.Picture = Kind.Picture;
     x: number = 0;
     y: number = 0;
-    kind: Kind.Picture = Kind.Picture;
     objs: GeoObj[] = [];
     strokeStyle: string = color.black;
 

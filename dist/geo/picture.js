@@ -7,9 +7,9 @@ import Segment from "../geo/segment.js";
 export default class Picture {
     w;
     h;
+    kind = 840;
     x = 0;
     y = 0;
-    kind = 840;
     objs = [];
     strokeStyle = color.black;
     constructor(w, h) {

@@ -83,16 +83,6 @@ export let nativeNames: Names = {
             // },
         // ],
     // },
-    // "bind": {
-        // kind:    Kind.Callable,
-        // call:    bind_,
-        // version: [
-            // {
-                // input:  [bindableSet],
-                // output: Kind.Nothing,
-            // },
-        // ],
-    // },
     // "resize": {
         // kind:    Kind.Callable,
         // call:    resize,
