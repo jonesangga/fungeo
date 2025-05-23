@@ -300,6 +300,7 @@ function run() {
                 }
                 frames.pop();
                 currFrame = frames[frames.length - 1];
+                currChunk = currFrame.fn.chunk;
                 break;
             }
             case 1290: {

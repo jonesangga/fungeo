@@ -360,6 +360,7 @@ function run(): boolean {
                 }
                 frames.pop();
                 currFrame = frames[frames.length - 1];
+                currChunk = currFrame.fn.chunk;
                 break;
             }
 
