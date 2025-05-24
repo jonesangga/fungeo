@@ -7,7 +7,6 @@ import Picture from "./geo/picture.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
-import { on_scrn } from "./vm.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -66,6 +65,7 @@ export let Type = new FGCallNative("Type", 0, _Type, [
         output: 600,
     },
 ]);
+let on_scrn = [];
 function draw_onScreen() {
     canvas.clear();
     for (let obj of on_scrn) {
@@ -375,10 +375,22 @@ export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [
     },
 ]);
 function _Help(n) {
+    pop();
     let str = "You are in help menu\nPress Shift-Enter to execute code";
     vm_output(str);
 }
 export let Help = new FGCallNative("Help", 1, _Help, [
+    {
+        input: [],
+        output: 100,
+    },
+]);
+function _Clear(n) {
+    pop();
+    canvas.clear();
+    on_scrn = [];
+}
+export let Clear = new FGCallNative("Clear", 1, _Clear, [
     {
         input: [],
         output: 100,

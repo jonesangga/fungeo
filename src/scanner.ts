@@ -2,7 +2,6 @@
 //
 // TODO: Support comment single and multiline.
 //       Add token # for list and string length.
-//       Remove TokenT.Clear. Make it a built-in procedure.
 
 export const enum TokenT {
     Comma     = 100,    // Single character.
@@ -42,8 +41,7 @@ export const enum TokenT {
     EOF       = 2100,   // Other.
     Error     = 2200,
     BoolT     = 2220,
-    Clear     = 2250,   // Keywords.
-    Else      = 2300,
+    Else      = 2300,   // Keywords.
     Fn        = 2320,
     If        = 2400,
     Ifx       = 2405,
@@ -63,7 +61,6 @@ export const TokenTName: {
     [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
-    [TokenT.Clear]: "Clear",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
@@ -168,7 +165,6 @@ function token_error(message: string): Token {
 function name_type(): TokenT {
     switch (source.slice(start, current)) {
         case "Bool":   return TokenT.BoolT;
-        case "clear":  return TokenT.Clear;
         case "else":   return TokenT.Else;
         case "false":  return TokenT.False;
         case "fn":     return TokenT.Fn;

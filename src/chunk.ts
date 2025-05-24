@@ -13,7 +13,6 @@ export const enum Op {
     CkExcD  = 212,
     CkInc   = 215,
     CkIncD  = 217,
-    Clear   = 230,
     Div     = 300,
     Eq      = 380,
     GEq     = 390,
@@ -55,7 +54,6 @@ export const OpName: {
     [Op.CkExcD]: "CkExcD",
     [Op.CkInc]: "CkInc",
     [Op.CkIncD]: "CkIncD",
-    [Op.Clear]: "Clear",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
@@ -127,7 +125,6 @@ export class Chunk {
         switch (instruction) {
             case Op.Add:
             case Op.AddStr:
-            case Op.Clear:
             case Op.Div:
             case Op.Eq:
             case Op.GEq:

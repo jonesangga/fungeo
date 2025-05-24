@@ -1,6 +1,4 @@
 // @jonesangga, 12-04-2025, MIT License.
-//
-// TODO: Remove Clear()
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
@@ -57,7 +55,6 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.BoolT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.Clear]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -928,9 +925,6 @@ function statement(): void {
     } else if (match(TokenT.LBracket)
             || match(TokenT.LParen)) {
         parse_loop();
-    } else if (match(TokenT.Clear)) {   // TODO: Think again.
-        advance();
-        emitByte(Op.Clear);
     } else if (match(TokenT.Return)) {
         parse_return();
     } else if (match(TokenT.Semicolon)) {
