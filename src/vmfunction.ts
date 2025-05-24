@@ -7,6 +7,7 @@ import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
+import { welcome } from "./data/help.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -398,8 +399,7 @@ export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint, [
 
 function _Help(n: number): void {
     pop();              // The function.
-    let str = "You are in help menu\nPress Shift-Enter to execute code";
-    vm_output( str );
+    vm_output( welcome );
 }
 export let Help = new FGCallNative("Help", CallT.Procedure, _Help, [
     {

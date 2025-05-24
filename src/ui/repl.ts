@@ -8,6 +8,7 @@
 //              and also error message when terminal is hidden. Hidden by default.
 
 import { Kind, type Repl } from "../value.js"
+import { welcome } from "../data/help.js"
 
 const container = document.createElement("div");
 document.body.appendChild(container);
@@ -235,5 +236,7 @@ function terminal_add_code(code: string, type?: number): void {
     div.innerHTML = code;
     terminal.appendChild(div);
 }
+
+terminal_add_code(welcome);
 
 export default repl;

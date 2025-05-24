@@ -1,3 +1,4 @@
+import { welcome } from "../data/help.js";
 const container = document.createElement("div");
 document.body.appendChild(container);
 container.style.position = "absolute";
@@ -192,4 +193,5 @@ function terminal_add_code(code, type) {
     div.innerHTML = code;
     terminal.appendChild(div);
 }
+terminal_add_code(welcome);
 export default repl;
