@@ -331,7 +331,6 @@ function run(): boolean {
             }
 
             case Op.GetLoc: {
-                console.log("currFrame.slots = " + currFrame.slots);
                 push(stack[currFrame.slots + read_byte() ]);
                 break;
             }

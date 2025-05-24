@@ -277,7 +277,6 @@ function run() {
                 break;
             }
             case 395: {
-                console.log("currFrame.slots = " + currFrame.slots);
                 push(stack[currFrame.slots + read_byte()]);
                 break;
             }

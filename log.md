@@ -2,6 +2,11 @@
 
 #### 24-05-25
 
+- bug: cannot print <fn funcname>. Change to {fn funcname}
+- make native procedure Help/0
+- support native procedure that doesnt have arg
+- fix bug: this should not be error
+  Print Print
 - change Op.Set type arg to Kind.CallUser for fn in fn()
 - change Op.Set type arg to Kind.CallUser for proc in proc()
 - update the related part in get_name()

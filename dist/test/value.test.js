@@ -21,7 +21,7 @@ describe("value", () => {
         equal(b.name, "f");
         equal(b.callType, 0);
         deepEqual(b.value, f);
-        equal(b.to_str(), "<fn f>");
+        equal(b.to_str(), "{fn f}");
     });
     it("FGCallUser", () => {
         let b = new FGCallUser("testfn", 0, [
@@ -33,7 +33,7 @@ describe("value", () => {
         equal(b.kind, 450);
         equal(b.name, "testfn");
         equal(b.callType, 0);
-        equal(b.to_str(), "<fn testfn>");
+        equal(b.to_str(), "{fn testfn}");
     });
     it("FGNumber", () => {
         let b = new FGNumber(123);

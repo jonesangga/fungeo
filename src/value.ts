@@ -109,7 +109,10 @@ export class FGCallNative implements FG {
     ) {}
 
     to_str(): string {
-        return `<fn ${ this.name }>`;
+        if (this.callType === CallT.Function)
+            return `{fn ${ this.name }}`;
+        else
+            return `{proc ${ this.name }}`;
     }
 
     equal(other: FG) {
@@ -129,9 +132,9 @@ export class FGCallUser implements FG {
 
     to_str(): string {
         if (this.callType === CallT.Function)
-            return `<fn ${ this.name }>`;
+            return `{fn ${ this.name }}`;
         else
-            return `<proc ${ this.name }>`;
+            return `{proc ${ this.name }}`;
     }
 
     equal(other: FG) {

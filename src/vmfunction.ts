@@ -394,3 +394,14 @@ export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint, [
         output: Kind.Point,
     },
 ]);
+
+function _Help(n: number): void {
+    let str = "You are in help menu\nPress Shift-Enter to execute code";
+    vm_output( str );
+}
+export let Help = new FGCallNative("Help", CallT.Procedure, _Help, [
+    {
+        input:  [],
+        output: Kind.Nothing,
+    },
+]);

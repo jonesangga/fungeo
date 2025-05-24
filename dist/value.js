@@ -72,7 +72,10 @@ export class FGCallNative {
         this.version = version;
     }
     to_str() {
-        return `<fn ${this.name}>`;
+        if (this.callType === 0)
+            return `{fn ${this.name}}`;
+        else
+            return `{proc ${this.name}}`;
     }
     equal(other) {
         return false;
@@ -92,9 +95,9 @@ export class FGCallUser {
     }
     to_str() {
         if (this.callType === 0)
-            return `<fn ${this.name}>`;
+            return `{fn ${this.name}}`;
         else
-            return `<proc ${this.name}>`;
+            return `{proc ${this.name}}`;
     }
     equal(other) {
         return false;

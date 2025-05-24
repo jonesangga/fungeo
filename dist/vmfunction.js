@@ -374,3 +374,13 @@ export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [
         output: 850,
     },
 ]);
+function _Help(n) {
+    let str = "You are in help menu\nPress Shift-Enter to execute code";
+    vm_output(str);
+}
+export let Help = new FGCallNative("Help", 1, _Help, [
+    {
+        input: [],
+        output: 100,
+    },
+]);

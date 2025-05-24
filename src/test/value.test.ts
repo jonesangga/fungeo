@@ -31,7 +31,7 @@ describe("value", () => {
         equal(b.name, "f");
         equal(b.callType, CallT.Function);
         deepEqual(b.value, f);
-        equal(b.to_str(), "<fn f>");
+        equal(b.to_str(), "{fn f}");
     });
 
     it("FGCallUser", () => {
@@ -45,7 +45,7 @@ describe("value", () => {
         equal(b.kind, Kind.CallUser);
         equal(b.name, "testfn");
         equal(b.callType, CallT.Function);
-        equal(b.to_str(), "<fn testfn>");
+        equal(b.to_str(), "{fn testfn}");
     });
 
     it("FGNumber", () => {

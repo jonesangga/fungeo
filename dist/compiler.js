@@ -397,7 +397,7 @@ function get_global(table, name, isNative) {
 }
 function global_callable(name_, table, native) {
     if (!canParseArgument) {
-        lastT = { base: table[name_].kind };
+        global_non_callable(table, name_, native);
         return;
     }
     canParseArgument = match(200);

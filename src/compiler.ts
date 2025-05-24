@@ -522,11 +522,13 @@ function get_global(table: any, name: string, isNative: boolean): void {
     }
 }
 
+// This also work for procedure that doesn't have parameter.
 // TODO: refactor this!
-// TODO: refactor this!
+//       check canParseArgument in the caller.
+
 function global_callable(name_: string, table: any, native: boolean): void {
     if (!canParseArgument) {
-        lastT = {base: table[name_].kind };
+        global_non_callable(table, name_, native);
         return;
     }
     canParseArgument = match(TokenT.Dollar);
