@@ -681,7 +681,6 @@ function proc(): void {
     do {
         parse_params();
     } while (match(TokenT.Comma));
-    console.log(current.fn);
 
     current.fn.version[0].output = Kind.Nothing;
     tempNames[name] = { kind: Kind.CallUser, value: current.fn };

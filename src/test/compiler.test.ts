@@ -581,6 +581,18 @@ describe.only("compiler: native function", () => {
     matchCode(tests);
 });
 
+// TODO: test code in the proc chunk
+//       maybe change the CodeTest type?
+
+describe.only("compiler: native procedure", () => {
+    const tests: CodeTest = [
+        ["call native procedure 0 arg", `Help`, [
+            Op.Load, 0, Op.CallNat, 0, 0, Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
+
 // TODO: test ifx
 //       test code in the fn chunk
 //       maybe change the CodeTest type?
@@ -604,7 +616,7 @@ describe.only("compiler: user function", () => {
 // TODO: test code in the proc chunk
 //       maybe change the CodeTest type?
 
-describe.only("compiler: user function", () => {
+describe.only("compiler: user procedure", () => {
     const tests: CodeTest = [
         ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
             Op.Load, 1, Op.Set, 0, Kind.CallUser,

@@ -513,6 +513,14 @@ describe.only("compiler: native function", () => {
     ];
     matchCode(tests);
 });
+describe.only("compiler: native procedure", () => {
+    const tests = [
+        ["call native procedure 0 arg", `Help`, [
+                800, 0, 200, 0, 0, 1290,
+            ]],
+    ];
+    matchCode(tests);
+});
 describe.only("compiler: user function", () => {
     const tests = [
         ["define and call user function 1 arg", `fn double x: Num -> Num = x * 2 a = double 10`, [
@@ -528,7 +536,7 @@ describe.only("compiler: user function", () => {
     ];
     matchCode(tests);
 });
-describe.only("compiler: user function", () => {
+describe.only("compiler: user procedure", () => {
     const tests = [
         ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
                 800, 1, 1400, 0, 450,

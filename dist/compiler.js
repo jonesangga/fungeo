@@ -525,7 +525,6 @@ function proc() {
     do {
         parse_params();
     } while (match(100));
-    console.log(current.fn);
     current.fn.version[0].output = 100;
     tempNames[name] = { kind: 450, value: current.fn };
     consume(300, "expect '{' before proc body");
