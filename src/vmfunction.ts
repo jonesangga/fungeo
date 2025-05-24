@@ -123,6 +123,21 @@ export let C = new FGCallNative("C", CallT.Function, _C, [
     },
 ]);
 
+function _Ccurv(n: number): void {
+    let curv = (pop() as FGNumber).value;
+    let y = (pop() as FGNumber).value;
+    let x = (pop() as FGNumber).value;
+    pop();              // The function.
+    let c = new Circle(x, y, Math.abs(1/curv));
+    push(c);
+}
+export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv, [
+    {
+        input:  [Kind.Number, Kind.Number, Kind.Number],
+        output: Kind.Circle,
+    },
+]);
+
 function _E(n: number): void {
     let ry = (pop() as FGNumber).value;
     let rx = (pop() as FGNumber).value;

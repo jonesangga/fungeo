@@ -31,4 +31,15 @@ export default class Circle {
             c.stroke();
         }
     }
+
+    // static descartes(c1: Circle, c2: Circle, c3: Circle): [number, number] {
+        // let k1 = 1 / c1.r;
+        // let k2 = 1 / c2.r;
+        // let k3 = 1 / c3.r;
+
+        // let sum = k1 + k2 + k3;
+        // let root = 2 * Math.sqrt(k1*k2 + k2*k3 + k1*k3);
+
+        // return [sum + root, sum - root];
+    // }
 }

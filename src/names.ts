@@ -6,7 +6,8 @@ import { Kind, type Value } from "./value.js"
 import { Print, Printf, Show, Padl, Type, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint,
          Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle,
-         MapPic, Help, Clear } from "./vmfunction.js"
+         MapPic, Help, Clear,
+         Ccurv } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import fish from "./data/fish.js"
@@ -43,6 +44,7 @@ export let nativeNames: Names = {
     "Clear":  { kind:  Kind.CallNative, value: Clear },
     "Paint":  { kind:  Kind.CallNative, value: Paint },
     "C":      { kind:  Kind.CallNative, value: C },
+    "Ccurv":  { kind:  Kind.CallNative, value: Ccurv },
     "E":      { kind:  Kind.CallNative, value: E },
     "P":      { kind:  Kind.CallNative, value: P },
     "Pic":    { kind:  Kind.CallNative, value: Pic },

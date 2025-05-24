@@ -237,6 +237,6 @@ function terminal_add_code(code: string, type?: number): void {
     terminal.appendChild(div);
 }
 
-terminal_add_code(welcome);
+// terminal_add_code(welcome);
 
 export default repl;
