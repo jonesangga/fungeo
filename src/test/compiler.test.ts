@@ -6,6 +6,7 @@
 //       Test chunk.values in a block (local name)
 //       Test GetLoc and SetLoc
 
+// import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { deepEqual, fail } from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
@@ -22,7 +23,7 @@ function matchCode(tests: CodeTest) {
     for (let [about, source, code] of tests) {
         it(about, () => {
             let result = compiler.compile(source);
-            if (!result.ok) fail();
+            if (!result.ok) fail(result.error.message);
             let chunk = result.value.chunk;
 
             deepEqual(chunk.code, code);
@@ -545,6 +546,81 @@ describe("compiler global assignment error", () => {
     ];
     matchError(tests);
 });
+
+//--------------------------------------------------------------------
+// Testing functions and procedures
+// TODO: test $
+
+describe.only("compiler: native function", () => {
+    const tests: CodeTest = [
+        ["call native function 1 arg", `Print 2`, [
+            Op.Load, 0, Op.Load, 1, Op.CallNat, 1, 0, Op.Ok,
+        ]],
+        ["call native function 2 args", `p = P 100 200`, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3,
+            Op.CallNat, 2, 0, Op.Set, 0, Kind.Point, Op.Ok,
+        ]],
+        ["call native function 3 args", `c = C 100 200 50`, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4,
+            Op.CallNat, 3, 0, Op.Set, 0, Kind.Circle, Op.Ok,
+        ]],
+        ["call native function 4 args", `r = R 100 200 300 400`, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.Load, 5,
+            Op.CallNat, 4, 0, Op.Set, 0, Kind.Rect, Op.Ok,
+        ]],
+        ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
+            Op.Load, 1, Op.Load, 2, Op.Load, 3,
+            Op.CallNat, 2, 0, Op.Set, 0, Kind.Point,
+            Op.Load, 5, Op.Load, 6, Op.Load, 7,
+            Op.CallNat, 2, 0, Op.Set, 4, Kind.Point,
+            Op.Load, 9, Op.GetUsr, 10, Op.GetUsr, 11,
+            Op.CallNat, 2, 1, Op.Set, 8, Kind.Segment,
+            Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
+
+// TODO: test ifx
+//       test code in the fn chunk
+//       maybe change the CodeTest type?
+
+describe.only("compiler: user function", () => {
+    const tests: CodeTest = [
+        ["define and call user function 1 arg", `fn double x: Num -> Num = x * 2 a = double 10`, [
+            Op.Load, 1, Op.Set, 0, Kind.CallUser,
+            Op.Load, 3, Op.Load, 4, Op.CallUsr, 1, 0, Op.Set, 2, Kind.Number,
+            Op.Ok,
+        ]],
+        ["define and call user function 2 arg", `fn add x: Num, y: Num -> Num = x + y a = add 2 3`, [
+            Op.Load, 1, Op.Set, 0, Kind.CallUser,
+            Op.Load, 3, Op.Load, 4, Op.Load, 5, Op.CallUsr, 2, 0, Op.Set, 2, Kind.Number,
+            Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
+
+// TODO: test code in the proc chunk
+//       maybe change the CodeTest type?
+
+describe.only("compiler: user function", () => {
+    const tests: CodeTest = [
+        ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
+            Op.Load, 1, Op.Set, 0, Kind.CallUser,
+            Op.Load, 2, Op.Load, 3, Op.CallUsr, 1, 0,
+            Op.Ok,
+        ]],
+        ["define and call user procedure 2 arg", `proc print_add x: Num, y: Num { Print $ x + y } print_add 10 20`, [
+            Op.Load, 1, Op.Set, 0, Kind.CallUser,
+            Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.CallUsr, 2, 0,
+            Op.Ok,
+        ]],
+    ];
+    matchCode(tests);
+});
+
+//--------------------------------------------------------------------
 
 describe("compiler general", () => {
     const tests: CodeTest = [

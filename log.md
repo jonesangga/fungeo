@@ -1,5 +1,13 @@
 # Log
 
+#### 24-05-25
+
+- change Op.Set type arg to Kind.CallUser for fn in fn()
+- change Op.Set type arg to Kind.CallUser for proc in proc()
+- update the related part in get_name()
+  make another check case for Kind.CallUser after Kind.CallNative
+- write test for native function and user function
+
 #### 23-05-25
 
 - move call to jsdom to one file

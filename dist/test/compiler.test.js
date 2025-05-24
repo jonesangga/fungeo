@@ -7,7 +7,7 @@ function matchCode(tests) {
         it(about, () => {
             let result = compiler.compile(source);
             if (!result.ok)
-                fail();
+                fail(result.error.message);
             let chunk = result.value.chunk;
             deepEqual(chunk.code, code);
         });
@@ -483,6 +483,65 @@ describe("compiler global assignment error", () => {
         ],
     ];
     matchError(tests);
+});
+describe.only("compiler: native function", () => {
+    const tests = [
+        ["call native function 1 arg", `Print 2`, [
+                800, 0, 800, 1, 200, 1, 0, 1290,
+            ]],
+        ["call native function 2 args", `p = P 100 200`, [
+                800, 1, 800, 2, 800, 3,
+                200, 2, 0, 1400, 0, 850, 1290,
+            ]],
+        ["call native function 3 args", `c = C 100 200 50`, [
+                800, 1, 800, 2, 800, 3, 800, 4,
+                200, 3, 0, 1400, 0, 700, 1290,
+            ]],
+        ["call native function 4 args", `r = R 100 200 300 400`, [
+                800, 1, 800, 2, 800, 3, 800, 4, 800, 5,
+                200, 4, 0, 1400, 0, 900, 1290,
+            ]],
+        ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
+                800, 1, 800, 2, 800, 3,
+                200, 2, 0, 1400, 0, 850,
+                800, 5, 800, 6, 800, 7,
+                200, 2, 0, 1400, 4, 850,
+                800, 9, 500, 10, 500, 11,
+                200, 2, 1, 1400, 8, 1000,
+                1290,
+            ]],
+    ];
+    matchCode(tests);
+});
+describe.only("compiler: user function", () => {
+    const tests = [
+        ["define and call user function 1 arg", `fn double x: Num -> Num = x * 2 a = double 10`, [
+                800, 1, 1400, 0, 450,
+                800, 3, 800, 4, 205, 1, 0, 1400, 2, 500,
+                1290,
+            ]],
+        ["define and call user function 2 arg", `fn add x: Num, y: Num -> Num = x + y a = add 2 3`, [
+                800, 1, 1400, 0, 450,
+                800, 3, 800, 4, 800, 5, 205, 2, 0, 1400, 2, 500,
+                1290,
+            ]],
+    ];
+    matchCode(tests);
+});
+describe.only("compiler: user function", () => {
+    const tests = [
+        ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
+                800, 1, 1400, 0, 450,
+                800, 2, 800, 3, 205, 1, 0,
+                1290,
+            ]],
+        ["define and call user procedure 2 arg", `proc print_add x: Num, y: Num { Print $ x + y } print_add 10 20`, [
+                800, 1, 1400, 0, 450,
+                800, 2, 800, 3, 800, 4, 205, 2, 0,
+                1290,
+            ]],
+    ];
+    matchCode(tests);
 });
 describe("compiler general", () => {
     const tests = [

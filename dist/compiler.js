@@ -364,85 +364,6 @@ function set_global(name) {
     tempNames[name] = { kind: lastT.base };
     lastT = nothingT;
 }
-function parse_type() {
-    advance();
-    switch (prevTok.kind) {
-        case 2220:
-            return { base: 300 };
-        case 2600:
-            return { base: 500 };
-        case 2900:
-            return { base: 600 };
-        default:
-            error("expect parameter type");
-            return { base: 100 };
-    }
-}
-function parse_params() {
-    consume(1700, "expect parameter name");
-    let name = prevTok.lexeme;
-    for (let i = current.locals.length - 1; i >= 0; i--) {
-        let local = current.locals[i];
-        if (local.depth < current.scopeDepth)
-            break;
-        if (name === local.name)
-            error(`${name} already defined in this scope`);
-    }
-    add_local(name);
-    consume(1300, "expect `:` after parameter name");
-    let t = parse_type();
-    current.locals[current.locals.length - 1].type = { kind: t.base };
-    current.fn.version[0].input.push(t.base);
-    lastT = nothingT;
-}
-function fn() {
-    consume(1700, "expect function name");
-    let name = prevTok.lexeme;
-    let index = makeConstant(new FGString(name));
-    begin_compiler(0, name);
-    beginScope();
-    do {
-        parse_params();
-    } while (match(100));
-    consume(1195, "expect `->` after list of params");
-    let t = parse_type();
-    current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: 450, value: current.fn };
-    consume(1500, "expect '=' before fn body");
-    expression();
-    emitBytes(1300, 1);
-    assertT(lastT, t, "return type not match");
-    let fn = endCompiler();
-    emitConstant(fn);
-    emitBytes(1400, index);
-    emitByte(400);
-}
-function proc() {
-    consume(1700, "expect procedure name");
-    let name = prevTok.lexeme;
-    let index = makeConstant(new FGString(name));
-    begin_compiler(0, name);
-    beginScope();
-    do {
-        parse_params();
-    } while (match(100));
-    console.log(current.fn);
-    current.fn.version[0].output = 100;
-    tempNames[name] = { kind: 400, value: current.fn };
-    consume(300, "expect '{' before proc body");
-    procBody();
-    emitBytes(1300, 0);
-    consume(695, "expect '}' after proc body");
-    let fn = endCompiler();
-    emitConstant(fn);
-    emitBytes(1400, index);
-    emitByte(400);
-}
-function procBody() {
-    while (!check(695) && !check(2100)) {
-        statement();
-    }
-}
 function get_name(name) {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
@@ -450,44 +371,29 @@ function get_name(name) {
         lastT = { base: current.locals[arg].type.kind };
     }
     else if (Object.hasOwn(nativeNames, name)) {
-        if (nativeNames[name].kind === 400)
-            global_callable(name, nativeNames, true);
-        else
-            global_non_callable(nativeNames, name, true);
+        get_global(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        if (userNames[name].kind === 400)
-            global_callable(name, userNames, false);
-        else
-            global_non_callable(userNames, name, false);
+        get_global(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        if (tempNames[name].kind === 400)
-            global_callable(name, tempNames, false);
-        else
-            global_non_callable(tempNames, name, false);
+        get_global(tempNames, name, false);
     }
     else {
         error(`undefined name ${name}`);
     }
 }
-function matchType(expected, actual) {
-    if (expected === 200) {
-        return true;
+function get_global(table, name, isNative) {
+    switch (table[name].kind) {
+        case 400:
+            global_callable(name, table, isNative);
+            break;
+        case 450:
+            global_callable(name, table, isNative);
+            break;
+        default:
+            global_non_callable(table, name, isNative);
     }
-    else if (typeof expected === "number") {
-        return actual === expected;
-    }
-    else {
-        return expected.includes(actual);
-    }
-}
-function setToKinds(set_) {
-    let s = [];
-    for (let kind of set_) {
-        s.push(KindName[kind]);
-    }
-    return s;
 }
 function global_callable(name_, table, native) {
     if (!canParseArgument) {
@@ -556,6 +462,103 @@ function global_non_callable(table, name, native) {
     else
         emitBytes(500, index);
     lastT = { base: table[name].kind };
+}
+function parse_type() {
+    advance();
+    switch (prevTok.kind) {
+        case 2220:
+            return { base: 300 };
+        case 2600:
+            return { base: 500 };
+        case 2900:
+            return { base: 600 };
+        default:
+            error("expect parameter type");
+            return { base: 100 };
+    }
+}
+function parse_params() {
+    consume(1700, "expect parameter name");
+    let name = prevTok.lexeme;
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth < current.scopeDepth)
+            break;
+        if (name === local.name)
+            error(`${name} already defined in this scope`);
+    }
+    add_local(name);
+    consume(1300, "expect `:` after parameter name");
+    let t = parse_type();
+    current.locals[current.locals.length - 1].type = { kind: t.base };
+    current.fn.version[0].input.push(t.base);
+    lastT = nothingT;
+}
+function fn() {
+    consume(1700, "expect function name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+    begin_compiler(0, name);
+    beginScope();
+    do {
+        parse_params();
+    } while (match(100));
+    consume(1195, "expect `->` after list of params");
+    let t = parse_type();
+    current.fn.version[0].output = t.base;
+    tempNames[name] = { kind: 450, value: current.fn };
+    consume(1500, "expect '=' before fn body");
+    expression();
+    emitBytes(1300, 1);
+    assertT(lastT, t, "return type not match");
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(1400, index);
+    emitByte(450);
+}
+function proc() {
+    consume(1700, "expect procedure name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+    begin_compiler(0, name);
+    beginScope();
+    do {
+        parse_params();
+    } while (match(100));
+    console.log(current.fn);
+    current.fn.version[0].output = 100;
+    tempNames[name] = { kind: 450, value: current.fn };
+    consume(300, "expect '{' before proc body");
+    procBody();
+    emitBytes(1300, 0);
+    consume(695, "expect '}' after proc body");
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(1400, index);
+    emitByte(450);
+}
+function procBody() {
+    while (!check(695) && !check(2100)) {
+        statement();
+    }
+}
+function matchType(expected, actual) {
+    if (expected === 200) {
+        return true;
+    }
+    else if (typeof expected === "number") {
+        return actual === expected;
+    }
+    else {
+        return expected.includes(actual);
+    }
+}
+function setToKinds(set_) {
+    let s = [];
+    for (let kind of set_) {
+        s.push(KindName[kind]);
+    }
+    return s;
 }
 function add_local(name) {
     let local = { name, type: { kind: 100 }, depth: current.scopeDepth };

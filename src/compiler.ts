@@ -487,107 +487,7 @@ function set_global(name: string): void {
     lastT = nothingT;
 }
 
-function parse_type(): {base: Kind} {
-    advance();
-    switch (prevTok.kind) {
-        case TokenT.BoolT:
-            return {base: Kind.Boolean};
-        case TokenT.NumT:
-            return {base: Kind.Number};
-        case TokenT.StrT:
-            return {base: Kind.String};
-        default:
-            error("expect parameter type");
-            return {base: Kind.Nothing};
-    }
-}
-
-function parse_params(): void {
-    consume(TokenT.Name, "expect parameter name");
-    let name = prevTok.lexeme;
-
-    for (let i = current.locals.length - 1; i >= 0; i--) {
-        let local = current.locals[i];
-        if (local.depth < current.scopeDepth) break;
-        if (name === local.name)
-            error(`${ name } already defined in this scope`);
-    }
-    add_local(name);
-
-    consume(TokenT.Colon, "expect `:` after parameter name");
-    let t = parse_type();
-
-    current.locals[current.locals.length - 1].type = { kind: t.base };
-    current.fn.version[0].input.push(t.base);
-    lastT = nothingT;
-}
-
-function fn(): void {
-    consume(TokenT.Name, "expect function name");
-    let name = prevTok.lexeme;
-    let index = makeConstant(new FGString(name));
-
-    begin_compiler(FnT.Function, name);
-    beginScope();
-
-    do {
-        parse_params();
-    } while (match(TokenT.Comma));
-
-    // return type
-    consume(TokenT.Arrow, "expect `->` after list of params");
-    let t = parse_type();
-
-    current.fn.version[0].output = t.base;
-    tempNames[name] = { kind: Kind.CallUser, value: current.fn };
-
-    consume(TokenT.Eq, "expect '=' before fn body");
-
-    expression();
-    emitBytes(Op.Ret, 1);
-    assertT(lastT, t, "return type not match");
-
-    let fn = endCompiler();
-    emitConstant(fn);
-    emitBytes(Op.Set, index);
-    emitByte(Kind.CallNative);
-}
-
-function proc(): void {
-    consume(TokenT.Name, "expect procedure name");
-    let name = prevTok.lexeme;
-    let index = makeConstant(new FGString(name));
-
-    begin_compiler(FnT.Function, name);
-    beginScope();
-
-    do {
-        parse_params();
-    } while (match(TokenT.Comma));
-    console.log(current.fn);
-
-    current.fn.version[0].output = Kind.Nothing;
-    tempNames[name] = { kind: Kind.CallNative, value: current.fn };
-
-    consume(TokenT.LBrace, "expect '{' before proc body");
-
-    procBody();
-    emitBytes(Op.Ret, 0);
-
-    consume(TokenT.RBrace, "expect '}' after proc body");
-
-    let fn = endCompiler();
-    emitConstant(fn);
-    emitBytes(Op.Set, index);
-    emitByte(Kind.CallNative);
-}
-
-function procBody(): void {
-    while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
-        statement();
-    }
-}
-
+// TODO: refactor this!
 function get_name(name: string): void {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
@@ -595,46 +495,35 @@ function get_name(name: string): void {
         lastT = {base: current.locals[arg].type.kind};
     }
     else if (Object.hasOwn(nativeNames, name)) {
-        if (nativeNames[name].kind === Kind.CallNative)
-            global_callable(name, nativeNames, true);
-        else
-            global_non_callable(nativeNames, name, true);
+        get_global(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
-        if (userNames[name].kind === Kind.CallNative)
-            global_callable(name, userNames, false);
-        else
-            global_non_callable(userNames, name, false);
+        get_global(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        if (tempNames[name].kind === Kind.CallNative)
-            global_callable(name, tempNames, false);
-        else
-            global_non_callable(tempNames, name, false);
+        get_global(tempNames, name, false);
     }
     else {
         error(`undefined name ${name}`);
     }
 }
 
-function matchType(expected: (Kind[] | Kind), actual: Kind): boolean {
-    if (expected === Kind.Any) {
-        return true;
-    } else if (typeof expected === "number") {
-        return actual === expected;
-    } else {
-        return expected.includes(actual);
+// TODO: refactor this!
+function get_global(table: any, name: string, isNative: boolean): void {
+    switch (table[name].kind) {
+        case Kind.CallNative:
+            global_callable(name, table, isNative);
+            break;
+        case Kind.CallUser:
+            global_callable(name, table, isNative);
+            break;
+        default:
+            global_non_callable(table, name, isNative);
     }
 }
 
-function setToKinds(set_: Kind[]): string[] {
-    let s = [];
-    for (let kind of set_) {
-        s.push(KindName[kind as Kind]);
-    }
-    return s;
-}
-
+// TODO: refactor this!
+// TODO: refactor this!
 function global_callable(name_: string, table: any, native: boolean): void {
     if (!canParseArgument) {
         lastT = {base: table[name_].kind };
@@ -711,6 +600,125 @@ function global_non_callable(table: any, name: string, native: boolean): void {
         emitBytes(Op.GetUsr, index);
 
     lastT = {base: table[name].kind};
+}
+
+function parse_type(): {base: Kind} {
+    advance();
+    switch (prevTok.kind) {
+        case TokenT.BoolT:
+            return {base: Kind.Boolean};
+        case TokenT.NumT:
+            return {base: Kind.Number};
+        case TokenT.StrT:
+            return {base: Kind.String};
+        default:
+            error("expect parameter type");
+            return {base: Kind.Nothing};
+    }
+}
+
+function parse_params(): void {
+    consume(TokenT.Name, "expect parameter name");
+    let name = prevTok.lexeme;
+
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth < current.scopeDepth) break;
+        if (name === local.name)
+            error(`${ name } already defined in this scope`);
+    }
+    add_local(name);
+
+    consume(TokenT.Colon, "expect `:` after parameter name");
+    let t = parse_type();
+
+    current.locals[current.locals.length - 1].type = { kind: t.base };
+    current.fn.version[0].input.push(t.base);
+    lastT = nothingT;
+}
+
+function fn(): void {
+    consume(TokenT.Name, "expect function name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+
+    begin_compiler(FnT.Function, name);
+    beginScope();
+
+    do {
+        parse_params();
+    } while (match(TokenT.Comma));
+
+    // return type
+    consume(TokenT.Arrow, "expect `->` after list of params");
+    let t = parse_type();
+
+    current.fn.version[0].output = t.base;
+    tempNames[name] = { kind: Kind.CallUser, value: current.fn };
+
+    consume(TokenT.Eq, "expect '=' before fn body");
+
+    expression();
+    emitBytes(Op.Ret, 1);
+    assertT(lastT, t, "return type not match");
+
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(Op.Set, index);
+    emitByte(Kind.CallUser);
+}
+
+function proc(): void {
+    consume(TokenT.Name, "expect procedure name");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+
+    begin_compiler(FnT.Function, name);
+    beginScope();
+
+    do {
+        parse_params();
+    } while (match(TokenT.Comma));
+    console.log(current.fn);
+
+    current.fn.version[0].output = Kind.Nothing;
+    tempNames[name] = { kind: Kind.CallUser, value: current.fn };
+
+    consume(TokenT.LBrace, "expect '{' before proc body");
+
+    procBody();
+    emitBytes(Op.Ret, 0);
+
+    consume(TokenT.RBrace, "expect '}' after proc body");
+
+    let fn = endCompiler();
+    emitConstant(fn);
+    emitBytes(Op.Set, index);
+    emitByte(Kind.CallUser);
+}
+
+function procBody(): void {
+    while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
+        statement();
+    }
+}
+
+function matchType(expected: (Kind[] | Kind), actual: Kind): boolean {
+    if (expected === Kind.Any) {
+        return true;
+    } else if (typeof expected === "number") {
+        return actual === expected;
+    } else {
+        return expected.includes(actual);
+    }
+}
+
+function setToKinds(set_: Kind[]): string[] {
+    let s = [];
+    for (let kind of set_) {
+        s.push(KindName[kind as Kind]);
+    }
+    return s;
 }
 
 function add_local(name: string): void {
