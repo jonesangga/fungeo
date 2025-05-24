@@ -113,6 +113,20 @@ export let C = new FGCallNative("C", 0, _C, [
         output: 700,
     },
 ]);
+function _Ccurv(n) {
+    let curv = pop().value;
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    let c = new Circle(x, y, Math.abs(1 / curv));
+    push(c);
+}
+export const Ccurv = new FGCallNative("Ccurv", 0, _Ccurv, [
+    {
+        input: [500, 500, 500],
+        output: 700,
+    },
+]);
 function _E(n) {
     let ry = pop().value;
     let rx = pop().value;

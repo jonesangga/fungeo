@@ -1,4 +1,4 @@
-import { Print, Printf, Show, Padl, Type, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle, MapPic, Help, Clear } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle, MapPic, Help, Clear, Ccurv } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
@@ -19,6 +19,7 @@ export let nativeNames = {
     "Clear": { kind: 400, value: Clear },
     "Paint": { kind: 400, value: Paint },
     "C": { kind: 400, value: C },
+    "Ccurv": { kind: 400, value: Ccurv },
     "E": { kind: 400, value: E },
     "P": { kind: 400, value: P },
     "Pic": { kind: 400, value: Pic },
