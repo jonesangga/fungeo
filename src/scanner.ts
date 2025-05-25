@@ -228,6 +228,14 @@ function skip_whitespace(): void {
                 line++;
                 advance();
                 break;
+            case '/':
+                if (peek_next() === '/') {
+                    while (peek() !== '\n' && !is_eof())
+                        advance();
+                } else {
+                    return;
+                }
+                break;
             default:
                 return;
         }
