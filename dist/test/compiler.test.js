@@ -294,8 +294,8 @@ describe("compiler numeric binary error", () => {
     matchError(tests);
 });
 describe("compiler string binary", () => {
-    it("Str ++ Str", () => {
-        let source = `result = "so " ++ "real"`;
+    it("Str <> Str", () => {
+        let source = `result = "so " <> "real"`;
         let result = compiler.compile(source);
         if (!result.ok)
             fail();
@@ -312,14 +312,14 @@ describe("compiler string binary", () => {
 describe("compiler string binary error", () => {
     const tests = [
         [
-            "error, when Str ++ Num",
-            `result = "real" ++ 2`,
-            "1: at '2': operands type for '++' didn't match\n"
+            "error, when Str <> Num",
+            `result = "real" <> 2`,
+            "1: at '2': '<>' only for strings\n"
         ],
         [
-            "error, when Num ++ Str",
-            `result = 2 ++ "real"`,
-            "1: at '++': '++' only for strings and lists\n"
+            "error, when Num <> Str",
+            `result = 2 <> "real"`,
+            "1: at '<>': '<>' only for strings\n"
         ],
     ];
     matchError(tests);

@@ -28,6 +28,20 @@ function assertT(actual: TypeCheck, expected: TypeCheck, msg: string): void {
     }
 }
 
+function assertList(actual: TypeCheck, expected: TypeCheck, msg: string): void {
+    // Length must be odd.
+    let len = actual.length;
+    if (len % 2 === 1 && len === expected.length) {
+        for (let i = 0; i < len; i += 2) {
+            if (actual[i] !== expected[i]) {
+                error(msg);
+            }
+        }
+    } else {
+        error(msg);
+    }
+}
+
 // To distinguish function as argument vs function call.
 let canParseArgument = false;
 
@@ -88,7 +102,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Pipe]      : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
-    [TokenT.PlusPlus]  : {prefix: null,            infix: concat,  precedence: Precedence.Term},
+    [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
     [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -357,48 +371,24 @@ function numeric_binary(): void {
         default:            error(`unhandled operator ${ operator }`);
     }
 }
-// function concat(): void {
-    // let operator = prevTok.lexeme;
-    // assertT(lastT, stringT, `'${ operator }' only for strings`);
-
-    // let opType = prevTok.kind;
-    // parsePrecedence(rules[opType].precedence + 1);
-    // assertT(lastT, stringT, `'${ operator }' only for strings`);
-
-    // emitByte(Op.AddStr);
-// }
 
 function concat_str(): void {
     assertT(lastT, stringT, `'<>' only for strings`);
 
-    parsePrecedence(rules[TokenT.LR].precedence + 1);
+    parsePrecedence(Precedence.Term + 1);
     assertT(lastT, stringT, `'<>' only for strings`);
 
     emitByte(Op.AddStr);
 }
 
-// TODO: Separate this. User <> for string, ++ for list.
-function concat(): void {
-    let left = lastT[0];
+function concat_list(): void {
+    let left = lastT;
+    if (left[0] !== Kind.List)
+        error("'++' only for lists");
 
-    if (left === Kind.String) {
-        parsePrecedence(Precedence.Term + 1);
-        if (lastT[0] !== Kind.String)
-            error("operands type for '++' didn't match");
-        emitByte(Op.AddStr);
-    }
-    else if (left === Kind.List) {
-        let elT = lastT[2] as Kind;
-        parsePrecedence(Precedence.Term + 1);
-        console.log(elT, lastT);
-        if (lastT[0] !== Kind.List
-            || lastT[2] !== elT)
-            error("operands type for '++' didn't match");
-        emitBytes(Op.AddList, elT);
-    }
-    else {
-        error("'++' only for strings and lists");
-    }
+    parsePrecedence(Precedence.Term + 1);
+    assertList(left, lastT, "operands type for '++' didn't match");
+    emitBytes(Op.AddList, left[2]);
 }
 
 //--------------------------------------------------------------------

@@ -21,6 +21,19 @@ function assertT(actual, expected, msg) {
         error(msg);
     }
 }
+function assertList(actual, expected, msg) {
+    let len = actual.length;
+    if (len % 2 === 1 && len === expected.length) {
+        for (let i = 0; i < len; i += 2) {
+            if (actual[i] !== expected[i]) {
+                error(msg);
+            }
+        }
+    }
+    else {
+        error(msg);
+    }
+}
 let canParseArgument = false;
 let canAssign = false;
 var Precedence;
@@ -72,7 +85,7 @@ const rules = {
     [1575]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
     [1580]: { prefix: null, infix: or, precedence: 210 },
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
-    [1590]: { prefix: null, infix: concat, precedence: 300 },
+    [1590]: { prefix: null, infix: concat_list, precedence: 300 },
     [2750]: { prefix: null, infix: null, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
@@ -276,30 +289,17 @@ function numeric_binary() {
 }
 function concat_str() {
     assertT(lastT, stringT, `'<>' only for strings`);
-    parsePrecedence(rules[1560].precedence + 1);
+    parsePrecedence(300 + 1);
     assertT(lastT, stringT, `'<>' only for strings`);
     emitByte(120);
 }
-function concat() {
-    let left = lastT[0];
-    if (left === 600) {
-        parsePrecedence(300 + 1);
-        if (lastT[0] !== 600)
-            error("operands type for '++' didn't match");
-        emitByte(120);
-    }
-    else if (left === 470) {
-        let elT = lastT[2];
-        parsePrecedence(300 + 1);
-        console.log(elT, lastT);
-        if (lastT[0] !== 470
-            || lastT[2] !== elT)
-            error("operands type for '++' didn't match");
-        emitBytes(110, elT);
-    }
-    else {
-        error("'++' only for strings and lists");
-    }
+function concat_list() {
+    let left = lastT;
+    if (left[0] !== 470)
+        error("'++' only for lists");
+    parsePrecedence(300 + 1);
+    assertList(left, lastT, "operands type for '++' didn't match");
+    emitBytes(110, left[2]);
 }
 function parse_boolean() {
     if (prevTok.kind === 2000)

@@ -176,7 +176,7 @@ describe("vm Op.IsDiv error", () => {
 });
 describe("vm Op.AddStr", () => {
     it("Op.AddStr", () => {
-        let chunk = setup(`a = "so " ++ "real"`);
+        let chunk = setup(`a = "so " <> "real"`);
         vm.step();
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[1]
