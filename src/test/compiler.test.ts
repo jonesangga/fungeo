@@ -9,8 +9,8 @@
 // import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { deepEqual, fail } from "node:assert/strict";
-import { Op, OpName, Chunk } from "../chunk.js"
-import { Kind, FGBoolean, FGNumber, FGString } from "../value.js"
+import { Op } from "../chunk.js"
+import { Kind, FGNumber, FGString } from "../value.js"
 import { compiler } from "../compiler.js"
 
 //--------------------------------------------------------------------
@@ -357,12 +357,12 @@ describe("compiler string binary error", () => {
         [
             "error, when Str ++ Num",
             `result = "real" ++ 2`,
-            "1: at '2': '++' only for strings\n"
+            "1: at '2': operands type for '++' didn't match\n"
         ],
         [
             "error, when Num ++ Str",
             `result = 2 ++ "real"`,
-            "1: at '++': '++' only for strings\n"
+            "1: at '++': '++' only for strings and lists\n"
         ],
     ];
     matchError(tests);

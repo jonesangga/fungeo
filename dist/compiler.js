@@ -4,14 +4,22 @@ import { KindName, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
 let numberType = { kind: 500 };
-let booleanT = { base: 300 };
-let numberT = { base: 500 };
-let stringT = { base: 600 };
-let nothingT = { base: 100 };
+let booleanT = [300];
+let numberT = [500];
+let stringT = [600];
+let nothingT = [100];
 let lastT = nothingT;
-function assertT(actual, expect, msg) {
-    if (actual.base !== expect.base)
+function assertT(actual, expected, msg) {
+    if (actual.length === expected.length) {
+        for (let i = 0; i < actual.length; i++) {
+            if (actual[i] !== expected[i]) {
+                error(msg);
+            }
+        }
+    }
+    else {
         error(msg);
+    }
 }
 let canParseArgument = false;
 let canAssign = false;
@@ -220,11 +228,11 @@ function boolean_isdiv() {
 function boolean_compare() {
     let opType = prevTok.kind;
     let operator = prevTok.lexeme;
-    let left = lastT.base;
+    let left = lastT[0];
     if (left !== 500 && left !== 600)
         error("can only compare strings and numbers");
     parsePrecedence(250 + 1);
-    if (lastT.base !== left)
+    if (lastT[0] !== left)
         error("operands type for comparison didn't match");
     switch (opType) {
         case 1520:
@@ -266,19 +274,19 @@ function numeric_binary() {
     }
 }
 function concat() {
-    let left = lastT.base;
+    let left = lastT[0];
     if (left === 600) {
         parsePrecedence(300 + 1);
-        if (lastT.base !== 600)
+        if (lastT[0] !== 600)
             error("operands type for '++' didn't match");
         emitByte(120);
     }
     else if (left === 470) {
-        let elT = lastT.elKind;
+        let elT = lastT[2];
         parsePrecedence(300 + 1);
         console.log(elT, lastT);
-        if (lastT.base !== 470
-            || lastT.elKind !== elT)
+        if (lastT[0] !== 470
+            || lastT[2] !== elT)
             error("operands type for '++' didn't match");
         emitBytes(110, elT);
     }
@@ -315,22 +323,20 @@ function parse_list() {
             canParseArgument = true;
             lastT = nothingT;
             expression();
-            assertT(lastT, listT, `in list[]: expect argument of type ${KindName[listT.base]}, got ${KindName[lastT.base]}`);
+            assertT(lastT, listT, `in list[]: expect argument of type ${KindName[listT[0]]}, got ${KindName[lastT[0]]}`);
             length++;
         }
     }
     consume(700, "expect ']' after list elements");
     emitBytes(700, length);
-    emitByte(listT.base);
-    lastT = { base: 470, elKind: listT.base };
+    emitByte(listT[0]);
+    lastT = [470, length, listT[0]];
 }
 function parse_return() {
     console.log("in parse_return()");
     expression();
     emitByte(1300);
-    let resultT = lastT;
     lastT = nothingT;
-    return resultT;
 }
 let tempNames = {};
 function resolveLocal(compiler, name) {
@@ -381,7 +387,7 @@ function set_local(name) {
     canParseArgument = true;
     expression();
     emitByte(1410);
-    current.locals[current.locals.length - 1].type = { kind: lastT.base };
+    current.locals[current.locals.length - 1].type = { kind: lastT[0] };
     lastT = nothingT;
 }
 function set_global(name) {
@@ -395,18 +401,18 @@ function set_global(name) {
     canParseArgument = true;
     expression();
     emitBytes(1400, index);
-    emitByte(lastT.base);
-    if (lastT.base === 470)
-        tempNames[name] = { kind: lastT.base, elKind: lastT.elKind };
+    emitByte(lastT[0]);
+    if (lastT[0] === 470)
+        tempNames[name] = { kind: lastT[0], elKind: lastT[2] };
     else
-        tempNames[name] = { kind: lastT.base };
+        tempNames[name] = { kind: lastT[0] };
     lastT = nothingT;
 }
 function get_name(name) {
     let arg = resolveLocal(current, name);
     if (arg != -1) {
         emitBytes(395, arg);
-        lastT = { base: current.locals[arg].type.kind };
+        lastT = [current.locals[arg].type.kind];
     }
     else if (Object.hasOwn(nativeNames, name)) {
         get_global(nativeNames, name, true);
@@ -466,8 +472,8 @@ function global_callable(name_, table, native) {
                 expression();
             else
                 parsePrecedence(600);
-            gotTypes.push(lastT.base);
-            if (!matchType(inputVersion[k], lastT.base)) {
+            gotTypes.push(lastT[0]);
+            if (!matchType(inputVersion[k], lastT[0])) {
                 checkNextVersion = true;
                 success = false;
                 break;
@@ -491,7 +497,7 @@ function global_callable(name_, table, native) {
     if (version[i].output === 100)
         lastT = nothingT;
     else
-        lastT = { base: version[i].output };
+        lastT = [version[i].output];
 }
 function global_non_callable(table, name, native) {
     console.log("in global_non_callable()");
@@ -502,22 +508,21 @@ function global_non_callable(table, name, native) {
         emitBytes(500, index);
     console.log(table[name]);
     if (table[name].kind === 470)
-        lastT = { base: 470, elKind: table[name].elKind };
+        lastT = [470, table[name].length, table[name].elKind];
     else
-        lastT = { base: table[name].kind };
+        lastT = [table[name].kind];
 }
 function parse_type() {
     advance();
     switch (prevTok.kind) {
         case 2220:
-            return { base: 300 };
+            return booleanT;
         case 2600:
-            return { base: 500 };
+            return numberT;
         case 2900:
-            return { base: 600 };
+            return stringT;
         default:
             error("expect parameter type");
-            return { base: 100 };
     }
 }
 function parse_params() {
@@ -533,8 +538,8 @@ function parse_params() {
     add_local(name);
     consume(1300, "expect `:` after parameter name");
     let t = parse_type();
-    current.locals[current.locals.length - 1].type = { kind: t.base };
-    current.fn.version[0].input.push(t.base);
+    current.locals[current.locals.length - 1].type = { kind: t[0] };
+    current.fn.version[0].input.push(t[0]);
     lastT = nothingT;
 }
 function fn() {
@@ -548,7 +553,7 @@ function fn() {
     } while (match(100));
     consume(1195, "expect `->` after list of params");
     let t = parse_type();
-    current.fn.version[0].output = t.base;
+    current.fn.version[0].output = t[0];
     tempNames[name] = { kind: 450, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();

@@ -314,12 +314,12 @@ describe("compiler string binary error", () => {
         [
             "error, when Str ++ Num",
             `result = "real" ++ 2`,
-            "1: at '2': '++' only for strings\n"
+            "1: at '2': operands type for '++' didn't match\n"
         ],
         [
             "error, when Num ++ Str",
             `result = 2 ++ "real"`,
-            "1: at '++': '++' only for strings\n"
+            "1: at '++': '++' only for strings and lists\n"
         ],
     ];
     matchError(tests);
