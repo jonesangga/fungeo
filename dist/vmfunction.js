@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js";
-import { geoKind, KindName, FGCallNative, FGString } from "./value.js";
+import { geoKind, KindName, FGCallNative, FGString, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
@@ -114,17 +114,31 @@ export let C = new FGCallNative("C", 0, _C, [
     },
 ]);
 function _Ccurv(n) {
-    let curv = pop().value;
+    let bend = pop().value;
     let y = pop().value;
     let x = pop().value;
     pop();
-    let c = new Circle(x, y, Math.abs(1 / curv));
+    let c = Circle.with_bend(x, y, bend);
     push(c);
 }
 export const Ccurv = new FGCallNative("Ccurv", 0, _Ccurv, [
     {
         input: [500, 500, 500],
         output: 700,
+    },
+]);
+function _Descart(n) {
+    let c3 = pop();
+    let c2 = pop();
+    let c1 = pop();
+    pop();
+    let list = new FGList(Circle.descartes(c1, c2, c3), 500);
+    push(list);
+}
+export const Descart = new FGCallNative("Descart", 0, _Descart, [
+    {
+        input: [700, 700, 700],
+        output: 470,
     },
 ]);
 function _E(n) {

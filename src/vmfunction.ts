@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js"
-import { CallT, Kind, type GeoObj, geoKind, KindName, FGCallNative, FGNumber, FGString } from "./value.js"
+import { CallT, Kind, type GeoObj, geoKind, KindName, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
@@ -124,17 +124,32 @@ export let C = new FGCallNative("C", CallT.Function, _C, [
 ]);
 
 function _Ccurv(n: number): void {
-    let curv = (pop() as FGNumber).value;
+    let bend = (pop() as FGNumber).value;
     let y = (pop() as FGNumber).value;
     let x = (pop() as FGNumber).value;
     pop();              // The function.
-    let c = new Circle(x, y, Math.abs(1/curv));
+    let c = Circle.with_bend(x, y, bend);
     push(c);
 }
 export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv, [
     {
         input:  [Kind.Number, Kind.Number, Kind.Number],
         output: Kind.Circle,
+    },
+]);
+
+function _Descart(n: number): void {
+    let c3 = pop() as Circle;
+    let c2 = pop() as Circle;
+    let c1 = pop() as Circle;
+    pop();              // The function.
+    let list = new FGList<Kind.Number>(Circle.descartes(c1, c2, c3), Kind.Number);
+    push(list);
+}
+export const Descart = new FGCallNative("Descart", CallT.Function, _Descart, [
+    {
+        input:  [Kind.Circle, Kind.Circle, Kind.Circle],
+        output: Kind.List,
     },
 ]);
 
