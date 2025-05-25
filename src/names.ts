@@ -15,7 +15,7 @@ import fish from "./data/fish.js"
 export type Info = {
     kind:     Kind,
     value?:   Value,
-    listKind?: Kind,
+    elKind?: Kind,
     drawn?:   boolean,
 };
 

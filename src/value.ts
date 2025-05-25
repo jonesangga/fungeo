@@ -16,6 +16,7 @@ export const enum Kind {
     Boolean  = 300,     // Literal.
     CallNative = 400,
     CallUser = 450,
+    List     = 470,
     Number   = 500,
     String   = 600,
     Type     = 650,
@@ -39,6 +40,7 @@ export const KindName: {
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
     [Kind.Ellipse]: "Ellipse",
+    [Kind.List]: "List",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Picture]: "Picture",
@@ -211,7 +213,35 @@ export class FGType implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType;
+export class FGList<K extends Kind> implements FG {
+    kind: Kind.List = Kind.List;
+    length: number;
+
+    constructor(
+        public value: Extract<Value, {kind: K}>[],
+        public elKind: K,
+    ) {
+        this.length = value.length;
+    }
+
+    to_str(): string {
+        let str = "[";
+        str += this.value.map(el => el.to_str()).join(",");
+        return str + "]";
+    }
+    // add<S extends Kind>(other: FGList<S>): FGList<Kind.Number> {
+        // // return new FGList<K>([...this.value, ...other.value], this.elKind);
+        // return new FGList<Kind.Number>([], Kind.Number);
+    // }
+
+    // TODO: implement this.
+    equal(other: FG): boolean {
+        return false;
+    }
+}
+
+export type List = FGList<Kind>;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | List;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;

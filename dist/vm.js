@@ -1,4 +1,4 @@
-import { FGBoolean, FGNumber } from "./value.js";
+import { FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
 export let stack = [];
 export let stackTop = 0;
@@ -43,6 +43,17 @@ function call(fn, argCount) {
     currChunk = fn.chunk;
     frames.push(currFrame);
 }
+function create_list(length, elKind) {
+    let el = [];
+    for (let i = 0; i < length; i++)
+        el[length - i - 1] = pop();
+    push(new FGList(el, elKind));
+}
+function concat_list(elKind) {
+    let b = pop();
+    let a = pop();
+    push(new FGList([...a.value, ...b.value], elKind));
+}
 function compare(f) {
     let b = pop();
     let a = pop();
@@ -52,7 +63,7 @@ const lt = (a, b) => a < b;
 const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
-const debug = false;
+const debug = true;
 function run() {
     for (;;) {
         if (debug) {
@@ -71,6 +82,11 @@ function run() {
                 let b = pop();
                 let a = pop();
                 push(a.add(b));
+                break;
+            }
+            case 110: {
+                let elKind = read_byte();
+                concat_list(elKind);
                 break;
             }
             case 120: {
@@ -266,7 +282,16 @@ function run() {
                 let name = read_string();
                 let kind = read_byte();
                 let value = pop();
-                userNames[name] = { kind, value };
+                if (kind === 470)
+                    userNames[name] = { kind, value, elKind: value.elKind };
+                else
+                    userNames[name] = { kind, value };
+                break;
+            }
+            case 700: {
+                let length = read_byte();
+                let elKind = read_byte();
+                create_list(length, elKind);
                 break;
             }
             case 395: {

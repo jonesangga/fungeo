@@ -52,7 +52,7 @@ const rules = {
     [2400]: { prefix: null, infix: null, precedence: 100 },
     [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
-    [400]: { prefix: null, infix: null, precedence: 100 },
+    [400]: { prefix: parse_list, infix: null, precedence: 100 },
     [1550]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
@@ -63,7 +63,7 @@ const rules = {
     [1575]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
     [1580]: { prefix: null, infix: or, precedence: 210 },
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
-    [1590]: { prefix: null, infix: string_binary, precedence: 300 },
+    [1590]: { prefix: null, infix: concat, precedence: 300 },
     [2750]: { prefix: null, infix: null, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
@@ -106,6 +106,7 @@ function begin_compiler(kind, name) {
 function endCompiler() {
     emitReturn();
     let fn = current.fn;
+    console.log(currentChunk().disassemble());
     current = current.enclosing;
     return fn;
 }
@@ -264,13 +265,26 @@ function numeric_binary() {
         default: error(`unhandled operator ${operator}`);
     }
 }
-function string_binary() {
-    let operator = prevTok.lexeme;
-    assertT(lastT, stringT, `'${operator}' only for strings`);
-    let opType = prevTok.kind;
-    parsePrecedence(rules[opType].precedence + 1);
-    assertT(lastT, stringT, `'${operator}' only for strings`);
-    emitByte(120);
+function concat() {
+    let left = lastT.base;
+    if (left === 600) {
+        parsePrecedence(300 + 1);
+        if (lastT.base !== 600)
+            error("operands type for '++' didn't match");
+        emitByte(120);
+    }
+    else if (left === 470) {
+        let elT = lastT.elKind;
+        parsePrecedence(300 + 1);
+        console.log(elT, lastT);
+        if (lastT.base !== 470
+            || lastT.elKind !== elT)
+            error("operands type for '++' didn't match");
+        emitBytes(110, elT);
+    }
+    else {
+        error("'++' only for strings and lists");
+    }
 }
 function parse_boolean() {
     if (prevTok.kind === 2000)
@@ -287,6 +301,28 @@ function parse_number() {
 function parse_string() {
     emitConstant(new FGString(prevTok.lexeme));
     lastT = stringT;
+}
+function parse_list() {
+    let length = 0;
+    let listT = nothingT;
+    if (!check(700)) {
+        canParseArgument = true;
+        lastT = nothingT;
+        expression();
+        listT = lastT;
+        length++;
+        while (match(100)) {
+            canParseArgument = true;
+            lastT = nothingT;
+            expression();
+            assertT(lastT, listT, `in list[]: expect argument of type ${KindName[listT.base]}, got ${KindName[lastT.base]}`);
+            length++;
+        }
+    }
+    consume(700, "expect ']' after list elements");
+    emitBytes(700, length);
+    emitByte(listT.base);
+    lastT = { base: 470, elKind: listT.base };
 }
 function parse_return() {
     console.log("in parse_return()");
@@ -360,7 +396,10 @@ function set_global(name) {
     expression();
     emitBytes(1400, index);
     emitByte(lastT.base);
-    tempNames[name] = { kind: lastT.base };
+    if (lastT.base === 470)
+        tempNames[name] = { kind: lastT.base, elKind: lastT.elKind };
+    else
+        tempNames[name] = { kind: lastT.base };
     lastT = nothingT;
 }
 function get_name(name) {
@@ -455,12 +494,17 @@ function global_callable(name_, table, native) {
         lastT = { base: version[i].output };
 }
 function global_non_callable(table, name, native) {
+    console.log("in global_non_callable()");
     let index = makeConstant(new FGString(name));
     if (native)
         emitBytes(400, index);
     else
         emitBytes(500, index);
-    lastT = { base: table[name].kind };
+    console.log(table[name]);
+    if (table[name].kind === 470)
+        lastT = { base: 470, elKind: table[name].elKind };
+    else
+        lastT = { base: table[name].kind };
 }
 function parse_type() {
     advance();

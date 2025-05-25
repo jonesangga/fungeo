@@ -1,9 +1,8 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { type GeoObj, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value, type Comparable } from "./value.js"
+import { Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, List, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
-import canvas from "./ui/canvas.js"
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -70,6 +69,20 @@ function call(fn: FGCallUser, argCount: number) {
     frames.push(currFrame);
 }
 
+function create_list<T extends Kind>(length: number, elKind: T): void {
+    type t = Extract<Value, {kind: T}>;
+    let el: t[] = [];
+    for (let i = 0; i < length; i++)
+        el[length-i-1] = pop() as t;
+    push(new FGList<T>(el, elKind));
+}
+
+function concat_list<T extends Kind>(elKind: T): void {
+    let b = pop() as FGList<T>;
+    let a = pop() as FGList<T>;
+    push(new FGList<T>([...a.value, ...b.value], elKind));
+}
+
 type NumStr = number | string;
 
 function compare(
@@ -85,7 +98,7 @@ const gt = (a: NumStr, b: NumStr): boolean => a > b;
 const leq = (a: NumStr, b: NumStr): boolean => a <= b;
 const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
-const debug = false;
+const debug = true;
 
 function run(): boolean {
     for (;;) {
@@ -106,6 +119,12 @@ function run(): boolean {
                 let b = pop() as FGNumber;
                 let a = pop() as FGNumber;
                 push(a.add(b));
+                break;
+            }
+
+            case Op.AddList: {
+                let elKind: Kind = read_byte();
+                concat_list(elKind);
                 break;
             }
 
@@ -316,7 +335,17 @@ function run(): boolean {
                 let name = read_string();
                 let kind = read_byte();
                 let value = pop();
-                userNames[name] = { kind, value };
+                if (kind === Kind.List)
+                    userNames[name] = { kind, value, elKind: (value as List).elKind };
+                else
+                    userNames[name] = { kind, value };
+                break;
+            }
+
+            case Op.List: {
+                let length = read_byte();
+                let elKind = read_byte();
+                create_list(length, elKind);
                 break;
             }
 

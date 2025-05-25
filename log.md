@@ -1,7 +1,20 @@
 # Log
 
+#### 25-05-25
+
+- add optional elKind in TypeCheck after base
+- overload ++ for list concat
+- implement list
+
 #### 24-05-25
 
+- make temporary Ccurv function to create Circle given a curvature
+  later it should be namespaced
+- display help on start up
+- new help.ts file
+- make Clear/0 native procedure
+- remove Clear token, Op, and in vm switch
+- add test for native procedure with no arg
 - bug: cannot print <fn funcname>. Change to {fn funcname}
 - make native procedure Help/0
 - support native procedure that doesnt have arg

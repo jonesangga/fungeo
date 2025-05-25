@@ -2,6 +2,7 @@ import { KindName } from "./value.js";
 export var Op;
 (function (Op) {
     Op[Op["Add"] = 100] = "Add";
+    Op[Op["AddList"] = 110] = "AddList";
     Op[Op["AddStr"] = 120] = "AddStr";
     Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["CallUsr"] = 205] = "CallUsr";
@@ -41,6 +42,7 @@ export var Op;
 ;
 export const OpName = {
     [100]: "Add",
+    [110]: "AddList",
     [120]: "AddStr",
     [200]: "CallNat",
     [205]: "CallUsr",
@@ -153,6 +155,7 @@ export class Chunk {
                 result += `${padr7(name)} ${padl4(offset)} -> ${offset + 2 + jump}\n`;
                 return [result, offset + 2];
             }
+            case 110:
             case 210:
             case 212:
             case 215:
@@ -170,6 +173,13 @@ export class Chunk {
                 result += `${padr7(name)} ${padl4(nameId)} '`;
                 result += this.values[nameId].to_str();
                 result += `: ${KindName[kind]}'\n`;
+                return [result, offset + 3];
+            }
+            case 700: {
+                let length = this.code[offset + 1];
+                let elKind = this.code[offset + 2];
+                result += `${padr7(name)} ${padl4(length)} '`;
+                result += `${KindName[elKind]}'\n`;
                 return [result, offset + 3];
             }
             default: {

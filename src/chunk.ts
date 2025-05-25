@@ -6,6 +6,7 @@ import { Kind, KindName, type Value } from "./value.js"
 
 export const enum Op {
     Add     = 100,
+    AddList = 110,
     AddStr  = 120,
     CallNat = 200,
     CallUsr = 205,
@@ -47,6 +48,7 @@ export const OpName: {
     [N in (keyof typeof Op) as (typeof Op)[N]]: N
 } = {
     [Op.Add]: "Add",
+    [Op.AddList]: "AddList",
     [Op.AddStr]: "AddStr",
     [Op.CallNat]: "CallNat",
     [Op.CallUsr]: "CallUsr",
@@ -169,6 +171,7 @@ export class Chunk {
                 return [result, offset + 2];
             }
 
+            case Op.AddList:
             case Op.CkExc:
             case Op.CkExcD:
             case Op.CkInc:
@@ -188,6 +191,15 @@ export class Chunk {
                 result += `${ padr7(name) } ${ padl4(nameId) } '`;
                 result += this.values[nameId].to_str();
                 result += `: ${ KindName[kind] }'\n`;
+                return [result, offset + 3];
+            }
+
+            case Op.List: {
+                let length       = this.code[offset + 1];
+                let elKind: Kind = this.code[offset + 2];
+
+                result += `${ padr7(name) } ${ padl4(length) } '`;
+                result += `${ KindName[elKind] }'\n`;
                 return [result, offset + 3];
             }
 

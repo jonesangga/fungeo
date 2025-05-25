@@ -10,13 +10,14 @@ let numberType: Info = { kind: Kind.Number };
 
 type TypeCheck = {
     base: Kind;
+    elKind?: Kind;
 }
 
 let booleanT = { base: Kind.Boolean };
 let numberT  = { base: Kind.Number };
 let stringT  = { base: Kind.String };
 let nothingT = { base: Kind.Nothing };
-let lastT = nothingT;
+let lastT: TypeCheck = nothingT;
 
 function assertT(actual: TypeCheck, expect: TypeCheck, msg: string): void {
     if (actual.base !== expect.base)
@@ -71,7 +72,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Ifx]       : {prefix: parse_ifx,       infix: null,    precedence: Precedence.None},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.LBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.LBracket]  : {prefix: parse_list,      infix: null,    precedence: Precedence.None},
     [TokenT.Less]      : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LessEq]    : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
@@ -82,7 +83,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Pipe]      : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
-    [TokenT.PlusPlus]  : {prefix: null,            infix: string_binary,  precedence: Precedence.Term},
+    [TokenT.PlusPlus]  : {prefix: null,            infix: concat,  precedence: Precedence.Term},
     [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -151,7 +152,7 @@ function begin_compiler(kind: FnT, name: string): void {
 function endCompiler(): FGCallUser {
     emitReturn();
     let fn = current.fn;
-    // console.log( currentChunk().disassemble() );
+    console.log( currentChunk().disassemble() );
     current = current.enclosing as Compiler;
     return fn;
 }
@@ -351,17 +352,39 @@ function numeric_binary(): void {
         default:            error(`unhandled operator ${ operator }`);
     }
 }
+// function concat(): void {
+    // let operator = prevTok.lexeme;
+    // assertT(lastT, stringT, `'${ operator }' only for strings`);
 
-// The result of these operators is of type Str.
-function string_binary(): void {
-    let operator = prevTok.lexeme;
-    assertT(lastT, stringT, `'${ operator }' only for strings`);
+    // let opType = prevTok.kind;
+    // parsePrecedence(rules[opType].precedence + 1);
+    // assertT(lastT, stringT, `'${ operator }' only for strings`);
 
-    let opType = prevTok.kind;
-    parsePrecedence(rules[opType].precedence + 1);
-    assertT(lastT, stringT, `'${ operator }' only for strings`);
+    // emitByte(Op.AddStr);
+// }
 
-    emitByte(Op.AddStr);
+// TODO: Separate this. User <> for string, ++ for list.
+function concat(): void {
+    let left = lastT.base;
+
+    if (left === Kind.String) {
+        parsePrecedence(Precedence.Term + 1);
+        if (lastT.base !== Kind.String)
+            error("operands type for '++' didn't match");
+        emitByte(Op.AddStr);
+    }
+    else if (left === Kind.List) {
+        let elT = lastT.elKind as Kind;
+        parsePrecedence(Precedence.Term + 1);
+        console.log(elT, lastT);
+        if (lastT.base !== Kind.List
+            || lastT.elKind !== elT)
+            error("operands type for '++' didn't match");
+        emitBytes(Op.AddList, elT);
+    }
+    else {
+        error("'++' only for strings and lists");
+    }
 }
 
 //--------------------------------------------------------------------
@@ -386,6 +409,30 @@ function parse_string(): void {
     lastT = stringT;
 }
 
+function parse_list(): void {
+    let length = 0;
+    let listT = nothingT;
+
+    if (!check(TokenT.RBracket)) {
+        canParseArgument = true;
+        lastT = nothingT;
+        expression();
+        listT = lastT;
+        length++;
+        while (match(TokenT.Comma)) {
+            canParseArgument = true;
+            lastT = nothingT;
+            expression();
+            assertT(lastT, listT, `in list[]: expect argument of type ${KindName[listT.base]}, got ${KindName[lastT.base]}`);
+            length++;
+        }
+    }
+    consume(TokenT.RBracket, "expect ']' after list elements");
+    emitBytes(Op.List, length);
+    emitByte(listT.base);
+    lastT = { base: Kind.List, elKind: listT.base };
+}
+
 function parse_return(): {base: Kind} {
     console.log("in parse_return()");
     expression();
@@ -398,8 +445,9 @@ function parse_return(): {base: Kind} {
 //--------------------------------------------------------------------
 
 interface TempTypes {
-    kind:     Kind;
-    value?:   Value,
+    kind:    Kind;
+    value?:  Value,
+    elKind?: Kind,
 }
 
 interface TempNames {
@@ -480,7 +528,10 @@ function set_global(name: string): void {
 
     emitBytes(Op.Set, index);
     emitByte(lastT.base);
-    tempNames[name] = { kind: lastT.base };
+    if (lastT.base === Kind.List)
+        tempNames[name] = { kind: lastT.base, elKind: lastT.elKind };
+    else
+        tempNames[name] = { kind: lastT.base };
     lastT = nothingT;
 }
 
@@ -592,13 +643,18 @@ function global_callable(name_: string, table: any, native: boolean): void {
 }
 
 function global_non_callable(table: any, name: string, native: boolean): void {
+    console.log("in global_non_callable()");
     let index = makeConstant(new FGString(name));
     if (native)
         emitBytes(Op.GetNat, index);
     else
         emitBytes(Op.GetUsr, index);
 
-    lastT = {base: table[name].kind};
+    console.log(table[name]);
+    if (table[name].kind === Kind.List)
+        lastT = {base: Kind.List, elKind: table[name].elKind};
+    else
+        lastT = {base: table[name].kind};
 }
 
 function parse_type(): {base: Kind} {

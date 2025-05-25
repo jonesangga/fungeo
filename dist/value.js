@@ -5,6 +5,7 @@ export var Kind;
     Kind[Kind["Boolean"] = 300] = "Boolean";
     Kind[Kind["CallNative"] = 400] = "CallNative";
     Kind[Kind["CallUser"] = 450] = "CallUser";
+    Kind[Kind["List"] = 470] = "List";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Type"] = 650] = "Type";
@@ -26,6 +27,7 @@ export const KindName = {
     [2000]: "Canvas",
     [700]: "Circle",
     [750]: "Ellipse",
+    [470]: "List",
     [100]: "Nothing",
     [500]: "Number",
     [840]: "Picture",
@@ -166,6 +168,25 @@ export class FGType {
             return false;
         if ("base" in other)
             return this.base === other.base;
+        return false;
+    }
+}
+export class FGList {
+    value;
+    elKind;
+    kind = 470;
+    length;
+    constructor(value, elKind) {
+        this.value = value;
+        this.elKind = elKind;
+        this.length = value.length;
+    }
+    to_str() {
+        let str = "[";
+        str += this.value.map(el => el.to_str()).join(",");
+        return str + "]";
+    }
+    equal(other) {
         return false;
     }
 }
