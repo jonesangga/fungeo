@@ -162,6 +162,7 @@ export class Chunk {
             case 217:
             case 395:
             case 595:
+            case 600:
             case 1300: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;

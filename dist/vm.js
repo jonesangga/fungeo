@@ -54,6 +54,15 @@ function concat_list(elKind) {
     let a = pop();
     push(new FGList([...a.value, ...b.value], elKind));
 }
+function index_list(elKind) {
+    let id = pop().value;
+    let list = pop();
+    if (id >= list.length) {
+        error("Out of bound access");
+    }
+    let value = list.value[id];
+    push(value);
+}
 function compare(f) {
     let b = pop();
     let a = pop();
@@ -292,6 +301,11 @@ function run() {
                 let length = read_byte();
                 let elKind = read_byte();
                 create_list(length, elKind);
+                break;
+            }
+            case 600: {
+                let elKind = read_byte();
+                index_list(elKind);
                 break;
             }
             case 395: {

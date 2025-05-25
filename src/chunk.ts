@@ -178,6 +178,7 @@ export class Chunk {
             case Op.CkIncD:
             case Op.GetLoc:
             case Op.Inc:
+            case Op.Index:
             case Op.Ret: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;

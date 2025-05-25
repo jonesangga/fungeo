@@ -83,6 +83,16 @@ function concat_list<T extends Kind>(elKind: T): void {
     push(new FGList<T>([...a.value, ...b.value], elKind));
 }
 
+function index_list<T extends Kind>(elKind: T): void {
+    let id = (pop() as FGNumber).value;
+    let list = pop() as FGList<T>;
+    if (id >= list.length) {
+        error("Out of bound access");
+    }
+    let value = list.value[id];
+    push(value);
+}
+
 type NumStr = number | string;
 
 function compare(
@@ -346,6 +356,11 @@ function run(): boolean {
                 let length = read_byte();
                 let elKind = read_byte();
                 create_list(length, elKind);
+                break;
+            }
+            case Op.Index: {
+                let elKind: Kind = read_byte();
+                index_list(elKind);
                 break;
             }
 

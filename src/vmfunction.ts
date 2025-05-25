@@ -138,6 +138,7 @@ export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv, [
     },
 ]);
 
+// TODO: Clean up
 function _Descart(n: number): void {
     let c3 = pop() as Circle;
     let c2 = pop() as Circle;
@@ -149,6 +150,23 @@ function _Descart(n: number): void {
 export const Descart = new FGCallNative("Descart", CallT.Function, _Descart, [
     {
         input:  [Kind.Circle, Kind.Circle, Kind.Circle],
+        output: Kind.List,
+    },
+]);
+
+// TODO: Clean up
+function _ComplexDescart(n: number): void {
+    let list = pop() as FGList<Kind.Number>;
+    let c3 = pop() as Circle;
+    let c2 = pop() as Circle;
+    let c1 = pop() as Circle;
+    pop();              // The function.
+    let circles = new FGList<Kind.Circle>(Circle.complex_descartes(c1, c2, c3, list.value), Kind.Circle);
+    push(circles);
+}
+export const ComplexDescart = new FGCallNative("ComplexDescart", CallT.Function, _ComplexDescart, [
+    {
+        input:  [Kind.Circle, Kind.Circle, Kind.Circle, Kind.List],
         output: Kind.List,
     },
 ]);

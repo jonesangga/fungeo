@@ -73,7 +73,7 @@ const rules = {
     [2400]: { prefix: null, infix: null, precedence: 100 },
     [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
-    [400]: { prefix: parse_list, infix: null, precedence: 100 },
+    [400]: { prefix: parse_list, infix: index_list, precedence: 600 },
     [1550]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
@@ -338,6 +338,19 @@ function parse_list() {
     emitBytes(700, length);
     emitByte(listT[0]);
     lastT = [470, length, listT[0]];
+}
+function index_list() {
+    console.log("in indexlist()");
+    if (lastT[0] !== 470)
+        error("Can only index a list");
+    let listKind = lastT[2];
+    lastT = nothingT;
+    expression();
+    if (lastT[0] !== 500)
+        error("Can only use number to index a list");
+    consume(700, "expect ']' after indexing");
+    emitBytes(600, listKind);
+    lastT = [listKind];
 }
 function parse_return() {
     console.log("in parse_return()");

@@ -90,7 +90,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Ifx]       : {prefix: parse_ifx,       infix: null,    precedence: Precedence.None},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.LBracket]  : {prefix: parse_list,      infix: null,    precedence: Precedence.None},
+    [TokenT.LBracket]  : {prefix: parse_list,      infix: index_list,    precedence: Precedence.Call},
     [TokenT.Less]      : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LessEq]    : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
@@ -435,6 +435,20 @@ function parse_list(): void {
     emitBytes(Op.List, length);
     emitByte(listT[0]);
     lastT = [Kind.List, length, listT[0]];
+}
+
+function index_list(): void {
+    console.log("in indexlist()");
+    if (lastT[0] !== Kind.List)
+        error("Can only index a list");
+    let listKind = lastT[2] as Kind;
+    lastT = nothingT;
+    expression();
+    if (lastT[0] !== Kind.Number)
+        error("Can only use number to index a list");
+    consume(TokenT.RBracket, "expect ']' after indexing");
+    emitBytes(Op.Index, listKind);
+    lastT = [listKind];
 }
 
 function parse_return(): void {

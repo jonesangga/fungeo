@@ -5,6 +5,7 @@ export var Kind;
     Kind[Kind["Boolean"] = 300] = "Boolean";
     Kind[Kind["CallNative"] = 400] = "CallNative";
     Kind[Kind["CallUser"] = 450] = "CallUser";
+    Kind[Kind["Complex"] = 460] = "Complex";
     Kind[Kind["List"] = 470] = "List";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
@@ -26,6 +27,7 @@ export const KindName = {
     [450]: "CallUser",
     [2000]: "Canvas",
     [700]: "Circle",
+    [460]: "Complex",
     [750]: "Ellipse",
     [470]: "List",
     [100]: "Nothing",
@@ -131,6 +133,42 @@ export class FGNumber {
             return false;
         if ("value" in other)
             return this.value === other.value;
+        return false;
+    }
+}
+export class FGComplex {
+    a;
+    b;
+    kind = 460;
+    constructor(a, b) {
+        this.a = a;
+        this.b = b;
+    }
+    to_str() {
+        return `${this.a}+${this.b}i`;
+    }
+    add(other) {
+        return new FGComplex(this.a + other.a, this.b + other.b);
+    }
+    sub(other) {
+        return new FGComplex(this.a - other.a, this.b - other.b);
+    }
+    scale(value) {
+        return new FGComplex(this.a * value, this.b * value);
+    }
+    mul(other) {
+        let a = this.a * other.a - this.b * other.b;
+        let b = this.a * other.b + other.a * this.b;
+        return new FGComplex(a, b);
+    }
+    sqrt() {
+        let m = Math.sqrt(this.a * this.a + this.b * this.b);
+        let angle = Math.atan2(this.b, this.a);
+        m = Math.sqrt(m);
+        angle = angle / 2;
+        return new FGComplex(m * Math.cos(angle), m * Math.sin(angle));
+    }
+    equal(other) {
         return false;
     }
 }

@@ -16,6 +16,7 @@ export const enum Kind {
     Boolean  = 300,     // Literal.
     CallNative = 400,
     CallUser = 450,
+    Complex  = 460,
     List     = 470,
     Number   = 500,
     String   = 600,
@@ -39,6 +40,7 @@ export const KindName: {
     [Kind.CallUser]: "CallUser",
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
+    [Kind.Complex]: "Complex",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
     [Kind.Nothing]: "Nothing",
@@ -170,6 +172,47 @@ export class FGNumber implements FG {
     equal(other: FG): boolean {
         if (this.kind !== other.kind) return false;
         if ("value" in other) return this.value === other.value;
+        return false;
+    }
+}
+
+export class FGComplex implements FG {
+    kind: Kind.Complex = Kind.Complex;
+
+    constructor(
+        public a: number,
+        public b: number
+    ) {}
+
+    to_str(): string {
+        return `${ this.a }+${ this.b }i`;
+    }
+
+    add(other: FGComplex): FGComplex {
+        return new FGComplex(this.a + other.a, this.b + other.b);
+    }
+    sub(other: FGComplex): FGComplex {
+        return new FGComplex(this.a - other.a, this.b - other.b);
+    }
+    scale(value: number): FGComplex {
+        return new FGComplex(this.a * value, this.b * value);
+    }
+    mul(other: FGComplex): FGComplex {
+        let a = this.a * other.a - this.b * other.b;
+        let b = this.a * other.b + other.a * this.b;
+        return new FGComplex(a, b);
+    }
+    sqrt() {
+        // Convert to polar form
+        let m = Math.sqrt(this.a * this.a + this.b * this.b);
+        let angle = Math.atan2(this.b, this.a);
+        // Calculate square root of magnitude and use half the angle for square root
+        m = Math.sqrt(m);
+        angle = angle / 2;
+        // Back to rectangular form
+        return new FGComplex(m * Math.cos(angle), m * Math.sin(angle));
+    }
+    equal(other: FG): boolean {
         return false;
     }
 }

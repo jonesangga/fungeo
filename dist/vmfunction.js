@@ -141,6 +141,21 @@ export const Descart = new FGCallNative("Descart", 0, _Descart, [
         output: 470,
     },
 ]);
+function _ComplexDescart(n) {
+    let list = pop();
+    let c3 = pop();
+    let c2 = pop();
+    let c1 = pop();
+    pop();
+    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, list.value), 700);
+    push(circles);
+}
+export const ComplexDescart = new FGCallNative("ComplexDescart", 0, _ComplexDescart, [
+    {
+        input: [700, 700, 700, 470],
+        output: 470,
+    },
+]);
 function _E(n) {
     let ry = pop().value;
     let rx = pop().value;

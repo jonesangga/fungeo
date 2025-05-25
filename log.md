@@ -2,6 +2,14 @@
 
 #### 25-05-25
 
+- list indexing
+- add bend optional field
+- implement complex number
+- make assertList()
+- separate <> for string, ++ for list
+- add token LR
+- change string concat syntax to use `<>`
+- change CheckType representation. Just use list.
 - add optional elKind in TypeCheck after base
 - overload ++ for list concat
 - implement list
