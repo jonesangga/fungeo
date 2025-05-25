@@ -64,6 +64,7 @@ const rules = {
     [1550]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
+    [1560]: { prefix: null, infix: concat_str, precedence: 300 },
     [600]: { prefix: negate, infix: numeric_binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
@@ -272,6 +273,12 @@ function numeric_binary() {
             break;
         default: error(`unhandled operator ${operator}`);
     }
+}
+function concat_str() {
+    assertT(lastT, stringT, `'<>' only for strings`);
+    parsePrecedence(rules[1560].precedence + 1);
+    assertT(lastT, stringT, `'<>' only for strings`);
+    emitByte(120);
 }
 function concat() {
     let left = lastT[0];

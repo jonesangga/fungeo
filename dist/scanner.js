@@ -25,6 +25,7 @@ export var TokenT;
     TokenT[TokenT["GreaterEq"] = 1525] = "GreaterEq";
     TokenT[TokenT["Less"] = 1550] = "Less";
     TokenT[TokenT["LessEq"] = 1555] = "LessEq";
+    TokenT[TokenT["LR"] = 1560] = "LR";
     TokenT[TokenT["Pipe"] = 1575] = "Pipe";
     TokenT[TokenT["PipePipe"] = 1580] = "PipePipe";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
@@ -75,6 +76,7 @@ export const TokenTName = {
     [1550]: "Less",
     [1555]: "LessEq",
     [500]: "LParen",
+    [1560]: "LR",
     [600]: "Minus",
     [1700]: "Name",
     [1800]: "Number",
@@ -234,7 +236,13 @@ export const scanner = {
             case '|': return token_lexeme(match('|') ? 1580 : 1575);
             case '&': return token_lexeme(match('&') ? 1190 : 1180);
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
-            case '<': return token_lexeme(match('=') ? 1555 : 1550);
+            case '<': {
+                if (match('='))
+                    return token_lexeme(1555);
+                if (match('>'))
+                    return token_lexeme(1560);
+                return token_lexeme(1550);
+            }
             case '>': return token_lexeme(match('=') ? 1525 : 1520);
             case '=': return token_lexeme(match('=') ? 1505 : 1500);
             case '!': return token_lexeme(match('=') ? 1210 : 1200);

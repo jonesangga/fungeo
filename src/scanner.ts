@@ -29,6 +29,7 @@ export const enum TokenT {
     GreaterEq = 1525,
     Less      = 1550,
     LessEq    = 1555,
+    LR        = 1560,
     Pipe      = 1575,
     PipePipe  = 1580,
     Plus      = 1585,
@@ -81,6 +82,7 @@ export const TokenTName: {
     [TokenT.Less]: "Less",
     [TokenT.LessEq]: "LessEq",
     [TokenT.LParen]: "LParen",
+    [TokenT.LR]: "LR",
     [TokenT.Minus]: "Minus",
     [TokenT.Name]: "Name",
     [TokenT.Number]: "Number",
@@ -272,8 +274,11 @@ export const scanner = {
                 match('&') ? TokenT.AmpAmp : TokenT.Amp);
             case ':': return token_lexeme(
                 match('=') ? TokenT.ColonEq : TokenT.Colon);
-            case '<': return token_lexeme(
-                match('=') ? TokenT.LessEq : TokenT.Less);
+            case '<': {
+                if (match('=')) return token_lexeme(TokenT.LessEq);
+                if (match('>')) return token_lexeme(TokenT.LR);
+                return token_lexeme(TokenT.Less);
+            }
             case '>': return token_lexeme(
                 match('=') ? TokenT.GreaterEq : TokenT.Greater);
             case '=': return token_lexeme(

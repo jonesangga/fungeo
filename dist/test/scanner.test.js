@@ -53,6 +53,7 @@ describe("scanner each token type", () => {
         [1550]: ["<", { kind: 1550, line: 1, lexeme: "<" }],
         [1555]: ["<=", { kind: 1555, line: 1, lexeme: "<=" }],
         [500]: ["(", { kind: 500, line: 1, lexeme: "(" }],
+        [1560]: ["<>", { kind: 1560, line: 1, lexeme: "<>" }],
         [600]: ["-", { kind: 600, line: 1, lexeme: "-" }],
         [1700]: ["kasukasu", { kind: 1700, line: 1, lexeme: "kasukasu" }],
         [1800]: ["123.456", { kind: 1800, line: 1, lexeme: "123.456" }],

@@ -80,6 +80,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Less]      : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LessEq]    : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
+    [TokenT.LR]        : {prefix: null,            infix: concat_str,    precedence: Precedence.Term},
     [TokenT.Minus]     : {prefix: negate,          infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
@@ -366,6 +367,15 @@ function numeric_binary(): void {
 
     // emitByte(Op.AddStr);
 // }
+
+function concat_str(): void {
+    assertT(lastT, stringT, `'<>' only for strings`);
+
+    parsePrecedence(rules[TokenT.LR].precedence + 1);
+    assertT(lastT, stringT, `'<>' only for strings`);
+
+    emitByte(Op.AddStr);
+}
 
 // TODO: Separate this. User <> for string, ++ for list.
 function concat(): void {
