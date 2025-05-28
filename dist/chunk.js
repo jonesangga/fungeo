@@ -1,4 +1,3 @@
-import { KindName } from "./value.js";
 export var Op;
 (function (Op) {
     Op[Op["Add"] = 100] = "Add";
@@ -23,6 +22,7 @@ export var Op;
     Op[Op["Jmp"] = 615] = "Jmp";
     Op[Op["JmpBack"] = 616] = "JmpBack";
     Op[Op["JmpF"] = 620] = "JmpF";
+    Op[Op["Len"] = 680] = "Len";
     Op[Op["LEq"] = 690] = "LEq";
     Op[Op["List"] = 700] = "List";
     Op[Op["Load"] = 800] = "Load";
@@ -37,6 +37,10 @@ export var Op;
     Op[Op["Ret"] = 1300] = "Ret";
     Op[Op["Set"] = 1400] = "Set";
     Op[Op["SetLoc"] = 1410] = "SetLoc";
+    Op[Op["SetLocG"] = 1415] = "SetLocG";
+    Op[Op["SetLocM"] = 1420] = "SetLocM";
+    Op[Op["SetLocN"] = 1425] = "SetLocN";
+    Op[Op["SetMut"] = 1430] = "SetMut";
     Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
 ;
@@ -63,6 +67,7 @@ export const OpName = {
     [615]: "Jmp",
     [616]: "JmpBack",
     [620]: "JmpF",
+    [680]: "Len",
     [690]: "LEq",
     [700]: "List",
     [800]: "Load",
@@ -77,6 +82,10 @@ export const OpName = {
     [1300]: "Ret",
     [1400]: "Set",
     [1410]: "SetLoc",
+    [1415]: "SetLocG",
+    [1420]: "SetLocM",
+    [1425]: "SetLocN",
+    [1430]: "SetMut",
     [1500]: "Sub",
 };
 export class Chunk {
@@ -114,12 +123,15 @@ export class Chunk {
         let name = OpName[instruction];
         switch (instruction) {
             case 100:
+            case 110:
             case 120:
             case 300:
             case 380:
             case 390:
             case 530:
+            case 600:
             case 610:
+            case 680:
             case 690:
             case 805:
             case 810:
@@ -129,7 +141,6 @@ export class Chunk {
             case 1100:
             case 1290:
             case 1200:
-            case 1410:
             case 1500: {
                 result += name + "\n";
                 return [result, offset + 1];
@@ -155,33 +166,37 @@ export class Chunk {
                 result += `${padr7(name)} ${padl4(offset)} -> ${offset + 2 + jump}\n`;
                 return [result, offset + 2];
             }
-            case 110:
             case 210:
             case 212:
             case 215:
             case 217:
             case 395:
             case 595:
-            case 600:
-            case 1300: {
+            case 1300:
+            case 1410:
+            case 1415:
+            case 1420:
+            case 1425: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
             }
             case 1400: {
-                let nameId = this.code[offset + 1];
-                let kind = this.code[offset + 2];
-                result += `${padr7(name)} ${padl4(nameId)} '`;
-                result += this.values[nameId].to_str();
-                result += `: ${KindName[kind]}'\n`;
-                return [result, offset + 3];
+                let index = this.code[offset + 1];
+                let varname = this.values[index].to_str();
+                result += `${padr7(name)} ${padl4(index)} '${varname}'\n`;
+                return [result, offset + 2];
+            }
+            case 1430: {
+                let index = this.code[offset + 1];
+                let varname = this.values[index].to_str();
+                result += `${padr7(name)} ${padl4(index)} 'mut ${varname}'\n`;
+                return [result, offset + 2];
             }
             case 700: {
                 let length = this.code[offset + 1];
-                let elKind = this.code[offset + 2];
-                result += `${padr7(name)} ${padl4(length)} '`;
-                result += `${KindName[elKind]}'\n`;
-                return [result, offset + 3];
+                result += `${padr7(name)} ${padl4(length)}\n`;
+                return [result, offset + 2];
             }
             default: {
                 result += `Unknown code ${instruction}\n`;

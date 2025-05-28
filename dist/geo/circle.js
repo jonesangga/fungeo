@@ -24,6 +24,9 @@ export default class Circle {
     to_str() {
         return `C ${this.x} ${this.y} ${this.r}`;
     }
+    dist(other) {
+        return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);
+    }
     draw() {
         c.beginPath();
         c.arc(this.x, this.y, this.r, 0, TAU);
@@ -57,15 +60,27 @@ export default class Circle {
         let sum = zk1.add(zk2).add(zk3);
         let root = zk1.mul(zk2).add(zk2.mul(zk3)).add(zk1.mul(zk3));
         root = root.sqrt().scale(2);
-        let center1 = sum.add(root).scale(1 / k4[0].value);
-        let center2 = sum.sub(root).scale(1 / k4[0].value);
-        let center3 = sum.add(root).scale(1 / k4[1].value);
-        let center4 = sum.sub(root).scale(1 / k4[1].value);
-        return [
-            Circle.with_bend(center1.a, center1.b, k4[0].value),
-            Circle.with_bend(center2.a, center2.b, k4[0].value),
-            Circle.with_bend(center3.a, center3.b, k4[1].value),
-            Circle.with_bend(center4.a, center4.b, k4[1].value),
-        ];
+        let center1 = sum.add(root).scale(1 / k4.value);
+        let center2 = sum.sub(root).scale(1 / k4.value);
+        let ca = Circle.with_bend(center1.a, center1.b, k4.value);
+        let cb = Circle.with_bend(center2.a, center2.b, k4.value);
+        let got = [];
+        if (is_tangent(c1, c2, c3, ca))
+            got.push(ca);
+        if (is_tangent(c1, c2, c3, cb))
+            got.push(cb);
+        return got;
     }
+}
+let epsilon = 0.0000001;
+function isTangent(c1, c2) {
+    let d = c1.dist(c2);
+    let r1 = c1.r;
+    let r2 = c2.r;
+    let a = Math.abs(d - (r1 + r2)) < epsilon;
+    let b = Math.abs(d - Math.abs(r2 - r1)) < epsilon;
+    return a || b;
+}
+function is_tangent(c1, c2, c3, ca) {
+    return isTangent(ca, c1) && isTangent(ca, c2) && isTangent(ca, c3);
 }

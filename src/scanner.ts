@@ -1,11 +1,11 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
-// TODO: Support comment single and multiline.
-//       Add token # for list and string length.
+// TODO: Support multiline comment.
 
 export const enum TokenT {
     Comma     = 100,    // Single character.
     Dollar    = 200,
+    Hash      = 250,
     LBrace    = 300,
     LBracket  = 400,
     LParen    = 500,
@@ -41,11 +41,15 @@ export const enum TokenT {
     True      = 2000,
     EOF       = 2100,   // Other.
     Error     = 2200,
-    BoolT     = 2220,
-    Else      = 2300,   // Keywords.
+    BoolT     = 2220,   // Keywords.
+    CircleT   = 2230,
+    Else      = 2300,
     Fn        = 2320,
     If        = 2400,
     Ifx       = 2405,
+    Global    = 2450,
+    Mut       = 2500,
+    Nonlocal  = 2550,
     NumT      = 2600,
     Proc      = 2750,
     Return    = 2800,
@@ -62,6 +66,7 @@ export const TokenTName: {
     [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
+    [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
@@ -73,8 +78,10 @@ export const TokenTName: {
     [TokenT.Error]: "Error",
     [TokenT.False]: "False",
     [TokenT.Fn]: "Fn",
+    [TokenT.Global]: "Global",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
+    [TokenT.Hash]: "Hash",
     [TokenT.If]: "If",
     [TokenT.Ifx]: "Ifx",
     [TokenT.LBrace]: "LBrace",
@@ -84,7 +91,9 @@ export const TokenTName: {
     [TokenT.LParen]: "LParen",
     [TokenT.LR]: "LR",
     [TokenT.Minus]: "Minus",
+    [TokenT.Mut]: "Mut",
     [TokenT.Name]: "Name",
+    [TokenT.Nonlocal]: "Nonlocal",
     [TokenT.Number]: "Number",
     [TokenT.NumT]: "NumT",
     [TokenT.Pipe]: "Pipe",
@@ -166,18 +175,22 @@ function token_error(message: string): Token {
 
 function name_type(): TokenT {
     switch (source.slice(start, current)) {
-        case "Bool":   return TokenT.BoolT;
-        case "else":   return TokenT.Else;
-        case "false":  return TokenT.False;
-        case "fn":     return TokenT.Fn;
-        case "if":     return TokenT.If;
-        case "ifx":    return TokenT.Ifx;
-        case "Num":    return TokenT.NumT;
-        case "proc":   return TokenT.Proc;
-        case "return": return TokenT.Return;
-        case "Str":    return TokenT.StrT;
-        case "then":   return TokenT.Then;
-        case "true":   return TokenT.True;
+        case "Bool":     return TokenT.BoolT;
+        case "Circle":   return TokenT.CircleT;
+        case "else":     return TokenT.Else;
+        case "false":    return TokenT.False;
+        case "fn":       return TokenT.Fn;
+        case "if":       return TokenT.If;
+        case "ifx":      return TokenT.Ifx;
+        case "global":   return TokenT.Global;
+        case "mut":      return TokenT.Mut;
+        case "nonlocal": return TokenT.Nonlocal;
+        case "Num":      return TokenT.NumT;
+        case "proc":     return TokenT.Proc;
+        case "return":   return TokenT.Return;
+        case "Str":      return TokenT.StrT;
+        case "then":     return TokenT.Then;
+        case "true":     return TokenT.True;
     }
     return TokenT.Name;
 }
@@ -268,6 +281,7 @@ export const scanner = {
             case '{': return token_lexeme(TokenT.LBrace);
             case '}': return token_lexeme(TokenT.RBrace);
             case '$': return token_lexeme(TokenT.Dollar);
+            case '#': return token_lexeme(TokenT.Hash);
             case ';': return token_lexeme(TokenT.Semicolon);
             case ',': return token_lexeme(TokenT.Comma);
             case '/': return token_lexeme(TokenT.Slash);

@@ -1,5 +1,5 @@
-let w = 400;
-let h = 400;
+let w = 600;
+let h = 600;
 const canvasElem = document.createElement("canvas");
 export const c = canvasElem.getContext("2d");
 const pixelRatio = window.devicePixelRatio || 1;

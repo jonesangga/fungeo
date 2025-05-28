@@ -3,6 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
+import { Type } from "./type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -93,8 +94,8 @@ export class FGBoolean implements FG {
 }
 
 export type Version = {
-    input:  (Kind[] | Kind)[],
-    output: Kind,
+    input:  Type[],
+    output: Type,
 };
 
 export const enum CallT {
@@ -242,27 +243,26 @@ export class FGType implements FG {
     kind: Kind.Type = Kind.Type;
 
     constructor(
-        public base: Kind
+        public value: Type
     ) {}
 
     to_str(): string {
-        return KindName[this.base];
+        return this.value.to_str();
     }
 
     equal(other: FG): boolean {
-        if (this.kind !== other.kind) return false;
-        if ("base" in other) return this.base === other.base;
         return false;
     }
 }
 
-export class FGList<K extends Kind> implements FG {
+// TODO: move AddList implementation here.
+export class FGList implements FG {
     kind: Kind.List = Kind.List;
     length: number;
 
     constructor(
-        public value: Extract<Value, {kind: K}>[],
-        public elKind: K,
+        public value: Value[],
+        public type: Type,
     ) {
         this.length = value.length;
     }
@@ -272,10 +272,6 @@ export class FGList<K extends Kind> implements FG {
         str += this.value.map(el => el.to_str()).join(",");
         return str + "]";
     }
-    // add<S extends Kind>(other: FGList<S>): FGList<Kind.Number> {
-        // // return new FGList<K>([...this.value, ...other.value], this.elKind);
-        // return new FGList<Kind.Number>([], Kind.Number);
-    // }
 
     // TODO: implement this.
     equal(other: FG): boolean {
@@ -283,8 +279,7 @@ export class FGList<K extends Kind> implements FG {
     }
 }
 
-export type List = FGList<Kind>;
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | List;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Value  = GeoObj | LitObj | UIObj;

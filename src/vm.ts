@@ -1,8 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, List, type Value, type Comparable } from "./value.js"
+import { Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
+import { type Type } from "./type.js"
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -69,28 +70,11 @@ function call(fn: FGCallUser, argCount: number) {
     frames.push(currFrame);
 }
 
-function create_list<T extends Kind>(length: number, elKind: T): void {
-    type t = Extract<Value, {kind: T}>;
-    let el: t[] = [];
+function create_list(length: number, eltype: Type): void {
+    let el = [];
     for (let i = 0; i < length; i++)
-        el[length-i-1] = pop() as t;
-    push(new FGList<T>(el, elKind));
-}
-
-function concat_list<T extends Kind>(elKind: T): void {
-    let b = pop() as FGList<T>;
-    let a = pop() as FGList<T>;
-    push(new FGList<T>([...a.value, ...b.value], elKind));
-}
-
-function index_list<T extends Kind>(elKind: T): void {
-    let id = (pop() as FGNumber).value;
-    let list = pop() as FGList<T>;
-    if (id >= list.length) {
-        error("Out of bound access");
-    }
-    let value = list.value[id];
-    push(value);
+        el[length-i-1] = pop();
+    push(new FGList(el, eltype));
 }
 
 type NumStr = number | string;
@@ -108,7 +92,7 @@ const gt = (a: NumStr, b: NumStr): boolean => a > b;
 const leq = (a: NumStr, b: NumStr): boolean => a <= b;
 const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
-const debug = true;
+const debug = false;
 
 function run(): boolean {
     for (;;) {
@@ -133,8 +117,10 @@ function run(): boolean {
             }
 
             case Op.AddList: {
-                let elKind: Kind = read_byte();
-                concat_list(elKind);
+                let elType = (pop() as FGType).value;
+                let b = pop() as FGList;
+                let a = pop() as FGList;
+                push(new FGList([...a.value, ...b.value], elType));
                 break;
             }
 
@@ -342,25 +328,44 @@ function run(): boolean {
             }
 
             case Op.Set: {
-                let name = read_string();
-                let kind = read_byte();
+                let name  = read_string();
+                let type  = (pop() as FGType).value;
                 let value = pop();
-                if (kind === Kind.List)
-                    userNames[name] = { kind, value, elKind: (value as List).elKind };
-                else
-                    userNames[name] = { kind, value };
+
+                userNames[name] = { type, value };
+                break;
+            }
+
+            case Op.SetMut: {
+                let name  = read_string();
+                let type  = (pop() as FGType).value;
+                let value = pop();
+
+                userNames[name] = { type, value, mut: true };
                 break;
             }
 
             case Op.List: {
                 let length = read_byte();
-                let elKind = read_byte();
-                create_list(length, elKind);
+                let elType = (pop() as FGType).value;
+                create_list(length, elType);
                 break;
             }
+
+            case Op.Len: {
+                let list = pop() as FGList;
+                push(new FGNumber(list.length));
+                break;
+            }
+
             case Op.Index: {
-                let elKind: Kind = read_byte();
-                index_list(elKind);
+                let id = (pop() as FGNumber).value;
+                let list = pop() as FGList;
+
+                if (id >= list.length)
+                    error("Out of bound access");
+                let value = list.value[id];
+                push(value);
                 break;
             }
 
@@ -370,7 +375,33 @@ function run(): boolean {
             }
 
             // Nothing to do for now. Because all name is immutable.
+            // TODO: Should we add the type?? It is not used
             case Op.SetLoc: {
+                pop();      // Its type
+                stack[currFrame.slots + read_byte()] = peek(0);
+                break;
+            }
+
+            case Op.SetLocM: {
+                pop();      // Its type
+                stack[currFrame.slots + read_byte()] = pop();
+                break;
+            }
+
+            // TODO: think again. This is similar to above. Only for documentation and debugging?
+            case Op.SetLocN: {
+                pop();      // Its type
+                stack[currFrame.slots + read_byte()] = pop();
+                break;
+            }
+
+            // TODO: it is redundant to assign type again. The type is same.
+            case Op.SetLocG: {
+                let name  = read_string();
+                let type  = (pop() as FGType).value;
+                let value = pop();
+
+                userNames[name] = { type, value };
                 break;
             }
 

@@ -1,38 +1,16 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { KindName, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
+import { KindName, FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-let numberType = { kind: 500 };
-let booleanT = [300];
-let numberT = [500];
-let stringT = [600];
-let nothingT = [100];
-let lastT = nothingT;
+import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
+let $ = console.log;
+$ = () => { };
+let lastT = neverT;
+let returnT = neverT;
 function assertT(actual, expected, msg) {
-    if (actual.length === expected.length) {
-        for (let i = 0; i < actual.length; i++) {
-            if (actual[i] !== expected[i]) {
-                error(msg);
-            }
-        }
-    }
-    else {
+    if (!actual.equal(expected))
         error(msg);
-    }
-}
-function assertList(actual, expected, msg) {
-    let len = actual.length;
-    if (len % 2 === 1 && len === expected.length) {
-        for (let i = 0; i < len; i += 2) {
-            if (actual[i] !== expected[i]) {
-                error(msg);
-            }
-        }
-    }
-    else {
-        error(msg);
-    }
 }
 let canParseArgument = false;
 let canAssign = false;
@@ -57,6 +35,7 @@ const rules = {
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
     [2220]: { prefix: null, infix: null, precedence: 100 },
+    [2230]: { prefix: null, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
@@ -68,8 +47,10 @@ const rules = {
     [2200]: { prefix: null, infix: null, precedence: 100 },
     [1600]: { prefix: parse_boolean, infix: null, precedence: 100 },
     [2320]: { prefix: null, infix: null, precedence: 100 },
+    [2450]: { prefix: null, infix: null, precedence: 100 },
     [1520]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [1525]: { prefix: null, infix: boolean_compare, precedence: 250 },
+    [250]: { prefix: length_list, infix: null, precedence: 100 },
     [2400]: { prefix: null, infix: null, precedence: 100 },
     [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
@@ -78,8 +59,10 @@ const rules = {
     [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
     [1560]: { prefix: null, infix: concat_str, precedence: 300 },
+    [2500]: { prefix: null, infix: null, precedence: 100 },
     [600]: { prefix: negate, infix: numeric_binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
+    [2550]: { prefix: null, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [2600]: { prefix: null, infix: null, precedence: 100 },
     [1575]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
@@ -117,10 +100,11 @@ function begin_compiler(kind, name) {
         enclosing: current,
         fn: new FGCallUser(name, 0, [{
                 input: [],
-                output: 100
+                output: nothingT,
             }], new Chunk(name)),
         kind: kind,
         locals: [],
+        localGlobals: [],
         scopeDepth: 0,
     };
     current = compiler;
@@ -128,7 +112,6 @@ function begin_compiler(kind, name) {
 function endCompiler() {
     emitReturn();
     let fn = current.fn;
-    console.log(currentChunk().disassemble());
     current = current.enclosing;
     return fn;
 }
@@ -242,11 +225,11 @@ function boolean_isdiv() {
 function boolean_compare() {
     let opType = prevTok.kind;
     let operator = prevTok.lexeme;
-    let left = lastT[0];
-    if (left !== 500 && left !== 600)
+    let left = lastT;
+    if (!(left instanceof NumberT) && !(left instanceof StringT))
         error("can only compare strings and numbers");
     parsePrecedence(250 + 1);
-    if (lastT[0] !== left)
+    if (left.constructor !== lastT.constructor)
         error("operands type for comparison didn't match");
     switch (opType) {
         case 1520:
@@ -294,12 +277,15 @@ function concat_str() {
     emitByte(120);
 }
 function concat_list() {
-    let left = lastT;
-    if (left[0] !== 470)
+    $("in concat_list()");
+    let leftT = lastT;
+    $(leftT);
+    if (!(leftT instanceof ListT))
         error("'++' only for lists");
     parsePrecedence(300 + 1);
-    assertList(left, lastT, "operands type for '++' didn't match");
-    emitBytes(110, left[2]);
+    assertT(leftT, lastT, "operands type for '++' didn't match");
+    emitConstant(new FGType(leftT));
+    emitByte(110);
 }
 function parse_boolean() {
     if (prevTok.kind === 2000)
@@ -319,43 +305,50 @@ function parse_string() {
 }
 function parse_list() {
     let length = 0;
-    let listT = nothingT;
+    let elType = nothingT;
     if (!check(700)) {
         canParseArgument = true;
-        lastT = nothingT;
+        lastT = neverT;
         expression();
-        listT = lastT;
+        elType = lastT;
         length++;
         while (match(100)) {
             canParseArgument = true;
-            lastT = nothingT;
+            lastT = neverT;
             expression();
-            assertT(lastT, listT, `in list[]: expect argument of type ${KindName[listT[0]]}, got ${KindName[lastT[0]]}`);
+            assertT(lastT, elType, `in list[]: expect member of type ${elType.to_str()}, got ${lastT.to_str()}`);
             length++;
         }
     }
     consume(700, "expect ']' after list elements");
+    emitConstant(new FGType(elType));
     emitBytes(700, length);
-    emitByte(listT[0]);
-    lastT = [470, length, listT[0]];
+    lastT = new ListT(elType);
 }
 function index_list() {
-    console.log("in indexlist()");
-    if (lastT[0] !== 470)
+    if (!(lastT instanceof ListT))
         error("Can only index a list");
-    let listKind = lastT[2];
-    lastT = nothingT;
+    let elType = lastT.elType;
+    lastT = neverT;
     expression();
-    if (lastT[0] !== 500)
-        error("Can only use number to index a list");
+    assertT(lastT, numberT, "Can only use number to index a list");
     consume(700, "expect ']' after indexing");
-    emitBytes(600, listKind);
-    lastT = [listKind];
+    emitByte(600);
+    lastT = elType;
+}
+function length_list() {
+    lastT = neverT;
+    expression();
+    if (!(lastT instanceof ListT))
+        error("'#' only for lists");
+    emitByte(680);
+    lastT = numberT;
 }
 function parse_return() {
-    console.log("in parse_return()");
+    $("in parse_return()");
     expression();
-    emitByte(1300);
+    emitBytes(1300, 1);
+    returnT = lastT;
     lastT = nothingT;
 }
 let tempNames = {};
@@ -368,16 +361,25 @@ function resolveLocal(compiler, name) {
     }
     return -1;
 }
+function parse_mut() {
+    $("in parse_mut()");
+    consume(1700, "expect a name");
+    let name = prevTok.lexeme;
+    consume(1500, "expect '=' after name");
+    if (current.scopeDepth > 0) {
+        set_local(name, true);
+    }
+    else {
+        set_global(name, true);
+    }
+}
 function parse_name() {
     let name = prevTok.lexeme;
     if (match(1500)) {
-        if (canAssign) {
-            canAssign = false;
-            set_name(name);
-        }
-        else {
+        if (!canAssign)
             error(`cannot assign ${name}`);
-        }
+        canAssign = false;
+        set_name(name);
     }
     else {
         canAssign = false;
@@ -392,55 +394,176 @@ function set_name(name) {
         set_global(name);
     }
 }
-function set_local(name) {
-    for (let i = current.locals.length - 1; i >= 0; i--) {
-        let local = current.locals[i];
-        if (local.depth < current.scopeDepth) {
-            break;
-        }
-        if (name === local.name) {
-            error(`${name} already defined in this scope`);
-        }
-    }
-    add_local(name);
-    lastT = nothingT;
+function set_local_global(name, type) {
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
     canParseArgument = true;
     expression();
-    emitByte(1410);
-    current.locals[current.locals.length - 1].type = { kind: lastT[0] };
+    emitConstant(new FGType(lastT));
+    assertT(lastT, type, "localGlobal reassignment type didn't match");
+    emitBytes(1415, index);
     lastT = nothingT;
 }
-function set_global(name) {
-    if (Object.hasOwn(nativeNames, name)
-        || Object.hasOwn(userNames, name)
-        || Object.hasOwn(tempNames, name)) {
-        error(`${name} already defined`);
+function parse_local_global() {
+    consume(1700, "expect name after global");
+    let name = prevTok.lexeme;
+    let type = neverT;
+    if (Object.hasOwn(nativeNames, name))
+        error("native name is immutable");
+    else if (Object.hasOwn(userNames, name)) {
+        if (userNames[name].mut === true)
+            type = userNames[name].type;
+        else
+            error(`${name} already defined, not mutable`);
+    }
+    else if (Object.hasOwn(tempNames, name)) {
+        if (tempNames[name].mut === true)
+            type = tempNames[name].type;
+        else
+            error(`${name} already defined, not mutable`);
+    }
+    else
+        error(`there is no ${name} in global`);
+    add_local_global(name, type);
+    lastT = nothingT;
+}
+function set_local(name, mut = false) {
+    for (let i = current.localGlobals.length - 1; i >= 0; i--) {
+        let global = current.localGlobals[i];
+        if (name === global.name) {
+            set_local_global(name, global.type);
+            return;
+        }
+    }
+    if (mut) {
+        for (let i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (local.depth < current.scopeDepth)
+                break;
+            if (name === local.name)
+                error(`${name} already defined in this scope`);
+        }
+        add_local(name);
+        let index = current.locals.length - 1;
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+        emitBytes(1410, index);
+        current.locals[current.locals.length - 1].type = lastT;
+        current.locals[current.locals.length - 1].isMut = true;
+    }
+    else {
+        let type = neverT;
+        let isMut = false;
+        let i;
+        for (i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (name === local.name) {
+                if (local.isMut === true) {
+                    isMut = true;
+                    type = local.type;
+                    break;
+                }
+                else {
+                    if (local.depth === current.scopeDepth)
+                        error(`${name} already defined in this scope`);
+                }
+            }
+        }
+        let index;
+        if (isMut) {
+            $("isMut");
+            index = i;
+        }
+        else {
+            add_local(name);
+            index = current.locals.length - 1;
+        }
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+        if (isMut)
+            emitBytes(1420, index);
+        else {
+            current.locals[current.locals.length - 1].type = lastT;
+            emitBytes(1410, index);
+        }
+    }
+    lastT = nothingT;
+}
+function set_global(name, mut = false) {
+    let type = neverT;
+    let ismut = false;
+    if (mut) {
+        if (Object.hasOwn(nativeNames, name)
+            || Object.hasOwn(userNames, name)
+            || Object.hasOwn(tempNames, name)) {
+            error(`${name} already defined`);
+        }
+    }
+    else {
+        if (Object.hasOwn(nativeNames, name)) {
+            error(`${name} already defined`);
+        }
+        else if (Object.hasOwn(userNames, name)) {
+            if (userNames[name].mut === true) {
+                ismut = true;
+                type = userNames[name].type;
+            }
+            else {
+                error(`${name} already defined, not mutable`);
+            }
+        }
+        else if (Object.hasOwn(tempNames, name)) {
+            if (tempNames[name].mut === true) {
+                ismut = true;
+                type = tempNames[name].type;
+            }
+            else {
+                error(`${name} already defined, not mutable`);
+            }
+        }
     }
     let index = makeConstant(new FGString(name));
-    lastT = nothingT;
+    lastT = neverT;
     canParseArgument = true;
     expression();
-    emitBytes(1400, index);
-    emitByte(lastT[0]);
-    if (lastT[0] === 470)
-        tempNames[name] = { kind: lastT[0], elKind: lastT[2] };
-    else
-        tempNames[name] = { kind: lastT[0] };
+    emitConstant(new FGType(lastT));
+    if (mut) {
+        tempNames[name] = { type: lastT, mut: true };
+        emitBytes(1430, index);
+    }
+    else if (ismut) {
+        assertT(lastT, type, "reassignment type didn't match");
+        tempNames[name] = { type: lastT, mut: true };
+        emitBytes(1430, index);
+    }
+    else {
+        tempNames[name] = { type: lastT };
+        emitBytes(1400, index);
+    }
     lastT = nothingT;
 }
 function get_name(name) {
     let arg = resolveLocal(current, name);
-    if (arg != -1) {
+    if (arg !== -1) {
+        $("got local name");
         emitBytes(395, arg);
-        lastT = [current.locals[arg].type.kind];
+        lastT = current.locals[arg].type;
+        $(current.locals[arg]);
     }
     else if (Object.hasOwn(nativeNames, name)) {
+        $("nativeNames");
         get_global(nativeNames, name, true);
     }
     else if (Object.hasOwn(userNames, name)) {
+        $("userNames");
         get_global(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
+        $("tempNames");
         get_global(tempNames, name, false);
     }
     else {
@@ -448,23 +571,29 @@ function get_name(name) {
     }
 }
 function get_global(table, name, isNative) {
-    switch (table[name].kind) {
-        case 400:
-            global_callable(name, table, isNative);
-            break;
-        case 450:
-            global_callable(name, table, isNative);
-            break;
-        default:
-            global_non_callable(table, name, isNative);
+    $("in get_global()");
+    let type = table[name].type;
+    if (type instanceof CallNativeT) {
+        $("Kind.CallNative calling global_callable()");
+        global_callable(name, table, isNative);
+    }
+    else if (type instanceof CallUserT) {
+        $("Kind.CallUser calling global_callable()");
+        global_callable(name, table, isNative);
+    }
+    else {
+        $("default calling global_non_callable()");
+        global_non_callable(table, name, isNative);
     }
 }
 function global_callable(name_, table, native) {
+    $("in global_callable()");
     if (!canParseArgument) {
         global_non_callable(table, name_, native);
         return;
     }
     canParseArgument = match(200);
+    $("canParseArgument in global_callable()");
     let name = table[name_];
     emitConstant(name.value);
     let version = name.value.version;
@@ -479,7 +608,7 @@ function global_callable(name_, table, native) {
         inputVersion = version[i].input;
         j = 0;
         for (; j < gotTypes.length; j++) {
-            if (!matchType(inputVersion[j], gotTypes[j])) {
+            if (!inputVersion[j].equal(gotTypes[j])) {
                 success = false;
                 break;
             }
@@ -492,58 +621,57 @@ function global_callable(name_, table, native) {
                 expression();
             else
                 parsePrecedence(600);
-            gotTypes.push(lastT[0]);
-            if (!matchType(inputVersion[k], lastT[0])) {
+            gotTypes.push(lastT);
+            $(inputVersion[k], lastT);
+            if (!inputVersion[k].equal(lastT)) {
                 checkNextVersion = true;
                 success = false;
+                j = k;
                 break;
             }
         }
         if (!checkNextVersion)
             break;
     }
-    if (!success) {
-        if (typeof inputVersion[j] === "number")
-            error(`in ${name_}: expect arg ${j} of type ${KindName[inputVersion[j]]}, got ${KindName[gotTypes[j]]}`);
-        else
-            error(`in ${name_}: expect arg ${j} of class [${setToKinds(inputVersion[j])}], got ${KindName[gotTypes[j]]}`);
-    }
+    if (!success)
+        error(`in ${name_}: expect arg ${j} of type ${inputVersion[j].to_str()}, got ${gotTypes[j].to_str()}`);
     let arity = version[i].input.length;
-    if (native)
-        emitBytes(200, arity);
-    else
-        emitBytes(205, arity);
+    emitBytes(native ? 200 : 205, arity);
     emitByte(i);
-    if (version[i].output === 100)
-        lastT = nothingT;
-    else
-        lastT = [version[i].output];
+    lastT = version[i].output;
 }
 function global_non_callable(table, name, native) {
-    console.log("in global_non_callable()");
+    $("in global_non_callable()");
     let index = makeConstant(new FGString(name));
-    if (native)
-        emitBytes(400, index);
-    else
-        emitBytes(500, index);
-    console.log(table[name]);
-    if (table[name].kind === 470)
-        lastT = [470, table[name].length, table[name].elKind];
-    else
-        lastT = [table[name].kind];
+    emitBytes(native ? 400 : 500, index);
+    lastT = table[name].type;
+    $(name, table, table[name].type);
 }
 function parse_type() {
     advance();
+    let type;
     switch (prevTok.kind) {
         case 2220:
-            return booleanT;
+            type = booleanT;
+            break;
         case 2600:
-            return numberT;
+            type = numberT;
+            break;
         case 2900:
-            return stringT;
+            type = stringT;
+            break;
+        case 2230:
+            type = circleT;
+            break;
         default:
             error("expect parameter type");
     }
+    while (match(400)) {
+        $("match [ in parse_type");
+        consume(700, "expect ']' after list type");
+        type = new ListT(type);
+    }
+    return type;
 }
 function parse_params() {
     consume(1700, "expect parameter name");
@@ -557,12 +685,13 @@ function parse_params() {
     }
     add_local(name);
     consume(1300, "expect `:` after parameter name");
-    let t = parse_type();
-    current.locals[current.locals.length - 1].type = { kind: t[0] };
-    current.fn.version[0].input.push(t[0]);
+    let type = parse_type();
+    current.locals[current.locals.length - 1].type = type;
+    current.fn.version[0].input.push(type);
     lastT = nothingT;
 }
 function fn() {
+    $("in fn()");
     consume(1700, "expect function name");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
@@ -572,19 +701,21 @@ function fn() {
         parse_params();
     } while (match(100));
     consume(1195, "expect `->` after list of params");
-    let t = parse_type();
-    current.fn.version[0].output = t[0];
-    tempNames[name] = { kind: 450, value: current.fn };
+    let outputT = parse_type();
+    current.fn.version[0].output = outputT;
+    tempNames[name] = { type: callUserT, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();
     emitBytes(1300, 1);
-    assertT(lastT, t, "return type not match");
+    assertT(lastT, outputT, "return type not match");
     let fn = endCompiler();
     emitConstant(fn);
+    emitConstant(new FGType(callUserT));
     emitBytes(1400, index);
-    emitByte(450);
+    lastT = outputT;
 }
 function proc() {
+    $("in proc()");
     consume(1700, "expect procedure name");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
@@ -593,31 +724,29 @@ function proc() {
     do {
         parse_params();
     } while (match(100));
-    current.fn.version[0].output = 100;
-    tempNames[name] = { kind: 450, value: current.fn };
+    let outputT = nothingT;
+    if (match(1195)) {
+        outputT = parse_type();
+    }
+    current.fn.version[0].output = outputT;
+    tempNames[name] = { type: callUserT };
+    tempNames[name] = { type: callUserT, value: current.fn };
     consume(300, "expect '{' before proc body");
-    procBody();
-    emitBytes(1300, 0);
+    returnT = nothingT;
+    proc_body();
+    assertT(returnT, outputT, "return type not match");
+    if (outputT.equal(nothingT))
+        emitBytes(1300, 0);
     consume(695, "expect '}' after proc body");
     let fn = endCompiler();
     emitConstant(fn);
+    emitConstant(new FGType(callUserT));
     emitBytes(1400, index);
-    emitByte(450);
+    lastT = outputT;
 }
-function procBody() {
+function proc_body() {
     while (!check(695) && !check(2100)) {
         statement();
-    }
-}
-function matchType(expected, actual) {
-    if (expected === 200) {
-        return true;
-    }
-    else if (typeof expected === "number") {
-        return actual === expected;
-    }
-    else {
-        return expected.includes(actual);
     }
 }
 function setToKinds(set_) {
@@ -628,8 +757,10 @@ function setToKinds(set_) {
     return s;
 }
 function add_local(name) {
-    let local = { name, type: { kind: 100 }, depth: current.scopeDepth };
-    current.locals.push(local);
+    current.locals.push({ name, type: nothingT, depth: current.scopeDepth });
+}
+function add_local_global(name, type) {
+    current.localGlobals.push({ name, type, depth: current.scopeDepth });
 }
 function emitJump(instruction) {
     emitByte(instruction);
@@ -681,11 +812,11 @@ function parse_loop() {
     expression();
     assertT(lastT, numberT, "start of range must be numeric");
     let start = current.locals.length;
-    current.locals.push({ name: "_Start", type: numberType, depth: current.scopeDepth });
+    current.locals.push({ name: "_Start", type: numberT, depth: current.scopeDepth });
     consume(100, "expect ',' between start and end of range");
     expression();
     assertT(lastT, numberT, "end of range must be numeric");
-    current.locals.push({ name: "_End", type: numberType, depth: current.scopeDepth });
+    current.locals.push({ name: "_End", type: numberT, depth: current.scopeDepth });
     if (match(100)) {
         expression();
         assertT(lastT, numberT, "step of range must be numeric");
@@ -693,7 +824,7 @@ function parse_loop() {
     else {
         emitConstant(new FGNumber(1));
     }
-    current.locals.push({ name: "_Step", type: numberType, depth: current.scopeDepth });
+    current.locals.push({ name: "_Step", type: numberT, depth: current.scopeDepth });
     let openRight;
     if (match(800)) {
         openRight = true;
@@ -706,7 +837,6 @@ function parse_loop() {
         error_at_current("expect name for iterator");
     let name = prevTok.lexeme;
     current.locals[start].name = name;
-    emitByte(1410);
     emitByte(805);
     let openLeftJump = openLeft ? emitJump(615) : -1;
     let loopStart = currentChunk().code.length;
@@ -782,6 +912,12 @@ function statement() {
         canAssign = true;
         parse_name();
     }
+    else if (match(2450)) {
+        parse_local_global();
+    }
+    else if (match(2500)) {
+        parse_mut();
+    }
     else if (match(300)) {
         beginScope();
         block();
@@ -818,6 +954,10 @@ function endScope() {
         && current.locals[current.locals.length - 1].depth > current.scopeDepth) {
         emitByte(1200);
         current.locals.pop();
+    }
+    while (current.localGlobals.length > 0
+        && current.localGlobals[current.localGlobals.length - 1].depth > current.scopeDepth) {
+        current.localGlobals.pop();
     }
 }
 class CompileError extends Error {

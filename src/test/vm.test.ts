@@ -2,6 +2,7 @@
 //
 // Integration Testing.
 
+// import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { deepEqual, equal, fail } from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
@@ -36,7 +37,12 @@ describe("vm Op.Set", () => {
             chunk.values[1]
         ]);
 
-        vm.step();      // Op.Set, 0, Kind.Number
+        vm.step();      // Op.Load, 2
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.Set, 0
         deepEqual(stack.slice(1, stackTop), []);
     });
 });
@@ -50,15 +56,25 @@ describe("vm Op.GetUsr", () => {
             chunk.values[1]
         ]);
 
-        vm.step();      // Op.Set, 0, Kind.Number
+        vm.step();      // Op.Load, 2
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+
+        vm.step();      // Op.Set, 0
         deepEqual(stack.slice(1, stackTop), []);
 
-        vm.step();      // Op.Load, 3
+        vm.step();      // Op.Load, 4
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[1]
         ]);
 
-        vm.step();      // Op.Set, 2, Kind.Number
+        vm.step();      // Op.Load, 5
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[5]
+        ]);
+
+        vm.step();      // Op.Set, 3
         deepEqual(stack.slice(1, stackTop), []);
     });
 });
@@ -330,6 +346,7 @@ describe("vm Op.GetLoc Op.SetLoc, Op.Pop", () => {
         let chunk = setup(`{a = 123 b = a}`);
 
         vm.step();      // Op.Load, 1
+        vm.step();      // Op.Load, 2
         vm.step();      // Op.SetLoc
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[0]
@@ -340,6 +357,7 @@ describe("vm Op.GetLoc Op.SetLoc, Op.Pop", () => {
             chunk.values[0], chunk.values[0]
         ]);
 
+        vm.step();      // Op.Load,
         vm.step();      // Op.SetLoc
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[0], chunk.values[0]

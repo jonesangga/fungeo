@@ -43,25 +43,11 @@ function call(fn, argCount) {
     currChunk = fn.chunk;
     frames.push(currFrame);
 }
-function create_list(length, elKind) {
+function create_list(length, eltype) {
     let el = [];
     for (let i = 0; i < length; i++)
         el[length - i - 1] = pop();
-    push(new FGList(el, elKind));
-}
-function concat_list(elKind) {
-    let b = pop();
-    let a = pop();
-    push(new FGList([...a.value, ...b.value], elKind));
-}
-function index_list(elKind) {
-    let id = pop().value;
-    let list = pop();
-    if (id >= list.length) {
-        error("Out of bound access");
-    }
-    let value = list.value[id];
-    push(value);
+    push(new FGList(el, eltype));
 }
 function compare(f) {
     let b = pop();
@@ -72,7 +58,7 @@ const lt = (a, b) => a < b;
 const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
-const debug = true;
+const debug = false;
 function run() {
     for (;;) {
         if (debug) {
@@ -94,8 +80,10 @@ function run() {
                 break;
             }
             case 110: {
-                let elKind = read_byte();
-                concat_list(elKind);
+                let elType = pop().value;
+                let b = pop();
+                let a = pop();
+                push(new FGList([...a.value, ...b.value], elType));
                 break;
             }
             case 120: {
@@ -289,23 +277,36 @@ function run() {
             }
             case 1400: {
                 let name = read_string();
-                let kind = read_byte();
+                let type = pop().value;
                 let value = pop();
-                if (kind === 470)
-                    userNames[name] = { kind, value, elKind: value.elKind };
-                else
-                    userNames[name] = { kind, value };
+                userNames[name] = { type, value };
+                break;
+            }
+            case 1430: {
+                let name = read_string();
+                let type = pop().value;
+                let value = pop();
+                userNames[name] = { type, value, mut: true };
                 break;
             }
             case 700: {
                 let length = read_byte();
-                let elKind = read_byte();
-                create_list(length, elKind);
+                let elType = pop().value;
+                create_list(length, elType);
+                break;
+            }
+            case 680: {
+                let list = pop();
+                push(new FGNumber(list.length));
                 break;
             }
             case 600: {
-                let elKind = read_byte();
-                index_list(elKind);
+                let id = pop().value;
+                let list = pop();
+                if (id >= list.length)
+                    error("Out of bound access");
+                let value = list.value[id];
+                push(value);
                 break;
             }
             case 395: {
@@ -313,6 +314,25 @@ function run() {
                 break;
             }
             case 1410: {
+                pop();
+                stack[currFrame.slots + read_byte()] = peek(0);
+                break;
+            }
+            case 1420: {
+                pop();
+                stack[currFrame.slots + read_byte()] = pop();
+                break;
+            }
+            case 1425: {
+                pop();
+                stack[currFrame.slots + read_byte()] = pop();
+                break;
+            }
+            case 1415: {
+                let name = read_string();
+                let type = pop().value;
+                let value = pop();
+                userNames[name] = { type, value };
                 break;
             }
             case 1200: {

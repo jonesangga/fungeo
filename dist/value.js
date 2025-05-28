@@ -193,30 +193,26 @@ export class FGString {
     }
 }
 export class FGType {
-    base;
+    value;
     kind = 650;
-    constructor(base) {
-        this.base = base;
+    constructor(value) {
+        this.value = value;
     }
     to_str() {
-        return KindName[this.base];
+        return this.value.to_str();
     }
     equal(other) {
-        if (this.kind !== other.kind)
-            return false;
-        if ("base" in other)
-            return this.base === other.base;
         return false;
     }
 }
 export class FGList {
     value;
-    elKind;
+    type;
     kind = 470;
     length;
-    constructor(value, elKind) {
+    constructor(value, type) {
         this.value = value;
-        this.elKind = elKind;
+        this.type = type;
         this.length = value.length;
     }
     to_str() {

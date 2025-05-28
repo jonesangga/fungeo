@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js";
 import { Chunk } from "../chunk.js";
+import { numberT } from "../type.js";
 describe("value", () => {
     it("FGBoolean", () => {
         let b = new FGBoolean(false);
@@ -13,8 +14,8 @@ describe("value", () => {
         let f = (n) => { return; };
         let b = new FGCallNative("f", 0, f, [
             {
-                input: [500],
-                output: 500,
+                input: [numberT],
+                output: numberT,
             }
         ]);
         equal(b.kind, 400);
@@ -26,8 +27,8 @@ describe("value", () => {
     it("FGCallUser", () => {
         let b = new FGCallUser("testfn", 0, [
             {
-                input: [500],
-                output: 500,
+                input: [numberT],
+                output: numberT,
             }
         ], new Chunk(""));
         equal(b.kind, 450);

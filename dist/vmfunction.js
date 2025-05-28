@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js";
-import { geoKind, KindName, FGCallNative, FGString, FGList } from "./value.js";
+import { KindName, FGCallNative, FGString, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
@@ -8,6 +8,7 @@ import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
+import { ListT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT } from "./type.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -15,8 +16,8 @@ function _Print(n) {
 }
 export let Print = new FGCallNative("Print", 0, _Print, [
     {
-        input: [200],
-        output: 100,
+        input: [anyT],
+        output: nothingT,
     },
 ]);
 function _Printf(n) {
@@ -26,8 +27,8 @@ function _Printf(n) {
 }
 export let Printf = new FGCallNative("Printf", 0, _Printf, [
     {
-        input: [200],
-        output: 100,
+        input: [anyT],
+        output: nothingT,
     },
 ]);
 function _Show(n) {
@@ -37,8 +38,8 @@ function _Show(n) {
 }
 export let Show = new FGCallNative("Show", 0, _Show, [
     {
-        input: [500],
-        output: 600,
+        input: [numberT],
+        output: stringT,
     },
 ]);
 function _Padl(n) {
@@ -51,8 +52,8 @@ function _Padl(n) {
 }
 export let Padl = new FGCallNative("Padl", 0, _Padl, [
     {
-        input: [600, 500, 600],
-        output: 600,
+        input: [stringT, numberT, stringT],
+        output: stringT,
     },
 ]);
 function _Type(n) {
@@ -62,8 +63,8 @@ function _Type(n) {
 }
 export let Type = new FGCallNative("Type", 0, _Type, [
     {
-        input: [200],
-        output: 600,
+        input: [anyT],
+        output: stringT,
     },
 ]);
 let on_scrn = [];
@@ -81,8 +82,8 @@ function _Draw(n) {
 }
 export let Draw = new FGCallNative("Draw", 0, _Draw, [
     {
-        input: [geoKind],
-        output: 100,
+        input: [geoT],
+        output: nothingT,
     },
 ]);
 function _C(n) {
@@ -105,12 +106,12 @@ function _C(n) {
 }
 export let C = new FGCallNative("C", 0, _C, [
     {
-        input: [500, 500, 500],
-        output: 700,
+        input: [numberT, numberT, numberT],
+        output: circleT,
     },
     {
-        input: [850, 850],
-        output: 700,
+        input: [pointT, pointT],
+        output: circleT,
     },
 ]);
 function _Ccurv(n) {
@@ -123,8 +124,8 @@ function _Ccurv(n) {
 }
 export const Ccurv = new FGCallNative("Ccurv", 0, _Ccurv, [
     {
-        input: [500, 500, 500],
-        output: 700,
+        input: [numberT, numberT, numberT],
+        output: circleT,
     },
 ]);
 function _Descart(n) {
@@ -132,28 +133,28 @@ function _Descart(n) {
     let c2 = pop();
     let c1 = pop();
     pop();
-    let list = new FGList(Circle.descartes(c1, c2, c3), 500);
+    let list = new FGList(Circle.descartes(c1, c2, c3), numberT);
     push(list);
 }
 export const Descart = new FGCallNative("Descart", 0, _Descart, [
     {
-        input: [700, 700, 700],
-        output: 470,
+        input: [circleT, circleT, circleT],
+        output: new ListT(numberT),
     },
 ]);
 function _ComplexDescart(n) {
-    let list = pop();
+    let curv = pop();
     let c3 = pop();
     let c2 = pop();
     let c1 = pop();
     pop();
-    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, list.value), 700);
+    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleT);
     push(circles);
 }
 export const ComplexDescart = new FGCallNative("ComplexDescart", 0, _ComplexDescart, [
     {
-        input: [700, 700, 700, 470],
-        output: 470,
+        input: [circleT, circleT, circleT, numberT],
+        output: new ListT(circleT),
     },
 ]);
 function _E(n) {
@@ -167,8 +168,8 @@ function _E(n) {
 }
 export let E = new FGCallNative("E", 0, _E, [
     {
-        input: [500, 500, 500, 500],
-        output: 750,
+        input: [numberT, numberT, numberT, numberT],
+        output: ellipseT,
     },
 ]);
 function _P(n) {
@@ -182,8 +183,8 @@ function _P(n) {
 }
 export let P = new FGCallNative("P", 0, _P, [
     {
-        input: [500, 500],
-        output: 850,
+        input: [numberT, numberT],
+        output: pointT,
     },
 ]);
 function _Paint(n) {
@@ -195,8 +196,8 @@ function _Paint(n) {
 }
 export let Paint = new FGCallNative("Paint", 0, _Paint, [
     {
-        input: [840, geoKind],
-        output: 100,
+        input: [pictureT, geoT],
+        output: nothingT,
     },
 ]);
 function _Cw(n) {
@@ -206,8 +207,8 @@ function _Cw(n) {
 }
 export let Cw = new FGCallNative("Cw", 0, _Cw, [
     {
-        input: [840],
-        output: 840,
+        input: [pictureT],
+        output: pictureT,
     },
 ]);
 function _Ccw(n) {
@@ -217,8 +218,8 @@ function _Ccw(n) {
 }
 export let Ccw = new FGCallNative("Ccw", 0, _Ccw, [
     {
-        input: [840],
-        output: 840,
+        input: [pictureT],
+        output: pictureT,
     },
 ]);
 function _FlipH(n) {
@@ -228,8 +229,8 @@ function _FlipH(n) {
 }
 export let FlipH = new FGCallNative("FlipH", 0, _FlipH, [
     {
-        input: [840],
-        output: 840,
+        input: [pictureT],
+        output: pictureT,
     },
 ]);
 function _FlipV(n) {
@@ -239,8 +240,8 @@ function _FlipV(n) {
 }
 export let FlipV = new FGCallNative("FlipV", 0, _FlipV, [
     {
-        input: [840],
-        output: 840,
+        input: [pictureT],
+        output: pictureT,
     },
 ]);
 function _Above(n) {
@@ -261,12 +262,12 @@ function _Above(n) {
 }
 export let Above = new FGCallNative("Above", 0, _Above, [
     {
-        input: [840, 840],
-        output: 840,
+        input: [pictureT, pictureT],
+        output: pictureT,
     },
     {
-        input: [500, 500, 840, 840],
-        output: 840,
+        input: [numberT, numberT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 function _Beside(n) {
@@ -287,12 +288,12 @@ function _Beside(n) {
 }
 export let Beside = new FGCallNative("Beside", 0, _Beside, [
     {
-        input: [840, 840],
-        output: 840,
+        input: [pictureT, pictureT],
+        output: pictureT
     },
     {
-        input: [500, 500, 840, 840],
-        output: 840,
+        input: [numberT, numberT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 function _Quartet(n) {
@@ -305,8 +306,8 @@ function _Quartet(n) {
 }
 export let Quartet = new FGCallNative("Quartet", 0, _Quartet, [
     {
-        input: [840, 840, 840, 840],
-        output: 840,
+        input: [pictureT, pictureT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 function _Cycle(n) {
@@ -316,8 +317,8 @@ function _Cycle(n) {
 }
 export let Cycle = new FGCallNative("Cycle", 0, _Cycle, [
     {
-        input: [840],
-        output: 840,
+        input: [pictureT],
+        output: pictureT,
     },
 ]);
 function _MapPic(n) {
@@ -329,8 +330,8 @@ function _MapPic(n) {
 }
 export let MapPic = new FGCallNative("MapPic", 0, _MapPic, [
     {
-        input: [840, 840],
-        output: 100,
+        input: [pictureT, pictureT],
+        output: nothingT,
     },
 ]);
 function _Pic(n) {
@@ -342,8 +343,8 @@ function _Pic(n) {
 }
 export let Pic = new FGCallNative("Pic", 0, _Pic, [
     {
-        input: [500, 500],
-        output: 840,
+        input: [numberT, numberT],
+        output: pictureT,
     },
 ]);
 function _R(n) {
@@ -370,12 +371,12 @@ function _R(n) {
 }
 export let R = new FGCallNative("R", 0, _R, [
     {
-        input: [500, 500, 500, 500],
-        output: 900,
+        input: [numberT, numberT, numberT, numberT],
+        output: rectT,
     },
     {
-        input: [850, 850],
-        output: 900,
+        input: [pointT, pointT],
+        output: rectT,
     },
 ]);
 function _Seg(n) {
@@ -398,12 +399,12 @@ function _Seg(n) {
 }
 export let Seg = new FGCallNative("Seg", 0, _Seg, [
     {
-        input: [500, 500, 500, 500],
-        output: 1000,
+        input: [numberT, numberT, numberT, numberT],
+        output: segmentT,
     },
     {
-        input: [850, 850],
-        output: 1000,
+        input: [pointT, pointT],
+        output: segmentT,
     },
 ]);
 function _Midpoint(n) {
@@ -414,8 +415,8 @@ function _Midpoint(n) {
 }
 export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [
     {
-        input: [1000],
-        output: 850,
+        input: [segmentT],
+        output: pointT,
     },
 ]);
 function _Help(n) {
@@ -425,7 +426,7 @@ function _Help(n) {
 export let Help = new FGCallNative("Help", 1, _Help, [
     {
         input: [],
-        output: 100,
+        output: nothingT,
     },
 ]);
 function _Clear(n) {
@@ -436,6 +437,6 @@ function _Clear(n) {
 export let Clear = new FGCallNative("Clear", 1, _Clear, [
     {
         input: [],
-        output: 100,
+        output: nothingT,
     },
 ]);

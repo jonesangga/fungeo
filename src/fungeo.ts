@@ -5,8 +5,8 @@ import { compiler } from "./compiler.js"
 import { Chunk } from "./chunk.js"
 import { vm } from "./vm.js"
 
-repl.place(0, 400);
-canvas.place(250, 0);
+repl.place(0, 640);
+canvas.place(650, 0);
 
 vm.init();
 

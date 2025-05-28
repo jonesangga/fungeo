@@ -2,6 +2,7 @@ export var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
     TokenT[TokenT["Dollar"] = 200] = "Dollar";
+    TokenT[TokenT["Hash"] = 250] = "Hash";
     TokenT[TokenT["LBrace"] = 300] = "LBrace";
     TokenT[TokenT["LBracket"] = 400] = "LBracket";
     TokenT[TokenT["LParen"] = 500] = "LParen";
@@ -38,10 +39,14 @@ export var TokenT;
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
     TokenT[TokenT["BoolT"] = 2220] = "BoolT";
+    TokenT[TokenT["CircleT"] = 2230] = "CircleT";
     TokenT[TokenT["Else"] = 2300] = "Else";
     TokenT[TokenT["Fn"] = 2320] = "Fn";
     TokenT[TokenT["If"] = 2400] = "If";
     TokenT[TokenT["Ifx"] = 2405] = "Ifx";
+    TokenT[TokenT["Global"] = 2450] = "Global";
+    TokenT[TokenT["Mut"] = 2500] = "Mut";
+    TokenT[TokenT["Nonlocal"] = 2550] = "Nonlocal";
     TokenT[TokenT["NumT"] = 2600] = "NumT";
     TokenT[TokenT["Proc"] = 2750] = "Proc";
     TokenT[TokenT["Return"] = 2800] = "Return";
@@ -56,6 +61,7 @@ export const TokenTName = {
     [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
+    [2230]: "CircleT",
     [1300]: "Colon",
     [1400]: "ColonEq",
     [100]: "Comma",
@@ -67,8 +73,10 @@ export const TokenTName = {
     [2200]: "Error",
     [1600]: "False",
     [2320]: "Fn",
+    [2450]: "Global",
     [1520]: "Greater",
     [1525]: "GreaterEq",
+    [250]: "Hash",
     [2400]: "If",
     [2405]: "Ifx",
     [300]: "LBrace",
@@ -78,7 +86,9 @@ export const TokenTName = {
     [500]: "LParen",
     [1560]: "LR",
     [600]: "Minus",
+    [2500]: "Mut",
     [1700]: "Name",
+    [2550]: "Nonlocal",
     [1800]: "Number",
     [2600]: "NumT",
     [1575]: "Pipe",
@@ -144,11 +154,15 @@ function token_error(message) {
 function name_type() {
     switch (source.slice(start, current)) {
         case "Bool": return 2220;
+        case "Circle": return 2230;
         case "else": return 2300;
         case "false": return 1600;
         case "fn": return 2320;
         case "if": return 2400;
         case "ifx": return 2405;
+        case "global": return 2450;
+        case "mut": return 2500;
+        case "nonlocal": return 2550;
         case "Num": return 2600;
         case "proc": return 2750;
         case "return": return 2800;
@@ -236,6 +250,7 @@ export const scanner = {
             case '{': return token_lexeme(300);
             case '}': return token_lexeme(695);
             case '$': return token_lexeme(200);
+            case '#': return token_lexeme(250);
             case ';': return token_lexeme(900);
             case ',': return token_lexeme(100);
             case '/': return token_lexeme(1000);

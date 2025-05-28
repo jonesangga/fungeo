@@ -1,5 +1,28 @@
 # Log
 
+#### 28-05-25
+
+- major rewrite
+- optional value field in tempNames
+- fix scoping bug
+- update tests
+
+#### 27-05-25
+
+- global keyword
+- mutable name
+- success implement apollonian gasket
+- clean up scanner, update scanner.test
+- make procedure that return value
+- change vmfunction input output
+- change Op.Set mechanism
+- change type representation
+
+#### 26-05-25
+
+- add comment support
+- fix bug: index in disassemble_instr
+
 #### 25-05-25
 
 - list indexing

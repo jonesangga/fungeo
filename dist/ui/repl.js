@@ -9,17 +9,18 @@ const holder = document.createElement("div");
 container.appendChild(holder);
 holder.style.position = "unset";
 holder.style.width = "10px";
-holder.style.height = "20px";
+holder.style.height = "30px";
 holder.style.background = "#000";
 const input = document.createElement("textarea");
+input.style.fontSize = "16px";
 container.appendChild(input);
 input.focus();
 input.cols = 20;
 input.rows = 1;
 input.wrap = "off";
 input.style.position = "unset";
-input.style.minWidth = "200px";
-input.style.maxWidth = "400px";
+input.style.minWidth = "560px";
+input.style.maxWidth = "600px";
 input.style.marginLeft = "5px";
 input.style.padding = "0px 5px";
 input.style.border = "1px solid #000";
@@ -166,10 +167,10 @@ const repl = {
 const terminal = document.createElement("div");
 container.appendChild(terminal);
 terminal.style.position = "absolute";
-terminal.style.top = "-400px";
+terminal.style.top = "-640px";
 terminal.style.left = "0px";
-terminal.style.width = "240px";
-terminal.style.height = "390px";
+terminal.style.width = "600px";
+terminal.style.height = "630px";
 terminal.style.border = "1px solid #000";
 terminal.style.fontSize = "11px";
 terminal.style.background = "#eee";
@@ -182,6 +183,7 @@ function terminal_update() {
 }
 function terminal_add_code(code, type) {
     const div = document.createElement("div");
+    div.style.fontSize = "16px";
     div.style.borderBottom = "1px solid #000";
     if (type === 0) {
         div.style.background = "#fee";

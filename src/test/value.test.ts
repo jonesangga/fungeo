@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { Kind, CallT, FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js"
 import { Chunk } from "../chunk.js"
+import { numberT } from "../type.js"
 
 describe("value", () => {
 
@@ -22,8 +23,8 @@ describe("value", () => {
         let f = (n: number) => {return;};
         let b = new FGCallNative("f", CallT.Function, f, [
             {
-                input: [Kind.Number],
-                output: Kind.Number,
+                input: [numberT],
+                output: numberT,
             }
         ]);
 
@@ -37,8 +38,8 @@ describe("value", () => {
     it("FGCallUser", () => {
         let b = new FGCallUser("testfn", CallT.Function, [
             {
-                input: [Kind.Number],
-                output: Kind.Number,
+                input: [numberT],
+                output: numberT,
             }
         ], new Chunk(""));
 

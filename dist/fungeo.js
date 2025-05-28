@@ -2,8 +2,8 @@ import repl from "./ui/repl.js";
 import canvas from "./ui/canvas.js";
 import { compiler } from "./compiler.js";
 import { vm } from "./vm.js";
-repl.place(0, 400);
-canvas.place(250, 0);
+repl.place(0, 640);
+canvas.place(650, 0);
 vm.init();
 function main(source) {
     let result = compiler.compile(source);

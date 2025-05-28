@@ -1,7 +1,9 @@
 // @jonesangga, 05-05-2025, MIT License.
 //
 // TODO: Test disassemble().
+//       Test SetLoc, SetLocG, SetLocM, SetLocN. AddList, Len, Index
 
+import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
@@ -58,7 +60,6 @@ describe("chunk disassemble op with no arg", () => {
         [Op.Not, "0000  123 Not\n"],
         [Op.Ok, "0000  123 Ok\n"],
         [Op.Pop, "0000  123 Pop\n"],
-        [Op.SetLoc, "0000  123 SetLoc\n"],
         [Op.Sub, "0000  123 Sub\n"],
     ];
 
@@ -126,16 +127,14 @@ describe("chunk disassemble op set", () => {
     it("Op.Set", () => {
         let chunk = new Chunk("test chunk");
         let name = new FGString("a");
-        let kind = Kind.Number;
-        let id = chunk.add_value(name);
+        let index = chunk.add_value(name);
         chunk.write(Op.Set, 123);
-        chunk.write(id, 123);
-        chunk.write(kind, 123);
+        chunk.write(index, 123);
 
         let [result, offset] = chunk.disassemble_instr(0);
 
-        deepEqual(result, "0000  123 Set        0 'a: Number'\n");
-        equal(offset, 3);
+        deepEqual(result, "0000  123 Set        0 'a'\n");
+        equal(offset, 2);
     });
 });
 

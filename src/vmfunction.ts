@@ -8,6 +8,7 @@ import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
+import { ListT, NumberT, CircleT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, booleanT, numberT } from "./type.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -16,8 +17,8 @@ function _Print(n: number): void {
 }
 export let Print = new FGCallNative("Print", CallT.Function, _Print, [
     {
-        input:  [Kind.Any],
-        output: Kind.Nothing,
+        input:  [anyT],
+        output: nothingT,
     },
 ]);
 
@@ -28,8 +29,8 @@ function _Printf(n: number): void {
 }
 export let Printf = new FGCallNative("Printf", CallT.Function, _Printf, [
     {
-        input:  [Kind.Any],
-        output: Kind.Nothing,
+        input:  [anyT],
+        output: nothingT,
     },
 ]);
 
@@ -40,8 +41,8 @@ function _Show(n: number): void {
 }
 export let Show = new FGCallNative("Show", CallT.Function, _Show, [
     {
-        input:  [Kind.Number],
-        output: Kind.String,
+        input:  [numberT],
+        output: stringT,
     },
 ]);
 
@@ -56,11 +57,12 @@ function _Padl(n: number): void {
 }
 export let Padl = new FGCallNative("Padl", CallT.Function, _Padl, [
     {
-        input:  [Kind.String, Kind.Number, Kind.String],
-        output: Kind.String,
+        input:  [stringT, numberT, stringT],
+        output: stringT,
     },
 ]);
 
+// TODO: Think about this again. We lose the type information because that is on table not on stack or on the value.
 function _Type(n: number): void {
     let value = pop();
     pop();              // The function.
@@ -68,8 +70,8 @@ function _Type(n: number): void {
 }
 export let Type = new FGCallNative("Type", CallT.Function, _Type, [
     {
-        input:  [Kind.Any],
-        output: Kind.String,
+        input:  [anyT],
+        output: stringT,
     },
 ]);
 
@@ -90,8 +92,8 @@ function _Draw(n: number): void {
 }
 export let Draw = new FGCallNative("Draw", CallT.Function, _Draw, [
     {
-        input:  [geoKind],
-        output: Kind.Nothing,
+        input:  [geoT],
+        output: nothingT,
     },
 ]);
 
@@ -114,12 +116,12 @@ function _C(n: number): void {
 }
 export let C = new FGCallNative("C", CallT.Function, _C, [
     {
-        input:  [Kind.Number, Kind.Number, Kind.Number],
-        output: Kind.Circle,
+        input:  [numberT, numberT, numberT],
+        output: circleT,
     },
     {
-        input:  [Kind.Point, Kind.Point],
-        output: Kind.Circle,
+        input:  [pointT, pointT],
+        output: circleT,
     },
 ]);
 
@@ -133,8 +135,8 @@ function _Ccurv(n: number): void {
 }
 export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv, [
     {
-        input:  [Kind.Number, Kind.Number, Kind.Number],
-        output: Kind.Circle,
+        input:  [numberT, numberT, numberT],
+        output: circleT,
     },
 ]);
 
@@ -144,30 +146,30 @@ function _Descart(n: number): void {
     let c2 = pop() as Circle;
     let c1 = pop() as Circle;
     pop();              // The function.
-    let list = new FGList<Kind.Number>(Circle.descartes(c1, c2, c3), Kind.Number);
+    let list = new FGList(Circle.descartes(c1, c2, c3), numberT);
     push(list);
 }
 export const Descart = new FGCallNative("Descart", CallT.Function, _Descart, [
     {
-        input:  [Kind.Circle, Kind.Circle, Kind.Circle],
-        output: Kind.List,
+        input:  [circleT, circleT, circleT],
+        output: new ListT(numberT),
     },
 ]);
 
 // TODO: Clean up
 function _ComplexDescart(n: number): void {
-    let list = pop() as FGList<Kind.Number>;
+    let curv = pop() as FGNumber;
     let c3 = pop() as Circle;
     let c2 = pop() as Circle;
     let c1 = pop() as Circle;
     pop();              // The function.
-    let circles = new FGList<Kind.Circle>(Circle.complex_descartes(c1, c2, c3, list.value), Kind.Circle);
+    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleT);
     push(circles);
 }
 export const ComplexDescart = new FGCallNative("ComplexDescart", CallT.Function, _ComplexDescart, [
     {
-        input:  [Kind.Circle, Kind.Circle, Kind.Circle, Kind.List],
-        output: Kind.List,
+        input:  [circleT, circleT, circleT, numberT],
+        output: new ListT(circleT),
     },
 ]);
 
@@ -182,8 +184,8 @@ function _E(n: number): void {
 }
 export let E = new FGCallNative("E", CallT.Function, _E, [
     {
-        input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
-        output: Kind.Ellipse,
+        input:  [numberT, numberT, numberT, numberT],
+        output: ellipseT,
     },
 ]);
 
@@ -198,8 +200,8 @@ function _P(n: number): void {
 }
 export let P = new FGCallNative("P", CallT.Function, _P, [
     {
-        input:  [Kind.Number, Kind.Number],
-        output: Kind.Point,
+        input:  [numberT, numberT],
+        output: pointT,
     },
 ]);
 
@@ -212,8 +214,8 @@ function _Paint(n: number): void {
 }
 export let Paint = new FGCallNative("Paint", CallT.Function, _Paint, [
     {
-        input:  [Kind.Picture, geoKind],
-        output: Kind.Nothing,
+        input:  [pictureT, geoT],
+        output: nothingT,
     },
 ]);
 
@@ -224,8 +226,8 @@ function _Cw(n: number): void {
 }
 export let Cw = new FGCallNative("Cw", CallT.Function, _Cw, [
     {
-        input:  [Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -236,8 +238,8 @@ function _Ccw(n: number): void {
 }
 export let Ccw = new FGCallNative("Ccw", CallT.Function, _Ccw, [
     {
-        input:  [Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -248,8 +250,8 @@ function _FlipH(n: number): void {
 }
 export let FlipH = new FGCallNative("FlipH", CallT.Function, _FlipH, [
     {
-        input:  [Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -260,8 +262,8 @@ function _FlipV(n: number): void {
 }
 export let FlipV = new FGCallNative("FlipV", CallT.Function, _FlipV, [
     {
-        input:  [Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -282,12 +284,12 @@ function _Above(n: number): void {
 }
 export let Above = new FGCallNative("Above", CallT.Function, _Above, [
     {
-        input:  [Kind.Picture, Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT, pictureT],
+        output: pictureT,
     },
     {
-        input:  [Kind.Number, Kind.Number, Kind.Picture, Kind.Picture],
-        output: Kind.Picture,
+        input:  [numberT, numberT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -308,12 +310,12 @@ function _Beside(n: number): void {
 }
 export let Beside = new FGCallNative("Beside", CallT.Function, _Beside, [
     {
-        input:  [Kind.Picture, Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT, pictureT],
+        output: pictureT
     },
     {
-        input:  [Kind.Number, Kind.Number, Kind.Picture, Kind.Picture],
-        output: Kind.Picture,
+        input:  [numberT, numberT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -327,8 +329,8 @@ function _Quartet(n: number): void {
 }
 export let Quartet = new FGCallNative("Quartet", CallT.Function, _Quartet, [
     {
-        input:  [Kind.Picture, Kind.Picture, Kind.Picture, Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT, pictureT, pictureT, pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -339,8 +341,8 @@ function _Cycle(n: number): void {
 }
 export let Cycle = new FGCallNative("Cycle", CallT.Function, _Cycle, [
     {
-        input:  [Kind.Picture],
-        output: Kind.Picture,
+        input:  [pictureT],
+        output: pictureT,
     },
 ]);
 
@@ -353,8 +355,8 @@ function _MapPic(n: number): void {
 }
 export let MapPic = new FGCallNative("MapPic", CallT.Function, _MapPic, [
     {
-        input:  [Kind.Picture, Kind.Picture],
-        output: Kind.Nothing,
+        input:  [pictureT, pictureT],
+        output: nothingT,
     },
 ]);
 
@@ -367,8 +369,8 @@ function _Pic(n: number): void {
 }
 export let Pic = new FGCallNative("Pic", CallT.Function, _Pic, [
     {
-        input:  [Kind.Number, Kind.Number],
-        output: Kind.Picture,
+        input:  [numberT, numberT],
+        output: pictureT,
     },
 ]);
 
@@ -395,12 +397,12 @@ function _R(n: number): void {
 }
 export let R = new FGCallNative("R", CallT.Function, _R, [
     {
-        input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
-        output: Kind.Rect,
+        input:  [numberT, numberT, numberT, numberT],
+        output: rectT,
     },
     {
-        input:  [Kind.Point, Kind.Point],
-        output: Kind.Rect,
+        input:  [pointT, pointT],
+        output: rectT,
     },
 ]);
 
@@ -423,12 +425,12 @@ function _Seg(n: number): void {
 }
 export let Seg = new FGCallNative("Seg", CallT.Function, _Seg, [
     {
-        input:  [Kind.Number, Kind.Number, Kind.Number, Kind.Number],
-        output: Kind.Segment,
+        input:  [numberT, numberT, numberT, numberT],
+        output: segmentT,
     },
     {
-        input:  [Kind.Point, Kind.Point],
-        output: Kind.Segment,
+        input:  [pointT, pointT],
+        output: segmentT,
     },
 ]);
 
@@ -440,8 +442,8 @@ function _Midpoint(n: number): void {
 }
 export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint, [
     {
-        input:  [Kind.Segment],
-        output: Kind.Point,
+        input:  [segmentT],
+        output: pointT,
     },
 ]);
 
@@ -452,7 +454,7 @@ function _Help(n: number): void {
 export let Help = new FGCallNative("Help", CallT.Procedure, _Help, [
     {
         input:  [],
-        output: Kind.Nothing,
+        output: nothingT,
     },
 ]);
 
@@ -464,6 +466,6 @@ function _Clear(n: number): void {
 export let Clear = new FGCallNative("Clear", CallT.Procedure, _Clear, [
     {
         input:  [],
-        output: Kind.Nothing,
+        output: nothingT,
     },
 ]);

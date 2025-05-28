@@ -5,7 +5,7 @@
 
 import { describe, it } from "node:test";
 import { deepEqual } from "node:assert/strict";
-import { TokenT, type Token, scanner } from "../scanner.js"
+import { TokenT, scanner } from "../scanner.js"
 
 describe("scanner handling EOF", () => {
     it("success, on empty code", () => {
@@ -50,6 +50,7 @@ describe("scanner each token type", () => {
         [TokenT.Colon]: [":", { kind: TokenT.Colon, line: 1, lexeme: ":" }],
         [TokenT.ColonEq]: [":=", { kind: TokenT.ColonEq, line: 1, lexeme: ":=" }],
         [TokenT.Comma]: [",", { kind: TokenT.Comma, line: 1, lexeme: "," }],
+        [TokenT.CircleT]: ["Circle", { kind: TokenT.CircleT, line: 1, lexeme: "Circle" }],
         [TokenT.Dollar]: ["$", { kind: TokenT.Dollar, line: 1, lexeme: "$" }],
         [TokenT.Else]: ["else", { kind: TokenT.Else, line: 1, lexeme: "else" }],
         [TokenT.EOF]: ["", { kind: TokenT.EOF, line: 1, lexeme: "" }],
@@ -58,8 +59,10 @@ describe("scanner each token type", () => {
         [TokenT.Error]: ["@", { kind: TokenT.Error, line: 1, lexeme: "unexpected character @" }],
         [TokenT.False]: ["false", { kind: TokenT.False, line: 1, lexeme: "false" }],
         [TokenT.Fn]: ["fn", { kind: TokenT.Fn, line: 1, lexeme: "fn" }],
+        [TokenT.Global]: ["global", { kind: TokenT.Global, line: 1, lexeme: "global" }],
         [TokenT.Greater]: [">", { kind: TokenT.Greater, line: 1, lexeme: ">" }],
         [TokenT.GreaterEq]: [">=", { kind: TokenT.GreaterEq, line: 1, lexeme: ">=" }],
+        [TokenT.Hash]: ["#", { kind: TokenT.Hash, line: 1, lexeme: "#" }],
         [TokenT.If]: ["if", { kind: TokenT.If, line: 1, lexeme: "if" }],
         [TokenT.Ifx]: ["ifx", { kind: TokenT.Ifx, line: 1, lexeme: "ifx" }],
         [TokenT.LBrace]: ["{", { kind: TokenT.LBrace, line: 1, lexeme: "{" }],
@@ -68,8 +71,10 @@ describe("scanner each token type", () => {
         [TokenT.LessEq]: ["<=", { kind: TokenT.LessEq, line: 1, lexeme: "<=" }],
         [TokenT.LParen]: ["(", { kind: TokenT.LParen, line: 1, lexeme: "(" }],
         [TokenT.LR]: ["<>", { kind: TokenT.LR, line: 1, lexeme: "<>" }],
+        [TokenT.Mut]: ["mut", { kind: TokenT.Mut, line: 1, lexeme: "mut" }],
         [TokenT.Minus]: ["-", { kind: TokenT.Minus, line: 1, lexeme: "-" }],
         [TokenT.Name]: ["kasukasu", { kind: TokenT.Name, line: 1, lexeme: "kasukasu" }],
+        [TokenT.Nonlocal]: ["nonlocal", { kind: TokenT.Nonlocal, line: 1, lexeme: "nonlocal" }],
         [TokenT.Number]: ["123.456", { kind: TokenT.Number, line: 1, lexeme: "123.456" }],
         [TokenT.NumT]: ["Num", { kind: TokenT.NumT, line: 1, lexeme: "Num" }],
         [TokenT.Pipe]: ["|", { kind: TokenT.Pipe, line: 1, lexeme: "|" }],

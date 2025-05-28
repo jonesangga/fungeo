@@ -1,3 +1,4 @@
+import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { OpName, Chunk } from "../chunk.js";
@@ -45,7 +46,6 @@ describe("chunk disassemble op with no arg", () => {
         [1100, "0000  123 Not\n"],
         [1290, "0000  123 Ok\n"],
         [1200, "0000  123 Pop\n"],
-        [1410, "0000  123 SetLoc\n"],
         [1500, "0000  123 Sub\n"],
     ];
     for (let [op, expected] of tests) {
@@ -101,14 +101,12 @@ describe("chunk disassemble op set", () => {
     it("Op.Set", () => {
         let chunk = new Chunk("test chunk");
         let name = new FGString("a");
-        let kind = 500;
-        let id = chunk.add_value(name);
+        let index = chunk.add_value(name);
         chunk.write(1400, 123);
-        chunk.write(id, 123);
-        chunk.write(kind, 123);
+        chunk.write(index, 123);
         let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 Set        0 'a: Number'\n");
-        equal(offset, 3);
+        deepEqual(result, "0000  123 Set        0 'a'\n");
+        equal(offset, 2);
     });
 });
 describe("chunk disassemble op jumps", () => {

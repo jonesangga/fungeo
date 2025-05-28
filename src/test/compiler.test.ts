@@ -14,7 +14,7 @@ import { Kind, FGNumber, FGString } from "../value.js"
 import { compiler } from "../compiler.js"
 
 //--------------------------------------------------------------------
-// Testing unary operators.
+// Helpers.
 
 type CodeTest = [string, string, number[]][];
 type ErrorTest = [string, string, string][];
@@ -42,23 +42,26 @@ function matchError(tests: ErrorTest) {
     }
 }
 
-describe("compiler unary grouping", () => {
+//--------------------------------------------------------------------
+// Testing unary operators.
+
+describe("compiler: unary: grouping", () => {
     const tests: CodeTest = [
-        ["() to change precedence", `result = 1 * (2 + 3)`, [
+        ["use () to change precedence", `result = 1 * (2 + 3)`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Add, Op.Mul,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 4, Op.Set, 0, Op.Ok,
         ]],
-        ["((Str))", `result = (("real"))`, [
-            Op.Load, 1, Op.Set, 0, Kind.String, Op.Ok,
+        ["no effect on ((Str))", `result = (("real"))`, [
+            Op.Load, 1, Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler unary grouping error", () => {
+describe("compiler: unary: grouping error", () => {
     const tests: ErrorTest = [
         [
-            "error, when ( not closed",
+            "error, when ( is not closed",
             `result = 1 * (2 + 3`,
             "1: at end: expect ')' after grouping\n"
         ],
@@ -66,25 +69,25 @@ describe("compiler unary grouping error", () => {
     matchError(tests);
 });
 
-describe("compiler unary !", () => {
+describe("compiler: unary: !", () => {
     const tests: CodeTest = [
         ["!Bool", `result = !false`, [
             Op.Load, 1, Op.Not,
-            Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["!!Bool", `result = !!false`, [
             Op.Load, 1, Op.Not, Op.Not,
-            Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["!(Bool)", `result = !(false)`, [
             Op.Load, 1, Op.Not,
-            Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler unary ! error", () => {
+describe("compiler: unary: ! error", () => {
     const tests: ErrorTest = [
         [
             "error, when !Num",
@@ -100,25 +103,25 @@ describe("compiler unary ! error", () => {
     matchError(tests);
 });
 
-describe("compiler unary -", () => {
+describe("compiler: unary: -", () => {
     const tests: CodeTest = [
         ["-Num", `result = -2`, [
             Op.Load, 1, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["--Num", `result = --2`, [
             Op.Load, 1, Op.Neg, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["-(Num)", `result = -(2)`, [
             Op.Load, 1, Op.Neg,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler unary - error", () => {
+describe("compiler: unary: - error", () => {
     const tests: ErrorTest = [
         [
             "error, when -Str",
@@ -137,7 +140,7 @@ describe("compiler unary - error", () => {
 //--------------------------------------------------------------------
 // Testing binary operators.
 
-describe("compiler boolean equality", () => {
+describe("compiler: == and !=", () => {
     const tests: [string, string, Op][] = [
         ["Expr == Expr", "result = 12 == 34", Op.Eq],
         ["Expr != Expr", "result = 12 != 34", Op.NEq],
@@ -151,13 +154,13 @@ describe("compiler boolean equality", () => {
 
             deepEqual(chunk.code, [
                 Op.Load, 1, Op.Load, 2, expectedOp,
-                Op.Set, 0, Kind.Boolean, Op.Ok,
+                Op.Load, 3, Op.Set, 0, Op.Ok,
             ]);
         });
     }
 });
 
-describe("compiler boolean |", () => {
+describe("compiler: is divisible by '|'", () => {
     it("Num | Num", () => {
         let source = "result = 12 | 34";
         let result = compiler.compile(source);
@@ -166,12 +169,12 @@ describe("compiler boolean |", () => {
 
         deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.IsDiv,
-            Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 3, Op.Set, 0, Op.Ok,
         ]);
     });
 });
 
-describe("compiler boolean &&", () => {
+describe("compiler: &&", () => {
     it("Bool && Bool", () => {
         let source = "result = true && true";
         let result = compiler.compile(source);
@@ -179,13 +182,13 @@ describe("compiler boolean &&", () => {
         let chunk = result.value.chunk;
 
         deepEqual(chunk.code, [
-            Op.Load, 1, Op.JmpF, 3, Op.Pop,
-            Op.Load, 2, Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 1, Op.JmpF, 3, Op.Pop, Op.Load, 2,
+            Op.Load, 3, Op.Set, 0, Op.Ok,
         ]);
     });
 });
 
-describe("compiler boolean && error", () => {
+describe("compiler: && error", () => {
     const tests: ErrorTest = [
         [
             "error, when Bool && Num",
@@ -201,7 +204,7 @@ describe("compiler boolean && error", () => {
     matchError(tests);
 });
 
-describe("compiler boolean ||", () => {
+describe("compiler: ||", () => {
     it("Bool || Bool", () => {
         let source = "result = true || true";
         let result = compiler.compile(source);
@@ -210,12 +213,12 @@ describe("compiler boolean ||", () => {
 
         deepEqual(chunk.code, [
             Op.Load, 1, Op.JmpF, 2, Op.Jmp, 3, Op.Pop,
-            Op.Load, 2, Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 2, Op.Load, 3, Op.Set, 0, Op.Ok,
         ]);
     });
 });
 
-describe("compiler boolean || error", () => {
+describe("compiler: || error", () => {
     const tests: ErrorTest = [
         [
             "error, when Bool || Num",
@@ -231,7 +234,7 @@ describe("compiler boolean || error", () => {
     matchError(tests);
 });
 
-describe("compiler boolean compare", () => {
+describe("compiler: comparison", () => {
     const tests: [string, string, Op][] = [
         ["Num < Num", "result = 12 < 34", Op.LT],
         ["Num <= Num", "result = 12 <= 34", Op.LEq],
@@ -251,13 +254,13 @@ describe("compiler boolean compare", () => {
 
             deepEqual(chunk.code, [
                 Op.Load, 1, Op.Load, 2, expectedOp,
-                Op.Set, 0, Kind.Boolean, Op.Ok,
+                Op.Load, 3, Op.Set, 0, Op.Ok,
             ]);
         });
     }
 });
 
-describe("compiler boolean compare error", () => {
+describe("compiler: comparison error", () => {
     const tests: ErrorTest = [
         [
             "error, when Str < Num",
@@ -273,7 +276,7 @@ describe("compiler boolean compare error", () => {
     matchError(tests);
 });
 
-describe("compiler numeric binary", () => {
+describe("compiler: arithmetic", () => {
     const tests: [string, string, Op][] = [
         ["Num + Num", "result = 12 + 34", Op.Add],
         ["Num - Num", "result = 12 - 34", Op.Sub],
@@ -289,7 +292,7 @@ describe("compiler numeric binary", () => {
 
             deepEqual(chunk.code, [
                 Op.Load, 1, Op.Load, 2, expectedOp,
-                Op.Set, 0, Kind.Number, Op.Ok,
+                Op.Load, 3, Op.Set, 0, Op.Ok,
             ]);
             deepEqual(chunk.values[0], new FGString("result"));
             deepEqual(chunk.values[1], new FGNumber(12));
@@ -298,28 +301,28 @@ describe("compiler numeric binary", () => {
     }
 });
 
-describe("compiler numeric binary precedence", () => {
+describe("compiler: arithmetic precedence", () => {
     const tests: CodeTest = [
         ["+- term", "result = 12 + 34 - 56", [
             Op.Load, 1, Op.Load, 2, Op.Add,
             Op.Load, 3, Op.Sub,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 4, Op.Set, 0, Op.Ok,
         ]],
         ["*/ factor", "result = 12 * 34 / 56", [
             Op.Load, 1, Op.Load, 2, Op.Mul,
             Op.Load, 3, Op.Div,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 4, Op.Set, 0, Op.Ok,
         ]],
         ["+-*/ term and factor", "result = 12 + 34 * 56 - 78 / 9", [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Mul, Op.Add,
             Op.Load, 4, Op.Load, 5, Op.Div, Op.Sub,
-            Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 6, Op.Set, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler numeric binary error", () => {
+describe("compiler: arithmetic error", () => {
     const tests: ErrorTest = [
         [
             "error, when Str + Num",
@@ -335,7 +338,7 @@ describe("compiler numeric binary error", () => {
     matchError(tests);
 });
 
-describe("compiler string binary", () => {
+describe("compiler: string concatenation", () => {
     it("Str <> Str", () => {
         let source = `result = "so " <> "real"`;
         let result = compiler.compile(source);
@@ -344,7 +347,7 @@ describe("compiler string binary", () => {
 
         deepEqual(chunk.code, [
             Op.Load, 1, Op.Load, 2, Op.AddStr,
-            Op.Set, 0, Kind.String, Op.Ok,
+            Op.Load, 3, Op.Set, 0, Op.Ok,
         ]);
         deepEqual(chunk.values[0], new FGString("result"));
         deepEqual(chunk.values[1], new FGString("so "));
@@ -352,7 +355,7 @@ describe("compiler string binary", () => {
     });
 });
  
-describe("compiler string binary error", () => {
+describe("compiler: string concatenation error", () => {
     const tests: ErrorTest = [
         [
             "error, when Str <> Num",
@@ -371,30 +374,30 @@ describe("compiler string binary error", () => {
 //--------------------------------------------------------------------
 // Testing block.
 
-describe("compiler block", () => {
+describe("compiler: block", () => {
     const tests: CodeTest = [
         ["empty {}", `{}`, [
             Op.Ok,
         ]],
         ["SetLoc in {}", `{a = 2}`, [
-            Op.Load, 0, Op.SetLoc, Op.Pop, Op.Ok,
+            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0, Op.Pop, Op.Ok,
         ]],
         ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
-            Op.Load, 0, Op.SetLoc, Op.Load, 1, Op.GetLoc, 0,
+            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0, Op.Load, 2, Op.GetLoc, 0,
             Op.CallNat, 1, 0, Op.Pop, Op.Ok,
         ]],
         ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
-            Op.Load, 0, Op.SetLoc,
-            Op.Load, 1, Op.SetLoc,
-            Op.Load, 2, Op.GetLoc, 1, Op.CallNat, 1, 0, Op.Pop,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
+            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0,
+            Op.Load, 2, Op.Load, 3, Op.SetLoc, 1,
+            Op.Load, 4, Op.GetLoc, 1, Op.CallNat, 1, 0, Op.Pop,
+            Op.Load, 5, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
             Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler block error", () => {
+describe("compiler: block error", () => {
     const tests: ErrorTest = [
         [
             "error, when reassign local name",
@@ -413,7 +416,7 @@ describe("compiler block error", () => {
 //--------------------------------------------------------------------
 // Testing control flow.
 
-describe("compiler if", () => {
+describe("compiler: if", () => {
     const tests: CodeTest = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
             Op.Load, 0, Op.JmpF, 10, Op.Pop,
@@ -426,7 +429,7 @@ describe("compiler if", () => {
     matchCode(tests);
 });
 
-describe("compiler if error", () => {
+describe("compiler: if error", () => {
     const tests: ErrorTest = [
         [
             "error, when conditional not Bool",
@@ -441,7 +444,7 @@ describe("compiler if error", () => {
 describe("compiler loop", () => {
     const tests: CodeTest = [
         ["closed increasing default loop", `[10,15]i Print i`, [
-            Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
+            Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.CkInc, 0, Op.JmpF, 12, Op.Pop,
             Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
             Op.Inc, 0, Op.JmpBack, -16,
@@ -449,7 +452,7 @@ describe("compiler loop", () => {
             Op.Ok,
         ]],
         ["open left increasing default loop", `(10,15]i Print i`, [
-            Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
+            Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.Jmp, 12, Op.CkInc, 0, Op.JmpF, 12, Op.Pop,
             Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
             Op.Inc, 0, Op.JmpBack, -16,
@@ -457,7 +460,7 @@ describe("compiler loop", () => {
             Op.Ok,
         ]],
         ["open right increasing default loop", `[10,15)i Print i`, [
-            Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
+            Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.CkExc, 0, Op.JmpF, 12, Op.Pop,
             Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
             Op.Inc, 0, Op.JmpBack, -16,
@@ -465,7 +468,7 @@ describe("compiler loop", () => {
             Op.Ok,
         ]],
         ["open increasing default loop", `(10,15)i Print i`, [
-            Op.Load, 0, Op.Load, 1, Op.Load, 2, Op.SetLoc,
+            Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.Jmp, 12, Op.CkExc, 0, Op.JmpF, 12, Op.Pop,
             Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0,
             Op.Inc, 0, Op.JmpBack, -16,
@@ -516,27 +519,27 @@ describe("compiler loop error", () => {
 // Testing expression.
 
 // TODO: test type annotation when it is implemented.
-describe("compiler global assignment", () => {
+describe("compiler: global assignment", () => {
     const tests: CodeTest = [
         ["infer Num", `a = 3`, [
-            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Ok,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["infer Str", `a = "real"`, [
-            Op.Load, 1, Op.Set, 0, Kind.String, Op.Ok,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
         ["infer Bool", `a = false`, [
-            Op.Load, 1, Op.Set, 0, Kind.Boolean, Op.Ok,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler global assignment error", () => {
+describe("compiler: global assignment error", () => {
     const tests: ErrorTest = [
         [
             "error, when reassign",
             `a = 123.456 a = 2`,
-            "1: at '=': a already defined\n"
+            "1: at '=': a already defined, not mutable\n"
         ],
         [
             "error, when no expression to assign",
@@ -551,30 +554,30 @@ describe("compiler global assignment error", () => {
 // Testing functions and procedures
 // TODO: test $
 
-describe.only("compiler: native function", () => {
+describe("compiler: native function", () => {
     const tests: CodeTest = [
         ["call native function 1 arg", `Print 2`, [
             Op.Load, 0, Op.Load, 1, Op.CallNat, 1, 0, Op.Ok,
         ]],
         ["call native function 2 args", `p = P 100 200`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            Op.CallNat, 2, 0, Op.Set, 0, Kind.Point, Op.Ok,
+            Op.CallNat, 2, 0, Op.Load, 4, Op.Set, 0, Op.Ok,
         ]],
         ["call native function 3 args", `c = C 100 200 50`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4,
-            Op.CallNat, 3, 0, Op.Set, 0, Kind.Circle, Op.Ok,
+            Op.CallNat, 3, 0, Op.Load, 5, Op.Set, 0, Op.Ok,
         ]],
         ["call native function 4 args", `r = R 100 200 300 400`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.Load, 5,
-            Op.CallNat, 4, 0, Op.Set, 0, Kind.Rect, Op.Ok,
+            Op.CallNat, 4, 0, Op.Load, 6, Op.Set, 0, Op.Ok,
         ]],
         ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            Op.CallNat, 2, 0, Op.Set, 0, Kind.Point,
-            Op.Load, 5, Op.Load, 6, Op.Load, 7,
-            Op.CallNat, 2, 0, Op.Set, 4, Kind.Point,
-            Op.Load, 9, Op.GetUsr, 10, Op.GetUsr, 11,
-            Op.CallNat, 2, 1, Op.Set, 8, Kind.Segment,
+            Op.CallNat, 2, 0, Op.Load, 4, Op.Set, 0,
+            Op.Load, 6, Op.Load, 7, Op.Load, 8,
+            Op.CallNat, 2, 0, Op.Load, 9, Op.Set, 5,
+            Op.Load, 11, Op.GetUsr, 12, Op.GetUsr, 13,
+            Op.CallNat, 2, 1, Op.Load, 14, Op.Set, 10,
             Op.Ok,
         ]],
     ];
@@ -584,7 +587,7 @@ describe.only("compiler: native function", () => {
 // TODO: test code in the proc chunk
 //       maybe change the CodeTest type?
 
-describe.only("compiler: native procedure", () => {
+describe("compiler: native procedure", () => {
     const tests: CodeTest = [
         ["call native procedure 0 arg", `Help`, [
             Op.Load, 0, Op.CallNat, 0, 0, Op.Ok,
@@ -597,16 +600,16 @@ describe.only("compiler: native procedure", () => {
 //       test code in the fn chunk
 //       maybe change the CodeTest type?
 
-describe.only("compiler: user function", () => {
+describe("compiler: user function", () => {
     const tests: CodeTest = [
         ["define and call user function 1 arg", `fn double x: Num -> Num = x * 2 a = double 10`, [
-            Op.Load, 1, Op.Set, 0, Kind.CallUser,
-            Op.Load, 3, Op.Load, 4, Op.CallUsr, 1, 0, Op.Set, 2, Kind.Number,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0,
+            Op.Load, 4, Op.Load, 5, Op.CallUsr, 1, 0, Op.Load, 6, Op.Set, 3,
             Op.Ok,
         ]],
         ["define and call user function 2 arg", `fn add x: Num, y: Num -> Num = x + y a = add 2 3`, [
-            Op.Load, 1, Op.Set, 0, Kind.CallUser,
-            Op.Load, 3, Op.Load, 4, Op.Load, 5, Op.CallUsr, 2, 0, Op.Set, 2, Kind.Number,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0,
+            Op.Load, 4, Op.Load, 5, Op.Load, 6, Op.CallUsr, 2, 0, Op.Load, 7, Op.Set, 3,
             Op.Ok,
         ]],
     ];
@@ -616,16 +619,16 @@ describe.only("compiler: user function", () => {
 // TODO: test code in the proc chunk
 //       maybe change the CodeTest type?
 
-describe.only("compiler: user procedure", () => {
+describe("compiler: user procedure", () => {
     const tests: CodeTest = [
         ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
-            Op.Load, 1, Op.Set, 0, Kind.CallUser,
-            Op.Load, 2, Op.Load, 3, Op.CallUsr, 1, 0,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0,
+            Op.Load, 3, Op.Load, 4, Op.CallUsr, 1, 0,
             Op.Ok,
         ]],
         ["define and call user procedure 2 arg", `proc print_add x: Num, y: Num { Print $ x + y } print_add 10 20`, [
-            Op.Load, 1, Op.Set, 0, Kind.CallUser,
-            Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.CallUsr, 2, 0,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0,
+            Op.Load, 3, Op.Load, 4, Op.Load, 5, Op.CallUsr, 2, 0,
             Op.Ok,
         ]],
     ];
@@ -634,19 +637,19 @@ describe.only("compiler: user procedure", () => {
 
 //--------------------------------------------------------------------
 
-describe("compiler general", () => {
+describe("compiler: general", () => {
     const tests: CodeTest = [
         ["empty source", ``, [
             Op.Ok,
         ]],
         ["optional delimiter ;", `a = 2; b = 3`, [
-            Op.Load, 1, Op.Set, 0, Kind.Number, Op.Load, 3, Op.Set, 2, Kind.Number, Op.Ok,
+            Op.Load, 1, Op.Load, 2, Op.Set, 0, Op.Load, 4, Op.Load, 5, Op.Set, 3, Op.Ok,
         ]],
     ];
     matchCode(tests);
 });
 
-describe("compiler general error", () => {
+describe("compiler: general error", () => {
     const tests: ErrorTest = [
         [
             "error, when unexpected character",

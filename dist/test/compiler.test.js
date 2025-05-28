@@ -23,46 +23,46 @@ function matchError(tests) {
         });
     }
 }
-describe("compiler unary grouping", () => {
+describe("compiler: unary: grouping", () => {
     const tests = [
-        ["() to change precedence", `result = 1 * (2 + 3)`, [
+        ["use () to change precedence", `result = 1 * (2 + 3)`, [
                 800, 1, 800, 2, 800, 3, 100, 900,
-                1400, 0, 500, 1290,
+                800, 4, 1400, 0, 1290,
             ]],
-        ["((Str))", `result = (("real"))`, [
-                800, 1, 1400, 0, 600, 1290,
+        ["no effect on ((Str))", `result = (("real"))`, [
+                800, 1, 800, 2, 1400, 0, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler unary grouping error", () => {
+describe("compiler: unary: grouping error", () => {
     const tests = [
         [
-            "error, when ( not closed",
+            "error, when ( is not closed",
             `result = 1 * (2 + 3`,
             "1: at end: expect ')' after grouping\n"
         ],
     ];
     matchError(tests);
 });
-describe("compiler unary !", () => {
+describe("compiler: unary: !", () => {
     const tests = [
         ["!Bool", `result = !false`, [
                 800, 1, 1100,
-                1400, 0, 300, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
         ["!!Bool", `result = !!false`, [
                 800, 1, 1100, 1100,
-                1400, 0, 300, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
         ["!(Bool)", `result = !(false)`, [
                 800, 1, 1100,
-                1400, 0, 300, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler unary ! error", () => {
+describe("compiler: unary: ! error", () => {
     const tests = [
         [
             "error, when !Num",
@@ -77,24 +77,24 @@ describe("compiler unary ! error", () => {
     ];
     matchError(tests);
 });
-describe("compiler unary -", () => {
+describe("compiler: unary: -", () => {
     const tests = [
         ["-Num", `result = -2`, [
                 800, 1, 1000,
-                1400, 0, 500, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
         ["--Num", `result = --2`, [
                 800, 1, 1000, 1000,
-                1400, 0, 500, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
         ["-(Num)", `result = -(2)`, [
                 800, 1, 1000,
-                1400, 0, 500, 1290,
+                800, 2, 1400, 0, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler unary - error", () => {
+describe("compiler: unary: - error", () => {
     const tests = [
         [
             "error, when -Str",
@@ -109,7 +109,7 @@ describe("compiler unary - error", () => {
     ];
     matchError(tests);
 });
-describe("compiler boolean equality", () => {
+describe("compiler: == and !=", () => {
     const tests = [
         ["Expr == Expr", "result = 12 == 34", 380],
         ["Expr != Expr", "result = 12 != 34", 1010],
@@ -122,12 +122,12 @@ describe("compiler boolean equality", () => {
             let chunk = result.value.chunk;
             deepEqual(chunk.code, [
                 800, 1, 800, 2, expectedOp,
-                1400, 0, 300, 1290,
+                800, 3, 1400, 0, 1290,
             ]);
         });
     }
 });
-describe("compiler boolean |", () => {
+describe("compiler: is divisible by '|'", () => {
     it("Num | Num", () => {
         let source = "result = 12 | 34";
         let result = compiler.compile(source);
@@ -136,11 +136,11 @@ describe("compiler boolean |", () => {
         let chunk = result.value.chunk;
         deepEqual(chunk.code, [
             800, 1, 800, 2, 610,
-            1400, 0, 300, 1290,
+            800, 3, 1400, 0, 1290,
         ]);
     });
 });
-describe("compiler boolean &&", () => {
+describe("compiler: &&", () => {
     it("Bool && Bool", () => {
         let source = "result = true && true";
         let result = compiler.compile(source);
@@ -148,12 +148,12 @@ describe("compiler boolean &&", () => {
             fail();
         let chunk = result.value.chunk;
         deepEqual(chunk.code, [
-            800, 1, 620, 3, 1200,
-            800, 2, 1400, 0, 300, 1290,
+            800, 1, 620, 3, 1200, 800, 2,
+            800, 3, 1400, 0, 1290,
         ]);
     });
 });
-describe("compiler boolean && error", () => {
+describe("compiler: && error", () => {
     const tests = [
         [
             "error, when Bool && Num",
@@ -168,7 +168,7 @@ describe("compiler boolean && error", () => {
     ];
     matchError(tests);
 });
-describe("compiler boolean ||", () => {
+describe("compiler: ||", () => {
     it("Bool || Bool", () => {
         let source = "result = true || true";
         let result = compiler.compile(source);
@@ -177,11 +177,11 @@ describe("compiler boolean ||", () => {
         let chunk = result.value.chunk;
         deepEqual(chunk.code, [
             800, 1, 620, 2, 615, 3, 1200,
-            800, 2, 1400, 0, 300, 1290,
+            800, 2, 800, 3, 1400, 0, 1290,
         ]);
     });
 });
-describe("compiler boolean || error", () => {
+describe("compiler: || error", () => {
     const tests = [
         [
             "error, when Bool || Num",
@@ -196,7 +196,7 @@ describe("compiler boolean || error", () => {
     ];
     matchError(tests);
 });
-describe("compiler boolean compare", () => {
+describe("compiler: comparison", () => {
     const tests = [
         ["Num < Num", "result = 12 < 34", 810],
         ["Num <= Num", "result = 12 <= 34", 690],
@@ -215,12 +215,12 @@ describe("compiler boolean compare", () => {
             let chunk = result.value.chunk;
             deepEqual(chunk.code, [
                 800, 1, 800, 2, expectedOp,
-                1400, 0, 300, 1290,
+                800, 3, 1400, 0, 1290,
             ]);
         });
     }
 });
-describe("compiler boolean compare error", () => {
+describe("compiler: comparison error", () => {
     const tests = [
         [
             "error, when Str < Num",
@@ -235,7 +235,7 @@ describe("compiler boolean compare error", () => {
     ];
     matchError(tests);
 });
-describe("compiler numeric binary", () => {
+describe("compiler: arithmetic", () => {
     const tests = [
         ["Num + Num", "result = 12 + 34", 100],
         ["Num - Num", "result = 12 - 34", 1500],
@@ -250,7 +250,7 @@ describe("compiler numeric binary", () => {
             let chunk = result.value.chunk;
             deepEqual(chunk.code, [
                 800, 1, 800, 2, expectedOp,
-                1400, 0, 500, 1290,
+                800, 3, 1400, 0, 1290,
             ]);
             deepEqual(chunk.values[0], new FGString("result"));
             deepEqual(chunk.values[1], new FGNumber(12));
@@ -258,27 +258,27 @@ describe("compiler numeric binary", () => {
         });
     }
 });
-describe("compiler numeric binary precedence", () => {
+describe("compiler: arithmetic precedence", () => {
     const tests = [
         ["+- term", "result = 12 + 34 - 56", [
                 800, 1, 800, 2, 100,
                 800, 3, 1500,
-                1400, 0, 500, 1290,
+                800, 4, 1400, 0, 1290,
             ]],
         ["*/ factor", "result = 12 * 34 / 56", [
                 800, 1, 800, 2, 900,
                 800, 3, 300,
-                1400, 0, 500, 1290,
+                800, 4, 1400, 0, 1290,
             ]],
         ["+-*/ term and factor", "result = 12 + 34 * 56 - 78 / 9", [
                 800, 1, 800, 2, 800, 3, 900, 100,
                 800, 4, 800, 5, 300, 1500,
-                1400, 0, 500, 1290,
+                800, 6, 1400, 0, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler numeric binary error", () => {
+describe("compiler: arithmetic error", () => {
     const tests = [
         [
             "error, when Str + Num",
@@ -293,7 +293,7 @@ describe("compiler numeric binary error", () => {
     ];
     matchError(tests);
 });
-describe("compiler string binary", () => {
+describe("compiler: string concatenation", () => {
     it("Str <> Str", () => {
         let source = `result = "so " <> "real"`;
         let result = compiler.compile(source);
@@ -302,14 +302,14 @@ describe("compiler string binary", () => {
         let chunk = result.value.chunk;
         deepEqual(chunk.code, [
             800, 1, 800, 2, 120,
-            1400, 0, 600, 1290,
+            800, 3, 1400, 0, 1290,
         ]);
         deepEqual(chunk.values[0], new FGString("result"));
         deepEqual(chunk.values[1], new FGString("so "));
         deepEqual(chunk.values[2], new FGString("real"));
     });
 });
-describe("compiler string binary error", () => {
+describe("compiler: string concatenation error", () => {
     const tests = [
         [
             "error, when Str <> Num",
@@ -324,29 +324,29 @@ describe("compiler string binary error", () => {
     ];
     matchError(tests);
 });
-describe("compiler block", () => {
+describe("compiler: block", () => {
     const tests = [
         ["empty {}", `{}`, [
                 1290,
             ]],
         ["SetLoc in {}", `{a = 2}`, [
-                800, 0, 1410, 1200, 1290,
+                800, 0, 800, 1, 1410, 0, 1200, 1290,
             ]],
         ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
-                800, 0, 1410, 800, 1, 395, 0,
+                800, 0, 800, 1, 1410, 0, 800, 2, 395, 0,
                 200, 1, 0, 1200, 1290,
             ]],
         ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
-                800, 0, 1410,
-                800, 1, 1410,
-                800, 2, 395, 1, 200, 1, 0, 1200,
-                800, 3, 395, 0, 200, 1, 0, 1200,
+                800, 0, 800, 1, 1410, 0,
+                800, 2, 800, 3, 1410, 1,
+                800, 4, 395, 1, 200, 1, 0, 1200,
+                800, 5, 395, 0, 200, 1, 0, 1200,
                 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler block error", () => {
+describe("compiler: block error", () => {
     const tests = [
         [
             "error, when reassign local name",
@@ -361,7 +361,7 @@ describe("compiler block error", () => {
     ];
     matchError(tests);
 });
-describe("compiler if", () => {
+describe("compiler: if", () => {
     const tests = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
                 800, 0, 620, 10, 1200,
@@ -373,7 +373,7 @@ describe("compiler if", () => {
     ];
     matchCode(tests);
 });
-describe("compiler if error", () => {
+describe("compiler: if error", () => {
     const tests = [
         [
             "error, when conditional not Bool",
@@ -386,7 +386,7 @@ describe("compiler if error", () => {
 describe("compiler loop", () => {
     const tests = [
         ["closed increasing default loop", `[10,15]i Print i`, [
-                800, 0, 800, 1, 800, 2, 1410,
+                800, 0, 800, 1, 800, 2,
                 805, 215, 0, 620, 12, 1200,
                 800, 3, 395, 0, 200, 1, 0,
                 595, 0, 616, -16,
@@ -394,7 +394,7 @@ describe("compiler loop", () => {
                 1290,
             ]],
         ["open left increasing default loop", `(10,15]i Print i`, [
-                800, 0, 800, 1, 800, 2, 1410,
+                800, 0, 800, 1, 800, 2,
                 805, 615, 12, 215, 0, 620, 12, 1200,
                 800, 3, 395, 0, 200, 1, 0,
                 595, 0, 616, -16,
@@ -402,7 +402,7 @@ describe("compiler loop", () => {
                 1290,
             ]],
         ["open right increasing default loop", `[10,15)i Print i`, [
-                800, 0, 800, 1, 800, 2, 1410,
+                800, 0, 800, 1, 800, 2,
                 805, 210, 0, 620, 12, 1200,
                 800, 3, 395, 0, 200, 1, 0,
                 595, 0, 616, -16,
@@ -410,7 +410,7 @@ describe("compiler loop", () => {
                 1290,
             ]],
         ["open increasing default loop", `(10,15)i Print i`, [
-                800, 0, 800, 1, 800, 2, 1410,
+                800, 0, 800, 1, 800, 2,
                 805, 615, 12, 210, 0, 620, 12, 1200,
                 800, 3, 395, 0, 200, 1, 0,
                 595, 0, 616, -16,
@@ -455,26 +455,26 @@ describe("compiler loop error", () => {
     ];
     matchError(tests);
 });
-describe("compiler global assignment", () => {
+describe("compiler: global assignment", () => {
     const tests = [
         ["infer Num", `a = 3`, [
-                800, 1, 1400, 0, 500, 1290,
+                800, 1, 800, 2, 1400, 0, 1290,
             ]],
         ["infer Str", `a = "real"`, [
-                800, 1, 1400, 0, 600, 1290,
+                800, 1, 800, 2, 1400, 0, 1290,
             ]],
         ["infer Bool", `a = false`, [
-                800, 1, 1400, 0, 300, 1290,
+                800, 1, 800, 2, 1400, 0, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler global assignment error", () => {
+describe("compiler: global assignment error", () => {
     const tests = [
         [
             "error, when reassign",
             `a = 123.456 a = 2`,
-            "1: at '=': a already defined\n"
+            "1: at '=': a already defined, not mutable\n"
         ],
         [
             "error, when no expression to assign",
@@ -484,36 +484,36 @@ describe("compiler global assignment error", () => {
     ];
     matchError(tests);
 });
-describe.only("compiler: native function", () => {
+describe("compiler: native function", () => {
     const tests = [
         ["call native function 1 arg", `Print 2`, [
                 800, 0, 800, 1, 200, 1, 0, 1290,
             ]],
         ["call native function 2 args", `p = P 100 200`, [
                 800, 1, 800, 2, 800, 3,
-                200, 2, 0, 1400, 0, 850, 1290,
+                200, 2, 0, 800, 4, 1400, 0, 1290,
             ]],
         ["call native function 3 args", `c = C 100 200 50`, [
                 800, 1, 800, 2, 800, 3, 800, 4,
-                200, 3, 0, 1400, 0, 700, 1290,
+                200, 3, 0, 800, 5, 1400, 0, 1290,
             ]],
         ["call native function 4 args", `r = R 100 200 300 400`, [
                 800, 1, 800, 2, 800, 3, 800, 4, 800, 5,
-                200, 4, 0, 1400, 0, 900, 1290,
+                200, 4, 0, 800, 6, 1400, 0, 1290,
             ]],
         ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
                 800, 1, 800, 2, 800, 3,
-                200, 2, 0, 1400, 0, 850,
-                800, 5, 800, 6, 800, 7,
-                200, 2, 0, 1400, 4, 850,
-                800, 9, 500, 10, 500, 11,
-                200, 2, 1, 1400, 8, 1000,
+                200, 2, 0, 800, 4, 1400, 0,
+                800, 6, 800, 7, 800, 8,
+                200, 2, 0, 800, 9, 1400, 5,
+                800, 11, 500, 12, 500, 13,
+                200, 2, 1, 800, 14, 1400, 10,
                 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe.only("compiler: native procedure", () => {
+describe("compiler: native procedure", () => {
     const tests = [
         ["call native procedure 0 arg", `Help`, [
                 800, 0, 200, 0, 0, 1290,
@@ -521,48 +521,48 @@ describe.only("compiler: native procedure", () => {
     ];
     matchCode(tests);
 });
-describe.only("compiler: user function", () => {
+describe("compiler: user function", () => {
     const tests = [
         ["define and call user function 1 arg", `fn double x: Num -> Num = x * 2 a = double 10`, [
-                800, 1, 1400, 0, 450,
-                800, 3, 800, 4, 205, 1, 0, 1400, 2, 500,
+                800, 1, 800, 2, 1400, 0,
+                800, 4, 800, 5, 205, 1, 0, 800, 6, 1400, 3,
                 1290,
             ]],
         ["define and call user function 2 arg", `fn add x: Num, y: Num -> Num = x + y a = add 2 3`, [
-                800, 1, 1400, 0, 450,
-                800, 3, 800, 4, 800, 5, 205, 2, 0, 1400, 2, 500,
+                800, 1, 800, 2, 1400, 0,
+                800, 4, 800, 5, 800, 6, 205, 2, 0, 800, 7, 1400, 3,
                 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe.only("compiler: user procedure", () => {
+describe("compiler: user procedure", () => {
     const tests = [
         ["define and call user procedure 1 arg", `proc print_double x: Num { Print $ x * 2 } print_double 10`, [
-                800, 1, 1400, 0, 450,
-                800, 2, 800, 3, 205, 1, 0,
+                800, 1, 800, 2, 1400, 0,
+                800, 3, 800, 4, 205, 1, 0,
                 1290,
             ]],
         ["define and call user procedure 2 arg", `proc print_add x: Num, y: Num { Print $ x + y } print_add 10 20`, [
-                800, 1, 1400, 0, 450,
-                800, 2, 800, 3, 800, 4, 205, 2, 0,
+                800, 1, 800, 2, 1400, 0,
+                800, 3, 800, 4, 800, 5, 205, 2, 0,
                 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler general", () => {
+describe("compiler: general", () => {
     const tests = [
         ["empty source", ``, [
                 1290,
             ]],
         ["optional delimiter ;", `a = 2; b = 3`, [
-                800, 1, 1400, 0, 500, 800, 3, 1400, 2, 500, 1290,
+                800, 1, 800, 2, 1400, 0, 800, 4, 800, 5, 1400, 3, 1290,
             ]],
     ];
     matchCode(tests);
 });
-describe("compiler general error", () => {
+describe("compiler: general error", () => {
     const tests = [
         [
             "error, when unexpected character",

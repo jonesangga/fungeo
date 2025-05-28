@@ -27,6 +27,10 @@ describe("vm Op.Set", () => {
             chunk.values[1]
         ]);
         vm.step();
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+        vm.step();
         deepEqual(stack.slice(1, stackTop), []);
     });
 });
@@ -38,10 +42,18 @@ describe("vm Op.GetUsr", () => {
             chunk.values[1]
         ]);
         vm.step();
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[2]
+        ]);
+        vm.step();
         deepEqual(stack.slice(1, stackTop), []);
         vm.step();
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[1]
+        ]);
+        vm.step();
+        deepEqual(stack.slice(1, stackTop), [
+            chunk.values[1], chunk.values[5]
         ]);
         vm.step();
         deepEqual(stack.slice(1, stackTop), []);
@@ -240,6 +252,7 @@ describe("vm Op.GetLoc Op.SetLoc, Op.Pop", () => {
         let chunk = setup(`{a = 123 b = a}`);
         vm.step();
         vm.step();
+        vm.step();
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[0]
         ]);
@@ -247,6 +260,7 @@ describe("vm Op.GetLoc Op.SetLoc, Op.Pop", () => {
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[0], chunk.values[0]
         ]);
+        vm.step();
         vm.step();
         deepEqual(stack.slice(1, stackTop), [
             chunk.values[0], chunk.values[0]

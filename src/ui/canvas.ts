@@ -2,8 +2,8 @@
 
 import { Kind, Canvas } from "../value.js"
 
-let w = 400;    // Canvas width.
-let h = 400;    // Canvas height.
+let w = 600;    // Canvas width.
+let h = 600;    // Canvas height.
 
 const canvasElem = document.createElement("canvas");
 export const c = canvasElem.getContext("2d") as CanvasRenderingContext2D;

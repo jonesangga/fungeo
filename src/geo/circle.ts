@@ -26,6 +26,10 @@ export default class Circle {
         return `C ${this.x} ${this.y} ${this.r}`;
     }
 
+    dist(other: Circle): number {
+        return Math.sqrt((this.x - other.x)**2 + (this.y - other.y)**2);
+    }
+
     draw(): void {
         c.beginPath();
         c.arc(this.x, this.y, this.r, 0, TAU);
@@ -50,7 +54,7 @@ export default class Circle {
         return [new FGNumber(sum + root), new FGNumber(sum - root)];
     }
 
-    static complex_descartes(c1: Circle, c2: Circle, c3: Circle, k4: FGNumber[]): Circle[] {
+    static complex_descartes(c1: Circle, c2: Circle, c3: Circle, k4: FGNumber): Circle[] {
         let k1 = c1.bend as number;
         let k2 = c2.bend as number;
         let k3 = c3.bend as number;
@@ -65,16 +69,34 @@ export default class Circle {
 
         let root = zk1.mul(zk2).add(zk2.mul(zk3)).add(zk1.mul(zk3));
         root = root.sqrt().scale(2);
-        let center1 = sum.add(root).scale(1 / k4[0].value);
-        let center2 = sum.sub(root).scale(1 / k4[0].value);
-        let center3 = sum.add(root).scale(1 / k4[1].value);
-        let center4 = sum.sub(root).scale(1 / k4[1].value);
+        let center1 = sum.add(root).scale(1 / k4.value);
+        let center2 = sum.sub(root).scale(1 / k4.value);
 
-        return [
-            Circle.with_bend(center1.a, center1.b, k4[0].value),
-            Circle.with_bend(center2.a, center2.b, k4[0].value),
-            Circle.with_bend(center3.a, center3.b, k4[1].value),
-            Circle.with_bend(center4.a, center4.b, k4[1].value),
-        ];
+        let ca = Circle.with_bend(center1.a, center1.b, k4.value);
+        let cb = Circle.with_bend(center2.a, center2.b, k4.value);
+
+        let got: Circle[] = [];
+        if (is_tangent(c1, c2, c3, ca))
+            got.push(ca);
+        if (is_tangent(c1, c2, c3, cb))
+            got.push(cb);
+        return got;
     }
+}
+
+let epsilon = 0.0000001;
+
+function isTangent(c1: Circle, c2: Circle): boolean {
+    let d = c1.dist(c2);
+    let r1 = c1.r;
+    let r2 = c2.r;
+    // Tangency check based on distances and radii
+    let a = Math.abs(d - (r1 + r2)) < epsilon;
+    let b = Math.abs(d - Math.abs(r2 - r1)) < epsilon;
+    return a || b;
+}
+
+// Determine if two circles are tangent to each other
+function is_tangent(c1: Circle, c2: Circle, c3: Circle, ca: Circle): boolean {
+    return isTangent(ca, c1) && isTangent(ca, c2) && isTangent(ca, c3);
 }

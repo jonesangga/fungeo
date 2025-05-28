@@ -1,8 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
-//
-// TODO: Remove Op.Clear asap.
 
-import { Kind, KindName, type Value } from "./value.js"
+import { type Value } from "./value.js"
 
 export const enum Op {
     Add     = 100,
@@ -18,8 +16,8 @@ export const enum Op {
     Eq      = 380,
     GEq     = 390,
     GetLoc  = 395,
-    GetNat  = 400,   // Get nativeNames.
-    GetUsr  = 500,   // Get userNames.
+    GetNat  = 400,      // Get nativeNames.
+    GetUsr  = 500,      // Get userNames.
     GT      = 530,
     Inc     = 595,
     Index   = 600,
@@ -27,6 +25,7 @@ export const enum Op {
     Jmp     = 615,
     JmpBack = 616,
     JmpF    = 620,
+    Len     = 680,      // List length. TODO: str length.
     LEq     = 690,
     List    = 700,
     Load    = 800,
@@ -40,7 +39,11 @@ export const enum Op {
     Pop     = 1200,
     Ret     = 1300,
     Set     = 1400,
-    SetLoc  = 1410,
+    SetLoc  = 1410,     // Local normal
+    SetLocG = 1415,     // Local global
+    SetLocM = 1420,     // Local mutable
+    SetLocN = 1425,     // Local nonlocal
+    SetMut  = 1430,
     Sub     = 1500,
 };
 
@@ -69,6 +72,7 @@ export const OpName: {
     [Op.Jmp]: "Jmp",
     [Op.JmpBack]: "JmpBack",
     [Op.JmpF]: "JmpF",
+    [Op.Len]: "Len",
     [Op.LEq]: "LEq",
     [Op.List]: "List",
     [Op.Load]: "Load",
@@ -83,6 +87,10 @@ export const OpName: {
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
     [Op.SetLoc]: "SetLoc",
+    [Op.SetLocG]: "SetLocG",
+    [Op.SetLocM]: "SetLocM",
+    [Op.SetLocN]: "SetLocN",
+    [Op.SetMut]: "SetMut",
     [Op.Sub]: "Sub",
 };
 
@@ -126,12 +134,15 @@ export class Chunk {
         let name = OpName[instruction as Op];
         switch (instruction) {
             case Op.Add:
+            case Op.AddList:
             case Op.AddStr:
             case Op.Div:
             case Op.Eq:
             case Op.GEq:
             case Op.GT:
+            case Op.Index:
             case Op.IsDiv:
+            case Op.Len:
             case Op.LEq:
             case Op.Loop:
             case Op.LT:
@@ -141,7 +152,6 @@ export class Chunk {
             case Op.Not:
             case Op.Ok:
             case Op.Pop:
-            case Op.SetLoc:
             case Op.Sub: {
                 result += name + "\n";
                 return [result, offset + 1];
@@ -171,37 +181,43 @@ export class Chunk {
                 return [result, offset + 2];
             }
 
-            case Op.AddList:
             case Op.CkExc:
             case Op.CkExcD:
             case Op.CkInc:
             case Op.CkIncD:
             case Op.GetLoc:
             case Op.Inc:
-            case Op.Index:
-            case Op.Ret: {
+            case Op.Ret:
+            case Op.SetLoc:
+            case Op.SetLocG:
+            case Op.SetLocM:
+            case Op.SetLocN: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];
             }
 
             case Op.Set: {
-                let nameId     = this.code[offset + 1];
-                let kind: Kind = this.code[offset + 2];
+                let index = this.code[offset + 1];
+                let varname  = this.values[index].to_str();
 
-                result += `${ padr7(name) } ${ padl4(nameId) } '`;
-                result += this.values[nameId].to_str();
-                result += `: ${ KindName[kind] }'\n`;
-                return [result, offset + 3];
+                result += `${ padr7(name) } ${ padl4(index) } '${ varname }'\n`;
+                return [result, offset + 2];
+            }
+
+            case Op.SetMut: {
+                let index = this.code[offset + 1];
+                let varname  = this.values[index].to_str();
+
+                result += `${ padr7(name) } ${ padl4(index) } 'mut ${ varname }'\n`;
+                return [result, offset + 2];
             }
 
             case Op.List: {
                 let length       = this.code[offset + 1];
-                let elKind: Kind = this.code[offset + 2];
 
-                result += `${ padr7(name) } ${ padl4(length) } '`;
-                result += `${ KindName[elKind] }'\n`;
-                return [result, offset + 3];
+                result += `${ padr7(name) } ${ padl4(length) }\n`;
+                return [result, offset + 2];
             }
 
             default: {
