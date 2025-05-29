@@ -17,6 +17,7 @@ container.style.display    = "flex";
 container.style.top        = "0px";
 container.style.left       = "0px";
 container.style.background = "#ff0";
+container.style.zIndex     = "10";
 
 const holder = document.createElement("div");
 container.appendChild(holder);
@@ -26,8 +27,8 @@ holder.style.height     = "30px";
 holder.style.background = "#000";
 
 const input = document.createElement("textarea");
-input.style.fontSize   = "16px";
 container.appendChild(input);
+input.style.fontSize   = "16px";
 input.focus();
 input.cols = 20;
 input.rows = 1;
@@ -149,6 +150,13 @@ function input_binding(e: any): void {
 const repl: Repl = {
     kind: Kind.Repl,
 
+    reset(): void {
+        history = [{ code: "" }];
+        historyViewIdx    = 1;
+        savedLine         = ""; // Save line when going to view history.
+        terminal.innerHTML = "";
+    },
+
     to_str(): string { return "repl"; },
 
     callback(source: string): void {
@@ -157,6 +165,23 @@ const repl: Repl = {
 
     set_callback(fn: (source: string) => void): void {
         this.callback = fn;
+    },
+
+    from_script(source: string): void {
+        source = source.trim();
+        if (source !== "") {
+            input.value = "";
+            input_reset();
+
+            if (history[history.length - 1].code !== source) {
+                history.push({ code: source });
+            }
+            historyViewIdx = history.length;
+            terminal_add_code(source);
+
+            this.callback(source);
+            terminal_update();
+        }
     },
 
     place(x: number, y: number): void {
@@ -206,14 +231,14 @@ const repl: Repl = {
 //       Change it to be an object and add its name in names object.
 
 const terminal = document.createElement("div");
-container.appendChild(terminal);
+document.body.appendChild(terminal);
 terminal.style.position   = "absolute";
-terminal.style.top        = "-640px";
+terminal.style.top        = "35px";
 terminal.style.left       = "0px";
 terminal.style.width      = "600px";
-terminal.style.height     = "630px";
+terminal.style.height     = "500px";
 terminal.style.border     = "1px solid #000";
-terminal.style.fontSize   = "11px";
+terminal.style.fontSize   = "16px";
 terminal.style.background = "#eee";
 terminal.style.overflow   = "auto";
 terminal.style.fontFamily = "monospace";

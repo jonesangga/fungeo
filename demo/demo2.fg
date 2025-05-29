@@ -1,0 +1,2 @@
+n = 2
+Print $ "this is demo " <> Show n
