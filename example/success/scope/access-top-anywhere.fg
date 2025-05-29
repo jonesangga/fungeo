@@ -1,0 +1,13 @@
+// Can access top names from procedure scope and control scope.
+
+a = 2
+
+if true {
+    Print a
+}
+
+[0, 1] i {
+    Print a
+}
+
+Print a

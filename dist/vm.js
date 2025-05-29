@@ -1,5 +1,7 @@
 import { FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
+let $ = console.log;
+$ = () => { };
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
@@ -70,7 +72,7 @@ function run() {
             }
             str += "\n";
             let [result,] = currChunk.disassemble_instr(currFrame.ip);
-            console.log(str + result);
+            $(str + result);
         }
         switch (read_byte()) {
             case 100: {
@@ -167,15 +169,15 @@ function run() {
                 let start = peek(2).value;
                 let end = peek(1).value;
                 let step = peek(0).value;
-                console.log(start, end, step);
+                $(start, end, step);
                 if (start <= end) {
-                    console.log("increasing");
+                    $("increasing");
                     if (step <= 0) {
                         error("infinite loop");
                     }
                 }
                 else {
-                    console.log("decreasing");
+                    $("decreasing");
                     if (step >= 0) {
                         error("infinite loop");
                     }

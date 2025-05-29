@@ -1,3 +1,4 @@
+import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { deepEqual, equal, fail } from "node:assert/strict";
 import { FGBoolean, FGNumber, FGString } from "../value.js";
@@ -245,32 +246,6 @@ describe("vm Op.GEq", () => {
         deepEqual(stack.slice(1, stackTop), [
             new FGBoolean(false)
         ]);
-    });
-});
-describe("vm Op.GetLoc Op.SetLoc, Op.Pop", () => {
-    it("Op.GetLoc Op.SetLoc, Op.Pop", () => {
-        let chunk = setup(`{a = 123 b = a}`);
-        vm.step();
-        vm.step();
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            chunk.values[0]
-        ]);
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            chunk.values[0], chunk.values[0]
-        ]);
-        vm.step();
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            chunk.values[0], chunk.values[0]
-        ]);
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), [
-            chunk.values[0]
-        ]);
-        vm.step();
-        deepEqual(stack.slice(1, stackTop), []);
     });
 });
 describe("vm Op.Jmp, Op.JmpF: if branch", () => {

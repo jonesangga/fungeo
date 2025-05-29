@@ -1,3 +1,4 @@
+import 'global-jsdom/register';
 import { describe, it } from "node:test";
 import { deepEqual, fail } from "node:assert/strict";
 import { FGNumber, FGString } from "../value.js";
@@ -326,22 +327,11 @@ describe("compiler: string concatenation error", () => {
 });
 describe("compiler: block", () => {
     const tests = [
-        ["empty {}", `{}`, [
-                1290,
-            ]],
-        ["SetLoc in {}", `{a = 2}`, [
-                800, 0, 800, 1, 1410, 0, 1200, 1290,
-            ]],
-        ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
-                800, 0, 800, 1, 1410, 0, 800, 2, 395, 0,
-                200, 1, 0, 1200, 1290,
-            ]],
-        ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
-                800, 0, 800, 1, 1410, 0,
-                800, 2, 800, 3, 1410, 1,
-                800, 4, 395, 1, 200, 1, 0, 1200,
-                800, 5, 395, 0, 200, 1, 0, 1200,
-                1290,
+        ["SetLoc GetLoc in {}", `if true {let a = 2 Print a}`, [
+                800, 0, 620, 17, 1200,
+                800, 1, 800, 2, 1410, 0,
+                800, 3, 395, 0, 200, 1, 0, 1200,
+                615, 1, 1200, 1290,
             ]],
     ];
     matchCode(tests);
@@ -349,13 +339,18 @@ describe("compiler: block", () => {
 describe("compiler: block error", () => {
     const tests = [
         [
+            "error, when empty block",
+            "{}",
+            "1: at '{': forbiden block\n",
+        ],
+        [
             "error, when reassign local name",
-            `{a = 1 a = 2}`,
-            "1: at '=': a already defined in this scope\n"
+            `if true {a = 1 a = 2}`,
+            "1: at '=': use 'let' to define name in control scope\n"
         ],
         [
             "error, when no }",
-            `{a = 1`,
+            `if true {let a = 1`,
             "1: at end: expect '}' at the end of block\n"
         ],
     ];
@@ -449,7 +444,7 @@ describe("compiler loop error", () => {
         ],
         [
             "error, when reassign to iterator",
-            `[2, 5] i { i = 2 Print i }`,
+            `[2, 5] i { let i = 2 Print i }`,
             "1: at '=': i already defined in this scope\n"
         ],
     ];

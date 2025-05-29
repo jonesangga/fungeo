@@ -2,6 +2,12 @@
 
 #### 29-05-25
 
+- script to run example test
+- add (one) test file for example files
+- add example files
+- use 'let' for control scope
+- can only use block as a body
+- forbid bare block statement
 - make demo
 
 #### 28-05-25

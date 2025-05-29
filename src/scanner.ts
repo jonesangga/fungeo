@@ -48,6 +48,7 @@ export const enum TokenT {
     If        = 2400,
     Ifx       = 2405,
     Global    = 2450,
+    Let       = 2460,
     Mut       = 2500,
     Nonlocal  = 2550,
     NumT      = 2600,
@@ -90,6 +91,7 @@ export const TokenTName: {
     [TokenT.LessEq]: "LessEq",
     [TokenT.LParen]: "LParen",
     [TokenT.LR]: "LR",
+    [TokenT.Let]: "Let",
     [TokenT.Minus]: "Minus",
     [TokenT.Mut]: "Mut",
     [TokenT.Name]: "Name",
@@ -183,6 +185,7 @@ function name_type(): TokenT {
         case "if":       return TokenT.If;
         case "ifx":      return TokenT.Ifx;
         case "global":   return TokenT.Global;
+        case "let":      return TokenT.Let;
         case "mut":      return TokenT.Mut;
         case "nonlocal": return TokenT.Nonlocal;
         case "Num":      return TokenT.NumT;

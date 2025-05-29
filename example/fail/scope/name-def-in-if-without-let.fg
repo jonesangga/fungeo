@@ -1,0 +1,6 @@
+// Must use let for definition in control scope.
+
+if true {
+    b = 2
+    Print b
+}

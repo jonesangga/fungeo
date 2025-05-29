@@ -1,0 +1,23 @@
+// Define name in control scope must use `let`.
+
+if true {
+    let b = 3
+    Print b
+    if true {
+        let b = 5
+        Print b
+    }
+    Print b
+    if true {
+        let c = 10
+        Print c
+        Print b
+    }
+}
+
+Print "---";
+
+[0, 1] i {
+    let b = 5
+    Print b
+}

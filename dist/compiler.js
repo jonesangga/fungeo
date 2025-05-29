@@ -13,6 +13,7 @@ function assertT(actual, expected, msg) {
         error(msg);
 }
 let canParseArgument = false;
+let canParseBlock = false;
 let canAssign = false;
 var Precedence;
 (function (Precedence) {
@@ -59,6 +60,7 @@ const rules = {
     [1555]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [500]: { prefix: grouping, infix: null, precedence: 100 },
     [1560]: { prefix: null, infix: concat_str, precedence: 300 },
+    [2460]: { prefix: null, infix: null, precedence: 100 },
     [2500]: { prefix: null, infix: null, precedence: 100 },
     [600]: { prefix: negate, infix: numeric_binary, precedence: 300 },
     [1700]: { prefix: parse_name, infix: null, precedence: 100 },
@@ -361,6 +363,18 @@ function resolveLocal(compiler, name) {
     }
     return -1;
 }
+function parse_let() {
+    $("in parse_let()");
+    consume(1700, "expect a name");
+    let name = prevTok.lexeme;
+    consume(1500, "expect '=' after name");
+    if (current.scopeDepth > 0) {
+        set_block(name);
+    }
+    else {
+        error("cannot use 'let' in non block");
+    }
+}
 function parse_mut() {
     $("in parse_mut()");
     consume(1700, "expect a name");
@@ -388,13 +402,26 @@ function parse_name() {
 }
 function set_name(name) {
     if (current.scopeDepth > 0) {
-        set_local(name);
+        set_local_global(name);
     }
     else {
         set_global(name);
     }
 }
-function set_local_global(name, type) {
+function set_local_global(name) {
+    $("in set_local_global()");
+    let found = false;
+    let type = neverT;
+    for (let i = current.localGlobals.length - 1; i >= 0; i--) {
+        let global = current.localGlobals[i];
+        if (name === global.name) {
+            found = true;
+            type = global.type;
+            break;
+        }
+    }
+    if (!found)
+        error("use 'let' to define name in control scope");
     let index = makeConstant(new FGString(name));
     lastT = neverT;
     canParseArgument = true;
@@ -427,14 +454,66 @@ function parse_local_global() {
     add_local_global(name, type);
     lastT = nothingT;
 }
-function set_local(name, mut = false) {
-    for (let i = current.localGlobals.length - 1; i >= 0; i--) {
-        let global = current.localGlobals[i];
-        if (name === global.name) {
-            set_local_global(name, global.type);
-            return;
+function set_block(name, mut = false) {
+    if (mut) {
+        for (let i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (local.depth < current.scopeDepth)
+                break;
+            if (name === local.name)
+                error(`${name} already defined in this scope`);
+        }
+        add_local(name);
+        let index = current.locals.length - 1;
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+        emitBytes(1410, index);
+        current.locals[current.locals.length - 1].type = lastT;
+        current.locals[current.locals.length - 1].isMut = true;
+    }
+    else {
+        let type = neverT;
+        let isMut = false;
+        let i;
+        for (i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (name === local.name) {
+                if (local.isMut === true) {
+                    isMut = true;
+                    type = local.type;
+                    break;
+                }
+                else {
+                    if (local.depth === current.scopeDepth)
+                        error(`${name} already defined in this scope`);
+                }
+            }
+        }
+        let index;
+        if (isMut) {
+            $("isMut");
+            index = i;
+        }
+        else {
+            add_local(name);
+            index = current.locals.length - 1;
+        }
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+        if (isMut)
+            emitBytes(1420, index);
+        else {
+            current.locals[current.locals.length - 1].type = lastT;
+            emitBytes(1410, index);
         }
     }
+    lastT = nothingT;
+}
+function set_local(name, mut = false) {
     if (mut) {
         for (let i = current.locals.length - 1; i >= 0; i--) {
             let local = current.locals[i];
@@ -533,6 +612,7 @@ function set_global(name, mut = false) {
     emitConstant(new FGType(lastT));
     if (mut) {
         tempNames[name] = { type: lastT, mut: true };
+        add_local_global(name, lastT);
         emitBytes(1430, index);
     }
     else if (ismut) {
@@ -776,12 +856,15 @@ function parse_if() {
     assertT(lastT, booleanT, "conditional expression must be boolean");
     let thenJump = emitJump(620);
     emitByte(1200);
+    canParseBlock = true;
     statement();
     let elseJump = emitJump(615);
     patchJump(thenJump);
     emitByte(1200);
-    if (match(2300))
+    if (match(2300)) {
+        canParseBlock = true;
         statement();
+    }
     patchJump(elseJump);
 }
 function parse_ifx() {
@@ -915,10 +998,15 @@ function statement() {
     else if (match(2450)) {
         parse_local_global();
     }
+    else if (match(2460)) {
+        parse_let();
+    }
     else if (match(2500)) {
         parse_mut();
     }
     else if (match(300)) {
+        if (!canParseBlock)
+            error("forbiden block");
         beginScope();
         block();
         endScope();
@@ -944,6 +1032,7 @@ function beginScope() {
     current.scopeDepth++;
 }
 function block() {
+    canParseBlock = false;
     while (!check(695) && !check(2100))
         declaration();
     consume(695, "expect '}' at the end of block");

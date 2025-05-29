@@ -45,6 +45,7 @@ export var TokenT;
     TokenT[TokenT["If"] = 2400] = "If";
     TokenT[TokenT["Ifx"] = 2405] = "Ifx";
     TokenT[TokenT["Global"] = 2450] = "Global";
+    TokenT[TokenT["Let"] = 2460] = "Let";
     TokenT[TokenT["Mut"] = 2500] = "Mut";
     TokenT[TokenT["Nonlocal"] = 2550] = "Nonlocal";
     TokenT[TokenT["NumT"] = 2600] = "NumT";
@@ -85,6 +86,7 @@ export const TokenTName = {
     [1555]: "LessEq",
     [500]: "LParen",
     [1560]: "LR",
+    [2460]: "Let",
     [600]: "Minus",
     [2500]: "Mut",
     [1700]: "Name",
@@ -161,6 +163,7 @@ function name_type() {
         case "if": return 2400;
         case "ifx": return 2405;
         case "global": return 2450;
+        case "let": return 2460;
         case "mut": return 2500;
         case "nonlocal": return 2550;
         case "Num": return 2600;

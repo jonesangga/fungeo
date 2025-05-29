@@ -5,6 +5,10 @@ import { Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, 
 import { Names, nativeNames } from "./names.js"
 import { type Type } from "./type.js"
 
+// For quick debugging.
+let $ = console.log;
+$ = () => {};
+
 // These are exported only for vm.test.
 export let stack: Value[] = [];
 export let stackTop = 0;
@@ -105,7 +109,7 @@ function run(): boolean {
             }
             str += "\n";
             let [result, ] = currChunk.disassemble_instr(currFrame.ip);
-            console.log(str + result);
+            $(str + result);
         }
 
         switch (read_byte()) {
@@ -209,14 +213,14 @@ function run(): boolean {
                 let start = (peek(2) as FGNumber).value;
                 let end = (peek(1) as FGNumber).value;
                 let step = (peek(0) as FGNumber).value;
-                console.log(start, end, step);
+                $(start, end, step);
                 if (start <= end) {
-                    console.log("increasing");
+                    $("increasing");
                     if (step <= 0) {
                         error("infinite loop");
                     }
                 } else {
-                    console.log("decreasing");
+                    $("decreasing");
                     if (step >= 0) {
                         error("infinite loop");
                     }

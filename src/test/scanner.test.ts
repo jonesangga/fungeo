@@ -71,6 +71,7 @@ describe("scanner each token type", () => {
         [TokenT.LessEq]: ["<=", { kind: TokenT.LessEq, line: 1, lexeme: "<=" }],
         [TokenT.LParen]: ["(", { kind: TokenT.LParen, line: 1, lexeme: "(" }],
         [TokenT.LR]: ["<>", { kind: TokenT.LR, line: 1, lexeme: "<>" }],
+        [TokenT.Let]: ["let", { kind: TokenT.Let, line: 1, lexeme: "let" }],
         [TokenT.Mut]: ["mut", { kind: TokenT.Mut, line: 1, lexeme: "mut" }],
         [TokenT.Minus]: ["-", { kind: TokenT.Minus, line: 1, lexeme: "-" }],
         [TokenT.Name]: ["kasukasu", { kind: TokenT.Name, line: 1, lexeme: "kasukasu" }],

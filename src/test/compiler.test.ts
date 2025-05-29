@@ -6,7 +6,7 @@
 //       Test chunk.values in a block (local name)
 //       Test GetLoc and SetLoc
 
-// import 'global-jsdom/register'
+import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { deepEqual, fail } from "node:assert/strict";
 import { Op } from "../chunk.js"
@@ -374,25 +374,22 @@ describe("compiler: string concatenation error", () => {
 //--------------------------------------------------------------------
 // Testing block.
 
+// TODO: use example like if with block body.
 describe("compiler: block", () => {
     const tests: CodeTest = [
-        ["empty {}", `{}`, [
-            Op.Ok,
+        ["SetLoc GetLoc in {}", `if true {let a = 2 Print a}`, [
+            Op.Load, 0, Op.JmpF, 17, Op.Pop,
+            Op.Load, 1, Op.Load, 2, Op.SetLoc, 0,
+            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
+            Op.Jmp, 1, Op.Pop, Op.Ok,
         ]],
-        ["SetLoc in {}", `{a = 2}`, [
-            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0, Op.Pop, Op.Ok,
-        ]],
-        ["SetLoc GetLoc in {}", `{a = 2 Print a}`, [
-            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0, Op.Load, 2, Op.GetLoc, 0,
-            Op.CallNat, 1, 0, Op.Pop, Op.Ok,
-        ]],
-        ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
-            Op.Load, 0, Op.Load, 1, Op.SetLoc, 0,
-            Op.Load, 2, Op.Load, 3, Op.SetLoc, 1,
-            Op.Load, 4, Op.GetLoc, 1, Op.CallNat, 1, 0, Op.Pop,
-            Op.Load, 5, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
-            Op.Ok,
-        ]],
+        // ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
+            // Op.Load, 0, Op.Load, 1, Op.SetLoc, 0,
+            // Op.Load, 2, Op.Load, 3, Op.SetLoc, 1,
+            // Op.Load, 4, Op.GetLoc, 1, Op.CallNat, 1, 0, Op.Pop,
+            // Op.Load, 5, Op.GetLoc, 0, Op.CallNat, 1, 0, Op.Pop,
+            // Op.Ok,
+        // ]],
     ];
     matchCode(tests);
 });
@@ -400,13 +397,18 @@ describe("compiler: block", () => {
 describe("compiler: block error", () => {
     const tests: ErrorTest = [
         [
+            "error, when empty block",
+            "{}",
+            "1: at '{': forbiden block\n",
+        ],
+        [
             "error, when reassign local name",
-            `{a = 1 a = 2}`,
-            "1: at '=': a already defined in this scope\n"
+            `if true {a = 1 a = 2}`,
+            "1: at '=': use 'let' to define name in control scope\n"
         ],
         [
             "error, when no }",
-            `{a = 1`,
+            `if true {let a = 1`,
             "1: at end: expect '}' at the end of block\n"
         ],
     ];
@@ -508,7 +510,7 @@ describe("compiler loop error", () => {
         ],
         [
             "error, when reassign to iterator",
-            `[2, 5] i { i = 2 Print i }`,
+            `[2, 5] i { let i = 2 Print i }`,
             "1: at '=': i already defined in this scope\n"
         ],
     ];

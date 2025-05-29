@@ -25,8 +25,12 @@ function assertT(actual: Type, expected: Type, msg: string): void {
 // To distinguish function as argument vs function call.
 let canParseArgument = false;
 
+// To forbid bare block.
+let canParseBlock = false;
+
 // To forbid assignment in expression.
 let canAssign = false;
+
 
 const enum Precedence {
     None = 100,
@@ -79,6 +83,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.LessEq]    : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.LParen]    : {prefix: grouping,        infix: null,    precedence: Precedence.None},
     [TokenT.LR]        : {prefix: null,            infix: concat_str,    precedence: Precedence.Term},
+    [TokenT.Let]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Mut]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Minus]     : {prefix: negate,          infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
@@ -483,6 +488,20 @@ function resolveLocal(compiler: Compiler, name: string): number {
     return -1;
 }
 
+function parse_let(): void {
+    $("in parse_let()");
+    consume(TokenT.Name, "expect a name");
+    let name = prevTok.lexeme;
+
+    consume(TokenT.Eq, "expect '=' after name");
+    if (current.scopeDepth > 0) {
+        set_block(name);
+    }
+    else {
+        error("cannot use 'let' in non block");
+    }
+}
+
 function parse_mut(): void {
     $("in parse_mut()");
     consume(TokenT.Name, "expect a name");
@@ -512,7 +531,7 @@ function parse_name(): void {
 
 function set_name(name: string): void {
     if (current.scopeDepth > 0) {
-        set_local(name);
+        set_local_global(name);
     } else {
         set_global(name);
     }
@@ -531,7 +550,21 @@ function set_name(name: string): void {
     // lastT = nothingT;           // Because assignment is not an expression.
 // }
 
-function set_local_global(name: string, type: Type): void {
+function set_local_global(name: string): void {
+    $("in set_local_global()");
+    let found = false;
+    let type = neverT;
+    for (let i = current.localGlobals.length - 1; i >= 0; i--) {
+        let global = current.localGlobals[i];
+        if (name === global.name) {
+            found = true;
+            type = global.type;
+            break;
+        }
+    }
+    if (!found)
+        error("use 'let' to define name in control scope");
+
     let index = makeConstant(new FGString(name));
     lastT = neverT;
     canParseArgument = true;
@@ -593,16 +626,73 @@ function parse_local_global(): void {
     lastT = nothingT;
 }
 
-function set_local(name: string, mut: boolean = false): void {
-    // Check if name is in localGlobals
-    for (let i = current.localGlobals.length - 1; i >= 0; i--) {
-        let global = current.localGlobals[i];
-        if (name === global.name) {
-            set_local_global(name, global.type);
-            return;
+function set_block(name: string, mut: boolean = false): void {
+    if (mut) {
+        for (let i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (local.depth < current.scopeDepth)
+                break;
+            if (name === local.name)
+                error(`${ name } already defined in this scope`);
         }
-    }
 
+        add_local(name);
+        let index = current.locals.length - 1;
+
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+
+        emitBytes(Op.SetLoc, index);
+        current.locals[current.locals.length - 1].type = lastT;
+        current.locals[current.locals.length - 1].isMut = true;
+    }
+    else {
+        let type: Type = neverT;
+        let isMut = false;
+
+        let i;
+        for (i = current.locals.length - 1; i >= 0; i--) {
+            let local = current.locals[i];
+            if (name === local.name) {
+                if (local.isMut === true) {
+                    isMut = true;
+                    type = local.type;
+                    break;
+                }
+                else {
+                    if (local.depth === current.scopeDepth)
+                        error(`${ name } already defined in this scope`);
+                }
+            }
+        }
+        let index: number;
+        if (isMut) {
+            $("isMut");
+            index = i;
+        } else {
+            add_local(name);
+            index = current.locals.length - 1;
+        }
+
+        lastT = neverT;
+        canParseArgument = true;
+        expression();
+        emitConstant(new FGType(lastT));
+
+        if (isMut)
+            emitBytes(Op.SetLocM, index);
+        else {
+            current.locals[current.locals.length - 1].type = lastT;
+            emitBytes(Op.SetLoc, index);
+        }
+
+    }
+    lastT = nothingT;
+}
+
+function set_local(name: string, mut: boolean = false): void {
     // // Check if name is in nonlocals
     // for (let i = current.nonlocals.length - 1; i >= 0; i--) {
         // let non = current.nonlocals[i];
@@ -735,6 +825,7 @@ function set_global(name: string, mut: boolean = false): void {
 
     if (mut) {
         tempNames[name] = { type: lastT, mut: true };
+        add_local_global(name, lastT);
         emitBytes(Op.SetMut, index);
     }
     else if (ismut) {
@@ -1044,14 +1135,17 @@ function parse_if(): void {
 
     let thenJump = emitJump(Op.JmpF);
     emitByte(Op.Pop);
+    canParseBlock = true;
     statement();
 
     let elseJump = emitJump(Op.Jmp);
     patchJump(thenJump);
     emitByte(Op.Pop);
 
-    if (match(TokenT.Else))
+    if (match(TokenT.Else)) {
+        canParseBlock = true;
         statement();
+    }
     patchJump(elseJump);
 }
 
@@ -1138,6 +1232,7 @@ function parse_loop(): void {
     emitByte(Op.Pop);                   // Discard the result of Op.Cond.
 
     // Parse the body.
+    // TODO: think again.
     if (match(TokenT.LBrace)) {
         block();
         // Pop locals not related to range.
@@ -1218,9 +1313,13 @@ function statement(): void {
         parse_local_global();
     // } else if (match(TokenT.Nonlocal)) {
         // parse_nonlocal();
+    } else if (match(TokenT.Let)) {
+        parse_let();
     } else if (match(TokenT.Mut)) {
         parse_mut();
     } else if (match(TokenT.LBrace)) {
+        if (!canParseBlock)
+            error("forbiden block");
         beginScope();
         block();
         endScope();
@@ -1246,6 +1345,7 @@ function beginScope(): void {
 
 // The '{' must be already consumed.
 function block(): void {
+    canParseBlock = false;
     while (!check(TokenT.RBrace) && !check(TokenT.EOF))
         declaration();
     consume(TokenT.RBrace, "expect '}' at the end of block");
