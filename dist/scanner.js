@@ -31,8 +31,8 @@ export var TokenT;
     TokenT[TokenT["PipePipe"] = 1580] = "PipePipe";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
-    TokenT[TokenT["False"] = 1600] = "False";
-    TokenT[TokenT["Name"] = 1700] = "Name";
+    TokenT[TokenT["Callable"] = 1650] = "Callable";
+    TokenT[TokenT["False"] = 1700] = "False";
     TokenT[TokenT["Number"] = 1800] = "Number";
     TokenT[TokenT["String"] = 1900] = "String";
     TokenT[TokenT["True"] = 2000] = "True";
@@ -47,6 +47,7 @@ export var TokenT;
     TokenT[TokenT["Global"] = 2450] = "Global";
     TokenT[TokenT["Let"] = 2460] = "Let";
     TokenT[TokenT["Mut"] = 2500] = "Mut";
+    TokenT[TokenT["NCallable"] = 2540] = "NCallable";
     TokenT[TokenT["Nonlocal"] = 2550] = "Nonlocal";
     TokenT[TokenT["NumT"] = 2600] = "NumT";
     TokenT[TokenT["Proc"] = 2750] = "Proc";
@@ -62,6 +63,7 @@ export const TokenTName = {
     [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
+    [1650]: "Callable",
     [2230]: "CircleT",
     [1300]: "Colon",
     [1400]: "ColonEq",
@@ -72,7 +74,7 @@ export const TokenTName = {
     [1500]: "Eq",
     [1505]: "EqEq",
     [2200]: "Error",
-    [1600]: "False",
+    [1700]: "False",
     [2320]: "Fn",
     [2450]: "Global",
     [1520]: "Greater",
@@ -89,7 +91,7 @@ export const TokenTName = {
     [2460]: "Let",
     [600]: "Minus",
     [2500]: "Mut",
-    [1700]: "Name",
+    [2540]: "NCallable",
     [2550]: "Nonlocal",
     [1800]: "Number",
     [2600]: "NumT",
@@ -116,6 +118,12 @@ let current = 0;
 let line = 1;
 function is_digit(c) {
     return c >= '0' && c <= '9';
+}
+function is_lower(c) {
+    return c >= 'a' && c <= 'z';
+}
+function is_upper(c) {
+    return c >= 'A' && c <= 'Z';
 }
 function is_alpha(c) {
     return (c >= 'a' && c <= 'z') ||
@@ -153,32 +161,36 @@ function token_string(kind) {
 function token_error(message) {
     return { kind: 2200, lexeme: message, line };
 }
-function name_type() {
-    switch (source.slice(start, current)) {
-        case "Bool": return 2220;
-        case "Circle": return 2230;
-        case "else": return 2300;
-        case "false": return 1600;
-        case "fn": return 2320;
-        case "if": return 2400;
-        case "ifx": return 2405;
-        case "global": return 2450;
-        case "let": return 2460;
-        case "mut": return 2500;
-        case "nonlocal": return 2550;
-        case "Num": return 2600;
-        case "proc": return 2750;
-        case "return": return 2800;
-        case "Str": return 2900;
-        case "then": return 3000;
-        case "true": return 2000;
-    }
-    return 1700;
-}
-function name() {
+function pascal_case() {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
-    return token_lexeme(name_type());
+    switch (source.slice(start, current)) {
+        case "Bool": return token_lexeme(2220);
+        case "Circle": return token_lexeme(2230);
+        case "Num": return token_lexeme(2600);
+        case "Str": return token_lexeme(2900);
+    }
+    return token_lexeme(1650);
+}
+function non_pascal_case() {
+    while (is_alpha(peek()) || is_digit(peek()))
+        advance();
+    switch (source.slice(start, current)) {
+        case "else": return token_lexeme(2300);
+        case "false": return token_lexeme(1700);
+        case "fn": return token_lexeme(2320);
+        case "if": return token_lexeme(2400);
+        case "ifx": return token_lexeme(2405);
+        case "global": return token_lexeme(2450);
+        case "let": return token_lexeme(2460);
+        case "mut": return token_lexeme(2500);
+        case "nonlocal": return token_lexeme(2550);
+        case "proc": return token_lexeme(2750);
+        case "return": return token_lexeme(2800);
+        case "then": return token_lexeme(3000);
+        case "true": return token_lexeme(2000);
+    }
+    return token_lexeme(2540);
 }
 function number_() {
     while (is_digit(peek()))
@@ -243,8 +255,10 @@ export const scanner = {
         let c = advance();
         if (is_digit(c))
             return number_();
-        if (is_alpha(c))
-            return name();
+        if (is_lower(c))
+            return non_pascal_case();
+        if (is_upper(c))
+            return pascal_case();
         switch (c) {
             case '(': return token_lexeme(500);
             case ')': return token_lexeme(800);

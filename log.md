@@ -1,5 +1,10 @@
 # Log
 
+#### 30-05-25
+
+- force callable name to use PascalCase
+- change token Name into NCallable and Callable
+
 #### 29-05-25
 
 - script to run example test

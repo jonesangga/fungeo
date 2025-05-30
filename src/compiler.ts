@@ -10,7 +10,7 @@ import { type Type, NeverT, NumberT, StringT, ListT, neverT, circleT, numberT, s
 
 // For quick debugging.
 let $ = console.log;
-$ = () => {};
+// $ = () => {};
 
 let lastT = neverT;
 
@@ -59,6 +59,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.BoolT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Callable]  : {prefix: parse_callable,  infix: null,    precedence: Precedence.None},
     [TokenT.CircleT]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -86,7 +87,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Let]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Mut]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Minus]     : {prefix: negate,          infix: numeric_binary,  precedence: Precedence.Term},
-    [TokenT.Name]      : {prefix: parse_name,      infix: null,    precedence: Precedence.None},
+    [TokenT.NCallable] : {prefix: parse_non_callable,      infix: null,    precedence: Precedence.None},
     [TokenT.Nonlocal]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -109,10 +110,10 @@ const rules: { [key in TokenT]: ParseRule } = {
 }
 
 interface Local {
-    name:   string;
-    type:   Type;
-    depth:  number;
-    isMut?: boolean;
+    name:  string;
+    type:  Type;
+    depth: number;
+    mut?:  boolean;
     // index?: number;     // For nonlocal referencing its position in current.locals array
 }
 
@@ -479,18 +480,16 @@ let tempNames: {
 
 function resolveLocal(compiler: Compiler, name: string): number {
     for (let i = compiler.locals.length - 1; i >= 0; i--) {
-        let local = compiler.locals[i];
-        if (name === local.name) {
+        if (name === compiler.locals[i].name) {
             return i;
         }
     }
-
     return -1;
 }
 
 function parse_let(): void {
     $("in parse_let()");
-    consume(TokenT.Name, "expect a name");
+    consume(TokenT.NCallable, "expect a name");
     let name = prevTok.lexeme;
 
     consume(TokenT.Eq, "expect '=' after name");
@@ -504,7 +503,7 @@ function parse_let(): void {
 
 function parse_mut(): void {
     $("in parse_mut()");
-    consume(TokenT.Name, "expect a name");
+    consume(TokenT.NCallable, "expect a name");
     let name = prevTok.lexeme;
 
     consume(TokenT.Eq, "expect '=' after name");
@@ -515,45 +514,107 @@ function parse_mut(): void {
     }
 }
 
-function parse_name(): void {
+// Non-callable names, keywords, true, false.
+function parse_non_callable(): void {
     let name = prevTok.lexeme;
 
     if (match(TokenT.Eq)) {
         if (!canAssign)
-            error(`cannot assign ${name}`);
+            error(`cannot assign ${ name }`);
         canAssign = false;
-        set_name(name);
+        set_non_callable(name);
     } else {
         canAssign = false;
-        get_name(name);
+        get_non_callable(name);
     }
 }
 
-function set_name(name: string): void {
+function get_non_callable(name: string): void {
+    $(name);
+    let arg = resolveLocal(current, name);
+    if (arg !== -1) {
+        $("got local name");
+        emitBytes(Op.GetLoc, arg);
+        lastT = current.locals[arg].type;
+    }
+    else if (Object.hasOwn(nativeNames, name)) {
+        get_non_callable_(nativeNames, name, Op.GetNat);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        get_non_callable_(userNames, name, Op.GetUsr);
+    }
+    else if (Object.hasOwn(tempNames, name)) {
+        get_non_callable_(tempNames, name, Op.GetUsr);
+    }
+    else {
+        error(`undefined name ${name}`);
+    }
+}
+
+function get_non_callable_(table: any, name: string, op: Op): void {
+    let index = makeConstant(new FGString(name));
+    emitBytes(op, index);
+    lastT = table[name].type;
+}
+
+function set_non_callable(name: string): void {
     if (current.scopeDepth > 0) {
-        set_local_global(name);
+        set_non_callable_control(name);
     } else {
-        set_global(name);
+        set_non_callable_callable(name);
     }
 }
 
-// function set_nonlocal(index: number, type: Type): void {
-    // lastT = neverT;
-    // canParseArgument = true;
-    // expression();
-    // emitConstant(new FGType(lastT));
-    // console.log(lastT, type);
+function set_non_callable_callable(name: string): void {
+    let type = neverT;
+    let ismut = false;
 
-    // assertT(lastT, type, "nonlocal reassignment type didn't match");
-    // emitBytes(Op.SetLocN, index);
+    if (Object.hasOwn(nativeNames, name)) {
+        error(`cannot reassign built-in name`);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        if (userNames[name].mut === true) {
+            ismut = true;
+            type = userNames[name].type;
+        } else {
+            error(`${ name } already defined, not mutable`);
+        }
+    }
+    else if (Object.hasOwn(tempNames, name)) {
+        if (tempNames[name].mut === true) {
+            ismut = true;
+            type = tempNames[name].type;
+        } else {
+            error(`${ name } already defined, not mutable`);
+        }
+    }
 
-    // lastT = nothingT;           // Because assignment is not an expression.
-// }
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
+    canParseArgument = true;
+    expression();
+    emitConstant(new FGType(lastT));
 
-function set_local_global(name: string): void {
-    $("in set_local_global()");
+    if (ismut) {
+        assertT(lastT, type, "reassignment type didn't match");
+        emitBytes(Op.SetMut, index);
+    }
+    else {
+        tempNames[name] = { type: lastT };
+        emitBytes(Op.Set, index);
+    }
+    lastT = nothingT; // Because assignment is not an expression.
+}
+
+// This is for assignment in control scope that doesn't use `let` or `mut`.
+// So it must be a mutable name from callable scope.
+
+function set_non_callable_control(name: string): void {
+    $("in set_non_callable_control()");
+
     let found = false;
     let type = neverT;
+
     for (let i = current.localGlobals.length - 1; i >= 0; i--) {
         let global = current.localGlobals[i];
         if (name === global.name) {
@@ -574,11 +635,114 @@ function set_local_global(name: string): void {
     assertT(lastT, type, "localGlobal reassignment type didn't match");
     emitBytes(Op.SetLocG, index);
 
-    lastT = nothingT;           // Because assignment is not an expression.
+    lastT = nothingT; // Because assignment is not an expression.
 }
 
+// It doesn't support assignment to callable.
+// Instead, see fn() and proc().
+
+function parse_callable(): void {
+    $("in parse_callable()");
+    let name = prevTok.lexeme;
+    get_callable(name);
+}
+
+// There is no local scope callable.
+function get_callable(name: string): void {
+    if (Object.hasOwn(nativeNames, name)) {
+        get_global(nativeNames, name, true);
+    }
+    else if (Object.hasOwn(userNames, name)) {
+        get_global(userNames, name, false);
+    }
+    else if (Object.hasOwn(tempNames, name)) {
+        get_global(tempNames, name, false);
+    }
+    else {
+        error(`undefined name ${name}`);
+    }
+}
+
+// This also work for procedure that doesn't have parameter.
+// TODO: refactor this!
+//       check canParseArgument in the caller.
+
+function get_global(table: any, name_: string, native: boolean): void {
+    if (!canParseArgument) {
+        error("not implemented yet");
+        // global_non_callable(table, name_, native);
+        return;
+    }
+    canParseArgument = match(TokenT.Dollar);
+
+    let name = table[name_];
+    emitConstant(name.value as FGCallNative);
+
+    let version = (name.value as FGCallNative).version;
+    let inputVersion: Type[] = [];
+    let gotTypes: Type[] = [];
+
+    let success = true;
+
+    let i = 0;
+    let j = 0;
+    for ( ; i < version.length; i++) {
+        let checkNextVersion = false;
+        success = true;
+        inputVersion = version[i].input;
+
+        j = 0;
+        for ( ; j < gotTypes.length; j++) {
+            if (!inputVersion[j].equal( gotTypes[j] )) {
+                success = false;
+                break;
+            }
+        }
+        if (!success) continue;
+
+        for (let k = j; k < inputVersion.length; k++) {
+            lastT = nothingT;
+            if (canParseArgument)
+                expression();
+            else
+                parsePrecedence(Precedence.Call);
+
+            gotTypes.push(lastT);
+            $(inputVersion[k], lastT);
+            if (!inputVersion[k].equal( lastT )) {
+                checkNextVersion = true;
+                success = false;
+                j = k;
+                break;
+            }
+        }
+        if (!checkNextVersion) break;
+    }
+
+    if (!success)
+        error(`in ${name_}: expect arg ${j} of type ${ inputVersion[j].to_str() }, got ${ gotTypes[j].to_str() }`);
+
+    let arity = version[i].input.length;
+    emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
+    emitByte(i);
+    lastT = version[i].output;
+}
+
+// function set_nonlocal(index: number, type: Type): void {
+    // lastT = neverT;
+    // canParseArgument = true;
+    // expression();
+    // emitConstant(new FGType(lastT));
+    // console.log(lastT, type);
+
+    // assertT(lastT, type, "nonlocal reassignment type didn't match");
+    // emitBytes(Op.SetLocN, index);
+
+    // lastT = nothingT;           // Because assignment is not an expression.
+// }
+
 // function parse_nonlocal(): void {
-    // consume(TokenT.Name, "expect name after nonlocal");
+    // consume(TokenT.NCallable, "expect name after nonlocal");
     // let name = prevTok.lexeme;
     // let type = neverT;
 
@@ -601,7 +765,7 @@ function set_local_global(name: string): void {
 // }
 
 function parse_local_global(): void {
-    consume(TokenT.Name, "expect name after global");
+    consume(TokenT.NCallable, "expect name after global");
     let name = prevTok.lexeme;
     let type = neverT;
 
@@ -646,18 +810,18 @@ function set_block(name: string, mut: boolean = false): void {
 
         emitBytes(Op.SetLoc, index);
         current.locals[current.locals.length - 1].type = lastT;
-        current.locals[current.locals.length - 1].isMut = true;
+        current.locals[current.locals.length - 1].mut = true;
     }
     else {
         let type: Type = neverT;
-        let isMut = false;
+        let mut = false;
 
         let i;
         for (i = current.locals.length - 1; i >= 0; i--) {
             let local = current.locals[i];
             if (name === local.name) {
-                if (local.isMut === true) {
-                    isMut = true;
+                if (local.mut === true) {
+                    mut = true;
                     type = local.type;
                     break;
                 }
@@ -668,8 +832,8 @@ function set_block(name: string, mut: boolean = false): void {
             }
         }
         let index: number;
-        if (isMut) {
-            $("isMut");
+        if (mut) {
+            $("mut");
             index = i;
         } else {
             add_local(name);
@@ -681,7 +845,7 @@ function set_block(name: string, mut: boolean = false): void {
         expression();
         emitConstant(new FGType(lastT));
 
-        if (isMut)
+        if (mut)
             emitBytes(Op.SetLocM, index);
         else {
             current.locals[current.locals.length - 1].type = lastT;
@@ -723,18 +887,18 @@ function set_local(name: string, mut: boolean = false): void {
 
         emitBytes(Op.SetLoc, index);
         current.locals[current.locals.length - 1].type = lastT;
-        current.locals[current.locals.length - 1].isMut = true;
+        current.locals[current.locals.length - 1].mut = true;
     }
     else {
         let type: Type = neverT;
-        let isMut = false;
+        let mut = false;
 
         let i;
         for (i = current.locals.length - 1; i >= 0; i--) {
             let local = current.locals[i];
             if (name === local.name) {
-                if (local.isMut === true) {
-                    isMut = true;
+                if (local.mut === true) {
+                    mut = true;
                     type = local.type;
                     break;
                 }
@@ -745,8 +909,8 @@ function set_local(name: string, mut: boolean = false): void {
             }
         }
         let index: number;
-        if (isMut) {
-            $("isMut");
+        if (mut) {
+            $("mut");
             index = i;
         } else {
             add_local(name);
@@ -758,7 +922,7 @@ function set_local(name: string, mut: boolean = false): void {
         expression();
         emitConstant(new FGType(lastT));
 
-        if (isMut)
+        if (mut)
             emitBytes(Op.SetLocM, index);
         else {
             current.locals[current.locals.length - 1].type = lastT;
@@ -840,125 +1004,13 @@ function set_global(name: string, mut: boolean = false): void {
     lastT = nothingT;           // Because assignment is not an expression.
 }
 
-// TODO: refactor this!
-
-function get_name(name: string): void {
-    let arg = resolveLocal(current, name);
-    if (arg !== -1) {
-        $("got local name");
-        emitBytes(Op.GetLoc, arg);
-        lastT = current.locals[arg].type;
-        $(current.locals[arg]);
-    }
-    else if (Object.hasOwn(nativeNames, name)) {
-        $("nativeNames");
-        get_global(nativeNames, name, true);
-    }
-    else if (Object.hasOwn(userNames, name)) {
-        $("userNames");
-        get_global(userNames, name, false);
-    }
-    else if (Object.hasOwn(tempNames, name)) {
-        $("tempNames");
-        get_global(tempNames, name, false);
-    }
-    else {
-        error(`undefined name ${name}`);
-    }
-}
-
-// TODO: refactor this!
-
-function get_global(table: any, name: string, isNative: boolean): void {
-    $("in get_global()");
-    let type = table[name].type;
-    if (type instanceof CallNativeT) {
-        $("Kind.CallNative calling global_callable()");
-        global_callable(name, table, isNative);
-    }
-    else if (type instanceof CallUserT) {
-        $("Kind.CallUser calling global_callable()");
-        global_callable(name, table, isNative);
-    }
-    else {
-        $("default calling global_non_callable()");
-        global_non_callable(table, name, isNative);
-    }
-}
-
-// This also work for procedure that doesn't have parameter.
-// TODO: refactor this!
-//       check canParseArgument in the caller.
-
-function global_callable(name_: string, table: any, native: boolean): void {
-    $("in global_callable()");
-    if (!canParseArgument) {
-        global_non_callable(table, name_, native);
-        return;
-    }
-    canParseArgument = match(TokenT.Dollar);
-    $("canParseArgument in global_callable()");
-
-    let name = table[name_];
-    emitConstant(name.value as FGCallNative);
-
-    let version = (name.value as FGCallNative).version;
-    let inputVersion: Type[] = [];
-    let gotTypes: Type[] = [];
-
-    let success = true;
-
-    let i = 0;
-    let j = 0;
-    for ( ; i < version.length; i++) {
-        let checkNextVersion = false;
-        success = true;
-        inputVersion = version[i].input;
-
-        j = 0;
-        for ( ; j < gotTypes.length; j++) {
-            if (!inputVersion[j].equal( gotTypes[j] )) {
-                success = false;
-                break;
-            }
-        }
-        if (!success) continue;
-
-        for (let k = j; k < inputVersion.length; k++) {
-            lastT = nothingT;
-            if (canParseArgument)
-                expression();
-            else
-                parsePrecedence(Precedence.Call);
-
-            gotTypes.push(lastT);
-            $(inputVersion[k], lastT);
-            if (!inputVersion[k].equal( lastT )) {
-                checkNextVersion = true;
-                success = false;
-                j = k;
-                break;
-            }
-        }
-        if (!checkNextVersion) break;
-    }
-
-    if (!success)
-        error(`in ${name_}: expect arg ${j} of type ${ inputVersion[j].to_str() }, got ${ gotTypes[j].to_str() }`);
-
-    let arity = version[i].input.length;
-    emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
-    emitByte(i);
-    lastT = version[i].output;
-}
-
-function global_non_callable(table: any, name: string, native: boolean): void {
-    $("in global_non_callable()");
-    let index = makeConstant(new FGString(name));
-    emitBytes(native ? Op.GetNat : Op.GetUsr, index);
-    lastT = table[name].type;
-    $(name, table, table[name].type);
-}
+// Not implemented yet.
+// function global_non_callable(table: any, name: string, native: boolean): void {
+    // let index = makeConstant(new FGString(name));
+    // emitBytes(native ? Op.GetNat : Op.GetUsr, index);
+    // lastT = table[name].type;
+    // $(name, table, table[name].type);
+// }
 
 function parse_type(): Type {
     advance();
@@ -989,7 +1041,7 @@ function parse_type(): Type {
 }
 
 function parse_params(): void {
-    consume(TokenT.Name, "expect parameter name");
+    consume(TokenT.NCallable, "expect parameter name");
     let name = prevTok.lexeme;
 
     for (let i = current.locals.length - 1; i >= 0; i--) {
@@ -1010,7 +1062,7 @@ function parse_params(): void {
 
 function fn(): void {
     $("in fn()");
-    consume(TokenT.Name, "expect function name");
+    consume(TokenT.Callable, "expect function name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1045,7 +1097,7 @@ function fn(): void {
 // TODO: Implement recursion. See commented line.
 function proc(): void {
     $("in proc()");
-    consume(TokenT.Name, "expect procedure name");
+    consume(TokenT.Callable, "expect procedure name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1210,7 +1262,7 @@ function parse_loop(): void {
         consume(TokenT.RBracket, "expect ']' in range");
     }
 
-    if (!match(TokenT.Name))
+    if (!match(TokenT.NCallable))
         error_at_current("expect name for iterator");
     let name = prevTok.lexeme;
     // No need to check conflicting name because it is the first name in this scope.
@@ -1305,10 +1357,12 @@ function declaration(): void {
 
 // TODO: change error message in else to output types in FG.
 function statement(): void {
-    if (match(TokenT.Name)) {
-        canParseArgument = true;
+    if (match(TokenT.NCallable)) {
         canAssign = true;
-        parse_name();
+        parse_non_callable();
+    } else if (match(TokenT.Callable)) {
+        canParseArgument = true;
+        parse_callable();
     } else if (match(TokenT.Global)) {
         parse_local_global();
     // } else if (match(TokenT.Nonlocal)) {
@@ -1343,7 +1397,6 @@ function beginScope(): void {
     current.scopeDepth++;
 }
 
-// The '{' must be already consumed.
 function block(): void {
     canParseBlock = false;
     while (!check(TokenT.RBrace) && !check(TokenT.EOF))
