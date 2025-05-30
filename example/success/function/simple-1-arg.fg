@@ -1,0 +1,6 @@
+fn Square x: Num -> Num =
+  x * x
+
+Print $ Square 2
+Print $ Square (-2)
+Print $ Square 0

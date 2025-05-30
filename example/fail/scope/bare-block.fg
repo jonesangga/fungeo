@@ -1,0 +1,6 @@
+// It is an error to make bare block
+
+{
+    a = "no way"
+    Print a
+}

@@ -2,6 +2,10 @@
 
 #### 30-05-25
 
+- add more examples
+- example fail bare block
+- add fizzbuzz to demo
+- add fibonacci to demo
 - force callable name to use PascalCase
 - change token Name into NCallable and Callable
 

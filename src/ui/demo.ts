@@ -2,6 +2,8 @@ import repl from "./repl.js"
 import { vm } from "../vm.js"
 
 const files = [
+    ["fibonacci", "fibonacci.fg"],
+    ["fizzbuzz", "fizzbuzz.fg"],
     ["demo1", "demo1.fg"],
     ["demo2", "demo2.fg"],
     ["demo3", "demo3.fg"],
