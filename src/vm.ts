@@ -135,6 +135,12 @@ function run(): boolean {
                 break;
             }
 
+            case Op.Pipe: {
+                // let fn = pop() as FGCallNative;
+                // let a = pop() as FGNumber;
+                // push(fn.value(0));
+                break;
+            }
             case Op.CallNat: {
                 let arity = read_byte();
                 let ver = read_byte();

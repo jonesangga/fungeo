@@ -8,7 +8,9 @@ import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, NumberT, CircleT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, booleanT, numberT } from "./type.js"
+import { ListT, NumberT, CircleT, geoT, anyT, circleT, pointT, pictureT, rectT,
+         ellipseT, segmentT, nothingT, stringT, booleanT, numberT,
+         CallNativeT, NothingT, AnyT } from "./type.js"
 
 function _Print(n: number): void {
     let value = pop();
@@ -21,6 +23,10 @@ export let Print = new FGCallNative("Print", CallT.Function, _Print, [
         output: nothingT,
     },
 ]);
+export const PrintT = new CallNativeT(
+    [new AnyT()],
+    new NothingT()
+);
 
 function _Printf(n: number): void {
     let value = pop();
@@ -407,27 +413,29 @@ export let R = new FGCallNative("R", CallT.Function, _R, [
 ]);
 
 function _Seg(n: number): void {
-    if (n === 0) {
-        let y2 = (pop() as FGNumber).value;
-        let x2 = (pop() as FGNumber).value;
-        let y1 = (pop() as FGNumber).value;
-        let x1 = (pop() as FGNumber).value;
-        pop();              // The function.
-        let seg = new Segment(x1, y1, x2, y2);
-        push(seg);
-    } else {
-        let q = pop() as Point;
-        let p = pop() as Point;
-        pop();              // The function.
-        let seg = new Segment(p.x, p.y, q.x, q.y);
-        push(seg);
-    }
+    let y2 = (pop() as FGNumber).value;
+    let x2 = (pop() as FGNumber).value;
+    let y1 = (pop() as FGNumber).value;
+    let x1 = (pop() as FGNumber).value;
+    pop();              // The function.
+    let seg = new Segment(x1, y1, x2, y2);
+    push(seg);
 }
 export let Seg = new FGCallNative("Seg", CallT.Function, _Seg, [
     {
         input:  [numberT, numberT, numberT, numberT],
         output: segmentT,
     },
+]);
+
+function _Seg_FromPoint(n: number): void {
+    let q = pop() as Point;
+    let p = pop() as Point;
+    pop();              // The function.
+    let seg = new Segment(p.x, p.y, q.x, q.y);
+    push(seg);
+}
+export let Seg_FromPoint = new FGCallNative("Seg_FromPoint", CallT.Function, _Seg_FromPoint, [
     {
         input:  [pointT, pointT],
         output: segmentT,

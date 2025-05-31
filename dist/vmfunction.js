@@ -8,7 +8,7 @@ import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
-import { ListT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT } from "./type.js";
+import { ListT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, CallNativeT, NothingT, AnyT } from "./type.js";
 function _Print(n) {
     let value = pop();
     pop();
@@ -20,6 +20,7 @@ export let Print = new FGCallNative("Print", 0, _Print, [
         output: nothingT,
     },
 ]);
+export const PrintT = new CallNativeT([new AnyT()], new NothingT());
 function _Printf(n) {
     let value = pop();
     pop();
@@ -380,28 +381,28 @@ export let R = new FGCallNative("R", 0, _R, [
     },
 ]);
 function _Seg(n) {
-    if (n === 0) {
-        let y2 = pop().value;
-        let x2 = pop().value;
-        let y1 = pop().value;
-        let x1 = pop().value;
-        pop();
-        let seg = new Segment(x1, y1, x2, y2);
-        push(seg);
-    }
-    else {
-        let q = pop();
-        let p = pop();
-        pop();
-        let seg = new Segment(p.x, p.y, q.x, q.y);
-        push(seg);
-    }
+    let y2 = pop().value;
+    let x2 = pop().value;
+    let y1 = pop().value;
+    let x1 = pop().value;
+    pop();
+    let seg = new Segment(x1, y1, x2, y2);
+    push(seg);
 }
 export let Seg = new FGCallNative("Seg", 0, _Seg, [
     {
         input: [numberT, numberT, numberT, numberT],
         output: segmentT,
     },
+]);
+function _Seg_FromPoint(n) {
+    let q = pop();
+    let p = pop();
+    pop();
+    let seg = new Segment(p.x, p.y, q.x, q.y);
+    push(seg);
+}
+export let Seg_FromPoint = new FGCallNative("Seg_FromPoint", 0, _Seg_FromPoint, [
     {
         input: [pointT, pointT],
         output: segmentT,

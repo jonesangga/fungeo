@@ -3,9 +3,9 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
-import { nativeNames } from "./names.js"
+import { Method, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
-import { type Type, NeverT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT,
+import { type Type, NeverT, NumberT, StringT, ListT, TupleT, neverT, circleT, numberT, stringT, booleanT, callUserT,
          CallNativeT, CallUserT, nothingT, canvasT, replT, pictureT, callNativeT } from "./type.js"
 
 // For quick debugging.
@@ -64,7 +64,9 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.DivBy]     : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
     [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Dot]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Else]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Eq]        : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -91,7 +93,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Nonlocal]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.Pipe]      : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
+    [TokenT.Pipe]      : {prefix: null,            infix: pipe,    precedence: Precedence.Call},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
@@ -391,6 +393,21 @@ function concat_list(): void {
     emitByte(Op.AddList);
 }
 
+// applicable(actual: Type, expected: Type, msg: string) {
+// }
+
+function pipe(): void {
+    let argT = lastT;
+
+    parsePrecedence(Precedence.Call + 1);
+    if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
+        error("can only pipe to function");
+    assertT(lastT.input[lastT.input.length - 1], argT, `argT non match`);
+
+    lastT = lastT.output;
+    emitByte(Op.Pipe);
+}
+
 //--------------------------------------------------------------------
 // Parsing literal.
 
@@ -640,11 +657,32 @@ function set_non_callable_control(name: string): void {
 
 // It doesn't support assignment to callable.
 // Instead, see fn() and proc().
+// Dot operator for accessing method is handled here.
 
 function parse_callable(): void {
     $("in parse_callable()");
     let name = prevTok.lexeme;
-    get_callable(name);
+    if (match(TokenT.Dot)) {
+        method(name);
+    } else {
+        get_callable(name);
+    }
+}
+
+function method(name: string): void {
+    consume(TokenT.Callable, "expect method name after '.'");
+    let methodName = prevTok.lexeme;
+
+    if (name in nativeNames) {
+        if (nativeNames[name].methods
+                && methodName in nativeNames[name].methods) {
+            get_global(nativeNames[name].methods, methodName, true);
+        } else {
+            error(`undefined method ${ methodName } in ${ name }`);
+        }
+    } else {
+        error(`undefined callable ${ name }`);
+    }
 }
 
 // There is no local scope callable.
@@ -727,6 +765,67 @@ function get_global(table: any, name_: string, native: boolean): void {
     emitByte(i);
     lastT = version[i].output;
 }
+
+// function get_global(table: any, name_: string, native: boolean): void {
+    // if (!canParseArgument) {
+        // error("not implemented yet");
+        // // global_non_callable(table, name_, native);
+        // return;
+    // }
+    // canParseArgument = match(TokenT.Dollar);
+
+    // let name = table[name_];
+    // emitConstant(name.value as FGCallNative);
+
+    // let version = (name.value as FGCallNative).version;
+    // let inputVersion: Type[] = [];
+    // let gotTypes: Type[] = [];
+
+    // let success = true;
+
+    // let i = 0;
+    // let j = 0;
+    // for ( ; i < version.length; i++) {
+        // let checkNextVersion = false;
+        // success = true;
+        // inputVersion = version[i].input;
+
+        // j = 0;
+        // for ( ; j < gotTypes.length; j++) {
+            // if (!inputVersion[j].equal( gotTypes[j] )) {
+                // success = false;
+                // break;
+            // }
+        // }
+        // if (!success) continue;
+
+        // for (let k = j; k < inputVersion.length; k++) {
+            // lastT = nothingT;
+            // if (canParseArgument)
+                // expression();
+            // else
+                // parsePrecedence(Precedence.Call);
+
+            // gotTypes.push(lastT);
+            // $(inputVersion[k], lastT);
+            // if (!inputVersion[k].equal( lastT )) {
+                // checkNextVersion = true;
+                // success = false;
+                // j = k;
+                // break;
+            // }
+        // }
+        // if (!checkNextVersion) break;
+    // }
+
+    // if (!success)
+        // error(`in ${name_}: expect arg ${j} of type ${ inputVersion[j].to_str() }, got ${ gotTypes[j].to_str() }`);
+
+    // let arity = version[i].input.length;
+    // emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
+    // emitByte(i);
+    // lastT = version[i].output;
+// }
 
 // function set_nonlocal(index: number, type: Type): void {
     // lastT = neverT;
@@ -1040,7 +1139,8 @@ function parse_type(): Type {
     return type;
 }
 
-function parse_params(): void {
+// TODO: Check again what that for loop doing? Is it necessary?
+function parse_params(): Type {
     consume(TokenT.NCallable, "expect parameter name");
     let name = prevTok.lexeme;
 
@@ -1058,6 +1158,7 @@ function parse_params(): void {
     current.locals[current.locals.length - 1].type = type;
     current.fn.version[0].input.push(type);
     lastT = nothingT;
+    return type;
 }
 
 function fn(): void {
@@ -1069,8 +1170,9 @@ function fn(): void {
     begin_compiler(FnT.Function, name);
     beginScope();
 
+    let inputT: Type[] = [];
     do {
-        parse_params();
+        inputT.push( parse_params() );
     } while (match(TokenT.Comma));
 
     // return type
@@ -1089,7 +1191,7 @@ function fn(): void {
     let fn = endCompiler();
 
     emitConstant(fn);
-    emitConstant(new FGType(callUserT));
+    emitConstant(new FGType(new CallUserT(inputT, outputT)));
     emitBytes(Op.Set, index);
     lastT = outputT;
 }
@@ -1115,9 +1217,7 @@ function proc(): void {
     }
 
     current.fn.version[0].output = outputT;
-    tempNames[name] = { type: callUserT };
     tempNames[name] = { type: callUserT, value: current.fn };
-    // tempNames[name] = { type: [Kind.CallUser], value: current.fn }; // TODO: look at this later.     Here to support recursion
 
     consume(TokenT.LBrace, "expect '{' before proc body");
 
@@ -1142,14 +1242,6 @@ function proc_body(): void {
     while (!check(TokenT.RBrace) && !check(TokenT.EOF)) {
         statement();
     }
-}
-
-function setToKinds(set_: Kind[]): string[] {
-    let s = [];
-    for (let kind of set_) {
-        s.push(KindName[kind as Kind]);
-    }
-    return s;
 }
 
 function add_local(name: string): void {
@@ -1336,13 +1428,6 @@ function expression(): void {
 
 function identifierConstant(name: Token): number {
     return makeConstant(new FGString(name.lexeme));
-}
-
-function prev() {
-    console.log(TokenTName[prevTok.kind]);
-}
-function curr() {
-    console.log(TokenTName[currTok.kind]);
 }
 
 function declaration(): void {

@@ -2,6 +2,7 @@ export var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
     TokenT[TokenT["Dollar"] = 200] = "Dollar";
+    TokenT[TokenT["Dot"] = 210] = "Dot";
     TokenT[TokenT["Hash"] = 250] = "Hash";
     TokenT[TokenT["LBrace"] = 300] = "LBrace";
     TokenT[TokenT["LBracket"] = 400] = "LBracket";
@@ -20,6 +21,7 @@ export var TokenT;
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
     TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
+    TokenT[TokenT["DivBy"] = 1450] = "DivBy";
     TokenT[TokenT["Eq"] = 1500] = "Eq";
     TokenT[TokenT["EqEq"] = 1505] = "EqEq";
     TokenT[TokenT["Greater"] = 1520] = "Greater";
@@ -68,7 +70,9 @@ export const TokenTName = {
     [1300]: "Colon",
     [1400]: "ColonEq",
     [100]: "Comma",
+    [1450]: "DivBy",
     [200]: "Dollar",
+    [210]: "Dot",
     [2300]: "Else",
     [2100]: "EOF",
     [1500]: "Eq",
@@ -260,6 +264,7 @@ export const scanner = {
         if (is_upper(c))
             return pascal_case();
         switch (c) {
+            case '.': return token_lexeme(210);
             case '(': return token_lexeme(500);
             case ')': return token_lexeme(800);
             case '[': return token_lexeme(400);
@@ -274,7 +279,13 @@ export const scanner = {
             case '*': return token_lexeme(1100);
             case '"': return string_();
             case '-': return token_lexeme(match('>') ? 1195 : 600);
-            case '|': return token_lexeme(match('|') ? 1580 : 1575);
+            case '|': {
+                if (match('|'))
+                    return token_lexeme(1580);
+                if (match('>'))
+                    return token_lexeme(1575);
+                return token_lexeme(1450);
+            }
             case '&': return token_lexeme(match('&') ? 1190 : 1180);
             case ':': return token_lexeme(match('=') ? 1400 : 1300);
             case '<': {

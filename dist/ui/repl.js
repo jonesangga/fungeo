@@ -158,11 +158,11 @@ const repl = {
         container.style.top = y + "px";
     },
     ok(message) {
+        holder.style.background = colorOk;
         if (message === "")
             return;
         terminal_add_code(message, 1);
         history[history.length - 1].output = message;
-        holder.style.background = colorOk;
         if (!terminalShow) {
             if (message === "") {
                 output.style.visibility = "hidden";

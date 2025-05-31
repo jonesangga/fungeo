@@ -9,13 +9,18 @@ import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint,
          Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle,
          MapPic, Help, Clear,
-         Ccurv, Descart, ComplexDescart } from "./vmfunction.js"
+         Ccurv, Descart, ComplexDescart,
+         PrintT, Seg_FromPoint } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl   from "./ui/repl.js"
 import fish   from "./data/fish.js"
 
+export type Method = {
+    [name: string]: { type: Type, value: Value },
+}
+
 export type Names = {
-    [name: string]: { type: Type, value: Value, mut?: boolean },
+    [name: string]: { type: Type, value: Value, mut?: boolean, methods?: Method },
 };
 
 export let nativeNames: Names = {
@@ -30,7 +35,7 @@ export let nativeNames: Names = {
     "fishs": { type: pictureT, value: fish.s },
 
     "Help":   { type: callNativeT, value: Help },
-    "Print":  { type: callNativeT, value: Print },
+    "Print":  { type: PrintT, value: Print },
     "Printf": { type: callNativeT, value: Printf },
     "Show":   { type: callNativeT, value: Show },
     "Padl":   { type: callNativeT, value: Padl },
@@ -55,6 +60,9 @@ export let nativeNames: Names = {
     "Cycle":  { type: callNativeT, value: Cycle },
     "MapPic": { type: callNativeT, value: MapPic },
     "R":      { type: callNativeT, value: R },
-    "Seg":    { type: callNativeT, value: Seg },
+    // "Seg":    { type: callNativeT, value: Seg },
+    "Seg":    { type: callNativeT, value: Seg, methods: {
+        "FromPoint": { type: callNativeT, value: Seg_FromPoint },
+    }},
     "Midpoint": { type: callNativeT, value: Midpoint },
 };

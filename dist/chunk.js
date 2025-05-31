@@ -32,7 +32,8 @@ export var Op;
     Op[Op["Neg"] = 1000] = "Neg";
     Op[Op["NEq"] = 1010] = "NEq";
     Op[Op["Not"] = 1100] = "Not";
-    Op[Op["Ok"] = 1290] = "Ok";
+    Op[Op["Ok"] = 1150] = "Ok";
+    Op[Op["Pipe"] = 1190] = "Pipe";
     Op[Op["Pop"] = 1200] = "Pop";
     Op[Op["Ret"] = 1300] = "Ret";
     Op[Op["Set"] = 1400] = "Set";
@@ -77,7 +78,8 @@ export const OpName = {
     [1000]: "Neg",
     [1010]: "NEq",
     [1100]: "Not",
-    [1290]: "Ok",
+    [1150]: "Ok",
+    [1190]: "Pipe",
     [1200]: "Pop",
     [1300]: "Ret",
     [1400]: "Set",
@@ -139,7 +141,8 @@ export class Chunk {
             case 1000:
             case 1010:
             case 1100:
-            case 1290:
+            case 1150:
+            case 1190:
             case 1200:
             case 1500: {
                 result += name + "\n";

@@ -573,15 +573,15 @@ describe("compiler: native function", () => {
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.Load, 5,
             Op.CallNat, 4, 0, Op.Load, 6, Op.Set, 0, Op.Ok,
         ]],
-        ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
-            Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            Op.CallNat, 2, 0, Op.Load, 4, Op.Set, 0,
-            Op.Load, 6, Op.Load, 7, Op.Load, 8,
-            Op.CallNat, 2, 0, Op.Load, 9, Op.Set, 5,
-            Op.Load, 11, Op.GetUsr, 12, Op.GetUsr, 13,
-            Op.CallNat, 2, 1, Op.Load, 14, Op.Set, 10,
-            Op.Ok,
-        ]],
+        // ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
+            // Op.Load, 1, Op.Load, 2, Op.Load, 3,
+            // Op.CallNat, 2, 0, Op.Load, 4, Op.Set, 0,
+            // Op.Load, 6, Op.Load, 7, Op.Load, 8,
+            // Op.CallNat, 2, 0, Op.Load, 9, Op.Set, 5,
+            // Op.Load, 11, Op.GetUsr, 12, Op.GetUsr, 13,
+            // Op.CallNat, 2, 1, Op.Load, 14, Op.Set, 10,
+            // Op.Ok,
+        // ]],
     ];
     matchCode(tests);
 });

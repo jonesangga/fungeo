@@ -5,6 +5,7 @@
 export const enum TokenT {
     Comma     = 100,    // Single character.
     Dollar    = 200,
+    Dot       = 210,
     Hash      = 250,
     LBrace    = 300,
     LBracket  = 400,
@@ -23,6 +24,7 @@ export const enum TokenT {
     BangEq    = 1210,
     Colon     = 1300,
     ColonEq   = 1400,
+    DivBy     = 1450,
     Eq        = 1500,
     EqEq      = 1505,
     Greater   = 1520,
@@ -73,7 +75,9 @@ export const TokenTName: {
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
+    [TokenT.DivBy]: "DivBy",
     [TokenT.Dollar]: "Dollar",
+    [TokenT.Dot]: "Dot",
     [TokenT.Else]: "Else",
     [TokenT.EOF]: "EOF",
     [TokenT.Eq]: "Eq",
@@ -296,6 +300,7 @@ export const scanner = {
         if (is_upper(c)) return pascal_case();
         
         switch (c) {
+            case '.': return token_lexeme(TokenT.Dot);
             case '(': return token_lexeme(TokenT.LParen);
             case ')': return token_lexeme(TokenT.RParen);
             case '[': return token_lexeme(TokenT.LBracket);
@@ -312,8 +317,11 @@ export const scanner = {
 
             case '-': return token_lexeme(
                 match('>') ? TokenT.Arrow : TokenT.Minus);
-            case '|': return token_lexeme(
-                match('|') ? TokenT.PipePipe : TokenT.Pipe);
+            case '|': {
+                if (match('|')) return token_lexeme(TokenT.PipePipe);
+                if (match('>')) return token_lexeme(TokenT.Pipe);
+                return token_lexeme(TokenT.DivBy);
+            }
             case '&': return token_lexeme(
                 match('&') ? TokenT.AmpAmp : TokenT.Amp);
             case ':': return token_lexeme(

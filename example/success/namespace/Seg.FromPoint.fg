@@ -1,0 +1,6 @@
+// Create a Segment from 2 points
+
+p = P 100 100
+q = P 200 200
+s = Seg.FromPoint p q
+Print s

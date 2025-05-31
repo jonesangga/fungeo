@@ -1,5 +1,13 @@
 # Log
 
+#### 31-05-25
+
+- check if can compile Seg.FromPoint p q. Done
+- parse Dot in parse_callable(), not in statement()
+- remove overload in Seg into method Seg.FromPoint
+- new token Dot
+- add optional methods field on names
+
 #### 30-05-25
 
 - add more examples

@@ -43,6 +43,18 @@ export class ListT {
         return other instanceof ListT;
     }
 }
+export class TupleT {
+    values;
+    constructor(values) {
+        this.values = values;
+    }
+    to_str() {
+        return "[" + this.values.map(v => v.to_str()).join(", ") + "]";
+    }
+    equal(other) {
+        return other instanceof ListT;
+    }
+}
 export class UnionT {
     value;
     constructor(value) {
@@ -56,16 +68,30 @@ export class UnionT {
     }
 }
 export class CallNativeT {
+    input;
+    output;
+    constructor(input, output) {
+        this.input = input;
+        this.output = output;
+    }
     to_str() {
-        return "CallNative";
+        let input = this.input.map(v => v.to_str()).join(" -> ");
+        return input + " -> " + this.output.to_str();
     }
     equal(other) {
         return other instanceof CallNativeT;
     }
 }
 export class CallUserT {
+    input;
+    output;
+    constructor(input, output) {
+        this.input = input;
+        this.output = output;
+    }
     to_str() {
-        return "CallUser";
+        let input = this.input.map(v => v.to_str()).join(" -> ");
+        return input + " -> " + this.output.to_str();
     }
     equal(other) {
         return other instanceof CallUserT;
@@ -163,8 +189,8 @@ export const neverT = new NeverT();
 export const nothingT = new NothingT();
 export const anyT = new AnyT();
 export const booleanT = new BooleanT();
-export const callNativeT = new CallNativeT();
-export const callUserT = new CallUserT();
+export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
+export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();
 export const circleT = new CircleT();

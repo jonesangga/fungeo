@@ -1,9 +1,9 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { KindName, FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
+import { FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, nothingT } from "./type.js";
+import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
 let $ = console.log;
 let lastT = neverT;
 let returnT = neverT;
@@ -40,7 +40,9 @@ const rules = {
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
+    [1450]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
     [200]: { prefix: null, infix: null, precedence: 100 },
+    [210]: { prefix: null, infix: null, precedence: 100 },
     [2300]: { prefix: null, infix: null, precedence: 100 },
     [2100]: { prefix: null, infix: null, precedence: 100 },
     [1500]: { prefix: null, infix: null, precedence: 100 },
@@ -67,7 +69,7 @@ const rules = {
     [2550]: { prefix: null, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [2600]: { prefix: null, infix: null, precedence: 100 },
-    [1575]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
+    [1575]: { prefix: null, infix: pipe, precedence: 600 },
     [1580]: { prefix: null, infix: or, precedence: 210 },
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
     [1590]: { prefix: null, infix: concat_list, precedence: 300 },
@@ -169,7 +171,7 @@ function emitConstant(value) {
     emitBytes(800, makeConstant(value));
 }
 function emitReturn() {
-    emitByte(1290);
+    emitByte(1150);
 }
 function makeConstant(value) {
     return currentChunk().add_value(value);
@@ -288,6 +290,15 @@ function concat_list() {
     assertT(leftT, lastT, "operands type for '++' didn't match");
     emitConstant(new FGType(leftT));
     emitByte(110);
+}
+function pipe() {
+    let argT = lastT;
+    parsePrecedence(600 + 1);
+    if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
+        error("can only pipe to function");
+    assertT(lastT.input[lastT.input.length - 1], argT, `argT non match`);
+    lastT = lastT.output;
+    emitByte(1190);
 }
 function parse_boolean() {
     if (prevTok.kind === 2000)
@@ -498,7 +509,28 @@ function set_non_callable_control(name) {
 function parse_callable() {
     $("in parse_callable()");
     let name = prevTok.lexeme;
-    get_callable(name);
+    if (match(210)) {
+        method(name);
+    }
+    else {
+        get_callable(name);
+    }
+}
+function method(name) {
+    consume(1650, "expect method name after '.'");
+    let methodName = prevTok.lexeme;
+    if (name in nativeNames) {
+        if (nativeNames[name].methods
+            && methodName in nativeNames[name].methods) {
+            get_global(nativeNames[name].methods, methodName, true);
+        }
+        else {
+            error(`undefined method ${methodName} in ${name}`);
+        }
+    }
+    else {
+        error(`undefined callable ${name}`);
+    }
 }
 function get_callable(name) {
     if (Object.hasOwn(nativeNames, name)) {
@@ -803,6 +835,7 @@ function parse_params() {
     current.locals[current.locals.length - 1].type = type;
     current.fn.version[0].input.push(type);
     lastT = nothingT;
+    return type;
 }
 function fn() {
     $("in fn()");
@@ -811,8 +844,9 @@ function fn() {
     let index = makeConstant(new FGString(name));
     begin_compiler(0, name);
     beginScope();
+    let inputT = [];
     do {
-        parse_params();
+        inputT.push(parse_params());
     } while (match(100));
     consume(1195, "expect `->` after list of params");
     let outputT = parse_type();
@@ -824,7 +858,7 @@ function fn() {
     assertT(lastT, outputT, "return type not match");
     let fn = endCompiler();
     emitConstant(fn);
-    emitConstant(new FGType(callUserT));
+    emitConstant(new FGType(new CallUserT(inputT, outputT)));
     emitBytes(1400, index);
     lastT = outputT;
 }
@@ -843,7 +877,6 @@ function proc() {
         outputT = parse_type();
     }
     current.fn.version[0].output = outputT;
-    tempNames[name] = { type: callUserT };
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(300, "expect '{' before proc body");
     returnT = nothingT;
@@ -862,13 +895,6 @@ function proc_body() {
     while (!check(695) && !check(2100)) {
         statement();
     }
-}
-function setToKinds(set_) {
-    let s = [];
-    for (let kind of set_) {
-        s.push(KindName[kind]);
-    }
-    return s;
 }
 function add_local(name) {
     current.locals.push({ name, type: nothingT, depth: current.scopeDepth });
@@ -1005,12 +1031,6 @@ function expression() {
 }
 function identifierConstant(name) {
     return makeConstant(new FGString(name.lexeme));
-}
-function prev() {
-    console.log(TokenTName[prevTok.kind]);
-}
-function curr() {
-    console.log(TokenTName[currTok.kind]);
 }
 function declaration() {
     if (match(2320)) {

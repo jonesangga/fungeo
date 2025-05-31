@@ -56,6 +56,19 @@ export class ListT implements Type {
 }
 
 // TODO: update to_str()
+export class TupleT implements Type {
+    constructor(
+        public values: Type[]
+    ) {}
+    to_str(): string {
+        return "[" + this.values.map(v => v.to_str()).join(", ") + "]";
+    }
+    equal(other: Type): boolean {
+        return other instanceof ListT;
+    }
+}
+
+// TODO: update to_str()
 export class UnionT implements Type {
     constructor(
         public value: Type[]
@@ -69,8 +82,13 @@ export class UnionT implements Type {
 }
 
 export class CallNativeT implements Type {
+    constructor(
+        public input: Type[],
+        public output: Type
+    ) {}
     to_str(): string {
-        return "CallNative";
+        let input = this.input.map(v => v.to_str()).join(" -> ");
+        return input + " -> " + this.output.to_str();
     }
     equal(other: Type): boolean {
         return other instanceof CallNativeT;
@@ -78,8 +96,13 @@ export class CallNativeT implements Type {
 }
 
 export class CallUserT implements Type {
+    constructor(
+        public input: Type[],
+        public output: Type
+    ) {}
     to_str(): string {
-        return "CallUser";
+        let input = this.input.map(v => v.to_str()).join(" -> ");
+        return input + " -> " + this.output.to_str();
     }
     equal(other: Type): boolean {
         return other instanceof CallUserT;
@@ -189,8 +212,8 @@ export const neverT = new NeverT();
 export const nothingT = new NothingT();
 export const anyT = new AnyT();
 export const booleanT = new BooleanT();
-export const callNativeT = new CallNativeT();
-export const callUserT = new CallUserT();
+export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
+export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();
 export const circleT = new CircleT();

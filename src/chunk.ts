@@ -35,7 +35,8 @@ export const enum Op {
     Neg     = 1000,
     NEq     = 1010,
     Not     = 1100,
-    Ok      = 1290,
+    Ok      = 1150,
+    Pipe    = 1190,
     Pop     = 1200,
     Ret     = 1300,
     Set     = 1400,
@@ -83,6 +84,7 @@ export const OpName: {
     [Op.NEq]: "NEq",
     [Op.Not]: "Not",
     [Op.Ok]: "Ok",
+    [Op.Pipe]: "Pipe",
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
@@ -151,6 +153,7 @@ export class Chunk {
             case Op.NEq:
             case Op.Not:
             case Op.Ok:
+            case Op.Pipe:
             case Op.Pop:
             case Op.Sub: {
                 result += name + "\n";

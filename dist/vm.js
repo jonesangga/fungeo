@@ -94,6 +94,9 @@ function run() {
                 push(a.add(b));
                 break;
             }
+            case 1190: {
+                break;
+            }
             case 200: {
                 let arity = read_byte();
                 let ver = read_byte();
@@ -356,7 +359,7 @@ function run() {
                 currChunk = currFrame.fn.chunk;
                 break;
             }
-            case 1290: {
+            case 1150: {
                 pop();
                 return true;
             }
