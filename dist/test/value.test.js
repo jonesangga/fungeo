@@ -12,12 +12,10 @@ describe("value", () => {
     });
     it("FGCallNative", () => {
         let f = (n) => { return; };
-        let b = new FGCallNative("f", 0, f, [
-            {
-                input: [numberT],
-                output: numberT,
-            }
-        ]);
+        let b = new FGCallNative("f", 0, f, {
+            input: [numberT],
+            output: numberT,
+        });
         equal(b.kind, 400);
         equal(b.name, "f");
         equal(b.callType, 0);
@@ -25,12 +23,10 @@ describe("value", () => {
         equal(b.to_str(), "{fn f}");
     });
     it("FGCallUser", () => {
-        let b = new FGCallUser("testfn", 0, [
-            {
-                input: [numberT],
-                output: numberT,
-            }
-        ], new Chunk(""));
+        let b = new FGCallUser("testfn", 0, {
+            input: [numberT],
+            output: numberT,
+        }, new Chunk(""));
         equal(b.kind, 450);
         equal(b.name, "testfn");
         equal(b.callType, 0);

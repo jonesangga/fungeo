@@ -102,10 +102,10 @@ function currentChunk() {
 function begin_compiler(kind, name) {
     let compiler = {
         enclosing: current,
-        fn: new FGCallUser(name, 0, [{
-                input: [],
-                output: nothingT,
-            }], new Chunk(name)),
+        fn: new FGCallUser(name, 0, {
+            input: [],
+            output: nothingT,
+        }, new Chunk(name)),
         kind: kind,
         locals: [],
         localGlobals: [],
@@ -560,10 +560,10 @@ function get_global(table, name_, native) {
     let success = true;
     let i = 0;
     let j = 0;
-    for (; i < version.length; i++) {
+    for (; i < 1; i++) {
         let checkNextVersion = false;
         success = true;
-        inputVersion = version[i].input;
+        inputVersion = version.input;
         j = 0;
         for (; j < gotTypes.length; j++) {
             if (!inputVersion[j].equal(gotTypes[j])) {
@@ -593,10 +593,10 @@ function get_global(table, name_, native) {
     }
     if (!success)
         error(`in ${name_}: expect arg ${j} of type ${inputVersion[j].to_str()}, got ${gotTypes[j].to_str()}`);
-    let arity = version[i].input.length;
+    let arity = version.input.length;
     emitBytes(native ? 200 : 205, arity);
     emitByte(i);
-    lastT = version[i].output;
+    lastT = version.output;
 }
 function parse_local_global() {
     consume(2540, "expect name after global");
@@ -833,7 +833,7 @@ function parse_params() {
     consume(1300, "expect `:` after parameter name");
     let type = parse_type();
     current.locals[current.locals.length - 1].type = type;
-    current.fn.version[0].input.push(type);
+    current.fn.version.input.push(type);
     lastT = nothingT;
     return type;
 }
@@ -850,7 +850,7 @@ function fn() {
     } while (match(100));
     consume(1195, "expect `->` after list of params");
     let outputT = parse_type();
-    current.fn.version[0].output = outputT;
+    current.fn.version.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(1500, "expect '=' before fn body");
     expression();
@@ -876,7 +876,7 @@ function proc() {
     if (match(1195)) {
         outputT = parse_type();
     }
-    current.fn.version[0].output = outputT;
+    current.fn.version.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(300, "expect '{' before proc body");
     returnT = nothingT;

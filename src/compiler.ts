@@ -151,10 +151,10 @@ function begin_compiler(kind: FnT, name: string): void {
         fn: new FGCallUser(
             name,
             CallT.Function,
-            [{
+            {
                 input: [],
                 output: nothingT,
-            }],
+            },
             new Chunk(name),
         ),
         kind: kind,
@@ -724,10 +724,10 @@ function get_global(table: any, name_: string, native: boolean): void {
 
     let i = 0;
     let j = 0;
-    for ( ; i < version.length; i++) {
+    for ( ; i < 1; i++) {
         let checkNextVersion = false;
         success = true;
-        inputVersion = version[i].input;
+        inputVersion = version.input;
 
         j = 0;
         for ( ; j < gotTypes.length; j++) {
@@ -760,10 +760,10 @@ function get_global(table: any, name_: string, native: boolean): void {
     if (!success)
         error(`in ${name_}: expect arg ${j} of type ${ inputVersion[j].to_str() }, got ${ gotTypes[j].to_str() }`);
 
-    let arity = version[i].input.length;
+    let arity = version.input.length;
     emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
     emitByte(i);
-    lastT = version[i].output;
+    lastT = version.output;
 }
 
 // function get_global(table: any, name_: string, native: boolean): void {
@@ -1156,7 +1156,7 @@ function parse_params(): Type {
     let type = parse_type();
 
     current.locals[current.locals.length - 1].type = type;
-    current.fn.version[0].input.push(type);
+    current.fn.version.input.push(type);
     lastT = nothingT;
     return type;
 }
@@ -1179,7 +1179,7 @@ function fn(): void {
     consume(TokenT.Arrow, "expect `->` after list of params");
     let outputT = parse_type();
 
-    current.fn.version[0].output = outputT;
+    current.fn.version.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
 
     consume(TokenT.Eq, "expect '=' before fn body");
@@ -1216,7 +1216,7 @@ function proc(): void {
         outputT = parse_type();
     }
 
-    current.fn.version[0].output = outputT;
+    current.fn.version.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
 
     consume(TokenT.LBrace, "expect '{' before proc body");

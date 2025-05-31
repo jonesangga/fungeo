@@ -162,7 +162,6 @@ describe("chunk disassemble op jumps", () => {
 describe("chunk disassemble op calls", () => {
     it("Op.CallNat", () => {
         let chunk = new Chunk("test chunk");
-        let fn = nativeNames["Print"].value as FGCallNative;
         let arity = 1;
         let ver = 1;
         chunk.write(Op.CallNat, 123);
@@ -177,7 +176,6 @@ describe("chunk disassemble op calls", () => {
 
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
-        let fn = new FGCallUser("dummy", CallT.Function, [], new Chunk("dummy chunk"));
         let arity = 1;
         let ver = 1;
         chunk.write(Op.CallUsr, 123);

@@ -110,7 +110,7 @@ export class FGCallNative implements FG {
         public name: string,
         public callType: CallT,
         public value: (n: number) => void,
-        public version: Version[]
+        public version: Version
     ) {}
 
     to_str(): string {
@@ -131,7 +131,7 @@ export class FGCallUser implements FG {
     constructor(
         public name: string,
         public callType: CallT,
-        public version: Version[],
+        public version: Version,
         public chunk: Chunk,
     ) {}
 
