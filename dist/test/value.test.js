@@ -11,7 +11,7 @@ describe("value", () => {
         equal(b.to_str(), "false");
     });
     it("FGCallNative", () => {
-        let f = (n) => { return; };
+        let f = () => { return; };
         let b = new FGCallNative("f", 0, f, {
             input: [numberT],
             output: numberT,

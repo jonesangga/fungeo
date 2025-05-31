@@ -20,7 +20,7 @@ describe("value", () => {
     });
 
     it("FGCallNative", () => {
-        let f = (n: number) => {return;};
+        let f = () => {return;};
         let b = new FGCallNative("f", CallT.Function, f, {
             input: [numberT],
             output: numberT,

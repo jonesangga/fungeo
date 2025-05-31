@@ -109,7 +109,7 @@ export class FGCallNative implements FG {
     constructor(
         public name: string,
         public callType: CallT,
-        public value: (n: number) => void,
+        public value: () => void,
         public version: Version
     ) {}
 

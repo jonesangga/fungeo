@@ -100,7 +100,7 @@ function run() {
             case 200: {
                 let arity = read_byte();
                 let fn = peek(arity);
-                fn.value(0);
+                fn.value();
                 break;
             }
             case 205: {
