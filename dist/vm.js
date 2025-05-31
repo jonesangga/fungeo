@@ -99,14 +99,12 @@ function run() {
             }
             case 200: {
                 let arity = read_byte();
-                let ver = read_byte();
                 let fn = peek(arity);
-                fn.value(ver);
+                fn.value(0);
                 break;
             }
             case 205: {
                 let arity = read_byte();
-                let ver = read_byte();
                 let fn = peek(arity);
                 call(fn, arity);
                 break;

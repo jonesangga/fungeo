@@ -555,47 +555,21 @@ function get_global(table, name_, native) {
     let name = table[name_];
     emitConstant(name.value);
     let version = name.value.version;
-    let inputVersion = [];
     let gotTypes = [];
-    let success = true;
-    let i = 0;
-    let j = 0;
-    for (; i < 1; i++) {
-        let checkNextVersion = false;
-        success = true;
-        inputVersion = version.input;
-        j = 0;
-        for (; j < gotTypes.length; j++) {
-            if (!inputVersion[j].equal(gotTypes[j])) {
-                success = false;
-                break;
-            }
+    let inputs = version.input;
+    for (let i = 0; i < inputs.length; i++) {
+        lastT = nothingT;
+        if (canParseArgument)
+            expression();
+        else
+            parsePrecedence(600);
+        gotTypes.push(lastT);
+        if (!inputs[i].equal(lastT)) {
+            error(`in ${name_}: expect arg ${i} of type ${inputs[i].to_str()}, got ${gotTypes[i].to_str()}`);
         }
-        if (!success)
-            continue;
-        for (let k = j; k < inputVersion.length; k++) {
-            lastT = nothingT;
-            if (canParseArgument)
-                expression();
-            else
-                parsePrecedence(600);
-            gotTypes.push(lastT);
-            $(inputVersion[k], lastT);
-            if (!inputVersion[k].equal(lastT)) {
-                checkNextVersion = true;
-                success = false;
-                j = k;
-                break;
-            }
-        }
-        if (!checkNextVersion)
-            break;
     }
-    if (!success)
-        error(`in ${name_}: expect arg ${j} of type ${inputVersion[j].to_str()}, got ${gotTypes[j].to_str()}`);
     let arity = version.input.length;
     emitBytes(native ? 200 : 205, arity);
-    emitByte(i);
     lastT = version.output;
 }
 function parse_local_global() {

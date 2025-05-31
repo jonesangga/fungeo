@@ -328,9 +328,9 @@ describe("compiler: string concatenation error", () => {
 describe("compiler: block", () => {
     const tests = [
         ["SetLoc GetLoc in {}", `if true {let a = 2 Print a}`, [
-                800, 0, 620, 17, 1200,
+                800, 0, 620, 16, 1200,
                 800, 1, 800, 2, 1410, 0,
-                800, 3, 395, 0, 200, 1, 0, 1200,
+                800, 3, 395, 0, 200, 1, 1200,
                 615, 1, 1200, 1150,
             ]],
     ];
@@ -359,10 +359,10 @@ describe("compiler: block error", () => {
 describe("compiler: if", () => {
     const tests = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
-                800, 0, 620, 10, 1200,
-                800, 1, 800, 2, 200, 1, 0,
-                615, 8, 1200,
-                800, 3, 800, 4, 200, 1, 0,
+                800, 0, 620, 9, 1200,
+                800, 1, 800, 2, 200, 1,
+                615, 7, 1200,
+                800, 3, 800, 4, 200, 1,
                 1150,
             ]],
     ];
@@ -382,33 +382,33 @@ describe("compiler loop", () => {
     const tests = [
         ["closed increasing default loop", `[10,15]i Print i`, [
                 800, 0, 800, 1, 800, 2,
-                805, 215, 0, 620, 12, 1200,
-                800, 3, 395, 0, 200, 1, 0,
-                595, 0, 616, -16,
+                805, 215, 0, 620, 11, 1200,
+                800, 3, 395, 0, 200, 1,
+                595, 0, 616, -15,
                 1200, 1200, 1200, 1200,
                 1150,
             ]],
         ["open left increasing default loop", `(10,15]i Print i`, [
                 800, 0, 800, 1, 800, 2,
-                805, 615, 12, 215, 0, 620, 12, 1200,
-                800, 3, 395, 0, 200, 1, 0,
-                595, 0, 616, -16,
+                805, 615, 11, 215, 0, 620, 11, 1200,
+                800, 3, 395, 0, 200, 1,
+                595, 0, 616, -15,
                 1200, 1200, 1200, 1200,
                 1150,
             ]],
         ["open right increasing default loop", `[10,15)i Print i`, [
                 800, 0, 800, 1, 800, 2,
-                805, 210, 0, 620, 12, 1200,
-                800, 3, 395, 0, 200, 1, 0,
-                595, 0, 616, -16,
+                805, 210, 0, 620, 11, 1200,
+                800, 3, 395, 0, 200, 1,
+                595, 0, 616, -15,
                 1200, 1200, 1200, 1200,
                 1150,
             ]],
         ["open increasing default loop", `(10,15)i Print i`, [
                 800, 0, 800, 1, 800, 2,
-                805, 615, 12, 210, 0, 620, 12, 1200,
-                800, 3, 395, 0, 200, 1, 0,
-                595, 0, 616, -16,
+                805, 615, 11, 210, 0, 620, 11, 1200,
+                800, 3, 395, 0, 200, 1,
+                595, 0, 616, -15,
                 1200, 1200, 1200, 1200,
                 1150,
             ]],
@@ -482,19 +482,19 @@ describe("compiler: global assignment error", () => {
 describe("compiler: native function", () => {
     const tests = [
         ["call native function 1 arg", `Print 2`, [
-                800, 0, 800, 1, 200, 1, 0, 1150,
+                800, 0, 800, 1, 200, 1, 1150,
             ]],
         ["call native function 2 args", `p = P 100 200`, [
                 800, 1, 800, 2, 800, 3,
-                200, 2, 0, 800, 4, 1400, 0, 1150,
+                200, 2, 800, 4, 1400, 0, 1150,
             ]],
         ["call native function 3 args", `c = C 100 200 50`, [
                 800, 1, 800, 2, 800, 3, 800, 4,
-                200, 3, 0, 800, 5, 1400, 0, 1150,
+                200, 3, 800, 5, 1400, 0, 1150,
             ]],
         ["call native function 4 args", `r = R 100 200 300 400`, [
                 800, 1, 800, 2, 800, 3, 800, 4, 800, 5,
-                200, 4, 0, 800, 6, 1400, 0, 1150,
+                200, 4, 800, 6, 1400, 0, 1150,
             ]],
     ];
     matchCode(tests);
@@ -502,7 +502,7 @@ describe("compiler: native function", () => {
 describe("compiler: native procedure", () => {
     const tests = [
         ["call native procedure 0 arg", `Help`, [
-                800, 0, 200, 0, 0, 1150,
+                800, 0, 200, 0, 1150,
             ]],
     ];
     matchCode(tests);
@@ -511,12 +511,12 @@ describe("compiler: user function", () => {
     const tests = [
         ["define and call user function 1 arg", `fn Double x: Num -> Num = x * 2 a = Double 10`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 4, 800, 5, 205, 1, 0, 800, 6, 1400, 3,
+                800, 4, 800, 5, 205, 1, 800, 6, 1400, 3,
                 1150,
             ]],
         ["define and call user function 2 arg", `fn Add x: Num, y: Num -> Num = x + y a = Add 2 3`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 4, 800, 5, 800, 6, 205, 2, 0, 800, 7, 1400, 3,
+                800, 4, 800, 5, 800, 6, 205, 2, 800, 7, 1400, 3,
                 1150,
             ]],
     ];
@@ -526,12 +526,12 @@ describe("compiler: user procedure", () => {
     const tests = [
         ["define and call user procedure 1 arg", `proc Print_double x: Num { Print $ x * 2 } Print_double 10`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 3, 800, 4, 205, 1, 0,
+                800, 3, 800, 4, 205, 1,
                 1150,
             ]],
         ["define and call user procedure 2 arg", `proc Print_add x: Num, y: Num { Print $ x + y } Print_add 10 20`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 3, 800, 4, 800, 5, 205, 2, 0,
+                800, 3, 800, 4, 800, 5, 205, 2,
                 1150,
             ]],
     ];

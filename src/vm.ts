@@ -143,14 +143,14 @@ function run(): boolean {
             }
             case Op.CallNat: {
                 let arity = read_byte();
-                let ver = read_byte();
+                // let ver = read_byte();
                 let fn = peek(arity) as FGCallNative;
-                fn.value(ver);
+                fn.value(0);
                 break;
             }
             case Op.CallUsr: {
                 let arity = read_byte();
-                let ver = read_byte();
+                // let ver = read_byte();
                 let fn = peek(arity) as FGCallUser;
                 call(fn, arity);
                 break;
