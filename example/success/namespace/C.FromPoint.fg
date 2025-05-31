@@ -1,0 +1,6 @@
+// Create a Circle from 2 points: center and one at the circle
+
+p = P 100 100
+q = P 100 150
+c = C.FromPoints p q
+Print c

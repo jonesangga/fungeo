@@ -1,5 +1,5 @@
 import { canvasT, replT, pictureT, callNativeT } from "./type.js";
-import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Beside, Above, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, PrintT, Seg_FromPoint } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, PrintT, R_FromPoints, Seg_FromPoints, C_FromPoints } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
@@ -19,7 +19,9 @@ export let nativeNames = {
     "Draw": { type: callNativeT, value: Draw },
     "Clear": { type: callNativeT, value: Clear },
     "Paint": { type: callNativeT, value: Paint },
-    "C": { type: callNativeT, value: C },
+    "C": { type: callNativeT, value: C, methods: {
+            "FromPoints": { type: callNativeT, value: C_FromPoints },
+        } },
     "Ccurv": { type: callNativeT, value: Ccurv },
     "Descart": { type: callNativeT, value: Descart },
     "ComplexDescart": { type: callNativeT, value: ComplexDescart },
@@ -30,14 +32,14 @@ export let nativeNames = {
     "Ccw": { type: callNativeT, value: Ccw },
     "FlipH": { type: callNativeT, value: FlipH },
     "FlipV": { type: callNativeT, value: FlipV },
-    "Above": { type: callNativeT, value: Above },
-    "Beside": { type: callNativeT, value: Beside },
     "Quartet": { type: callNativeT, value: Quartet },
     "Cycle": { type: callNativeT, value: Cycle },
     "MapPic": { type: callNativeT, value: MapPic },
-    "R": { type: callNativeT, value: R },
+    "R": { type: callNativeT, value: R, methods: {
+            "FromPoints": { type: callNativeT, value: R_FromPoints },
+        } },
     "Seg": { type: callNativeT, value: Seg, methods: {
-            "FromPoint": { type: callNativeT, value: Seg_FromPoint },
+            "FromPoints": { type: callNativeT, value: Seg_FromPoints },
         } },
     "Midpoint": { type: callNativeT, value: Midpoint },
 };

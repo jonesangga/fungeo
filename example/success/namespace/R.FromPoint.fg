@@ -1,0 +1,6 @@
+// Create a Rect from 2 points as diagonal oposite corners
+
+p = P 100 100
+q = P 200 300
+r = R.FromPoints p q
+Print r

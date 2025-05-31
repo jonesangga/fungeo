@@ -2,5 +2,5 @@
 
 p = P 100 100
 q = P 200 200
-s = Seg.FromPoint p q
+s = Seg.FromPoints p q
 Print s

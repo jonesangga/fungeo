@@ -88,28 +88,28 @@ export let Draw = new FGCallNative("Draw", 0, _Draw, [
     },
 ]);
 function _C(n) {
-    if (n === 0) {
-        let r = pop().value;
-        let y = pop().value;
-        let x = pop().value;
-        pop();
-        let c = new Circle(x, y, r);
-        push(c);
-    }
-    else {
-        let q = pop();
-        let p = pop();
-        pop();
-        let r = Math.sqrt((q.x - p.x) ** 2 + (q.y - p.y) ** 2);
-        let c = new Circle(p.x, p.y, r);
-        push(c);
-    }
+    let r = pop().value;
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    let c = new Circle(x, y, r);
+    push(c);
 }
 export let C = new FGCallNative("C", 0, _C, [
     {
         input: [numberT, numberT, numberT],
         output: circleT,
     },
+]);
+function _C_FromPoints(n) {
+    let q = pop();
+    let p = pop();
+    pop();
+    let r = Math.sqrt((q.x - p.x) ** 2 + (q.y - p.y) ** 2);
+    let c = new Circle(p.x, p.y, r);
+    push(c);
+}
+export let C_FromPoints = new FGCallNative("C_FromPoints", 0, _C_FromPoints, [
     {
         input: [pointT, pointT],
         output: circleT,
@@ -245,58 +245,6 @@ export let FlipV = new FGCallNative("FlipV", 0, _FlipV, [
         output: pictureT,
     },
 ]);
-function _Above(n) {
-    if (n === 0) {
-        let bottom = pop();
-        let top = pop();
-        pop();
-        push(Picture.above(1, 1, top, bottom));
-    }
-    else {
-        let bottom = pop();
-        let top = pop();
-        let rbottom = pop().value;
-        let rtop = pop().value;
-        pop();
-        push(Picture.above(rtop, rbottom, top, bottom));
-    }
-}
-export let Above = new FGCallNative("Above", 0, _Above, [
-    {
-        input: [pictureT, pictureT],
-        output: pictureT,
-    },
-    {
-        input: [numberT, numberT, pictureT, pictureT],
-        output: pictureT,
-    },
-]);
-function _Beside(n) {
-    if (n === 0) {
-        let right = pop();
-        let left = pop();
-        pop();
-        push(Picture.beside(1, 1, left, right));
-    }
-    else {
-        let right = pop();
-        let left = pop();
-        let rright = pop().value;
-        let rleft = pop().value;
-        pop();
-        push(Picture.beside(rleft, rright, left, right));
-    }
-}
-export let Beside = new FGCallNative("Beside", 0, _Beside, [
-    {
-        input: [pictureT, pictureT],
-        output: pictureT
-    },
-    {
-        input: [numberT, numberT, pictureT, pictureT],
-        output: pictureT,
-    },
-]);
 function _Quartet(n) {
     let s = pop();
     let r = pop();
@@ -349,32 +297,32 @@ export let Pic = new FGCallNative("Pic", 0, _Pic, [
     },
 ]);
 function _R(n) {
-    if (n === 0) {
-        let h = pop().value;
-        let w = pop().value;
-        let y = pop().value;
-        let x = pop().value;
-        pop();
-        let rect = new Rect(x, y, w, h);
-        push(rect);
-    }
-    else {
-        let q = pop();
-        let p = pop();
-        pop();
-        let x = Math.min(p.x, q.x);
-        let y = Math.min(p.y, q.y);
-        let w = Math.abs(p.x - q.x);
-        let h = Math.abs(p.y - q.y);
-        let rect = new Rect(x, y, w, h);
-        push(rect);
-    }
+    let h = pop().value;
+    let w = pop().value;
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    let rect = new Rect(x, y, w, h);
+    push(rect);
 }
 export let R = new FGCallNative("R", 0, _R, [
     {
         input: [numberT, numberT, numberT, numberT],
         output: rectT,
     },
+]);
+function _R_FromPoints(n) {
+    let q = pop();
+    let p = pop();
+    pop();
+    let x = Math.min(p.x, q.x);
+    let y = Math.min(p.y, q.y);
+    let w = Math.abs(p.x - q.x);
+    let h = Math.abs(p.y - q.y);
+    let rect = new Rect(x, y, w, h);
+    push(rect);
+}
+export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [
     {
         input: [pointT, pointT],
         output: rectT,
@@ -395,14 +343,14 @@ export let Seg = new FGCallNative("Seg", 0, _Seg, [
         output: segmentT,
     },
 ]);
-function _Seg_FromPoint(n) {
+function _Seg_FromPoints(n) {
     let q = pop();
     let p = pop();
     pop();
     let seg = new Segment(p.x, p.y, q.x, q.y);
     push(seg);
 }
-export let Seg_FromPoint = new FGCallNative("Seg_FromPoint", 0, _Seg_FromPoint, [
+export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", 0, _Seg_FromPoints, [
     {
         input: [pointT, pointT],
         output: segmentT,
