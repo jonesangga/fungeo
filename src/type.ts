@@ -74,7 +74,8 @@ export class UnionT implements Type {
         public value: Type[]
     ) {}
     to_str(): string {
-        return "Union";
+        // return "Union";
+        return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
     }
     equal(other: Type): boolean {
         return this.value.some(val => val.equal(other));
@@ -226,3 +227,4 @@ export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
 export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, rectT, segmentT]);
+export const fillableT = new UnionT([circleT, ellipseT, rectT]);

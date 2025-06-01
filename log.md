@@ -2,6 +2,21 @@
 
 #### 31-05-25
 
+- new Data type for storing partial application: FGCurry
+
+- change signature without n: Number in all functions in vmfunction since there is overload now
+- clean up  get_global() since there is only one version of functios
+- don't emit ver
+- in vm: dont read the ver
+- change version signature to not use array
+- add examples for new namespaced functions
+- just comment Above and Beside for now
+- change all overloaded functions to use namespace
+    - C -> C.FromPoints
+    - R -> R.FromPoints
+- change FromPoint to FromPoints
+- add new example about this
+
 - check if can compile Seg.FromPoint p q. Done
 - parse Dot in parse_callable(), not in statement()
 - remove overload in Seg into method Seg.FromPoint

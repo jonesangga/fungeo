@@ -1,3 +1,4 @@
+import { CallNativeT, CallUserT } from "./type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -6,6 +7,7 @@ export var Kind;
     Kind[Kind["CallNative"] = 400] = "CallNative";
     Kind[Kind["CallUser"] = 450] = "CallUser";
     Kind[Kind["Complex"] = 460] = "Complex";
+    Kind[Kind["Curry"] = 465] = "Curry";
     Kind[Kind["List"] = 470] = "List";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
@@ -28,6 +30,7 @@ export const KindName = {
     [2000]: "Canvas",
     [700]: "Circle",
     [460]: "Complex",
+    [465]: "Curry",
     [750]: "Ellipse",
     [470]: "List",
     [100]: "Nothing",
@@ -81,6 +84,9 @@ export class FGCallNative {
         else
             return `{proc ${this.name}}`;
     }
+    type() {
+        return new FGType(new CallNativeT(this.version.input, this.version.output));
+    }
     equal(other) {
         return false;
     }
@@ -102,6 +108,29 @@ export class FGCallUser {
             return `{fn ${this.name}}`;
         else
             return `{proc ${this.name}}`;
+    }
+    type() {
+        return new FGType(new CallUserT(this.version.input, this.version.output));
+    }
+    equal(other) {
+        return false;
+    }
+}
+export class FGCurry {
+    name;
+    fn;
+    args;
+    kind = 465;
+    constructor(name, fn, args) {
+        this.name = name;
+        this.fn = fn;
+        this.args = args;
+    }
+    to_str() {
+        return `{curry ${this.name}}`;
+    }
+    type() {
+        return new FGType(new CallUserT(this.fn.version.input.slice(this.args.length), this.fn.version.output));
     }
     equal(other) {
         return false;

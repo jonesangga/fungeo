@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js";
-import { KindName, FGCallNative, FGString, FGList } from "./value.js";
+import { FGCallNative, FGString, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
@@ -8,7 +8,7 @@ import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
-import { ListT, geoT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, CallNativeT, NothingT, AnyT } from "./type.js";
+import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, CallNativeT, NothingT, AnyT } from "./type.js";
 function _Print() {
     let value = pop();
     pop();
@@ -52,7 +52,7 @@ export let Padl = new FGCallNative("Padl", 0, _Padl, {
 function _Type() {
     let value = pop();
     pop();
-    push(new FGString(KindName[value.kind]));
+    push(value.type());
 }
 export let Type = new FGCallNative("Type", 0, _Type, {
     input: [anyT],
@@ -73,6 +73,18 @@ function _Draw() {
 }
 export let Draw = new FGCallNative("Draw", 0, _Draw, {
     input: [geoT],
+    output: nothingT,
+});
+function _Fill() {
+    console.log("in _Fill()");
+    let v = pop();
+    let color = pop();
+    pop();
+    v.fillStyle = color.value;
+    draw_onScreen();
+}
+export let Fill = new FGCallNative("Fill", 0, _Fill, {
+    input: [stringT, fillableT],
     output: nothingT,
 });
 function _C() {
@@ -260,6 +272,19 @@ function _R() {
     push(rect);
 }
 export let R = new FGCallNative("R", 0, _R, {
+    input: [numberT, numberT, numberT, numberT],
+    output: rectT,
+});
+function _R_WithCenter() {
+    let h = pop().value;
+    let w = pop().value;
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    let rect = new Rect(x - w / 2, y - h / 2, w, h);
+    push(rect);
+}
+export let R_WithCenter = new FGCallNative("R_WithCenter", 0, _R_WithCenter, {
     input: [numberT, numberT, numberT, numberT],
     output: rectT,
 });

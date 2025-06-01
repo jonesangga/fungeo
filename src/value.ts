@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { Type } from "./type.js"
+import { Type, CallNativeT, CallUserT } from "./type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -18,6 +18,7 @@ export const enum Kind {
     CallNative = 400,
     CallUser = 450,
     Complex  = 460,
+    Curry    = 465,
     List     = 470,
     Number   = 500,
     String   = 600,
@@ -42,6 +43,7 @@ export const KindName: {
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
     [Kind.Complex]: "Complex",
+    [Kind.Curry]: "Curry",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
     [Kind.Nothing]: "Nothing",
@@ -107,10 +109,10 @@ export class FGCallNative implements FG {
     kind: Kind.CallNative = Kind.CallNative;
 
     constructor(
-        public name: string,
+        public name:     string,
         public callType: CallT,
-        public value: () => void,
-        public version: Version
+        public value:    () => void,
+        public version:  Version
     ) {}
 
     to_str(): string {
@@ -118,6 +120,10 @@ export class FGCallNative implements FG {
             return `{fn ${ this.name }}`;
         else
             return `{proc ${ this.name }}`;
+    }
+
+    type(): FGType {
+        return new FGType(new CallNativeT(this.version.input, this.version.output));
     }
 
     equal(other: FG) {
@@ -140,6 +146,32 @@ export class FGCallUser implements FG {
             return `{fn ${ this.name }}`;
         else
             return `{proc ${ this.name }}`;
+    }
+
+    type(): FGType {
+        return new FGType(new CallUserT(this.version.input, this.version.output));
+    }
+
+    equal(other: FG) {
+        return false;
+    }
+}
+
+export class FGCurry implements FG {
+    kind: Kind.Curry = Kind.Curry;
+
+    constructor(
+        public name: string,
+        public fn: FGCallNative,
+        public args: Value[]
+    ) {}
+
+    to_str(): string {
+        return `{curry ${ this.name }}`;
+    }
+
+    type(): FGType {
+        return new FGType(new CallUserT(this.fn.version.input.slice(this.args.length), this.fn.version.output));
     }
 
     equal(other: FG) {
@@ -279,9 +311,10 @@ export class FGList implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
+export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
 

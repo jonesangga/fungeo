@@ -3,12 +3,14 @@ export var Op;
     Op[Op["Add"] = 100] = "Add";
     Op[Op["AddList"] = 110] = "AddList";
     Op[Op["AddStr"] = 120] = "AddStr";
+    Op[Op["CallCur"] = 190] = "CallCur";
     Op[Op["CallNat"] = 200] = "CallNat";
     Op[Op["CallUsr"] = 205] = "CallUsr";
     Op[Op["CkExc"] = 210] = "CkExc";
     Op[Op["CkExcD"] = 212] = "CkExcD";
     Op[Op["CkInc"] = 215] = "CkInc";
     Op[Op["CkIncD"] = 217] = "CkIncD";
+    Op[Op["Curry"] = 230] = "Curry";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
@@ -49,12 +51,14 @@ export const OpName = {
     [100]: "Add",
     [110]: "AddList",
     [120]: "AddStr",
+    [190]: "CallCur",
     [200]: "CallNat",
     [205]: "CallUsr",
     [210]: "CkExc",
     [212]: "CkExcD",
     [215]: "CkInc",
     [217]: "CkIncD",
+    [230]: "Curry",
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
@@ -148,12 +152,12 @@ export class Chunk {
                 result += name + "\n";
                 return [result, offset + 1];
             }
+            case 190:
             case 200:
             case 205: {
                 let index = this.code[offset + 1];
-                let ver = this.code[offset + 2];
-                result += `${padr7(name)} ${padl4(index)} 'v${ver}'\n`;
-                return [result, offset + 3];
+                result += `${padr7(name)} ${padl4(index)}\n`;
+                return [result, offset + 2];
             }
             case 400:
             case 500:
@@ -173,6 +177,7 @@ export class Chunk {
             case 212:
             case 215:
             case 217:
+            case 230:
             case 395:
             case 595:
             case 1300:

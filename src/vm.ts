@@ -1,13 +1,13 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
+import { FGCurry, Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
 import { type Type } from "./type.js"
 
 // For quick debugging.
 let $ = console.log;
-$ = () => {};
+// $ = () => {};
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -96,7 +96,7 @@ const gt = (a: NumStr, b: NumStr): boolean => a > b;
 const leq = (a: NumStr, b: NumStr): boolean => a <= b;
 const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
-const debug = false;
+const debug = true;
 
 function run(): boolean {
     for (;;) {
@@ -139,6 +139,34 @@ function run(): boolean {
                 // let fn = pop() as FGCallNative;
                 // let a = pop() as FGNumber;
                 // push(fn.value(0));
+                break;
+            }
+            case Op.Curry: {
+                let applied = read_byte();
+                let fn = peek(applied) as FGCallNative;
+
+                let args: Value[] = [];
+                for (let i = 0; i < applied; i++)
+                    args[applied - i - 1] = pop();
+                pop(); // The  source fn
+
+                let curry = new FGCurry("dummy", fn, args);
+                push(curry);
+                break;
+            }
+            case Op.CallCur: {
+                let n = read_byte();
+                // pop args;
+                let args: Value[] = [];
+                for (let i = 0; i < n; i++)
+                    args.push(pop());
+                let curry = pop() as FGCurry;  // The curry fn
+                push(curry.fn);
+                for (let i = 0; i < curry.args.length; i++)
+                    push(curry.args[i]);
+
+                for (let i = 0; i < n; i++)
+                    push(args[n-i-1]);
                 break;
             }
             case Op.CallNat: {
@@ -409,7 +437,8 @@ function run(): boolean {
                 let type  = (pop() as FGType).value;
                 let value = pop();
 
-                userNames[name] = { type, value };
+                // userNames[name] = { type, value };
+                userNames[name].value = value;
                 break;
             }
 

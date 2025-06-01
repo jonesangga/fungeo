@@ -2,7 +2,7 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
+import { FGCurry, CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
 import { Method, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
 import { type Type, NeverT, NumberT, StringT, ListT, TupleT, neverT, circleT, numberT, stringT, booleanT, callUserT,
@@ -374,6 +374,7 @@ function numeric_binary(): void {
 function concat_str(): void {
     assertT(lastT, stringT, `'<>' only for strings`);
 
+    canParseArgument = true;
     parsePrecedence(Precedence.Term + 1);
     assertT(lastT, stringT, `'<>' only for strings`);
 
@@ -527,8 +528,28 @@ function parse_mut(): void {
     if (current.scopeDepth > 0) {
         set_local(name, true);
     } else {
-        set_global(name, true);
+        set_mut(name);
     }
+}
+
+function set_mut(name: string): void {
+    // Make sure it didn't redeclare a name.
+    if (Object.hasOwn(nativeNames, name)
+            || Object.hasOwn(userNames, name)
+            || Object.hasOwn(tempNames, name)) {
+        error(`${ name } already defined`);
+    }
+
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
+    canParseArgument = true;
+    expression();
+    emitConstant(new FGType(lastT));
+
+    tempNames[name] = { type: lastT, mut: true };
+    add_local_global(name, lastT);
+    emitBytes(Op.SetMut, index);
+    lastT = nothingT;           // Because assignment is not an expression.
 }
 
 // Non-callable names, keywords, true, false.
@@ -660,13 +681,37 @@ function set_non_callable_control(name: string): void {
 // Dot operator for accessing method is handled here.
 
 function parse_callable(): void {
-    $("in parse_callable()");
     let name = prevTok.lexeme;
-    if (match(TokenT.Dot)) {
+
+    if (match(TokenT.Eq)) {
+        if (!canAssign)
+            error(`cannot assign ${ name }`);
+        canAssign = false;
+        set_callable(name);
+    } else if (match(TokenT.Dot)) {
+        canAssign = false;
         method(name);
     } else {
+        canAssign = false;
         get_callable(name);
     }
+}
+
+// For now can only assign function to new name in TOP scope.
+// This is always immutable.
+// NOTE: doesn't support currying yet.
+// TODO: implement currying.
+
+function set_callable(name: string): void {
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
+    canParseArgument = true;
+    parsePrecedence(Precedence.Call);
+    emitConstant(new FGType(lastT));
+
+    tempNames[name] = { type: lastT };
+    emitBytes(Op.Set, index);
+    lastT = nothingT; // Because assignment is not an expression.
 }
 
 function method(name: string): void {
@@ -701,26 +746,66 @@ function get_callable(name: string): void {
     }
 }
 
+function call_curry(curry: FGCurry, isNative: boolean): void {
+    $("in call_curry()");
+    emitConstant(curry);
+
+    let version = curry.fn.version;
+    let gotTypes: Type[] = [];
+    let inputs = version.input;
+
+    let i = curry.args.length;
+    for ( ; i < inputs.length; i++) {
+        if (check(TokenT.Semicolon)) {
+            $("found semicolon");
+            break;
+        }
+        lastT = nothingT;
+        if (canParseArgument)
+            expression();
+        else
+            parsePrecedence(Precedence.Call);
+
+        gotTypes.push(lastT);
+        if (!inputs[i].equal( lastT )) {
+            error(`in ${curry.name}: expect arg ${i} of type ${ inputs[i].to_str() }, got ${ gotTypes[i].to_str() }`);
+        }
+    }
+
+    // emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
+    emitBytes(Op.CallCur, inputs.length - curry.args.length);
+    emitBytes(isNative ? Op.CallNat : Op.CallUsr, inputs.length);
+    lastT = version.output;
+}
+
 // This also work for procedure that doesn't have parameter.
 // TODO: refactor this!
 //       check canParseArgument in the caller.
 
 function get_global(table: any, name_: string, native: boolean): void {
     if (!canParseArgument) {
-        error("not implemented yet");
-        // global_non_callable(table, name_, native);
+        global_non_callable(table, name_, native);
         return;
     }
     canParseArgument = match(TokenT.Dollar);
 
     let name = table[name_];
+    if (name.value instanceof FGCurry) {
+        call_curry(name.value, native);
+        return;
+    }
     emitConstant(name.value as FGCallNative);
 
     let version = (name.value as FGCallNative).version;
     let gotTypes: Type[] = [];
     let inputs = version.input;
 
-    for (let i = 0; i < inputs.length; i++) {
+    let i = 0;
+    for ( ; i < inputs.length; i++) {
+        if (check(TokenT.Semicolon)) {
+            $("found semicolon");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -733,71 +818,25 @@ function get_global(table: any, name_: string, native: boolean): void {
         }
     }
 
-    let arity = version.input.length;
-    emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
-    lastT = version.output;
+    if (i !== inputs.length) {
+        $("gonna curry");
+
+        let newInput = inputs.slice(i);
+        console.log(newInput);
+        let type = new CallUserT(newInput, version.output);
+
+        // let newType = new FGType(type);
+        // emitConstant(newType);
+        emitBytes(Op.Curry, i);
+
+        lastT = type;
+    }
+    else {
+        let arity = version.input.length;
+        emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
+        lastT = version.output;
+    }
 }
-
-// function get_global(table: any, name_: string, native: boolean): void {
-    // if (!canParseArgument) {
-        // error("not implemented yet");
-        // // global_non_callable(table, name_, native);
-        // return;
-    // }
-    // canParseArgument = match(TokenT.Dollar);
-
-    // let name = table[name_];
-    // emitConstant(name.value as FGCallNative);
-
-    // let version = (name.value as FGCallNative).version;
-    // let inputVersion: Type[] = [];
-    // let gotTypes: Type[] = [];
-
-    // let success = true;
-
-    // let i = 0;
-    // let j = 0;
-    // for ( ; i < version.length; i++) {
-        // let checkNextVersion = false;
-        // success = true;
-        // inputVersion = version[i].input;
-
-        // j = 0;
-        // for ( ; j < gotTypes.length; j++) {
-            // if (!inputVersion[j].equal( gotTypes[j] )) {
-                // success = false;
-                // break;
-            // }
-        // }
-        // if (!success) continue;
-
-        // for (let k = j; k < inputVersion.length; k++) {
-            // lastT = nothingT;
-            // if (canParseArgument)
-                // expression();
-            // else
-                // parsePrecedence(Precedence.Call);
-
-            // gotTypes.push(lastT);
-            // $(inputVersion[k], lastT);
-            // if (!inputVersion[k].equal( lastT )) {
-                // checkNextVersion = true;
-                // success = false;
-                // j = k;
-                // break;
-            // }
-        // }
-        // if (!checkNextVersion) break;
-    // }
-
-    // if (!success)
-        // error(`in ${name_}: expect arg ${j} of type ${ inputVersion[j].to_str() }, got ${ gotTypes[j].to_str() }`);
-
-    // let arity = version[i].input.length;
-    // emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
-    // emitByte(i);
-    // lastT = version[i].output;
-// }
 
 // function set_nonlocal(index: number, type: Type): void {
     // lastT = neverT;
@@ -1075,13 +1114,14 @@ function set_global(name: string, mut: boolean = false): void {
     lastT = nothingT;           // Because assignment is not an expression.
 }
 
-// Not implemented yet.
-// function global_non_callable(table: any, name: string, native: boolean): void {
+function global_non_callable(table: any, name: string, native: boolean): void {
+    emitConstant(table[name].value);
+
     // let index = makeConstant(new FGString(name));
     // emitBytes(native ? Op.GetNat : Op.GetUsr, index);
-    // lastT = table[name].type;
+    lastT = table[name].type;
     // $(name, table, table[name].type);
-// }
+}
 
 function parse_type(): Type {
     advance();
@@ -1156,8 +1196,10 @@ function fn(): void {
 
     consume(TokenT.Eq, "expect '=' before fn body");
 
+    canParseArgument = true;
     expression();
     emitBytes(Op.Ret, 1);
+    $(lastT, outputT);
     assertT(lastT, outputT, "return type not match");
 
     let fn = endCompiler();
@@ -1418,6 +1460,7 @@ function statement(): void {
         canAssign = true;
         parse_non_callable();
     } else if (match(TokenT.Callable)) {
+        canAssign = true;
         canParseArgument = true;
         parse_callable();
     } else if (match(TokenT.Global)) {

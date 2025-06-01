@@ -134,8 +134,8 @@ describe("chunk disassemble op calls", () => {
         chunk.write(arity, 123);
         chunk.write(ver, 123);
         let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallNat    1 'v1'\n");
-        equal(offset, 3);
+        deepEqual(result, "0000  123 CallNat    1\n");
+        equal(offset, 2);
     });
     it("Op.CallUsr", () => {
         let chunk = new Chunk("test chunk");
@@ -145,8 +145,8 @@ describe("chunk disassemble op calls", () => {
         chunk.write(arity, 123);
         chunk.write(ver, 123);
         let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallUsr    1 'v1'\n");
-        equal(offset, 3);
+        deepEqual(result, "0000  123 CallUsr    1\n");
+        equal(offset, 2);
     });
 });
 describe("chunk disassemble default", () => {

@@ -1,7 +1,6 @@
-import { FGBoolean, FGNumber, FGList } from "./value.js";
+import { FGCurry, FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
 let $ = console.log;
-$ = () => { };
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
@@ -60,7 +59,7 @@ const lt = (a, b) => a < b;
 const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
-const debug = false;
+const debug = true;
 function run() {
     for (;;) {
         if (debug) {
@@ -95,6 +94,30 @@ function run() {
                 break;
             }
             case 1190: {
+                break;
+            }
+            case 230: {
+                let applied = read_byte();
+                let fn = peek(applied);
+                let args = [];
+                for (let i = 0; i < applied; i++)
+                    args[applied - i - 1] = pop();
+                pop();
+                let curry = new FGCurry("dummy", fn, args);
+                push(curry);
+                break;
+            }
+            case 190: {
+                let n = read_byte();
+                let args = [];
+                for (let i = 0; i < n; i++)
+                    args.push(pop());
+                let curry = pop();
+                push(curry.fn);
+                for (let i = 0; i < curry.args.length; i++)
+                    push(curry.args[i]);
+                for (let i = 0; i < n; i++)
+                    push(args[n - i - 1]);
                 break;
             }
             case 200: {
@@ -335,7 +358,7 @@ function run() {
                 let name = read_string();
                 let type = pop().value;
                 let value = pop();
-                userNames[name] = { type, value };
+                userNames[name].value = value;
                 break;
             }
             case 1200: {

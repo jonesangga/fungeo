@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js"
-import { CallT, Kind, type GeoObj, geoKind, KindName, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
+import { CallT, Kind, type GeoObj, type Fillable, geoKind, KindName, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
@@ -8,7 +8,7 @@ import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, NumberT, CircleT, geoT, anyT, circleT, pointT, pictureT, rectT,
+import { ListT, NumberT, CircleT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT,
          ellipseT, segmentT, nothingT, stringT, booleanT, numberT,
          CallNativeT, NothingT, AnyT } from "./type.js"
 
@@ -64,7 +64,7 @@ export let Padl = new FGCallNative("Padl", CallT.Function, _Padl, {
 function _Type(): void {
     let value = pop();
     pop();              // The function.
-    push(new FGString(KindName[value.kind]));
+    push((value as FGCallNative).type());
 }
 export let Type = new FGCallNative("Type", CallT.Function, _Type, {
     input:  [anyT],
@@ -88,6 +88,19 @@ function _Draw(): void {
 }
 export let Draw = new FGCallNative("Draw", CallT.Function, _Draw, {
     input:  [geoT],
+    output: nothingT,
+});
+
+function _Fill(): void {
+    console.log("in _Fill()");
+    let v = pop() as Fillable;
+    let color = pop() as FGString;
+    pop();              // The function.
+    v.fillStyle = color.value;
+    draw_onScreen();
+}
+export let Fill = new FGCallNative("Fill", CallT.Function, _Fill, {
+    input:  [stringT, fillableT],
     output: nothingT,
 });
 
@@ -348,6 +361,20 @@ function _R(): void {
     push(rect);
 }
 export let R = new FGCallNative("R", CallT.Function, _R, {
+    input:  [numberT, numberT, numberT, numberT],
+    output: rectT,
+});
+
+function _R_WithCenter(): void {
+    let h = (pop() as FGNumber).value;
+    let w = (pop() as FGNumber).value;
+    let y = (pop() as FGNumber).value;
+    let x = (pop() as FGNumber).value;
+    pop();              // The function.
+    let rect = new Rect(x-w/2, y-h/2, w, h);
+    push(rect);
+}
+export let R_WithCenter = new FGCallNative("R_WithCenter", CallT.Function, _R_WithCenter, {
     input:  [numberT, numberT, numberT, numberT],
     output: rectT,
 });

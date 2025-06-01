@@ -1,6 +1,6 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
+import { FGCurry, FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
 import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
@@ -276,6 +276,7 @@ function numeric_binary() {
 }
 function concat_str() {
     assertT(lastT, stringT, `'<>' only for strings`);
+    canParseArgument = true;
     parsePrecedence(300 + 1);
     assertT(lastT, stringT, `'<>' only for strings`);
     emitByte(120);
@@ -394,8 +395,24 @@ function parse_mut() {
         set_local(name, true);
     }
     else {
-        set_global(name, true);
+        set_mut(name);
     }
+}
+function set_mut(name) {
+    if (Object.hasOwn(nativeNames, name)
+        || Object.hasOwn(userNames, name)
+        || Object.hasOwn(tempNames, name)) {
+        error(`${name} already defined`);
+    }
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
+    canParseArgument = true;
+    expression();
+    emitConstant(new FGType(lastT));
+    tempNames[name] = { type: lastT, mut: true };
+    add_local_global(name, lastT);
+    emitBytes(1430, index);
+    lastT = nothingT;
 }
 function parse_non_callable() {
     let name = prevTok.lexeme;
@@ -507,14 +524,31 @@ function set_non_callable_control(name) {
     lastT = nothingT;
 }
 function parse_callable() {
-    $("in parse_callable()");
     let name = prevTok.lexeme;
-    if (match(210)) {
+    if (match(1500)) {
+        if (!canAssign)
+            error(`cannot assign ${name}`);
+        canAssign = false;
+        set_callable(name);
+    }
+    else if (match(210)) {
+        canAssign = false;
         method(name);
     }
     else {
+        canAssign = false;
         get_callable(name);
     }
+}
+function set_callable(name) {
+    let index = makeConstant(new FGString(name));
+    lastT = neverT;
+    canParseArgument = true;
+    parsePrecedence(600);
+    emitConstant(new FGType(lastT));
+    tempNames[name] = { type: lastT };
+    emitBytes(1400, index);
+    lastT = nothingT;
 }
 function method(name) {
     consume(1650, "expect method name after '.'");
@@ -546,18 +580,53 @@ function get_callable(name) {
         error(`undefined name ${name}`);
     }
 }
+function call_curry(curry, isNative) {
+    $("in call_curry()");
+    emitConstant(curry);
+    let version = curry.fn.version;
+    let gotTypes = [];
+    let inputs = version.input;
+    let i = curry.args.length;
+    for (; i < inputs.length; i++) {
+        if (check(900)) {
+            $("found semicolon");
+            break;
+        }
+        lastT = nothingT;
+        if (canParseArgument)
+            expression();
+        else
+            parsePrecedence(600);
+        gotTypes.push(lastT);
+        if (!inputs[i].equal(lastT)) {
+            error(`in ${curry.name}: expect arg ${i} of type ${inputs[i].to_str()}, got ${gotTypes[i].to_str()}`);
+        }
+    }
+    emitBytes(190, inputs.length - curry.args.length);
+    emitBytes(isNative ? 200 : 205, inputs.length);
+    lastT = version.output;
+}
 function get_global(table, name_, native) {
     if (!canParseArgument) {
-        error("not implemented yet");
+        global_non_callable(table, name_, native);
         return;
     }
     canParseArgument = match(200);
     let name = table[name_];
+    if (name.value instanceof FGCurry) {
+        call_curry(name.value, native);
+        return;
+    }
     emitConstant(name.value);
     let version = name.value.version;
     let gotTypes = [];
     let inputs = version.input;
-    for (let i = 0; i < inputs.length; i++) {
+    let i = 0;
+    for (; i < inputs.length; i++) {
+        if (check(900)) {
+            $("found semicolon");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -568,9 +637,19 @@ function get_global(table, name_, native) {
             error(`in ${name_}: expect arg ${i} of type ${inputs[i].to_str()}, got ${gotTypes[i].to_str()}`);
         }
     }
-    let arity = version.input.length;
-    emitBytes(native ? 200 : 205, arity);
-    lastT = version.output;
+    if (i !== inputs.length) {
+        $("gonna curry");
+        let newInput = inputs.slice(i);
+        console.log(newInput);
+        let type = new CallUserT(newInput, version.output);
+        emitBytes(230, i);
+        lastT = type;
+    }
+    else {
+        let arity = version.input.length;
+        emitBytes(native ? 200 : 205, arity);
+        lastT = version.output;
+    }
 }
 function parse_local_global() {
     consume(2540, "expect name after global");
@@ -767,6 +846,10 @@ function set_global(name, mut = false) {
     }
     lastT = nothingT;
 }
+function global_non_callable(table, name, native) {
+    emitConstant(table[name].value);
+    lastT = table[name].type;
+}
 function parse_type() {
     advance();
     let type;
@@ -827,8 +910,10 @@ function fn() {
     current.fn.version.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(1500, "expect '=' before fn body");
+    canParseArgument = true;
     expression();
     emitBytes(1300, 1);
+    $(lastT, outputT);
     assertT(lastT, outputT, "return type not match");
     let fn = endCompiler();
     emitConstant(fn);
@@ -1023,6 +1108,7 @@ function statement() {
         parse_non_callable();
     }
     else if (match(1650)) {
+        canAssign = true;
         canParseArgument = true;
         parse_callable();
     }

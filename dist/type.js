@@ -61,7 +61,7 @@ export class UnionT {
         this.value = value;
     }
     to_str() {
-        return "Union";
+        return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
     }
     equal(other) {
         return this.value.some(val => val.equal(other));
@@ -202,3 +202,4 @@ export const segmentT = new SegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, rectT, segmentT]);
+export const fillableT = new UnionT([circleT, ellipseT, rectT]);

@@ -6,12 +6,14 @@ export const enum Op {
     Add     = 100,
     AddList = 110,
     AddStr  = 120,
+    CallCur = 190,
     CallNat = 200,
     CallUsr = 205,
     CkExc   = 210,
     CkExcD  = 212,
     CkInc   = 215,
     CkIncD  = 217,
+    Curry   = 230,
     Div     = 300,
     Eq      = 380,
     GEq     = 390,
@@ -54,12 +56,14 @@ export const OpName: {
     [Op.Add]: "Add",
     [Op.AddList]: "AddList",
     [Op.AddStr]: "AddStr",
+    [Op.CallCur]: "CallCur",
     [Op.CallNat]: "CallNat",
     [Op.CallUsr]: "CallUsr",
     [Op.CkExc]: "CkExc",
     [Op.CkExcD]: "CkExcD",
     [Op.CkInc]: "CkInc",
     [Op.CkIncD]: "CkIncD",
+    [Op.Curry]: "Curry",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
@@ -160,12 +164,12 @@ export class Chunk {
                 return [result, offset + 1];
             }
 
+            case Op.CallCur:
             case Op.CallNat:
             case Op.CallUsr: {
                 let index = this.code[offset + 1];
-                let ver = this.code[offset + 2];
-                result += `${ padr7(name) } ${ padl4(index) } 'v${ ver }'\n`;
-                return [result, offset + 3];
+                result += `${ padr7(name) } ${ padl4(index) }\n`;
+                return [result, offset + 2];
             }
 
             case Op.GetNat:
@@ -188,6 +192,7 @@ export class Chunk {
             case Op.CkExcD:
             case Op.CkInc:
             case Op.CkIncD:
+            case Op.Curry:
             case Op.GetLoc:
             case Op.Inc:
             case Op.Ret:
