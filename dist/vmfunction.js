@@ -14,29 +14,20 @@ function _Print() {
     pop();
     vm_output(value.to_str() + "\n");
 }
-export let Print = new FGCallNative("Print", 0, _Print, {
-    input: [anyT],
-    output: nothingT,
-});
+export let Print = new FGCallNative("Print", 0, _Print, [anyT], nothingT);
 export const PrintT = new CallNativeT([new AnyT()], new NothingT());
 function _Printf() {
     let value = pop();
     pop();
     vm_output(value.to_str());
 }
-export let Printf = new FGCallNative("Printf", 0, _Printf, {
-    input: [anyT],
-    output: nothingT,
-});
+export let Printf = new FGCallNative("Printf", 0, _Printf, [anyT], nothingT);
 function _Show() {
     let value = pop();
     pop();
     push(new FGString(value.to_str()));
 }
-export let Show = new FGCallNative("Show", 0, _Show, {
-    input: [numberT],
-    output: stringT,
-});
+export let Show = new FGCallNative("Show", 0, _Show, [numberT], stringT);
 function _Padl() {
     let filler = pop().value;
     let width = pop().value;
@@ -45,19 +36,13 @@ function _Padl() {
     let result = (filler.repeat(width) + text).slice(-width);
     push(new FGString(result));
 }
-export let Padl = new FGCallNative("Padl", 0, _Padl, {
-    input: [stringT, numberT, stringT],
-    output: stringT,
-});
+export let Padl = new FGCallNative("Padl", 0, _Padl, [stringT, numberT, stringT], stringT);
 function _Type() {
     let value = pop();
     pop();
     push(value.type());
 }
-export let Type = new FGCallNative("Type", 0, _Type, {
-    input: [anyT],
-    output: stringT,
-});
+export let Type = new FGCallNative("Type", 0, _Type, [anyT], stringT);
 let on_scrn = [];
 function draw_onScreen() {
     canvas.clear();
@@ -71,10 +56,7 @@ function _Draw() {
     on_scrn.push(v);
     draw_onScreen();
 }
-export let Draw = new FGCallNative("Draw", 0, _Draw, {
-    input: [geoT],
-    output: nothingT,
-});
+export let Draw = new FGCallNative("Draw", 0, _Draw, [geoT], nothingT);
 function _Fill() {
     console.log("in _Fill()");
     let v = pop();
@@ -83,10 +65,7 @@ function _Fill() {
     v.fillStyle = color.value;
     draw_onScreen();
 }
-export let Fill = new FGCallNative("Fill", 0, _Fill, {
-    input: [stringT, fillableT],
-    output: nothingT,
-});
+export let Fill = new FGCallNative("Fill", 0, _Fill, [stringT, fillableT], nothingT);
 function _C() {
     let r = pop().value;
     let y = pop().value;
@@ -95,10 +74,7 @@ function _C() {
     let c = new Circle(x, y, r);
     push(c);
 }
-export let C = new FGCallNative("C", 0, _C, {
-    input: [numberT, numberT, numberT],
-    output: circleT,
-});
+export let C = new FGCallNative("C", 0, _C, [numberT, numberT, numberT], circleT);
 function _C_FromPoints() {
     let q = pop();
     let p = pop();
@@ -107,10 +83,7 @@ function _C_FromPoints() {
     let c = new Circle(p.x, p.y, r);
     push(c);
 }
-export let C_FromPoints = new FGCallNative("C_FromPoints", 0, _C_FromPoints, {
-    input: [pointT, pointT],
-    output: circleT,
-});
+export let C_FromPoints = new FGCallNative("C_FromPoints", 0, _C_FromPoints, [pointT, pointT], circleT);
 function _Ccurv() {
     let bend = pop().value;
     let y = pop().value;
@@ -119,10 +92,7 @@ function _Ccurv() {
     let c = Circle.with_bend(x, y, bend);
     push(c);
 }
-export const Ccurv = new FGCallNative("Ccurv", 0, _Ccurv, {
-    input: [numberT, numberT, numberT],
-    output: circleT,
-});
+export const Ccurv = new FGCallNative("Ccurv", 0, _Ccurv, [numberT, numberT, numberT], circleT);
 function _Descart() {
     let c3 = pop();
     let c2 = pop();
@@ -131,10 +101,7 @@ function _Descart() {
     let list = new FGList(Circle.descartes(c1, c2, c3), numberT);
     push(list);
 }
-export const Descart = new FGCallNative("Descart", 0, _Descart, {
-    input: [circleT, circleT, circleT],
-    output: new ListT(numberT),
-});
+export const Descart = new FGCallNative("Descart", 0, _Descart, [circleT, circleT, circleT], new ListT(numberT));
 function _ComplexDescart() {
     let curv = pop();
     let c3 = pop();
@@ -144,10 +111,7 @@ function _ComplexDescart() {
     let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleT);
     push(circles);
 }
-export const ComplexDescart = new FGCallNative("ComplexDescart", 0, _ComplexDescart, {
-    input: [circleT, circleT, circleT, numberT],
-    output: new ListT(circleT),
-});
+export const ComplexDescart = new FGCallNative("ComplexDescart", 0, _ComplexDescart, [circleT, circleT, circleT, numberT], new ListT(circleT));
 function _E() {
     let ry = pop().value;
     let rx = pop().value;
@@ -157,10 +121,7 @@ function _E() {
     let e = new Ellipse(x, y, rx, ry);
     push(e);
 }
-export let E = new FGCallNative("E", 0, _E, {
-    input: [numberT, numberT, numberT, numberT],
-    output: ellipseT,
-});
+export let E = new FGCallNative("E", 0, _E, [numberT, numberT, numberT, numberT], ellipseT);
 function _P() {
     let y = pop().value;
     let x = pop().value;
@@ -168,10 +129,7 @@ function _P() {
     let point = new Point(x, y);
     push(point);
 }
-export let P = new FGCallNative("P", 0, _P, {
-    input: [numberT, numberT],
-    output: pointT,
-});
+export let P = new FGCallNative("P", 0, _P, [numberT, numberT], pointT);
 function _Paint() {
     let geo = pop();
     let pic = pop();
@@ -179,46 +137,31 @@ function _Paint() {
     pic.objs.push(geo);
     draw_onScreen();
 }
-export let Paint = new FGCallNative("Paint", 0, _Paint, {
-    input: [pictureT, geoT],
-    output: nothingT,
-});
+export let Paint = new FGCallNative("Paint", 0, _Paint, [pictureT, geoT], nothingT);
 function _Cw() {
     let pic = pop();
     pop();
     push(pic.cw());
 }
-export let Cw = new FGCallNative("Cw", 0, _Cw, {
-    input: [pictureT],
-    output: pictureT,
-});
+export let Cw = new FGCallNative("Cw", 0, _Cw, [pictureT], pictureT);
 function _Ccw() {
     let pic = pop();
     pop();
     push(pic.ccw());
 }
-export let Ccw = new FGCallNative("Ccw", 0, _Ccw, {
-    input: [pictureT],
-    output: pictureT,
-});
+export let Ccw = new FGCallNative("Ccw", 0, _Ccw, [pictureT], pictureT);
 function _FlipH() {
     let pic = pop();
     pop();
     push(pic.fliph());
 }
-export let FlipH = new FGCallNative("FlipH", 0, _FlipH, {
-    input: [pictureT],
-    output: pictureT,
-});
+export let FlipH = new FGCallNative("FlipH", 0, _FlipH, [pictureT], pictureT);
 function _FlipV() {
     let pic = pop();
     pop();
     push(pic.flipv());
 }
-export let FlipV = new FGCallNative("FlipV", 0, _FlipV, {
-    input: [pictureT],
-    output: pictureT,
-});
+export let FlipV = new FGCallNative("FlipV", 0, _FlipV, [pictureT], pictureT);
 function _Quartet() {
     let s = pop();
     let r = pop();
@@ -227,19 +170,13 @@ function _Quartet() {
     pop();
     push(Picture.quartet(p, q, r, s));
 }
-export let Quartet = new FGCallNative("Quartet", 0, _Quartet, {
-    input: [pictureT, pictureT, pictureT, pictureT],
-    output: pictureT,
-});
+export let Quartet = new FGCallNative("Quartet", 0, _Quartet, [pictureT, pictureT, pictureT, pictureT], pictureT);
 function _Cycle() {
     let p = pop();
     pop();
     push(Picture.cycle(p));
 }
-export let Cycle = new FGCallNative("Cycle", 0, _Cycle, {
-    input: [pictureT],
-    output: pictureT,
-});
+export let Cycle = new FGCallNative("Cycle", 0, _Cycle, [pictureT], pictureT);
 function _MapPic() {
     let target = pop();
     let src = pop();
@@ -247,10 +184,7 @@ function _MapPic() {
     src.map_to(target);
     draw_onScreen();
 }
-export let MapPic = new FGCallNative("MapPic", 0, _MapPic, {
-    input: [pictureT, pictureT],
-    output: nothingT,
-});
+export let MapPic = new FGCallNative("MapPic", 0, _MapPic, [pictureT, pictureT], nothingT);
 function _Pic() {
     let w = pop().value;
     let h = pop().value;
@@ -258,10 +192,7 @@ function _Pic() {
     let pic = new Picture(w, h);
     push(pic);
 }
-export let Pic = new FGCallNative("Pic", 0, _Pic, {
-    input: [numberT, numberT],
-    output: pictureT,
-});
+export let Pic = new FGCallNative("Pic", 0, _Pic, [numberT, numberT], pictureT);
 function _R() {
     let h = pop().value;
     let w = pop().value;
@@ -271,10 +202,7 @@ function _R() {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R = new FGCallNative("R", 0, _R, {
-    input: [numberT, numberT, numberT, numberT],
-    output: rectT,
-});
+export let R = new FGCallNative("R", 0, _R, [numberT, numberT, numberT, numberT], rectT);
 function _R_WithCenter() {
     let h = pop().value;
     let w = pop().value;
@@ -284,10 +212,7 @@ function _R_WithCenter() {
     let rect = new Rect(x - w / 2, y - h / 2, w, h);
     push(rect);
 }
-export let R_WithCenter = new FGCallNative("R_WithCenter", 0, _R_WithCenter, {
-    input: [numberT, numberT, numberT, numberT],
-    output: rectT,
-});
+export let R_WithCenter = new FGCallNative("R_WithCenter", 0, _R_WithCenter, [numberT, numberT, numberT, numberT], rectT);
 function _R_FromPoints() {
     let q = pop();
     let p = pop();
@@ -299,10 +224,7 @@ function _R_FromPoints() {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, {
-    input: [pointT, pointT],
-    output: rectT,
-});
+export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [pointT, pointT], rectT);
 function _Seg() {
     let y2 = pop().value;
     let x2 = pop().value;
@@ -312,10 +234,7 @@ function _Seg() {
     let seg = new Segment(x1, y1, x2, y2);
     push(seg);
 }
-export let Seg = new FGCallNative("Seg", 0, _Seg, {
-    input: [numberT, numberT, numberT, numberT],
-    output: segmentT,
-});
+export let Seg = new FGCallNative("Seg", 0, _Seg, [numberT, numberT, numberT, numberT], segmentT);
 function _Seg_FromPoints() {
     let q = pop();
     let p = pop();
@@ -323,34 +242,22 @@ function _Seg_FromPoints() {
     let seg = new Segment(p.x, p.y, q.x, q.y);
     push(seg);
 }
-export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", 0, _Seg_FromPoints, {
-    input: [pointT, pointT],
-    output: segmentT,
-});
+export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", 0, _Seg_FromPoints, [pointT, pointT], segmentT);
 function _Midpoint() {
     let segment = pop();
     pop();
     let point = segment.midpoint();
     push(point);
 }
-export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, {
-    input: [segmentT],
-    output: pointT,
-});
+export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [segmentT], pointT);
 function _Help() {
     pop();
     vm_output(welcome);
 }
-export let Help = new FGCallNative("Help", 1, _Help, {
-    input: [],
-    output: nothingT,
-});
+export let Help = new FGCallNative("Help", 1, _Help, [], nothingT);
 function _Clear() {
     pop();
     canvas.clear();
     on_scrn = [];
 }
-export let Clear = new FGCallNative("Clear", 1, _Clear, {
-    input: [],
-    output: nothingT,
-});
+export let Clear = new FGCallNative("Clear", 1, _Clear, [], nothingT);

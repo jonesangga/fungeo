@@ -151,10 +151,8 @@ function begin_compiler(kind: FnT, name: string): void {
         fn: new FGCallUser(
             name,
             CallT.Function,
-            {
-                input: [],
-                output: nothingT,
-            },
+            [],
+            nothingT,
             new Chunk(name),
         ),
         kind: kind,
@@ -702,6 +700,8 @@ function parse_callable(): void {
 // NOTE: doesn't support currying yet.
 // TODO: implement currying.
 
+let curryFn: FGCurry | undefined = undefined;
+
 function set_callable(name: string): void {
     let index = makeConstant(new FGString(name));
     lastT = neverT;
@@ -709,7 +709,9 @@ function set_callable(name: string): void {
     parsePrecedence(Precedence.Call);
     emitConstant(new FGType(lastT));
 
-    tempNames[name] = { type: lastT };
+    if (curryFn === undefined)
+        error("undefined curryFn");
+    tempNames[name] = { type: lastT, value: curryFn};
     emitBytes(Op.Set, index);
     lastT = nothingT; // Because assignment is not an expression.
 }
@@ -746,13 +748,13 @@ function get_callable(name: string): void {
     }
 }
 
-function call_curry(curry: FGCurry, isNative: boolean): void {
+function call_curry(name: string, curry: FGCurry): void {
     $("in call_curry()");
-    emitConstant(curry);
+    let index = makeConstant(new FGString(name));
+    emitBytes(Op.GetUsr, index);
 
-    let version = curry.fn.version;
+    let inputs = curry.fn.input;
     let gotTypes: Type[] = [];
-    let inputs = version.input;
 
     let i = curry.args.length;
     for ( ; i < inputs.length; i++) {
@@ -772,10 +774,12 @@ function call_curry(curry: FGCurry, isNative: boolean): void {
         }
     }
 
-    // emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
     emitBytes(Op.CallCur, inputs.length - curry.args.length);
-    emitBytes(isNative ? Op.CallNat : Op.CallUsr, inputs.length);
-    lastT = version.output;
+    if (curry.fn instanceof FGCallNative)
+        emitBytes(Op.CallNat, inputs.length);
+    else
+        emitBytes(Op.CallUsr, inputs.length);
+    lastT = curry.fn.output;
 }
 
 // This also work for procedure that doesn't have parameter.
@@ -791,14 +795,14 @@ function get_global(table: any, name_: string, native: boolean): void {
 
     let name = table[name_];
     if (name.value instanceof FGCurry) {
-        call_curry(name.value, native);
+        call_curry(name_, name.value);
         return;
     }
     emitConstant(name.value as FGCallNative);
 
-    let version = (name.value as FGCallNative).version;
+    let inputs = (name.value as FGCallNative).input;
+    let output = (name.value as FGCallNative).output;
     let gotTypes: Type[] = [];
-    let inputs = version.input;
 
     let i = 0;
     for ( ; i < inputs.length; i++) {
@@ -821,9 +825,14 @@ function get_global(table: any, name_: string, native: boolean): void {
     if (i !== inputs.length) {
         $("gonna curry");
 
+        let args: Value[] = [];
+        for (let j = 0; j < i; j++)
+            args[j] = new FGNumber(0);
+
         let newInput = inputs.slice(i);
         console.log(newInput);
-        let type = new CallUserT(newInput, version.output);
+        let type = new CallUserT(newInput, output);
+        curryFn = new FGCurry("dummy", name.value, args);
 
         // let newType = new FGType(type);
         // emitConstant(newType);
@@ -832,9 +841,9 @@ function get_global(table: any, name_: string, native: boolean): void {
         lastT = type;
     }
     else {
-        let arity = version.input.length;
+        let arity = inputs.length;
         emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
-        lastT = version.output;
+        lastT = output;
     }
 }
 
@@ -1168,7 +1177,7 @@ function parse_params(): Type {
     let type = parse_type();
 
     current.locals[current.locals.length - 1].type = type;
-    current.fn.version.input.push(type);
+    current.fn.input.push(type);
     lastT = nothingT;
     return type;
 }
@@ -1191,7 +1200,7 @@ function fn(): void {
     consume(TokenT.Arrow, "expect `->` after list of params");
     let outputT = parse_type();
 
-    current.fn.version.output = outputT;
+    current.fn.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
 
     consume(TokenT.Eq, "expect '=' before fn body");
@@ -1230,7 +1239,7 @@ function proc(): void {
         outputT = parse_type();
     }
 
-    current.fn.version.output = outputT;
+    current.fn.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
 
     consume(TokenT.LBrace, "expect '{' before proc body");

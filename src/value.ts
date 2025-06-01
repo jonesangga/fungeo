@@ -95,11 +95,6 @@ export class FGBoolean implements FG {
     }
 }
 
-export type Version = {
-    input:  Type[],
-    output: Type,
-};
-
 export const enum CallT {
     Function,
     Procedure,
@@ -112,7 +107,8 @@ export class FGCallNative implements FG {
         public name:     string,
         public callType: CallT,
         public value:    () => void,
-        public version:  Version
+        public input:    Type[],
+        public output:   Type
     ) {}
 
     to_str(): string {
@@ -123,7 +119,7 @@ export class FGCallNative implements FG {
     }
 
     type(): FGType {
-        return new FGType(new CallNativeT(this.version.input, this.version.output));
+        return new FGType(new CallNativeT(this.input, this.output));
     }
 
     equal(other: FG) {
@@ -135,10 +131,11 @@ export class FGCallUser implements FG {
     kind: Kind.CallUser = Kind.CallUser;
 
     constructor(
-        public name: string,
+        public name:     string,
         public callType: CallT,
-        public version: Version,
-        public chunk: Chunk,
+        public input:    Type[],
+        public output:   Type,
+        public chunk:    Chunk,
     ) {}
 
     to_str(): string {
@@ -149,7 +146,7 @@ export class FGCallUser implements FG {
     }
 
     type(): FGType {
-        return new FGType(new CallUserT(this.version.input, this.version.output));
+        return new FGType(new CallUserT(this.input, this.output));
     }
 
     equal(other: FG) {
@@ -171,7 +168,7 @@ export class FGCurry implements FG {
     }
 
     type(): FGType {
-        return new FGType(new CallUserT(this.fn.version.input.slice(this.args.length), this.fn.version.output));
+        return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
 
     equal(other: FG) {
@@ -317,6 +314,3 @@ export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
-
-// This is used for Callable's input types. See Version type in value.ts.
-export let geoKind = [Kind.Circle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.Segment];

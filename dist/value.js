@@ -70,13 +70,15 @@ export class FGCallNative {
     name;
     callType;
     value;
-    version;
+    input;
+    output;
     kind = 400;
-    constructor(name, callType, value, version) {
+    constructor(name, callType, value, input, output) {
         this.name = name;
         this.callType = callType;
         this.value = value;
-        this.version = version;
+        this.input = input;
+        this.output = output;
     }
     to_str() {
         if (this.callType === 0)
@@ -85,7 +87,7 @@ export class FGCallNative {
             return `{proc ${this.name}}`;
     }
     type() {
-        return new FGType(new CallNativeT(this.version.input, this.version.output));
+        return new FGType(new CallNativeT(this.input, this.output));
     }
     equal(other) {
         return false;
@@ -94,13 +96,15 @@ export class FGCallNative {
 export class FGCallUser {
     name;
     callType;
-    version;
+    input;
+    output;
     chunk;
     kind = 450;
-    constructor(name, callType, version, chunk) {
+    constructor(name, callType, input, output, chunk) {
         this.name = name;
         this.callType = callType;
-        this.version = version;
+        this.input = input;
+        this.output = output;
         this.chunk = chunk;
     }
     to_str() {
@@ -110,7 +114,7 @@ export class FGCallUser {
             return `{proc ${this.name}}`;
     }
     type() {
-        return new FGType(new CallUserT(this.version.input, this.version.output));
+        return new FGType(new CallUserT(this.input, this.output));
     }
     equal(other) {
         return false;
@@ -130,7 +134,7 @@ export class FGCurry {
         return `{curry ${this.name}}`;
     }
     type() {
-        return new FGType(new CallUserT(this.fn.version.input.slice(this.args.length), this.fn.version.output));
+        return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
     equal(other) {
         return false;
@@ -253,4 +257,3 @@ export class FGList {
         return false;
     }
 }
-export let geoKind = [700, 750, 840, 850, 900, 1000];

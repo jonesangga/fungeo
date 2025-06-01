@@ -1,6 +1,6 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { FGCurry, FGBoolean, FGNumber, FGString, FGCallUser, FGType } from "./value.js";
+import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
 import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
@@ -102,10 +102,7 @@ function currentChunk() {
 function begin_compiler(kind, name) {
     let compiler = {
         enclosing: current,
-        fn: new FGCallUser(name, 0, {
-            input: [],
-            output: nothingT,
-        }, new Chunk(name)),
+        fn: new FGCallUser(name, 0, [], nothingT, new Chunk(name)),
         kind: kind,
         locals: [],
         localGlobals: [],
@@ -540,13 +537,16 @@ function parse_callable() {
         get_callable(name);
     }
 }
+let curryFn = undefined;
 function set_callable(name) {
     let index = makeConstant(new FGString(name));
     lastT = neverT;
     canParseArgument = true;
     parsePrecedence(600);
     emitConstant(new FGType(lastT));
-    tempNames[name] = { type: lastT };
+    if (curryFn === undefined)
+        error("undefined curryFn");
+    tempNames[name] = { type: lastT, value: curryFn };
     emitBytes(1400, index);
     lastT = nothingT;
 }
@@ -580,12 +580,12 @@ function get_callable(name) {
         error(`undefined name ${name}`);
     }
 }
-function call_curry(curry, isNative) {
+function call_curry(name, curry) {
     $("in call_curry()");
-    emitConstant(curry);
-    let version = curry.fn.version;
+    let index = makeConstant(new FGString(name));
+    emitBytes(500, index);
+    let inputs = curry.fn.input;
     let gotTypes = [];
-    let inputs = version.input;
     let i = curry.args.length;
     for (; i < inputs.length; i++) {
         if (check(900)) {
@@ -603,8 +603,11 @@ function call_curry(curry, isNative) {
         }
     }
     emitBytes(190, inputs.length - curry.args.length);
-    emitBytes(isNative ? 200 : 205, inputs.length);
-    lastT = version.output;
+    if (curry.fn instanceof FGCallNative)
+        emitBytes(200, inputs.length);
+    else
+        emitBytes(205, inputs.length);
+    lastT = curry.fn.output;
 }
 function get_global(table, name_, native) {
     if (!canParseArgument) {
@@ -614,13 +617,13 @@ function get_global(table, name_, native) {
     canParseArgument = match(200);
     let name = table[name_];
     if (name.value instanceof FGCurry) {
-        call_curry(name.value, native);
+        call_curry(name_, name.value);
         return;
     }
     emitConstant(name.value);
-    let version = name.value.version;
+    let inputs = name.value.input;
+    let output = name.value.output;
     let gotTypes = [];
-    let inputs = version.input;
     let i = 0;
     for (; i < inputs.length; i++) {
         if (check(900)) {
@@ -639,16 +642,20 @@ function get_global(table, name_, native) {
     }
     if (i !== inputs.length) {
         $("gonna curry");
+        let args = [];
+        for (let j = 0; j < i; j++)
+            args[j] = new FGNumber(0);
         let newInput = inputs.slice(i);
         console.log(newInput);
-        let type = new CallUserT(newInput, version.output);
+        let type = new CallUserT(newInput, output);
+        curryFn = new FGCurry("dummy", name.value, args);
         emitBytes(230, i);
         lastT = type;
     }
     else {
-        let arity = version.input.length;
+        let arity = inputs.length;
         emitBytes(native ? 200 : 205, arity);
-        lastT = version.output;
+        lastT = output;
     }
 }
 function parse_local_global() {
@@ -890,7 +897,7 @@ function parse_params() {
     consume(1300, "expect `:` after parameter name");
     let type = parse_type();
     current.locals[current.locals.length - 1].type = type;
-    current.fn.version.input.push(type);
+    current.fn.input.push(type);
     lastT = nothingT;
     return type;
 }
@@ -907,7 +914,7 @@ function fn() {
     } while (match(100));
     consume(1195, "expect `->` after list of params");
     let outputT = parse_type();
-    current.fn.version.output = outputT;
+    current.fn.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(1500, "expect '=' before fn body");
     canParseArgument = true;
@@ -935,7 +942,7 @@ function proc() {
     if (match(1195)) {
         outputT = parse_type();
     }
-    current.fn.version.output = outputT;
+    current.fn.output = outputT;
     tempNames[name] = { type: callUserT, value: current.fn };
     consume(300, "expect '{' before proc body");
     returnT = nothingT;

@@ -21,10 +21,7 @@ describe("value", () => {
 
     it("FGCallNative", () => {
         let f = () => {return;};
-        let b = new FGCallNative("f", CallT.Function, f, {
-            input: [numberT],
-            output: numberT,
-        });
+        let b = new FGCallNative("f", CallT.Function, f, [numberT], numberT);
 
         equal(b.kind, Kind.CallNative);
         equal(b.name, "f");
@@ -34,10 +31,7 @@ describe("value", () => {
     });
 
     it("FGCallUser", () => {
-        let b = new FGCallUser("testfn", CallT.Function, {
-            input: [numberT],
-            output: numberT,
-        }, new Chunk(""));
+        let b = new FGCallUser("testfn", CallT.Function, [numberT], numberT, new Chunk(""));
 
         equal(b.kind, Kind.CallUser);
         equal(b.name, "testfn");
