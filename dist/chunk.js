@@ -44,6 +44,7 @@ export var Op;
     Op[Op["SetLocM"] = 1420] = "SetLocM";
     Op[Op["SetLocN"] = 1425] = "SetLocN";
     Op[Op["SetMut"] = 1430] = "SetMut";
+    Op[Op["Struct"] = 1450] = "Struct";
     Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
 ;
@@ -92,6 +93,7 @@ export const OpName = {
     [1420]: "SetLocM",
     [1425]: "SetLocN",
     [1430]: "SetMut",
+    [1450]: "Struct",
     [1500]: "Sub",
 };
 export class Chunk {

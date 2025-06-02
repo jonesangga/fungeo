@@ -1,5 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
+import { FGType } from "../value.js";
+import { ellipseT } from "../type.js";
 export default class Ellipse {
     x;
     y;
@@ -20,6 +22,9 @@ export default class Ellipse {
     }
     to_str() {
         return `E ${this.x} ${this.y} ${this.rx} ${this.ry}`;
+    }
+    typeof() {
+        return new FGType(ellipseT);
     }
     draw() {
         c.beginPath();

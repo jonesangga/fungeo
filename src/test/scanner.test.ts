@@ -95,6 +95,7 @@ describe("scanner each token type", () => {
         [TokenT.Star]: ["*", { kind: TokenT.Star, line: 1, lexeme: "*" }],
         [TokenT.String]: ["\"real\"", { kind: TokenT.String, line: 1, lexeme: "real" }],
         [TokenT.StrT]: ["Str", { kind: TokenT.StrT, line: 1, lexeme: "Str" }],
+        [TokenT.Struct]: ["struct", { kind: TokenT.Struct, line: 1, lexeme: "struct" }],
         [TokenT.Then]: ["then", { kind: TokenT.Then, line: 1, lexeme: "then" }],
         [TokenT.True]: ["true", { kind: TokenT.True, line: 1, lexeme: "true" }],
     };

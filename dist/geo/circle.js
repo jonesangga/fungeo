@@ -1,6 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
-import { FGNumber, FGComplex } from "../value.js";
+import { FGNumber, FGComplex, FGType } from "../value.js";
+import { circleT } from "../type.js";
 export default class Circle {
     x;
     y;
@@ -23,6 +24,9 @@ export default class Circle {
     }
     to_str() {
         return `C ${this.x} ${this.y} ${this.r}`;
+    }
+    typeof() {
+        return new FGType(circleT);
     }
     dist(other) {
         return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);

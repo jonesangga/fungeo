@@ -11,6 +11,7 @@ export var Kind;
     Kind[Kind["List"] = 470] = "List";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
+    Kind[Kind["Struct"] = 610] = "Struct";
     Kind[Kind["Type"] = 650] = "Type";
     Kind[Kind["Circle"] = 700] = "Circle";
     Kind[Kind["Ellipse"] = 750] = "Ellipse";
@@ -41,6 +42,7 @@ export const KindName = {
     [2500]: "Repl",
     [1000]: "Segment",
     [600]: "String",
+    [610]: "Struct",
     [650]: "Type",
 };
 export class FGBoolean {

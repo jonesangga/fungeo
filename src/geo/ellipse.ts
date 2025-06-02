@@ -4,7 +4,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Kind } from "../value.js"
+import { Kind, FGType } from "../value.js"
+import { ellipseT } from "../type.js"
 
 export default class Ellipse {
     kind: Kind.Ellipse = Kind.Ellipse;
@@ -21,6 +22,10 @@ export default class Ellipse {
 
     to_str(): string {
         return `E ${this.x} ${this.y} ${this.rx} ${this.ry}`;
+    }
+
+    typeof(): FGType {
+        return new FGType(ellipseT);
     }
 
     draw(): void {

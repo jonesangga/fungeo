@@ -81,6 +81,7 @@ describe("scanner each token type", () => {
         [1100]: ["*", { kind: 1100, line: 1, lexeme: "*" }],
         [1900]: ["\"real\"", { kind: 1900, line: 1, lexeme: "real" }],
         [2900]: ["Str", { kind: 2900, line: 1, lexeme: "Str" }],
+        [2910]: ["struct", { kind: 2910, line: 1, lexeme: "struct" }],
         [3000]: ["then", { kind: 3000, line: 1, lexeme: "then" }],
         [2000]: ["true", { kind: 2000, line: 1, lexeme: "true" }],
     };

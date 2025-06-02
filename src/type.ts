@@ -42,13 +42,27 @@ export class BooleanT implements Type {
     }
 }
 
-// TODO: update to_str()
 export class ListT implements Type {
     constructor(
         public elType: Type
     ) {}
     to_str(): string {
         return this.elType.to_str() + "[]";
+    }
+    equal(other: Type): boolean {
+        return other instanceof ListT;
+    }
+}
+
+export class StructT implements Type {
+    constructor(
+        // public memberT: Type[]
+        public members: { [key: string]: Type },
+    ) {}
+    to_str(): string {
+        // return "struct type: not implemented yet"
+        // return Object.values(this.members).map(m => m.to_str());
+        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
     }
     equal(other: Type): boolean {
         return other instanceof ListT;

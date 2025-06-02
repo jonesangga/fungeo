@@ -43,6 +43,18 @@ export class ListT {
         return other instanceof ListT;
     }
 }
+export class StructT {
+    members;
+    constructor(members) {
+        this.members = members;
+    }
+    to_str() {
+        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
+    }
+    equal(other) {
+        return other instanceof ListT;
+    }
+}
 export class TupleT {
     values;
     constructor(values) {

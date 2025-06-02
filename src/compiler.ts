@@ -5,7 +5,7 @@ import { Op, Chunk } from "./chunk.js"
 import { FGCurry, CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
 import { Method, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
-import { type Type, NeverT, NumberT, StringT, ListT, TupleT, neverT, circleT, numberT, stringT, booleanT, callUserT,
+import { type Type, NeverT, StructT, NumberT, StringT, ListT, TupleT, neverT, circleT, numberT, stringT, booleanT, callUserT,
          CallNativeT, CallUserT, nothingT, canvasT, replT, pictureT, callNativeT } from "./type.js"
 
 // For quick debugging.
@@ -107,6 +107,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Star]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Factor},
     [TokenT.String]    : {prefix: parse_string,    infix: null,    precedence: Precedence.None},
     [TokenT.StrT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Struct]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Then]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
 }
@@ -1182,6 +1183,36 @@ function parse_params(): Type {
     return type;
 }
 
+function struct(): void {
+    consume(TokenT.Callable, "expect struct name in PascalCase");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+
+    consume(TokenT.LBrace, "expect '{' to after struct name");
+    let s: { [key: string]: Type } = {};
+    let memberNames: string[] = [];
+    let memberTypes: Type[] = [];
+    do {
+        // parse member name
+        consume(TokenT.NCallable, "expect parameter name");
+        let name = prevTok.lexeme;
+        // memberNames.push(prevTok.lexeme);
+
+        // parse member type
+        consume(TokenT.Colon, "expect `:` after parameter name");
+        let type = parse_type();
+        // memberTypes.push(parse_type());
+        s[name] = type;
+    } while (match(TokenT.Comma));
+
+    // consume TokenT.RBracket
+    consume(TokenT.RBrace, "expect '}' to after struct members");
+    let struct = new FGType(new StructT(s));
+    emitConstant(struct);
+    emitConstant(struct);
+    emitBytes(Op.Set, index);
+}
+
 function fn(): void {
     $("in fn()");
     consume(TokenT.Callable, "expect function name in PascalCase");
@@ -1458,6 +1489,8 @@ function declaration(): void {
         fn();
     } else if (match(TokenT.Proc)) {
         proc();
+    } else if (match(TokenT.Struct)) {
+        struct();
     } else {
         statement();
     }

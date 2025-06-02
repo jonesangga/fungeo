@@ -58,6 +58,7 @@ export const enum TokenT {
     Proc      = 2750,
     Return    = 2800,
     StrT      = 2900,
+    Struct    = 2910,
     Then      = 3000,
 };
 
@@ -118,6 +119,7 @@ export const TokenTName: {
     [TokenT.Star]: "Star",
     [TokenT.String]: "String",
     [TokenT.StrT]: "StrT",
+    [TokenT.Struct]: "Struct",
     [TokenT.Then]: "Then",
     [TokenT.True]: "True",
 };
@@ -220,6 +222,7 @@ function non_pascal_case(): Token {
         case "nonlocal": return token_lexeme( TokenT.Nonlocal );
         case "proc":     return token_lexeme( TokenT.Proc );
         case "return":   return token_lexeme( TokenT.Return );
+        case "struct":   return token_lexeme( TokenT.Struct );
         case "then":     return token_lexeme( TokenT.Then );
         case "true":     return token_lexeme( TokenT.True );
     }

@@ -3,7 +3,7 @@ import { Chunk } from "./chunk.js";
 import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-import { NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
+import { StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
 let $ = console.log;
 let lastT = neverT;
 let returnT = neverT;
@@ -83,6 +83,7 @@ const rules = {
     [1100]: { prefix: null, infix: numeric_binary, precedence: 400 },
     [1900]: { prefix: parse_string, infix: null, precedence: 100 },
     [2900]: { prefix: null, infix: null, precedence: 100 },
+    [2910]: { prefix: null, infix: null, precedence: 100 },
     [3000]: { prefix: null, infix: null, precedence: 100 },
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
 };
@@ -901,6 +902,27 @@ function parse_params() {
     lastT = nothingT;
     return type;
 }
+function struct() {
+    consume(1650, "expect struct name in PascalCase");
+    let name = prevTok.lexeme;
+    let index = makeConstant(new FGString(name));
+    consume(300, "expect '{' to after struct name");
+    let s = {};
+    let memberNames = [];
+    let memberTypes = [];
+    do {
+        consume(2540, "expect parameter name");
+        let name = prevTok.lexeme;
+        consume(1300, "expect `:` after parameter name");
+        let type = parse_type();
+        s[name] = type;
+    } while (match(100));
+    consume(695, "expect '}' to after struct members");
+    let struct = new FGType(new StructT(s));
+    emitConstant(struct);
+    emitConstant(struct);
+    emitBytes(1400, index);
+}
 function fn() {
     $("in fn()");
     consume(1650, "expect function name in PascalCase");
@@ -1104,6 +1126,9 @@ function declaration() {
     }
     else if (match(2750)) {
         proc();
+    }
+    else if (match(2910)) {
+        struct();
     }
     else {
         statement();

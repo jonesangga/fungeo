@@ -1,5 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
+import { FGType } from "../value.js";
+import { pointT } from "../type.js";
 export default class Point {
     x;
     y;
@@ -14,6 +16,9 @@ export default class Point {
     }
     to_str() {
         return `P ${this.x} ${this.y}`;
+    }
+    typeof() {
+        return new FGType(pointT);
     }
     draw() {
         c.beginPath();

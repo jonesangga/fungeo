@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js"
+import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT, StructT } from "./type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -22,6 +22,7 @@ export const enum Kind {
     List     = 470,
     Number   = 500,
     String   = 600,
+    Struct   = 610,
     Type     = 650,
     Circle   = 700,     // Geometry.
     Ellipse  = 750,
@@ -54,6 +55,7 @@ export const KindName: {
     [Kind.Repl]: "Repl",
     [Kind.Segment]: "Segment",
     [Kind.String]: "String",
+    [Kind.Struct]: "Struct",
     [Kind.Type]: "Type",
 };
 
@@ -63,6 +65,7 @@ export type Canvas = {
     resize: (w: number, h: number) => void,
     place:  (x: number, y: number) => void,
     clear:  () => void,
+    typeof: () => FGType;
 };
 
 export type Repl = {
@@ -332,6 +335,28 @@ export class FGList implements FG {
         return false;
     }
 }
+
+// export class FGStruct implements FG {
+    // kind: Kind.Struct = Kind.Struct;
+
+    // constructor(
+        // public members: { [key: string]: Value },
+    // ) {}
+
+    // to_str(): string {
+        // return "struct";
+    // }
+
+    // // TODO: implement this.
+    // typeof(): FGType {
+        // return new FGType(new StructT(Object.values(this.members).map(m => m.typeof())));
+    // }
+
+    // // TODO: implement this.
+    // equal(other: FG): boolean {
+        // return false;
+    // }
+// }
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList;
 type UIObj = Canvas | Repl;

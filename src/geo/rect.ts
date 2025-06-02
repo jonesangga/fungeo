@@ -2,7 +2,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind } from "../value.js"
+import { Kind, FGType } from "../value.js"
+import { rectT } from "../type.js"
 
 export default class Rect {
     kind: Kind.Rect = Kind.Rect;
@@ -18,6 +19,10 @@ export default class Rect {
 
     to_str(): string {
         return `R ${this.x} ${this.y} ${this.w} ${this.h}`;
+    }
+
+    typeof(): FGType {
+        return new FGType(rectT);
     }
 
     draw(): void {

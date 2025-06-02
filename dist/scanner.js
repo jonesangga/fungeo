@@ -55,6 +55,7 @@ export var TokenT;
     TokenT[TokenT["Proc"] = 2750] = "Proc";
     TokenT[TokenT["Return"] = 2800] = "Return";
     TokenT[TokenT["StrT"] = 2900] = "StrT";
+    TokenT[TokenT["Struct"] = 2910] = "Struct";
     TokenT[TokenT["Then"] = 3000] = "Then";
 })(TokenT || (TokenT = {}));
 ;
@@ -113,6 +114,7 @@ export const TokenTName = {
     [1100]: "Star",
     [1900]: "String",
     [2900]: "StrT",
+    [2910]: "Struct",
     [3000]: "Then",
     [2000]: "True",
 };
@@ -191,6 +193,7 @@ function non_pascal_case() {
         case "nonlocal": return token_lexeme(2550);
         case "proc": return token_lexeme(2750);
         case "return": return token_lexeme(2800);
+        case "struct": return token_lexeme(2910);
         case "then": return token_lexeme(3000);
         case "true": return token_lexeme(2000);
     }

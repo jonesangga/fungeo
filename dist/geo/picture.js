@@ -1,5 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
+import { FGType } from "../value.js";
+import { pictureT } from "../type.js";
 import Circle from "../geo/circle.js";
 import Ellipse from "../geo/ellipse.js";
 import Rect from "../geo/rect.js";
@@ -18,6 +20,9 @@ export default class Picture {
     }
     to_str() {
         return `Picture ${this.w} ${this.h}`;
+    }
+    typeof() {
+        return new FGType(pictureT);
     }
     draw() {
         c.strokeStyle = this.strokeStyle;

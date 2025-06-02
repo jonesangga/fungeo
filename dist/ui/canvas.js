@@ -1,3 +1,5 @@
+import { FGType } from "../value.js";
+import { canvasT } from "../type.js";
 let w = 600;
 let h = 600;
 const canvasElem = document.createElement("canvas");
@@ -20,6 +22,9 @@ const canvas = {
         c.fillRect(0, 0, w, h);
     },
     to_str() { return "canvas"; },
+    typeof() {
+        return new FGType(canvasT);
+    },
     resize(w_, h_) {
         w = w_;
         h = h_;

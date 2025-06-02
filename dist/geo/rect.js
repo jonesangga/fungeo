@@ -1,5 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
+import { FGType } from "../value.js";
+import { rectT } from "../type.js";
 export default class Rect {
     x;
     y;
@@ -18,6 +20,9 @@ export default class Rect {
     }
     to_str() {
         return `R ${this.x} ${this.y} ${this.w} ${this.h}`;
+    }
+    typeof() {
+        return new FGType(rectT);
     }
     draw() {
         if (this.fillStyle !== "") {

@@ -1,6 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind, Canvas } from "../value.js"
+import { Kind, FGType, Canvas } from "../value.js"
+import { canvasT } from "../type.js"
 
 let w = 600;    // Canvas width.
 let h = 600;    // Canvas height.
@@ -30,6 +31,10 @@ const canvas: Canvas = {
     },
 
     to_str(): string { return "canvas"; },
+
+    typeof(): FGType {
+        return new FGType(canvasT);
+    },
 
     resize(w_: number, h_: number): void {
         w = w_;

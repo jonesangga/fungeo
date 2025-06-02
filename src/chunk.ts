@@ -47,6 +47,7 @@ export const enum Op {
     SetLocM = 1420,     // Local mutable
     SetLocN = 1425,     // Local nonlocal
     SetMut  = 1430,
+    Struct  = 1450,
     Sub     = 1500,
 };
 
@@ -97,6 +98,7 @@ export const OpName: {
     [Op.SetLocM]: "SetLocM",
     [Op.SetLocN]: "SetLocN",
     [Op.SetMut]: "SetMut",
+    [Op.Struct]: "Struct",
     [Op.Sub]: "Sub",
 };
 

@@ -2,7 +2,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Kind, FGNumber, FGComplex } from "../value.js"
+import { Kind, FGNumber, FGComplex, FGType } from "../value.js"
+import { circleT } from "../type.js"
 
 export default class Circle {
     kind: Kind.Circle = Kind.Circle;
@@ -24,6 +25,10 @@ export default class Circle {
 
     to_str(): string {
         return `C ${this.x} ${this.y} ${this.r}`;
+    }
+
+    typeof(): FGType {
+        return new FGType(circleT);
     }
 
     dist(other: Circle): number {
