@@ -342,6 +342,13 @@ function run() {
                 push(new FGNumber(list.length));
                 break;
             }
+            case 850: {
+                let id = pop().value;
+                let struct = pop();
+                let value = struct.members[id];
+                push(value);
+                break;
+            }
             case 600: {
                 let id = pop().value;
                 let list = pop();

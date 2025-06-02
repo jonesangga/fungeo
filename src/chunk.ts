@@ -33,6 +33,7 @@ export const enum Op {
     Load    = 800,
     Loop    = 805,
     LT      = 810,
+    Member  = 850,
     Mul     = 900,
     Neg     = 1000,
     NEq     = 1010,
@@ -84,6 +85,7 @@ export const OpName: {
     [Op.Load]: "Load",
     [Op.Loop]: "Loop",
     [Op.LT]: "LT",
+    [Op.Member]: "Member",
     [Op.Mul]: "Mul",
     [Op.Neg]: "Neg",
     [Op.NEq]: "NEq",
@@ -154,6 +156,7 @@ export class Chunk {
             case Op.LEq:
             case Op.Loop:
             case Op.LT:
+            case Op.Member:
             case Op.Mul:
             case Op.Neg:
             case Op.NEq:

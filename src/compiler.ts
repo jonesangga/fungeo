@@ -66,7 +66,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.DivBy]     : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
     [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.Dot]       : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Dot]       : {prefix: null,            infix: index_struct,    precedence: Precedence.Call},
     [TokenT.Else]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Eq]        : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -431,6 +431,24 @@ function parse_string(): void {
     lastT = stringT;
 }
 
+function index_struct(): void {
+    if (!(lastT instanceof StructT))
+        error("can only index a struct");
+
+    let members = lastT.members;
+    let keys = Object.keys(members);
+    let types = Object.values(members);
+
+    lastT = neverT;
+    consume(TokenT.NCallable, "expect member name");
+    let name = prevTok.lexeme;
+    if (!keys.includes(name))
+        error(`no member named ${ name } in this struct`);
+    emitConstant(new FGString(name));
+    emitByte(Op.Member);
+    lastT = members[name];
+}
+
 function struct_init(): void {
     consume(TokenT.Callable, "expect struct name");
     let name_ = prevTok.lexeme;
@@ -498,6 +516,7 @@ function parse_list(): void {
 }
 
 // TODO: This is broken for nested list
+//       use parsePrecedence(Precedence.Call)??
 function index_list(): void {
     if (!(lastT instanceof ListT))
         error("Can only index a list");

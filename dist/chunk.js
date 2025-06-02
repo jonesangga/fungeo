@@ -30,6 +30,7 @@ export var Op;
     Op[Op["Load"] = 800] = "Load";
     Op[Op["Loop"] = 805] = "Loop";
     Op[Op["LT"] = 810] = "LT";
+    Op[Op["Member"] = 850] = "Member";
     Op[Op["Mul"] = 900] = "Mul";
     Op[Op["Neg"] = 1000] = "Neg";
     Op[Op["NEq"] = 1010] = "NEq";
@@ -79,6 +80,7 @@ export const OpName = {
     [800]: "Load",
     [805]: "Loop",
     [810]: "LT",
+    [850]: "Member",
     [900]: "Mul",
     [1000]: "Neg",
     [1010]: "NEq",
@@ -143,6 +145,7 @@ export class Chunk {
             case 690:
             case 805:
             case 810:
+            case 850:
             case 900:
             case 1000:
             case 1010:

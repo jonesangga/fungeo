@@ -42,7 +42,7 @@ const rules = {
     [100]: { prefix: null, infix: null, precedence: 100 },
     [1450]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
     [200]: { prefix: null, infix: null, precedence: 100 },
-    [210]: { prefix: null, infix: null, precedence: 100 },
+    [210]: { prefix: null, infix: index_struct, precedence: 600 },
     [2300]: { prefix: null, infix: null, precedence: 100 },
     [2100]: { prefix: null, infix: null, precedence: 100 },
     [1500]: { prefix: null, infix: null, precedence: 100 },
@@ -315,6 +315,21 @@ function parse_number() {
 function parse_string() {
     emitConstant(new FGString(prevTok.lexeme));
     lastT = stringT;
+}
+function index_struct() {
+    if (!(lastT instanceof StructT))
+        error("can only index a struct");
+    let members = lastT.members;
+    let keys = Object.keys(members);
+    let types = Object.values(members);
+    lastT = neverT;
+    consume(2540, "expect member name");
+    let name = prevTok.lexeme;
+    if (!keys.includes(name))
+        error(`no member named ${name} in this struct`);
+    emitConstant(new FGString(name));
+    emitByte(850);
+    lastT = members[name];
 }
 function struct_init() {
     consume(1650, "expect struct name");

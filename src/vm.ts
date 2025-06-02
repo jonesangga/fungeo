@@ -411,6 +411,15 @@ function run(): boolean {
                 break;
             }
 
+            case Op.Member: {
+                let id = (pop() as FGString).value;
+                let struct = pop() as FGStruct;
+
+                let value = struct.members[id];
+                push(value);
+                break;
+            }
+
             case Op.Index: {
                 let id = (pop() as FGNumber).value;
                 let list = pop() as FGList;
