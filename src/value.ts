@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { Type, CallNativeT, CallUserT } from "./type.js"
+import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -73,8 +73,9 @@ export type Repl = {
 };
 
 export interface FG {
-    kind: Kind;
+    kind:     Kind;
     to_str(): string;
+    typeof:   () => FGType;
 }
 
 export class FGBoolean implements FG {
@@ -86,6 +87,10 @@ export class FGBoolean implements FG {
 
     to_str(): string {
         return this.value.toString();
+    }
+
+    typeof(): FGType {
+        return new FGType(booleanT);
     }
 
     equal(other: FG): boolean {
@@ -118,7 +123,7 @@ export class FGCallNative implements FG {
             return `{proc ${ this.name }}`;
     }
 
-    type(): FGType {
+    typeof(): FGType {
         return new FGType(new CallNativeT(this.input, this.output));
     }
 
@@ -145,7 +150,7 @@ export class FGCallUser implements FG {
             return `{proc ${ this.name }}`;
     }
 
-    type(): FGType {
+    typeof(): FGType {
         return new FGType(new CallUserT(this.input, this.output));
     }
 
@@ -167,7 +172,7 @@ export class FGCurry implements FG {
         return `{curry ${ this.name }}`;
     }
 
-    type(): FGType {
+    typeof(): FGType {
         return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
 
@@ -185,6 +190,10 @@ export class FGNumber implements FG {
 
     to_str(): string {
         return this.value + "";
+    }
+
+    typeof(): FGType {
+        return new FGType(numberT);
     }
 
     add(other: FGNumber): FGNumber {
@@ -216,6 +225,10 @@ export class FGComplex implements FG {
 
     to_str(): string {
         return `${ this.a }+${ this.b }i`;
+    }
+
+    typeof(): FGType {
+        return new FGType(complexT);
     }
 
     add(other: FGComplex): FGComplex {
@@ -258,6 +271,10 @@ export class FGString implements FG {
         return this.value;
     }
 
+    typeof(): FGType {
+        return new FGType(stringT);
+    }
+
     add(other: FGString): FGString {
         return new FGString(this.value + other.value);
     }
@@ -277,6 +294,10 @@ export class FGType implements FG {
 
     to_str(): string {
         return this.value.to_str();
+    }
+
+    typeof(): FGType {
+        return this;
     }
 
     equal(other: FG): boolean {
@@ -300,6 +321,10 @@ export class FGList implements FG {
         let str = "[";
         str += this.value.map(el => el.to_str()).join(",");
         return str + "]";
+    }
+
+    typeof(): FGType {
+        return new FGType(new ListT(this.type));
     }
 
     // TODO: implement this.

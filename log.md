@@ -1,5 +1,13 @@
 # Log
 
+#### 01-06-25
+
+- change call in `_Type()`
+- add type() for all FG functions
+- don't use emitConstant for fn since it changes in runtime
+  use index = makeConstant(new String(name)), followed by emitBytes(Op.GetUsr, index)
+- remove version from FGCallNative and FGCallUser
+
 #### 31-05-25
 
 - new Data type for storing partial application: FGCurry

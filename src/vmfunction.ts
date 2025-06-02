@@ -64,7 +64,7 @@ export let Padl = new FGCallNative("Padl", CallT.Function, _Padl,
 function _Type(): void {
     let value = pop();
     pop();              // The function.
-    push((value as FGCallNative).type());
+    push((value as FGCallNative).typeof());
 }
 export let Type = new FGCallNative("Type", CallT.Function, _Type,
     [anyT],

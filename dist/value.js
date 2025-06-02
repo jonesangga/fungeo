@@ -1,4 +1,4 @@
-import { CallNativeT, CallUserT } from "./type.js";
+import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -52,6 +52,9 @@ export class FGBoolean {
     to_str() {
         return this.value.toString();
     }
+    typeof() {
+        return new FGType(booleanT);
+    }
     equal(other) {
         if (this.kind !== other.kind)
             return false;
@@ -86,7 +89,7 @@ export class FGCallNative {
         else
             return `{proc ${this.name}}`;
     }
-    type() {
+    typeof() {
         return new FGType(new CallNativeT(this.input, this.output));
     }
     equal(other) {
@@ -113,7 +116,7 @@ export class FGCallUser {
         else
             return `{proc ${this.name}}`;
     }
-    type() {
+    typeof() {
         return new FGType(new CallUserT(this.input, this.output));
     }
     equal(other) {
@@ -133,7 +136,7 @@ export class FGCurry {
     to_str() {
         return `{curry ${this.name}}`;
     }
-    type() {
+    typeof() {
         return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
     equal(other) {
@@ -148,6 +151,9 @@ export class FGNumber {
     }
     to_str() {
         return this.value + "";
+    }
+    typeof() {
+        return new FGType(numberT);
     }
     add(other) {
         return new FGNumber(this.value + other.value);
@@ -179,6 +185,9 @@ export class FGComplex {
     }
     to_str() {
         return `${this.a}+${this.b}i`;
+    }
+    typeof() {
+        return new FGType(complexT);
     }
     add(other) {
         return new FGComplex(this.a + other.a, this.b + other.b);
@@ -214,6 +223,9 @@ export class FGString {
     to_str() {
         return this.value;
     }
+    typeof() {
+        return new FGType(stringT);
+    }
     add(other) {
         return new FGString(this.value + other.value);
     }
@@ -234,6 +246,9 @@ export class FGType {
     to_str() {
         return this.value.to_str();
     }
+    typeof() {
+        return this;
+    }
     equal(other) {
         return false;
     }
@@ -252,6 +267,9 @@ export class FGList {
         let str = "[";
         str += this.value.map(el => el.to_str()).join(",");
         return str + "]";
+    }
+    typeof() {
+        return new FGType(new ListT(this.type));
     }
     equal(other) {
         return false;

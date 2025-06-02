@@ -213,6 +213,7 @@ export const neverT = new NeverT();
 export const nothingT = new NothingT();
 export const anyT = new AnyT();
 export const booleanT = new BooleanT();
+export const complexT = new ComplexT();
 export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();

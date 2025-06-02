@@ -40,7 +40,7 @@ export let Padl = new FGCallNative("Padl", 0, _Padl, [stringT, numberT, stringT]
 function _Type() {
     let value = pop();
     pop();
-    push(value.type());
+    push(value.typeof());
 }
 export let Type = new FGCallNative("Type", 0, _Type, [anyT], stringT);
 let on_scrn = [];
