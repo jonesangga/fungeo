@@ -11,6 +11,7 @@ export const enum TokenT {
     LBracket  = 400,
     LParen    = 500,
     Minus     = 600,
+    Percent   = 670,
     RBrace    = 695,
     RBracket  = 700,
     RParen    = 800,
@@ -105,6 +106,7 @@ export const TokenTName: {
     [TokenT.Nonlocal]: "Nonlocal",
     [TokenT.Number]: "Number",
     [TokenT.NumT]: "NumT",
+    [TokenT.Percent]: "Percent",
     [TokenT.Pipe]: "Pipe",
     [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
@@ -304,6 +306,7 @@ export const scanner = {
         
         switch (c) {
             case '.': return token_lexeme(TokenT.Dot);
+            case '%': return token_lexeme(TokenT.Percent);
             case '(': return token_lexeme(TokenT.LParen);
             case ')': return token_lexeme(TokenT.RParen);
             case '[': return token_lexeme(TokenT.LBracket);

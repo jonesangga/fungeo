@@ -168,7 +168,8 @@ export class Chunk {
 
             case Op.CallCur:
             case Op.CallNat:
-            case Op.CallUsr: {
+            case Op.CallUsr:
+            case Op.Struct: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];

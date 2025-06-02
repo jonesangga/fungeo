@@ -277,3 +277,19 @@ export class FGList {
         return false;
     }
 }
+export class FGStruct {
+    members;
+    kind = 610;
+    constructor(members) {
+        this.members = members;
+    }
+    to_str() {
+        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
+    }
+    typeof() {
+        return new FGType(booleanT);
+    }
+    equal(other) {
+        return false;
+    }
+}

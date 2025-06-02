@@ -336,29 +336,30 @@ export class FGList implements FG {
     }
 }
 
-// export class FGStruct implements FG {
-    // kind: Kind.Struct = Kind.Struct;
+export class FGStruct implements FG {
+    kind: Kind.Struct = Kind.Struct;
 
-    // constructor(
-        // public members: { [key: string]: Value },
-    // ) {}
+    constructor(
+        public members: { [key: string]: Value },
+    ) {}
 
-    // to_str(): string {
+    to_str(): string {
         // return "struct";
-    // }
+        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
+    }
 
-    // // TODO: implement this.
-    // typeof(): FGType {
-        // return new FGType(new StructT(Object.values(this.members).map(m => m.typeof())));
-    // }
+    // TODO: implement this.
+    typeof(): FGType {
+        return new FGType(booleanT);
+    }
 
-    // // TODO: implement this.
-    // equal(other: FG): boolean {
-        // return false;
-    // }
-// }
+    // TODO: implement this.
+    equal(other: FG): boolean {
+        return false;
+    }
+}
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList | FGStruct;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Fillable = Circle | Ellipse | Rect;

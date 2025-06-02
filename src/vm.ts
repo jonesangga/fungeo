@@ -1,9 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { FGCurry, Kind, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
+import { FGCurry, Kind, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
-import { type Type } from "./type.js"
+import { type Type, StructT } from "./type.js"
 
 // For quick debugging.
 let $ = console.log;
@@ -167,6 +167,23 @@ function run(): boolean {
 
                 for (let i = 0; i < n; i++)
                     push(args[n-i-1]);
+                break;
+            }
+            case Op.Struct: {
+                let arity = read_byte();
+                let got: Value[] = [];
+                for (let i = 0; i < arity; i++)
+                    got[arity-i-1] = pop();
+
+                let struct = pop() as FGType;
+                let members = (struct.value as StructT).members;
+                let keys = Object.keys(members);
+                let ms: {[key: string]: Value} = {};
+                for (let i = 0; i < keys.length; i++) {
+                    ms[keys[i]] = got[i];
+                }
+                let newStruct = new FGStruct(ms);
+                push(newStruct);
                 break;
             }
             case Op.CallNat: {

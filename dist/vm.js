@@ -1,4 +1,4 @@
-import { FGCurry, FGBoolean, FGNumber, FGList } from "./value.js";
+import { FGCurry, FGStruct, FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
 let $ = console.log;
 export let stack = [];
@@ -118,6 +118,22 @@ function run() {
                     push(curry.args[i]);
                 for (let i = 0; i < n; i++)
                     push(args[n - i - 1]);
+                break;
+            }
+            case 1450: {
+                let arity = read_byte();
+                let got = [];
+                for (let i = 0; i < arity; i++)
+                    got[arity - i - 1] = pop();
+                let struct = pop();
+                let members = struct.value.members;
+                let keys = Object.keys(members);
+                let ms = {};
+                for (let i = 0; i < keys.length; i++) {
+                    ms[keys[i]] = got[i];
+                }
+                let newStruct = new FGStruct(ms);
+                push(newStruct);
                 break;
             }
             case 200: {

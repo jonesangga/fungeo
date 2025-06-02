@@ -81,6 +81,7 @@ describe("scanner each token type", () => {
         [TokenT.Nonlocal]: ["nonlocal", { kind: TokenT.Nonlocal, line: 1, lexeme: "nonlocal" }],
         [TokenT.Number]: ["123.456", { kind: TokenT.Number, line: 1, lexeme: "123.456" }],
         [TokenT.NumT]: ["Num", { kind: TokenT.NumT, line: 1, lexeme: "Num" }],
+        [TokenT.Percent]: ["%", { kind: TokenT.Percent, line: 1, lexeme: "%" }],
         [TokenT.Pipe]: ["|>", { kind: TokenT.Pipe, line: 1, lexeme: "|>" }],
         [TokenT.PipePipe]: ["||", { kind: TokenT.PipePipe, line: 1, lexeme: "||" }],
         [TokenT.Plus]: ["+", { kind: TokenT.Plus, line: 1, lexeme: "+" }],

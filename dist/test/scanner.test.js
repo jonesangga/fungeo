@@ -67,6 +67,7 @@ describe("scanner each token type", () => {
         [2550]: ["nonlocal", { kind: 2550, line: 1, lexeme: "nonlocal" }],
         [1800]: ["123.456", { kind: 1800, line: 1, lexeme: "123.456" }],
         [2600]: ["Num", { kind: 2600, line: 1, lexeme: "Num" }],
+        [670]: ["%", { kind: 670, line: 1, lexeme: "%" }],
         [1575]: ["|>", { kind: 1575, line: 1, lexeme: "|>" }],
         [1580]: ["||", { kind: 1580, line: 1, lexeme: "||" }],
         [1585]: ["+", { kind: 1585, line: 1, lexeme: "+" }],

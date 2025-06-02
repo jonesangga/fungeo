@@ -93,6 +93,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Nonlocal]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.Percent]   : {prefix: struct_init,     infix: null,    precedence: Precedence.None},
     [TokenT.Pipe]      : {prefix: null,            infix: pipe,    precedence: Precedence.Call},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
@@ -428,6 +429,47 @@ function parse_number(): void {
 function parse_string(): void {
     emitConstant(new FGString(prevTok.lexeme));
     lastT = stringT;
+}
+
+function struct_init(): void {
+    consume(TokenT.Callable, "expect struct name");
+    let name_ = prevTok.lexeme;
+
+    consume(TokenT.LBrace, "expect '{' to after struct name");
+
+    if (!Object.hasOwn(userNames, name_))
+        error(`no struct ${ name_ } in userNames`);
+
+    let name = userNames[name_];
+
+    if (!(name.value instanceof FGType))
+        error(`${ name_} is not an FGType`);
+    emitConstant(name.value);
+
+    let struct = name.value.value;
+
+    if (!(struct instanceof StructT))
+        error(`${ name_} is not a struct`);
+    let members = struct.members;
+    let types = Object.values(members);
+
+    let i = 0;
+    for ( ; i < types.length; i++) {
+        lastT = nothingT;
+        canParseArgument = true;
+        expression();
+
+        if (!types[i].equal( lastT ))
+            error(`in ${name_}: expect arg ${i} of type ${ types[i].to_str() }, got ${ lastT.to_str() }`);
+
+        if (i < types.length - 1)
+            consume(TokenT.Comma, "expect ',' to after struct members");
+    }
+
+    consume(TokenT.RBrace, "expect '}' to after struct members");
+
+    emitBytes(Op.Struct, types.length);
+    lastT = struct;
 }
 
 function parse_list(): void {
@@ -1205,7 +1247,6 @@ function struct(): void {
         s[name] = type;
     } while (match(TokenT.Comma));
 
-    // consume TokenT.RBracket
     consume(TokenT.RBrace, "expect '}' to after struct members");
     let struct = new FGType(new StructT(s));
     emitConstant(struct);

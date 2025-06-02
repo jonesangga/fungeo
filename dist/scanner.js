@@ -8,6 +8,7 @@ export var TokenT;
     TokenT[TokenT["LBracket"] = 400] = "LBracket";
     TokenT[TokenT["LParen"] = 500] = "LParen";
     TokenT[TokenT["Minus"] = 600] = "Minus";
+    TokenT[TokenT["Percent"] = 670] = "Percent";
     TokenT[TokenT["RBrace"] = 695] = "RBrace";
     TokenT[TokenT["RBracket"] = 700] = "RBracket";
     TokenT[TokenT["RParen"] = 800] = "RParen";
@@ -100,6 +101,7 @@ export const TokenTName = {
     [2550]: "Nonlocal",
     [1800]: "Number",
     [2600]: "NumT",
+    [670]: "Percent",
     [1575]: "Pipe",
     [1580]: "PipePipe",
     [1585]: "Plus",
@@ -268,6 +270,7 @@ export const scanner = {
             return pascal_case();
         switch (c) {
             case '.': return token_lexeme(210);
+            case '%': return token_lexeme(670);
             case '(': return token_lexeme(500);
             case ')': return token_lexeme(800);
             case '[': return token_lexeme(400);

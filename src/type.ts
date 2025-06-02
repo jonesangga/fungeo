@@ -60,8 +60,6 @@ export class StructT implements Type {
         public members: { [key: string]: Type },
     ) {}
     to_str(): string {
-        // return "struct type: not implemented yet"
-        // return Object.values(this.members).map(m => m.to_str());
         return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
     }
     equal(other: Type): boolean {
