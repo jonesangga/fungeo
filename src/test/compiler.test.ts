@@ -655,8 +655,8 @@ describe("compiler: general error", () => {
     const tests: ErrorTest = [
         [
             "error, when unexpected character",
-            `a = 4 % 2`,
-            "1: scanner: unexpected character %\n"
+            `a = 4 @ 2`,
+            "1: scanner: unexpected character @\n"
         ],
         [
             "error, when undefined name",

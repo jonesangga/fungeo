@@ -794,8 +794,61 @@ function method(name: string): void {
     }
 }
 
-// There is no local scope callable.
 function get_callable(name: string): void {
+    $("in get_callable()");
+    if (current.scopeDepth > 0) {
+        get_callable_control(name);
+    } else {
+        get_callable_callable(name);
+    }
+}
+
+function get_callable_control(name_: string): void {
+    $(name_);
+    let arg = resolveLocal(current, name_);
+    if (arg === -1) {
+        get_callable_callable(name_);
+        return;
+    }
+        // error(`no local callalble ${ name_ }`);
+
+    $("got local fn arg");
+
+    emitBytes(Op.GetLoc, arg);
+    canParseArgument = match(TokenT.Dollar);
+
+    let name = current.locals[arg];
+
+    let inputs = (name.type as CallUserT).input;
+    let output = (name.type as CallUserT).output;
+    let gotTypes: Type[] = [];
+
+    let i = 0;
+    for ( ; i < inputs.length; i++) {
+        if (check(TokenT.Semicolon)) {
+            $("found semicolon");
+            break;
+        }
+        lastT = nothingT;
+        if (canParseArgument)
+            expression();
+        else
+            parsePrecedence(Precedence.Call);
+
+        gotTypes.push(lastT);
+        if (!inputs[i].equal( lastT )) {
+            error(`in ${name_}: expect arg ${i} of type ${ inputs[i].to_str() }, got ${ gotTypes[i].to_str() }`);
+        }
+    }
+
+    let arity = inputs.length;
+    emitBytes(Op.CallUsr, arity);
+    lastT = output;
+    console.log(lastT);
+}
+
+// There is no local scope callable.
+function get_callable_callable(name: string): void {
     if (Object.hasOwn(nativeNames, name)) {
         get_global(nativeNames, name, true);
     }
@@ -803,6 +856,7 @@ function get_callable(name: string): void {
         get_global(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
+        $("in got tempNames", name);
         get_global(tempNames, name, false);
     }
     else {
@@ -850,6 +904,7 @@ function call_curry(name: string, curry: FGCurry): void {
 
 function get_global(table: any, name_: string, native: boolean): void {
     if (!canParseArgument) {
+        $("cannot parse argumet", name_);
         global_non_callable(table, name_, native);
         return;
     }
@@ -877,6 +932,7 @@ function get_global(table: any, name_: string, native: boolean): void {
             expression();
         else
             parsePrecedence(Precedence.Call);
+        $("in get_global: ", inputs[i], lastT);
 
         gotTypes.push(lastT);
         if (!inputs[i].equal( lastT )) {
@@ -1191,10 +1247,27 @@ function global_non_callable(table: any, name: string, native: boolean): void {
     // let index = makeConstant(new FGString(name));
     // emitBytes(native ? Op.GetNat : Op.GetUsr, index);
     lastT = table[name].type;
+    console.log(table[name], lastT, name);
     // $(name, table, table[name].type);
 }
 
+function parse_fn_type(): Type {
+    let got: Type[] = [];
+    let count = 0;
+    do {
+        got.push( parse_type() );
+        count++;
+    } while (match(TokenT.Arrow));
+    consume(TokenT.RParen, "expect ')' after function type");
+    return new CallUserT(got.slice(0, count-1), got[count-1]);
+}
+
 function parse_type(): Type {
+    // Check if it is function type.
+    if (match(TokenT.LParen)) {
+        return parse_fn_type();
+    }
+
     advance();
     let type: Type;
     switch (prevTok.kind) {
@@ -1224,7 +1297,9 @@ function parse_type(): Type {
 
 // TODO: Check again what that for loop doing? Is it necessary?
 function parse_params(): Type {
-    consume(TokenT.NCallable, "expect parameter name");
+    if (check(TokenT.NCallable) || check(TokenT.Callable))
+        advance();
+    // consume(TokenT.NCallable, "expect parameter name");
     let name = prevTok.lexeme;
 
     for (let i = current.locals.length - 1; i >= 0; i--) {
@@ -1292,20 +1367,21 @@ function fn(): void {
     let outputT = parse_type();
 
     current.fn.output = outputT;
-    tempNames[name] = { type: callUserT, value: current.fn };
+    let fnT = new CallUserT(inputT, outputT);
+    tempNames[name] = { type: fnT, value: current.fn };
 
     consume(TokenT.Eq, "expect '=' before fn body");
 
     canParseArgument = true;
     expression();
     emitBytes(Op.Ret, 1);
-    $(lastT, outputT);
+    $("in fn: ", lastT, outputT);
     assertT(lastT, outputT, "return type not match");
 
     let fn = endCompiler();
 
     emitConstant(fn);
-    emitConstant(new FGType(new CallUserT(inputT, outputT)));
+    emitConstant(new FGType(fnT));
     emitBytes(Op.Set, index);
     lastT = outputT;
 }

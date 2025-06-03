@@ -613,6 +613,50 @@ function method(name) {
     }
 }
 function get_callable(name) {
+    $("in get_callable()");
+    if (current.scopeDepth > 0) {
+        get_callable_control(name);
+    }
+    else {
+        get_callable_callable(name);
+    }
+}
+function get_callable_control(name_) {
+    $(name_);
+    let arg = resolveLocal(current, name_);
+    if (arg === -1) {
+        get_callable_callable(name_);
+        return;
+    }
+    $("got local fn arg");
+    emitBytes(395, arg);
+    canParseArgument = match(200);
+    let name = current.locals[arg];
+    let inputs = name.type.input;
+    let output = name.type.output;
+    let gotTypes = [];
+    let i = 0;
+    for (; i < inputs.length; i++) {
+        if (check(900)) {
+            $("found semicolon");
+            break;
+        }
+        lastT = nothingT;
+        if (canParseArgument)
+            expression();
+        else
+            parsePrecedence(600);
+        gotTypes.push(lastT);
+        if (!inputs[i].equal(lastT)) {
+            error(`in ${name_}: expect arg ${i} of type ${inputs[i].to_str()}, got ${gotTypes[i].to_str()}`);
+        }
+    }
+    let arity = inputs.length;
+    emitBytes(205, arity);
+    lastT = output;
+    console.log(lastT);
+}
+function get_callable_callable(name) {
     if (Object.hasOwn(nativeNames, name)) {
         get_global(nativeNames, name, true);
     }
@@ -620,6 +664,7 @@ function get_callable(name) {
         get_global(userNames, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
+        $("in got tempNames", name);
         get_global(tempNames, name, false);
     }
     else {
@@ -657,6 +702,7 @@ function call_curry(name, curry) {
 }
 function get_global(table, name_, native) {
     if (!canParseArgument) {
+        $("cannot parse argumet", name_);
         global_non_callable(table, name_, native);
         return;
     }
@@ -681,6 +727,7 @@ function get_global(table, name_, native) {
             expression();
         else
             parsePrecedence(600);
+        $("in get_global: ", inputs[i], lastT);
         gotTypes.push(lastT);
         if (!inputs[i].equal(lastT)) {
             error(`in ${name_}: expect arg ${i} of type ${inputs[i].to_str()}, got ${gotTypes[i].to_str()}`);
@@ -902,8 +949,22 @@ function set_global(name, mut = false) {
 function global_non_callable(table, name, native) {
     emitConstant(table[name].value);
     lastT = table[name].type;
+    console.log(table[name], lastT, name);
+}
+function parse_fn_type() {
+    let got = [];
+    let count = 0;
+    do {
+        got.push(parse_type());
+        count++;
+    } while (match(1195));
+    consume(800, "expect ')' after function type");
+    return new CallUserT(got.slice(0, count - 1), got[count - 1]);
 }
 function parse_type() {
+    if (match(500)) {
+        return parse_fn_type();
+    }
     advance();
     let type;
     switch (prevTok.kind) {
@@ -930,7 +991,8 @@ function parse_type() {
     return type;
 }
 function parse_params() {
-    consume(2540, "expect parameter name");
+    if (check(2540) || check(1650))
+        advance();
     let name = prevTok.lexeme;
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
@@ -982,16 +1044,17 @@ function fn() {
     consume(1195, "expect `->` after list of params");
     let outputT = parse_type();
     current.fn.output = outputT;
-    tempNames[name] = { type: callUserT, value: current.fn };
+    let fnT = new CallUserT(inputT, outputT);
+    tempNames[name] = { type: fnT, value: current.fn };
     consume(1500, "expect '=' before fn body");
     canParseArgument = true;
     expression();
     emitBytes(1300, 1);
-    $(lastT, outputT);
+    $("in fn: ", lastT, outputT);
     assertT(lastT, outputT, "return type not match");
     let fn = endCompiler();
     emitConstant(fn);
-    emitConstant(new FGType(new CallUserT(inputT, outputT)));
+    emitConstant(new FGType(fnT));
     emitBytes(1400, index);
     lastT = outputT;
 }

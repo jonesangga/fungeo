@@ -1,5 +1,26 @@
 # Log
 
+#### 03-06-25
+
+- support function as argument for user-defined fn
+- parse function type
+
+#### 02-06-25
+
+- add Op.Member for struct similar to Op.Index for list
+- implement struct indexing
+
+- new Op.Struct in vm
+- implement struct initialization
+- add token percent
+
+- using C syntax for definition
+- add struct type
+- new function struct() to parse struct definition
+- new token struct
+- add FGStruct in value.js
+- new Struct kind
+
 #### 01-06-25
 
 - change call in `_Type()`

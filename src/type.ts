@@ -114,11 +114,22 @@ export class CallUserT implements Type {
         public output: Type
     ) {}
     to_str(): string {
-        let input = this.input.map(v => v.to_str()).join(" -> ");
+        let input = this.input.map(v => {
+            if (v instanceof CallUserT)
+                return "(" + v.to_str() + ")";
+            return v.to_str();
+        }).join(" -> ");
         return input + " -> " + this.output.to_str();
     }
     equal(other: Type): boolean {
-        return other instanceof CallUserT;
+        if (!(other instanceof CallUserT))
+            return false;
+        if (this.input.length !== other.input.length)
+            return false;
+        for (let i = 0; i < this.input.length; i++)
+            if (!this.input[i].equal(other.input[i]))
+                return false;
+        return this.output.equal(other.output);
     }
 }
 

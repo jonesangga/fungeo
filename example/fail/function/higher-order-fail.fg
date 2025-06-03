@@ -1,0 +1,7 @@
+fn Add n: Num, m: Num -> Num =
+  n + m
+
+fn Test F: (Num -> Num), n: Num -> Num =
+  F n
+
+Print $ Test Add 3

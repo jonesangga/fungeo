@@ -1,0 +1,9 @@
+fn Square n: Num -> Num =
+  n * n
+
+fn Test F: (Num -> Num), n: Num -> Num =
+  F n
+
+Print $ Type Square
+Print $ Type Test
+Print $ Test Square 3
