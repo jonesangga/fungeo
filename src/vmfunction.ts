@@ -1,5 +1,5 @@
-import { pop, push, vm_output } from "./vm.js"
-import { CallT, Kind, type GeoObj, type Fillable, KindName, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
+import { pop, push, vm_output, call, run } from "./vm.js"
+import { CallT, Kind, type GeoObj, type Fillable, KindName, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
@@ -69,6 +69,40 @@ function _Type(): void {
 export let Type = new FGCallNative("Type", CallT.Function, _Type,
     [anyT],
     stringT,
+);
+
+function _Map(): void {
+    console.log("in _Map()");
+    let list = pop() as FGList;
+    let callback = pop();
+    console.log(list, callback);
+    pop();              // The function.
+    if (callback instanceof FGCallNative) {
+        console.log("callback is FGCallNative");
+        let result = [];
+        for (let i = 0; i < list.value.length; i++) {
+            push(list.value[i]);    // dummy
+            push(list.value[i]);
+            callback.value();
+            result.push(pop());
+        }
+        push(new FGList(result, callback.output));
+    } else if (callback instanceof FGCallUser) {
+        let result = [];
+        for (let i = 0; i < list.value.length; i++) {
+            push(list.value[i]);    // dummy
+            push(list.value[i]);    // dummy
+            console.log("callback is FGCallUser");
+            call(callback, callback.input.length);
+            run(true);
+            result.push(pop());
+        }
+        push(new FGList(result, callback.output));
+    }
+}
+export let Map = new FGCallNative("Map", CallT.Function, _Map,
+    [anyT, new ListT(anyT)],
+    new ListT(anyT),
 );
 
 let on_scrn: GeoObj[] = [];

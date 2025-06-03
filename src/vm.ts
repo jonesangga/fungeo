@@ -68,7 +68,7 @@ function read_string(): string {
     return (read_constant() as FGString).value;
 }
 
-function call(fn: FGCallUser, argCount: number) {
+export function call(fn: FGCallUser, argCount: number) {
     currFrame = { fn, ip: 0, slots: stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
@@ -98,7 +98,7 @@ const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
 const debug = true;
 
-function run(): boolean {
+export function run(intercept: boolean = false): boolean {
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -488,6 +488,7 @@ function run(): boolean {
                 frames.pop();
                 currFrame = frames[frames.length - 1];
                 currChunk = currFrame.fn.chunk;
+                if (intercept) return true;
                 break;
             }
 

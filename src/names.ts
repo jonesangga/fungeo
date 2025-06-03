@@ -10,7 +10,7 @@ import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint,
          Cw, Ccw, FlipH, FlipV, Quartet, Cycle,
          MapPic, Help, Clear,
          Ccurv, Descart, ComplexDescart,
-         PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js"
+         Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl   from "./ui/repl.js"
 import fish   from "./data/fish.js"
@@ -36,6 +36,7 @@ export let nativeNames: Names = {
 
     "Help":   { type: callNativeT, value: Help },
     "Print":  { type: PrintT, value: Print },
+    "Map":    { type: callNativeT, value: Map },
     "Printf": { type: callNativeT, value: Printf },
     "Show":   { type: callNativeT, value: Show },
     "Padl":   { type: callNativeT, value: Padl },

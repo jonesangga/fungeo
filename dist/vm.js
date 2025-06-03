@@ -39,7 +39,7 @@ function read_constant() {
 function read_string() {
     return read_constant().value;
 }
-function call(fn, argCount) {
+export function call(fn, argCount) {
     currFrame = { fn, ip: 0, slots: stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
@@ -60,7 +60,7 @@ const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
 const debug = true;
-function run() {
+export function run(intercept = false) {
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -401,6 +401,8 @@ function run() {
                 frames.pop();
                 currFrame = frames[frames.length - 1];
                 currChunk = currFrame.fn.chunk;
+                if (intercept)
+                    return true;
                 break;
             }
             case 1150: {
