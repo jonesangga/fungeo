@@ -1,0 +1,7 @@
+fn Square n: Num -> Num =
+  n * n
+
+ns = [1,2,3]
+
+Print $ Map Type ns
+Print $ Map Square ns
