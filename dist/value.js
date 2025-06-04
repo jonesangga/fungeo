@@ -254,7 +254,7 @@ export class FGColor {
         this.a = a;
     }
     to_str() {
-        return `Color ${this.r},${this.b},${this.b},${this.a}`;
+        return `Color ${this.r},${this.g},${this.b},${this.a}`;
     }
     to_hex() {
         return '#' + [this.r, this.g, this.b].map(x => {

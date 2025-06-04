@@ -301,7 +301,7 @@ export class FGColor implements FG {
     ) {}
 
     to_str(): string {
-        return `Color ${this.r},${this.b},${this.b},${this.a}`;
+        return `Color ${this.r},${this.g},${this.b},${this.a}`;
     }
 
     to_hex(): string {

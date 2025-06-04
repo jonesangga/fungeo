@@ -1,0 +1,5 @@
+red = RGB 255 0 0
+yellow = RGB 255 255 0
+
+Print red
+Print yellow
