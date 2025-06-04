@@ -1,5 +1,5 @@
 import { canvasT, replT, pictureT, callNativeT } from "./type.js";
-import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, RGB, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
@@ -12,6 +12,7 @@ export let nativeNames = {
     "fishs": { type: pictureT, value: fish.s },
     "Help": { type: callNativeT, value: Help },
     "Print": { type: PrintT, value: Print },
+    "RGB": { type: callNativeT, value: RGB },
     "Map": { type: callNativeT, value: Map },
     "Printf": { type: callNativeT, value: Printf },
     "Show": { type: callNativeT, value: Show },

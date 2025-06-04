@@ -1,7 +1,17 @@
 # Log
 
+#### 04-05-25
+
+- RGB built-in function
+- FGColor
+- Color type
+
 #### 03-06-25
 
+- new apply() in vm to create 
+- Map can accept callback of type FGCallNative and FGCallUser
+- implement basic support for Map function
+- ideas to support higher-order built-in fns
 - support function as argument for user-defined fn
 - parse function type
 

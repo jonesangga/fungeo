@@ -31,6 +31,14 @@ export class BooleanT {
         return other instanceof BooleanT;
     }
 }
+export class ColorT {
+    to_str() {
+        return "Color";
+    }
+    equal(other) {
+        return other instanceof ColorT;
+    }
+}
 export class ListT {
     elType;
     constructor(elType) {
@@ -212,6 +220,7 @@ export const neverT = new NeverT();
 export const nothingT = new NothingT();
 export const anyT = new AnyT();
 export const booleanT = new BooleanT();
+export const colorT = new ColorT();
 export const complexT = new ComplexT();
 export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());

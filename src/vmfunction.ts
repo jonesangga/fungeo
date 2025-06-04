@@ -1,5 +1,5 @@
 import { pop, push, vm_output, call, run } from "./vm.js"
-import { CallT, Kind, type GeoObj, type Fillable, KindName, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { CallT, Kind, type GeoObj, type Fillable, KindName, FGColor, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
@@ -10,7 +10,7 @@ import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { ListT, NumberT, CircleT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT,
          ellipseT, segmentT, nothingT, stringT, booleanT, numberT,
-         CallNativeT, NothingT, AnyT } from "./type.js"
+         colorT, CallNativeT, NothingT, AnyT } from "./type.js"
 
 function _Print(): void {
     let value = pop();
@@ -58,6 +58,18 @@ function _Padl(): void {
 export let Padl = new FGCallNative("Padl", CallT.Function, _Padl,
     [stringT, numberT, stringT],
     stringT,
+);
+
+function _RGB(): void {
+    let b = (pop() as FGNumber).value;
+    let g = (pop() as FGNumber).value;
+    let r = (pop() as FGNumber).value;
+    pop();              // The function.
+    push(new FGColor(r, g, b));
+}
+export let RGB = new FGCallNative("RGB", CallT.Function, _RGB,
+    [numberT, numberT, numberT],
+    colorT,
 );
 
 // TODO: Think about this again. We lose the type information because that is on table not on stack or on the value.
@@ -128,13 +140,13 @@ export let Draw = new FGCallNative("Draw", CallT.Function, _Draw,
 function _Fill(): void {
     console.log("in _Fill()");
     let v = pop() as Fillable;
-    let color = pop() as FGString;
+    let color = pop() as FGColor;
     pop();              // The function.
-    v.fillStyle = color.value;
+    v.fillStyle = color.to_hex();
     draw_onScreen();
 }
 export let Fill = new FGCallNative("Fill", CallT.Function, _Fill,
-    [stringT, fillableT],
+    [colorT, fillableT],
     nothingT,
 );
 

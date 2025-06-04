@@ -1,4 +1,4 @@
-import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js";
+import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, colorT, complexT } from "./type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -6,6 +6,7 @@ export var Kind;
     Kind[Kind["Boolean"] = 300] = "Boolean";
     Kind[Kind["CallNative"] = 400] = "CallNative";
     Kind[Kind["CallUser"] = 450] = "CallUser";
+    Kind[Kind["Color"] = 455] = "Color";
     Kind[Kind["Complex"] = 460] = "Complex";
     Kind[Kind["Curry"] = 465] = "Curry";
     Kind[Kind["List"] = 470] = "List";
@@ -30,6 +31,7 @@ export const KindName = {
     [450]: "CallUser",
     [2000]: "Canvas",
     [700]: "Circle",
+    [455]: "Color",
     [460]: "Complex",
     [465]: "Curry",
     [750]: "Ellipse",
@@ -236,6 +238,34 @@ export class FGString {
             return false;
         if ("value" in other)
             return this.value === other.value;
+        return false;
+    }
+}
+export class FGColor {
+    r;
+    g;
+    b;
+    a;
+    kind = 455;
+    constructor(r, g, b, a = 255) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+    to_str() {
+        return `Color ${this.r},${this.b},${this.b},${this.a}`;
+    }
+    to_hex() {
+        return '#' + [this.r, this.g, this.b].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+    typeof() {
+        return new FGType(colorT);
+    }
+    equal(other) {
         return false;
     }
 }

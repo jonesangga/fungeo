@@ -1,5 +1,5 @@
 import { pop, push, vm_output, call, run } from "./vm.js";
-import { FGCallNative, FGCallUser, FGString, FGList } from "./value.js";
+import { FGColor, FGCallNative, FGCallUser, FGString, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
 import Ellipse from "./geo/ellipse.js";
@@ -8,7 +8,7 @@ import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
-import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, CallNativeT, NothingT, AnyT } from "./type.js";
+import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, colorT, CallNativeT, NothingT, AnyT } from "./type.js";
 function _Print() {
     let value = pop();
     pop();
@@ -37,6 +37,14 @@ function _Padl() {
     push(new FGString(result));
 }
 export let Padl = new FGCallNative("Padl", 0, _Padl, [stringT, numberT, stringT], stringT);
+function _RGB() {
+    let b = pop().value;
+    let g = pop().value;
+    let r = pop().value;
+    pop();
+    push(new FGColor(r, g, b));
+}
+export let RGB = new FGCallNative("RGB", 0, _RGB, [numberT, numberT, numberT], colorT);
 function _Type() {
     let value = pop();
     pop();
@@ -93,10 +101,10 @@ function _Fill() {
     let v = pop();
     let color = pop();
     pop();
-    v.fillStyle = color.value;
+    v.fillStyle = color.to_hex();
     draw_onScreen();
 }
-export let Fill = new FGCallNative("Fill", 0, _Fill, [stringT, fillableT], nothingT);
+export let Fill = new FGCallNative("Fill", 0, _Fill, [colorT, fillableT], nothingT);
 function _C() {
     let r = pop().value;
     let y = pop().value;

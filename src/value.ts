@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT, StructT } from "./type.js"
+import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, colorT, complexT, StructT } from "./type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -17,6 +17,7 @@ export const enum Kind {
     Boolean  = 300,     // Literal.
     CallNative = 400,
     CallUser = 450,
+    Color    = 455,
     Complex  = 460,
     Curry    = 465,
     List     = 470,
@@ -43,6 +44,7 @@ export const KindName: {
     [Kind.CallUser]: "CallUser",
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
+    [Kind.Color]: "Color",
     [Kind.Complex]: "Complex",
     [Kind.Curry]: "Curry",
     [Kind.Ellipse]: "Ellipse",
@@ -288,6 +290,37 @@ export class FGString implements FG {
     }
 }
 
+export class FGColor implements FG {
+    kind: Kind.Color = Kind.Color;
+
+    constructor(
+        public r: number,
+        public g: number,
+        public b: number,
+        public a: number = 255,
+    ) {}
+
+    to_str(): string {
+        return `Color ${this.r},${this.b},${this.b},${this.a}`;
+    }
+
+    to_hex(): string {
+        return '#' + [this.r, this.g, this.b].map(x => {
+            const hex = x.toString(16)
+            return hex.length === 1 ? '0' + hex : hex
+        }).join('');
+    }
+
+    typeof(): FGType {
+        return new FGType(colorT);
+    }
+
+    equal(other: FG): boolean {
+        return false;
+    }
+}
+
+
 export class FGType implements FG {
     kind: Kind.Type = Kind.Type;
 
@@ -359,7 +392,7 @@ export class FGStruct implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList | FGStruct;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Fillable = Circle | Ellipse | Rect;
