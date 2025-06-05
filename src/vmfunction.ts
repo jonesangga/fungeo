@@ -127,9 +127,16 @@ function draw_onScreen() {
 }
 
 function _Draw(): void {
-    let v = pop() as GeoObj;
+    let v = pop();
     pop();              // The function.
-    on_scrn.push(v);
+    if (v instanceof FGList) {
+        for (let i of v.value) {
+            on_scrn.push(i as GeoObj);
+        }
+    }
+    else {
+        on_scrn.push(v as GeoObj);
+    }
     draw_onScreen();
 }
 export let Draw = new FGCallNative("Draw", CallT.Function, _Draw,

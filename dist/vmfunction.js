@@ -92,7 +92,14 @@ function draw_onScreen() {
 function _Draw() {
     let v = pop();
     pop();
-    on_scrn.push(v);
+    if (v instanceof FGList) {
+        for (let i of v.value) {
+            on_scrn.push(i);
+        }
+    }
+    else {
+        on_scrn.push(v);
+    }
     draw_onScreen();
 }
 export let Draw = new FGCallNative("Draw", 0, _Draw, [geoT], nothingT);

@@ -1,7 +1,12 @@
 # Log
 
+#### 05-05-25
+
+- support drawing a list of GeoObj
+
 #### 04-05-25
 
+- add color example
 - RGB built-in function
 - FGColor
 - Color type
