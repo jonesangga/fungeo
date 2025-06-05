@@ -31,6 +31,9 @@ let canParseBlock = false;
 // To forbid assignment in expression.
 let canAssign = false;
 
+// For pipe |>
+let pipeArg = -1;
+let pipeOp = -1;
 
 const enum Precedence {
     None = 100,
@@ -42,6 +45,7 @@ const enum Precedence {
     Term = 300,       // + - |
     Factor = 400,     // * /
     Unary = 500,      // ! -
+    Pipe = 550,       // |>
     Call = 600,       // . ( _
     Primary = 700,
 }
@@ -94,7 +98,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Percent]   : {prefix: struct_init,     infix: null,    precedence: Precedence.None},
-    [TokenT.Pipe]      : {prefix: null,            infix: pipe,    precedence: Precedence.Call},
+    [TokenT.Pipe]      : {prefix: null,            infix: pipe,    precedence: Precedence.Pipe},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
@@ -400,13 +404,16 @@ function concat_list(): void {
 function pipe(): void {
     let argT = lastT;
 
-    parsePrecedence(Precedence.Call + 1);
+    canParseArgument = true;
+    parsePrecedence(Precedence.Pipe + 1);
     if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
         error("can only pipe to function");
-    assertT(lastT.input[lastT.input.length - 1], argT, `argT non match`);
+    console.log(lastT.input[lastT.input.length - 1], argT);
+    assertT(lastT.input[lastT.input.length - 1], argT, `pipe argT non match`);
 
-    lastT = lastT.output;
     emitByte(Op.Pipe);
+    emitBytes(pipeOp, pipeArg);
+    lastT = lastT.output;
 }
 
 //--------------------------------------------------------------------
@@ -829,6 +836,10 @@ function get_callable_control(name_: string): void {
             $("found semicolon");
             break;
         }
+        if (check(TokenT.Pipe)) {
+            $("found pipe");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -927,6 +938,10 @@ function get_global(table: any, name_: string, native: boolean): void {
             $("found semicolon");
             break;
         }
+        if (check(TokenT.Pipe)) {
+            $("found pipe");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -957,6 +972,10 @@ function get_global(table: any, name_: string, native: boolean): void {
         emitBytes(Op.Curry, i);
 
         lastT = type;
+        console.log("lastT in curry: ", lastT);
+        // For pipe
+        pipeArg = inputs.length;
+        pipeOp = native ? Op.CallNat : Op.CallUsr;
     }
     else {
         let arity = inputs.length;

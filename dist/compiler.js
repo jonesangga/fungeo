@@ -14,6 +14,8 @@ function assertT(actual, expected, msg) {
 let canParseArgument = false;
 let canParseBlock = false;
 let canAssign = false;
+let pipeArg = -1;
+let pipeOp = -1;
 var Precedence;
 (function (Precedence) {
     Precedence[Precedence["None"] = 100] = "None";
@@ -25,6 +27,7 @@ var Precedence;
     Precedence[Precedence["Term"] = 300] = "Term";
     Precedence[Precedence["Factor"] = 400] = "Factor";
     Precedence[Precedence["Unary"] = 500] = "Unary";
+    Precedence[Precedence["Pipe"] = 550] = "Pipe";
     Precedence[Precedence["Call"] = 600] = "Call";
     Precedence[Precedence["Primary"] = 700] = "Primary";
 })(Precedence || (Precedence = {}));
@@ -70,7 +73,7 @@ const rules = {
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [2600]: { prefix: null, infix: null, precedence: 100 },
     [670]: { prefix: struct_init, infix: null, precedence: 100 },
-    [1575]: { prefix: null, infix: pipe, precedence: 600 },
+    [1575]: { prefix: null, infix: pipe, precedence: 550 },
     [1580]: { prefix: null, infix: or, precedence: 210 },
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
     [1590]: { prefix: null, infix: concat_list, precedence: 300 },
@@ -293,12 +296,15 @@ function concat_list() {
 }
 function pipe() {
     let argT = lastT;
-    parsePrecedence(600 + 1);
+    canParseArgument = true;
+    parsePrecedence(550 + 1);
     if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
         error("can only pipe to function");
-    assertT(lastT.input[lastT.input.length - 1], argT, `argT non match`);
-    lastT = lastT.output;
+    console.log(lastT.input[lastT.input.length - 1], argT);
+    assertT(lastT.input[lastT.input.length - 1], argT, `pipe argT non match`);
     emitByte(1190);
+    emitBytes(pipeOp, pipeArg);
+    lastT = lastT.output;
 }
 function parse_boolean() {
     if (prevTok.kind === 2000)
@@ -641,6 +647,10 @@ function get_callable_control(name_) {
             $("found semicolon");
             break;
         }
+        if (check(1575)) {
+            $("found pipe");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -722,6 +732,10 @@ function get_global(table, name_, native) {
             $("found semicolon");
             break;
         }
+        if (check(1575)) {
+            $("found pipe");
+            break;
+        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -744,6 +758,9 @@ function get_global(table, name_, native) {
         curryFn = new FGCurry("dummy", name.value, args);
         emitBytes(230, i);
         lastT = type;
+        console.log("lastT in curry: ", lastT);
+        pipeArg = inputs.length;
+        pipeOp = native ? 200 : 205;
     }
     else {
         let arity = inputs.length;

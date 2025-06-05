@@ -93,9 +93,6 @@ export function run(intercept = false) {
                 push(a.add(b));
                 break;
             }
-            case 1190: {
-                break;
-            }
             case 230: {
                 let applied = read_byte();
                 let fn = peek(applied);
@@ -118,6 +115,16 @@ export function run(intercept = false) {
                     push(curry.args[i]);
                 for (let i = 0; i < n; i++)
                     push(args[n - i - 1]);
+                break;
+            }
+            case 1190: {
+                let curry = pop();
+                let pipeArg = pop();
+                console.log(curry, pipeArg);
+                push(curry.fn);
+                for (let i = 0; i < curry.args.length; i++)
+                    push(curry.args[i]);
+                push(pipeArg);
                 break;
             }
             case 1450: {

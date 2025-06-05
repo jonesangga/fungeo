@@ -135,12 +135,6 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.Pipe: {
-                // let fn = pop() as FGCallNative;
-                // let a = pop() as FGNumber;
-                // push(fn.value(0));
-                break;
-            }
             case Op.Curry: {
                 let applied = read_byte();
                 let fn = peek(applied) as FGCallNative;
@@ -167,6 +161,18 @@ export function run(intercept: boolean = false): boolean {
 
                 for (let i = 0; i < n; i++)
                     push(args[n-i-1]);
+                break;
+            }
+            case Op.Pipe: {
+                let curry = pop() as FGCurry;  // The curry fn
+                let pipeArg = pop();
+                console.log(curry, pipeArg);
+
+                push(curry.fn);
+                for (let i = 0; i < curry.args.length; i++)
+                    push(curry.args[i]);
+
+                push(pipeArg);
                 break;
             }
             case Op.Struct: {
