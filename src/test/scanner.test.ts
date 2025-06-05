@@ -50,6 +50,7 @@ describe("scanner each token type", () => {
         [TokenT.Callable]: ["Display", { kind: TokenT.Callable, line: 1, lexeme: "Display" }],
         [TokenT.Colon]: [":", { kind: TokenT.Colon, line: 1, lexeme: ":" }],
         [TokenT.ColonEq]: [":=", { kind: TokenT.ColonEq, line: 1, lexeme: ":=" }],
+        [TokenT.ColonMin]: [":-", { kind: TokenT.ColonMin, line: 1, lexeme: ":-" }],
         [TokenT.Comma]: [",", { kind: TokenT.Comma, line: 1, lexeme: "," }],
         [TokenT.CircleT]: ["Circle", { kind: TokenT.CircleT, line: 1, lexeme: "Circle" }],
         [TokenT.DivBy]: ["|", { kind: TokenT.DivBy, line: 1, lexeme: "|" }],

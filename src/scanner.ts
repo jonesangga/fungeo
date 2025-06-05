@@ -25,6 +25,7 @@ export const enum TokenT {
     BangEq    = 1210,
     Colon     = 1300,
     ColonEq   = 1400,
+    ColonMin  = 1410,
     DivBy     = 1450,
     Eq        = 1500,
     EqEq      = 1505,
@@ -76,6 +77,7 @@ export const TokenTName: {
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
+    [TokenT.ColonMin]: "ColonMin",
     [TokenT.Comma]: "Comma",
     [TokenT.DivBy]: "DivBy",
     [TokenT.Dollar]: "Dollar",
@@ -330,8 +332,11 @@ export const scanner = {
             }
             case '&': return token_lexeme(
                 match('&') ? TokenT.AmpAmp : TokenT.Amp);
-            case ':': return token_lexeme(
-                match('=') ? TokenT.ColonEq : TokenT.Colon);
+            case ':': {
+                if (match('=')) return token_lexeme(TokenT.ColonEq);
+                if (match('-')) return token_lexeme(TokenT.ColonMin);
+                return token_lexeme(TokenT.Colon);
+            }
             case '<': {
                 if (match('=')) return token_lexeme(TokenT.LessEq);
                 if (match('>')) return token_lexeme(TokenT.LR);

@@ -42,6 +42,7 @@ const rules = {
     [2230]: { prefix: null, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
+    [1410]: { prefix: null, infix: null, precedence: 100 },
     [100]: { prefix: null, infix: null, precedence: 100 },
     [1450]: { prefix: null, infix: boolean_isdiv, precedence: 300 },
     [200]: { prefix: null, infix: null, precedence: 100 },
@@ -1239,6 +1240,12 @@ function parsePrecedence(precedence) {
         infixRule();
     }
 }
+function exprStmt() {
+    canParseArgument = true;
+    parsePrecedence(200);
+    emitByte(1200);
+    lastT = nothingT;
+}
 function expression() {
     parsePrecedence(200);
 }
@@ -1294,6 +1301,9 @@ function statement() {
     }
     else if (match(2800)) {
         parse_return();
+    }
+    else if (match(1410)) {
+        exprStmt();
     }
     else if (match(900)) {
     }

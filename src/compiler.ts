@@ -67,6 +67,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.CircleT]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.ColonMin]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.DivBy]     : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
     [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -1631,6 +1632,13 @@ function parsePrecedence(precedence: Precedence): void {
     }
 }
 
+function exprStmt(): void {
+    canParseArgument = true;
+    parsePrecedence(Precedence.Assignment);
+    emitByte(Op.Pop);
+    lastT = nothingT;
+}
+
 function expression(): void {
     parsePrecedence(Precedence.Assignment);
 }
@@ -1681,6 +1689,8 @@ function statement(): void {
         parse_loop();
     } else if (match(TokenT.Return)) {
         parse_return();
+    } else if (match(TokenT.ColonMin)) {
+        exprStmt();
     } else if (match(TokenT.Semicolon)) {
         // This is optional statement delimiter. Nothing to do.
     } else {
