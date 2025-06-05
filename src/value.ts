@@ -344,14 +344,11 @@ export class FGType implements FG {
 // TODO: move AddList implementation here.
 export class FGList implements FG {
     kind: Kind.List = Kind.List;
-    length: number;
 
     constructor(
         public value: Value[],
         public type: Type,
-    ) {
-        this.length = value.length;
-    }
+    ) {}
 
     to_str(): string {
         let str = "[";

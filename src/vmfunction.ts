@@ -83,6 +83,18 @@ export let Type = new FGCallNative("Type", CallT.Function, _Type,
     stringT,
 );
 
+// TODO: not type safe, change to use generic.
+function _Push(): void {
+    let el = pop();
+    let list = pop() as FGList;
+    pop();              // The function.
+    list.value.push(el);
+}
+export let Push = new FGCallNative("Push", CallT.Function, _Push,
+    [new ListT(anyT), anyT],
+    nothingT,
+);
+
 function _Map(): void {
     console.log("in _Map()");
     let list = pop() as FGList;

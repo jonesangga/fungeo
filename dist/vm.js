@@ -346,7 +346,7 @@ export function run(intercept = false) {
             }
             case 680: {
                 let list = pop();
-                push(new FGNumber(list.length));
+                push(new FGNumber(list.value.length));
                 break;
             }
             case 850: {
@@ -359,7 +359,7 @@ export function run(intercept = false) {
             case 600: {
                 let id = pop().value;
                 let list = pop();
-                if (id >= list.length)
+                if (id >= list.value.length)
                     error("Out of bound access");
                 let value = list.value[id];
                 push(value);

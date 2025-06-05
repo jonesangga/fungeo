@@ -51,6 +51,13 @@ function _Type() {
     push(value.typeof());
 }
 export let Type = new FGCallNative("Type", 0, _Type, [anyT], stringT);
+function _Push() {
+    let el = pop();
+    let list = pop();
+    pop();
+    list.value.push(el);
+}
+export let Push = new FGCallNative("Push", 0, _Push, [new ListT(anyT), anyT], nothingT);
 function _Map() {
     console.log("in _Map()");
     let list = pop();

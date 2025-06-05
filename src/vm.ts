@@ -413,7 +413,7 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.Len: {
                 let list = pop() as FGList;
-                push(new FGNumber(list.length));
+                push(new FGNumber(list.value.length));
                 break;
             }
 
@@ -430,7 +430,7 @@ export function run(intercept: boolean = false): boolean {
                 let id = (pop() as FGNumber).value;
                 let list = pop() as FGList;
 
-                if (id >= list.length)
+                if (id >= list.value.length)
                     error("Out of bound access");
                 let value = list.value[id];
                 push(value);

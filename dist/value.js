@@ -289,11 +289,9 @@ export class FGList {
     value;
     type;
     kind = 470;
-    length;
     constructor(value, type) {
         this.value = value;
         this.type = type;
-        this.length = value.length;
     }
     to_str() {
         let str = "[";
