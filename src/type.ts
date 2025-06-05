@@ -73,7 +73,17 @@ export class StructT implements Type {
         return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
     }
     equal(other: Type): boolean {
-        return other instanceof ListT;
+        if (!(other instanceof StructT))
+            return false;
+        let membersA = Object.keys(this.members);
+        let membersB = Object.keys(other.members);
+        if (membersA.length !== membersB.length)
+            return false;
+        for (let i = 0; i < membersA.length; i++) {
+            if (!this.members[membersA[i]].equal(other.members[membersB[i]]))
+                return false;
+        }
+        return true;
     }
 }
 

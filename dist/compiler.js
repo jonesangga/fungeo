@@ -986,6 +986,16 @@ function parse_type() {
         return parse_fn_type();
     }
     advance();
+    let name = prevTok.lexeme;
+    if (Object.hasOwn(userNames, name)) {
+        let valueName = userNames[name];
+        if (!(valueName.value instanceof FGType))
+            error(`${name} is not an FGType`);
+        let struct = valueName.value.value;
+        if (!(struct instanceof StructT))
+            error(`${name} is not a struct`);
+        return struct;
+    }
     let type;
     switch (prevTok.kind) {
         case 2220:

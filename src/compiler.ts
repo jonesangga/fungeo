@@ -1270,6 +1270,19 @@ function parse_type(): Type {
     }
 
     advance();
+    let name = prevTok.lexeme;
+
+    // Check if type is a struct
+    if (Object.hasOwn(userNames, name)) {
+        let valueName = userNames[name];
+        if (!(valueName.value instanceof FGType))
+            error(`${ name} is not an FGType`);
+        let struct = valueName.value.value;
+        if (!(struct instanceof StructT))
+            error(`${ name } is not a struct`);
+        return struct;
+    }
+
     let type: Type;
     switch (prevTok.kind) {
         case TokenT.BoolT:
