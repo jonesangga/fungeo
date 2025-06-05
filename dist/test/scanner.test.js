@@ -76,6 +76,7 @@ describe("scanner each token type", () => {
         [2750]: ["proc", { kind: 2750, line: 1, lexeme: "proc" }],
         [695]: ["}", { kind: 695, line: 1, lexeme: "}" }],
         [700]: ["]", { kind: 700, line: 1, lexeme: "]" }],
+        [2780]: ["Rect", { kind: 2780, line: 1, lexeme: "Rect" }],
         [2800]: ["return", { kind: 2800, line: 1, lexeme: "return" }],
         [800]: [")", { kind: 800, line: 1, lexeme: ")" }],
         [900]: [";", { kind: 900, line: 1, lexeme: ";" }],

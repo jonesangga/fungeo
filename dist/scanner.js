@@ -55,6 +55,7 @@ export var TokenT;
     TokenT[TokenT["Nonlocal"] = 2550] = "Nonlocal";
     TokenT[TokenT["NumT"] = 2600] = "NumT";
     TokenT[TokenT["Proc"] = 2750] = "Proc";
+    TokenT[TokenT["RectT"] = 2780] = "RectT";
     TokenT[TokenT["Return"] = 2800] = "Return";
     TokenT[TokenT["StrT"] = 2900] = "StrT";
     TokenT[TokenT["Struct"] = 2910] = "Struct";
@@ -111,6 +112,7 @@ export const TokenTName = {
     [2750]: "Proc",
     [695]: "RBrace",
     [700]: "RBracket",
+    [2780]: "RectT",
     [2800]: "Return",
     [800]: "RParen",
     [900]: "Semicolon",
@@ -178,6 +180,7 @@ function pascal_case() {
         case "Bool": return token_lexeme(2220);
         case "Circle": return token_lexeme(2230);
         case "Num": return token_lexeme(2600);
+        case "Rect": return token_lexeme(2780);
         case "Str": return token_lexeme(2900);
     }
     return token_lexeme(1650);

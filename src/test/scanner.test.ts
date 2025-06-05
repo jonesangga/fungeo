@@ -90,6 +90,7 @@ describe("scanner each token type", () => {
         [TokenT.Proc]: ["proc", { kind: TokenT.Proc, line: 1, lexeme: "proc" }],
         [TokenT.RBrace]: ["}", { kind: TokenT.RBrace, line: 1, lexeme: "}" }],
         [TokenT.RBracket]: ["]", { kind: TokenT.RBracket, line: 1, lexeme: "]" }],
+        [TokenT.RectT]: ["Rect", { kind: TokenT.RectT, line: 1, lexeme: "Rect" }],
         [TokenT.Return]: ["return", { kind: TokenT.Return, line: 1, lexeme: "return" }],
         [TokenT.RParen]: [")", { kind: TokenT.RParen, line: 1, lexeme: ")" }],
         [TokenT.Semicolon]: [";", { kind: TokenT.Semicolon, line: 1, lexeme: ";" }],

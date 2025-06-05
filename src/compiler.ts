@@ -5,7 +5,7 @@ import { Op, Chunk } from "./chunk.js"
 import { FGCurry, CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
 import { Method, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
-import { type Type, NeverT, StructT, NumberT, StringT, ListT, TupleT, neverT, circleT, numberT, stringT, booleanT, callUserT,
+import { type Type, NeverT, StructT, NumberT, StringT, ListT, TupleT, neverT, circleT, rectT, numberT, stringT, booleanT, callUserT,
          CallNativeT, CallUserT, nothingT, canvasT, replT, pictureT, callNativeT } from "./type.js"
 
 // For quick debugging.
@@ -106,6 +106,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.RectT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Return]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RParen]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Semicolon] : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -601,16 +602,21 @@ function parse_mut(): void {
     consume(TokenT.Eq, "expect '=' after name");
 
     if (current.scopeDepth > 0) {
-        set_local(name, true);
+        if (explicit)
+            set_mut_control(name, type);
+        else
+            set_mut_control(name);
     } else {
         if (explicit)
-            set_mut(name, type);
+            set_mut_callable(name, type);
         else
-            set_mut(name);
+            set_mut_callable(name);
     }
 }
 
-function set_mut(name: string, explicitT?: Type): void {
+// TODO: this is broken!!!
+function set_mut_callable(name: string, explicitT?: Type): void {
+    $("in set_mut_callable");
     // Make sure it didn't redeclare a name.
     if (Object.hasOwn(nativeNames, name)
             || Object.hasOwn(userNames, name)
@@ -624,7 +630,7 @@ function set_mut(name: string, explicitT?: Type): void {
     expression();
 
     if (explicitT) {
-        $("explicitT in set_mut() is defined:", explicitT);
+        $("explicitT in set_mut_callable() is defined:", explicitT);
         assertT(lastT, explicitT, "type didn't match with explicit type");
     }
     emitConstant(new FGType(lastT));
@@ -689,7 +695,7 @@ function get_non_callable_(table: any, name: string, op: Op): void {
 
 function set_non_callable(name: string, type?: Type): void {
     if (current.scopeDepth > 0) {
-        set_non_callable_control(name);
+        set_non_callable_control(name, type);
     } else {
         set_non_callable_callable(name, type);
     }
@@ -742,7 +748,7 @@ function set_non_callable_callable(name: string, explicitT?: Type): void {
 // This is for assignment in control scope that doesn't use `let` or `mut`.
 // So it must be a mutable name from callable scope.
 
-function set_non_callable_control(name: string): void {
+function set_non_callable_control(name: string, explicitT?: Type): void {
     $("in set_non_callable_control()");
 
     let found = false;
@@ -763,6 +769,11 @@ function set_non_callable_control(name: string): void {
     lastT = neverT;
     canParseArgument = true;
     expression();
+    if (explicitT) {
+        $("in set_non_callable_control():", lastT, explicitT);
+        assertT(lastT, explicitT, "type didn't match with explicit type");
+    }
+
     emitConstant(new FGType(lastT));
 
     assertT(lastT, type, "localGlobal reassignment type didn't match");
@@ -1140,92 +1151,35 @@ function set_block(name: string, mut: boolean = false): void {
     lastT = nothingT;
 }
 
-function set_local(name: string, mut: boolean = false): void {
-    // // Check if name is in nonlocals
-    // for (let i = current.nonlocals.length - 1; i >= 0; i--) {
-        // let non = current.nonlocals[i];
-        // if (non.depth < current.scopeDepth)
-            // break;
-        // if (name === non.name) {
-            // set_nonlocal(non.index as number, non.type);
-            // return;
-        // }
-    // }
-
-    if (mut) {
-        for (let i = current.locals.length - 1; i >= 0; i--) {
-            let local = current.locals[i];
-            if (local.depth < current.scopeDepth)
-                break;
-            if (name === local.name)
-                error(`${ name } already defined in this scope`);
-        }
-
-        add_local(name);
-        let index = current.locals.length - 1;
-
-        lastT = neverT;
-        canParseArgument = true;
-        expression();
-        emitConstant(new FGType(lastT));
-
-        emitBytes(Op.SetLoc, index);
-        current.locals[current.locals.length - 1].type = lastT;
-        current.locals[current.locals.length - 1].mut = true;
+function set_mut_control(name: string, explicitT?: Type): void {
+    $("in set_mut_control");
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth < current.scopeDepth)
+            break;
+        if (name === local.name)
+            error(`${ name } already defined in this scope`);
     }
-    else {
-        let type: Type = neverT;
-        let mut = false;
 
-        let i;
-        for (i = current.locals.length - 1; i >= 0; i--) {
-            let local = current.locals[i];
-            if (name === local.name) {
-                if (local.mut === true) {
-                    mut = true;
-                    type = local.type;
-                    break;
-                }
-                else {
-                    if (local.depth === current.scopeDepth)
-                        error(`${ name } already defined in this scope`);
-                }
-            }
-        }
-        let index: number;
-        if (mut) {
-            $("mut");
-            index = i;
+    add_local(name);
+    let index = current.locals.length - 1;
+
+    lastT = neverT;
+    canParseArgument = true;
+    expression();
+    if (explicitT) {
+        $("explicitT in set_mut_control() is defined:", lastT, explicitT);
+        if (lastT.equal(new ListT(nothingT))) {
+            lastT = explicitT;
         } else {
-            add_local(name);
-            index = current.locals.length - 1;
+            assertT(lastT, explicitT, "type didn't match with explicit type");
         }
-
-        lastT = neverT;
-        canParseArgument = true;
-        expression();
-        emitConstant(new FGType(lastT));
-
-        if (mut)
-            emitBytes(Op.SetLocM, index);
-        else {
-            current.locals[current.locals.length - 1].type = lastT;
-            emitBytes(Op.SetLoc, index);
-        }
-
     }
+    emitConstant(new FGType(lastT));
 
-    // add_local(name);
-    // let index = current.locals.length - 1;
-
-    // lastT = neverT;
-    // canParseArgument = true;
-    // expression();
-
-    // emitBytes(Op.SetLoc, index);
-    // current.locals[current.locals.length - 1].type = lastT;
-    // if (mut)
-        // current.locals[current.locals.length - 1].mut = true;
+    emitBytes(Op.SetLoc, index);
+    current.locals[current.locals.length - 1].type = lastT;
+    current.locals[current.locals.length - 1].mut = true;
     lastT = nothingT;
 }
 
@@ -1329,6 +1283,9 @@ function parse_type(): Type {
             break;
         case TokenT.CircleT:
             type = circleT;
+            break;
+        case TokenT.RectT:
+            type = rectT;
             break;
         default:
             error("expect parameter type");
@@ -1461,6 +1418,7 @@ function proc(): void {
     // Check return statement
     returnT = nothingT;
     proc_body();
+    console.log("in proc():", returnT, outputT);
     assertT(returnT, outputT, "return type not match");
     if (outputT.equal(nothingT))
         emitBytes(Op.Ret, 0);

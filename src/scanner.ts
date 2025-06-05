@@ -58,6 +58,7 @@ export const enum TokenT {
     Nonlocal  = 2550,
     NumT      = 2600,
     Proc      = 2750,
+    RectT     = 2780,
     Return    = 2800,
     StrT      = 2900,
     Struct    = 2910,
@@ -116,6 +117,7 @@ export const TokenTName: {
     [TokenT.Proc]: "Proc",
     [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
+    [TokenT.RectT]: "RectT",
     [TokenT.Return]: "Return",
     [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
@@ -204,6 +206,7 @@ function pascal_case(): Token {
         case "Bool":   return token_lexeme( TokenT.BoolT );
         case "Circle": return token_lexeme( TokenT.CircleT );
         case "Num":    return token_lexeme( TokenT.NumT );
+        case "Rect":   return token_lexeme( TokenT.RectT );
         case "Str":    return token_lexeme( TokenT.StrT );
     }
     return token_lexeme( TokenT.Callable );

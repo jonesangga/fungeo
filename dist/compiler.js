@@ -3,7 +3,7 @@ import { Chunk } from "./chunk.js";
 import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-import { StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
+import { StructT, NumberT, StringT, ListT, neverT, circleT, rectT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
 let $ = console.log;
 let lastT = neverT;
 let returnT = neverT;
@@ -81,6 +81,7 @@ const rules = {
     [2750]: { prefix: null, infix: null, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
+    [2780]: { prefix: null, infix: null, precedence: 100 },
     [2800]: { prefix: null, infix: null, precedence: 100 },
     [800]: { prefix: null, infix: null, precedence: 100 },
     [900]: { prefix: null, infix: null, precedence: 100 },
@@ -448,16 +449,20 @@ function parse_mut() {
     }
     consume(1500, "expect '=' after name");
     if (current.scopeDepth > 0) {
-        set_local(name, true);
+        if (explicit)
+            set_mut_control(name, type);
+        else
+            set_mut_control(name);
     }
     else {
         if (explicit)
-            set_mut(name, type);
+            set_mut_callable(name, type);
         else
-            set_mut(name);
+            set_mut_callable(name);
     }
 }
-function set_mut(name, explicitT) {
+function set_mut_callable(name, explicitT) {
+    $("in set_mut_callable");
     if (Object.hasOwn(nativeNames, name)
         || Object.hasOwn(userNames, name)
         || Object.hasOwn(tempNames, name)) {
@@ -468,7 +473,7 @@ function set_mut(name, explicitT) {
     canParseArgument = true;
     expression();
     if (explicitT) {
-        $("explicitT in set_mut() is defined:", explicitT);
+        $("explicitT in set_mut_callable() is defined:", explicitT);
         assertT(lastT, explicitT, "type didn't match with explicit type");
     }
     emitConstant(new FGType(lastT));
@@ -526,7 +531,7 @@ function get_non_callable_(table, name, op) {
 }
 function set_non_callable(name, type) {
     if (current.scopeDepth > 0) {
-        set_non_callable_control(name);
+        set_non_callable_control(name, type);
     }
     else {
         set_non_callable_callable(name, type);
@@ -573,7 +578,7 @@ function set_non_callable_callable(name, explicitT) {
     }
     lastT = nothingT;
 }
-function set_non_callable_control(name) {
+function set_non_callable_control(name, explicitT) {
     $("in set_non_callable_control()");
     let found = false;
     let type = neverT;
@@ -591,6 +596,10 @@ function set_non_callable_control(name) {
     lastT = neverT;
     canParseArgument = true;
     expression();
+    if (explicitT) {
+        $("in set_non_callable_control():", lastT, explicitT);
+        assertT(lastT, explicitT, "type didn't match with explicit type");
+    }
     emitConstant(new FGType(lastT));
     assertT(lastT, type, "localGlobal reassignment type didn't match");
     emitBytes(1415, index);
@@ -874,63 +883,33 @@ function set_block(name, mut = false) {
     }
     lastT = nothingT;
 }
-function set_local(name, mut = false) {
-    if (mut) {
-        for (let i = current.locals.length - 1; i >= 0; i--) {
-            let local = current.locals[i];
-            if (local.depth < current.scopeDepth)
-                break;
-            if (name === local.name)
-                error(`${name} already defined in this scope`);
-        }
-        add_local(name);
-        let index = current.locals.length - 1;
-        lastT = neverT;
-        canParseArgument = true;
-        expression();
-        emitConstant(new FGType(lastT));
-        emitBytes(1410, index);
-        current.locals[current.locals.length - 1].type = lastT;
-        current.locals[current.locals.length - 1].mut = true;
+function set_mut_control(name, explicitT) {
+    $("in set_mut_control");
+    for (let i = current.locals.length - 1; i >= 0; i--) {
+        let local = current.locals[i];
+        if (local.depth < current.scopeDepth)
+            break;
+        if (name === local.name)
+            error(`${name} already defined in this scope`);
     }
-    else {
-        let type = neverT;
-        let mut = false;
-        let i;
-        for (i = current.locals.length - 1; i >= 0; i--) {
-            let local = current.locals[i];
-            if (name === local.name) {
-                if (local.mut === true) {
-                    mut = true;
-                    type = local.type;
-                    break;
-                }
-                else {
-                    if (local.depth === current.scopeDepth)
-                        error(`${name} already defined in this scope`);
-                }
-            }
-        }
-        let index;
-        if (mut) {
-            $("mut");
-            index = i;
+    add_local(name);
+    let index = current.locals.length - 1;
+    lastT = neverT;
+    canParseArgument = true;
+    expression();
+    if (explicitT) {
+        $("explicitT in set_mut_control() is defined:", lastT, explicitT);
+        if (lastT.equal(new ListT(nothingT))) {
+            lastT = explicitT;
         }
         else {
-            add_local(name);
-            index = current.locals.length - 1;
-        }
-        lastT = neverT;
-        canParseArgument = true;
-        expression();
-        emitConstant(new FGType(lastT));
-        if (mut)
-            emitBytes(1420, index);
-        else {
-            current.locals[current.locals.length - 1].type = lastT;
-            emitBytes(1410, index);
+            assertT(lastT, explicitT, "type didn't match with explicit type");
         }
     }
+    emitConstant(new FGType(lastT));
+    emitBytes(1410, index);
+    current.locals[current.locals.length - 1].type = lastT;
+    current.locals[current.locals.length - 1].mut = true;
     lastT = nothingT;
 }
 function set_global(name, mut = false) {
@@ -1020,6 +999,9 @@ function parse_type() {
             break;
         case 2230:
             type = circleT;
+            break;
+        case 2780:
+            type = rectT;
             break;
         default:
             error("expect parameter type");
@@ -1118,6 +1100,7 @@ function proc() {
     consume(300, "expect '{' before proc body");
     returnT = nothingT;
     proc_body();
+    console.log("in proc():", returnT, outputT);
     assertT(returnT, outputT, "return type not match");
     if (outputT.equal(nothingT))
         emitBytes(1300, 0);
