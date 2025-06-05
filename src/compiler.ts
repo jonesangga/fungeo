@@ -592,15 +592,25 @@ function parse_mut(): void {
     consume(TokenT.NCallable, "expect a name");
     let name = prevTok.lexeme;
 
+    let explicit = false;
+    let type = neverT;
+    if (match(TokenT.Colon)) {
+        type = parse_type();
+        explicit = true;
+    }
     consume(TokenT.Eq, "expect '=' after name");
+
     if (current.scopeDepth > 0) {
         set_local(name, true);
     } else {
-        set_mut(name);
+        if (explicit)
+            set_mut(name, type);
+        else
+            set_mut(name);
     }
 }
 
-function set_mut(name: string): void {
+function set_mut(name: string, explicitT?: Type): void {
     // Make sure it didn't redeclare a name.
     if (Object.hasOwn(nativeNames, name)
             || Object.hasOwn(userNames, name)
@@ -612,6 +622,11 @@ function set_mut(name: string): void {
     lastT = neverT;
     canParseArgument = true;
     expression();
+
+    if (explicitT) {
+        $("explicitT in set_mut() is defined:", explicitT);
+        assertT(lastT, explicitT, "type didn't match with explicit type");
+    }
     emitConstant(new FGType(lastT));
 
     tempNames[name] = { type: lastT, mut: true };
@@ -624,12 +639,21 @@ function set_mut(name: string): void {
 function parse_non_callable(): void {
     let name = prevTok.lexeme;
 
-    if (match(TokenT.Eq)) {
+    if (match(TokenT.Colon)) {
+        if (!canAssign)
+            error(`cannot assign ${ name }`);
+        canAssign = false;
+        let type = parse_type();
+        consume(TokenT.Eq, "expect '=' after lhs");
+        set_non_callable(name, type);
+    }
+    else if (match(TokenT.Eq)) {
         if (!canAssign)
             error(`cannot assign ${ name }`);
         canAssign = false;
         set_non_callable(name);
-    } else {
+    }
+    else {
         canAssign = false;
         get_non_callable(name);
     }
@@ -663,15 +687,15 @@ function get_non_callable_(table: any, name: string, op: Op): void {
     lastT = table[name].type;
 }
 
-function set_non_callable(name: string): void {
+function set_non_callable(name: string, type?: Type): void {
     if (current.scopeDepth > 0) {
         set_non_callable_control(name);
     } else {
-        set_non_callable_callable(name);
+        set_non_callable_callable(name, type);
     }
 }
 
-function set_non_callable_callable(name: string): void {
+function set_non_callable_callable(name: string, explicitT?: Type): void {
     let type = neverT;
     let ismut = false;
 
@@ -696,6 +720,7 @@ function set_non_callable_callable(name: string): void {
     }
 
     let index = makeConstant(new FGString(name));
+
     lastT = neverT;
     canParseArgument = true;
     expression();
@@ -706,6 +731,8 @@ function set_non_callable_callable(name: string): void {
         emitBytes(Op.SetMut, index);
     }
     else {
+        if (explicitT)
+            assertT(lastT, explicitT, "type didn't match with explicit type");
         tempNames[name] = { type: lastT };
         emitBytes(Op.Set, index);
     }

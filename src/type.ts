@@ -59,7 +59,8 @@ export class ListT implements Type {
         return this.elType.to_str() + "[]";
     }
     equal(other: Type): boolean {
-        return other instanceof ListT;
+        return other instanceof ListT
+            && this.elType.equal(other.elType);
     }
 }
 

@@ -440,15 +440,24 @@ function parse_mut() {
     $("in parse_mut()");
     consume(2540, "expect a name");
     let name = prevTok.lexeme;
+    let explicit = false;
+    let type = neverT;
+    if (match(1300)) {
+        type = parse_type();
+        explicit = true;
+    }
     consume(1500, "expect '=' after name");
     if (current.scopeDepth > 0) {
         set_local(name, true);
     }
     else {
-        set_mut(name);
+        if (explicit)
+            set_mut(name, type);
+        else
+            set_mut(name);
     }
 }
-function set_mut(name) {
+function set_mut(name, explicitT) {
     if (Object.hasOwn(nativeNames, name)
         || Object.hasOwn(userNames, name)
         || Object.hasOwn(tempNames, name)) {
@@ -458,6 +467,10 @@ function set_mut(name) {
     lastT = neverT;
     canParseArgument = true;
     expression();
+    if (explicitT) {
+        $("explicitT in set_mut() is defined:", explicitT);
+        assertT(lastT, explicitT, "type didn't match with explicit type");
+    }
     emitConstant(new FGType(lastT));
     tempNames[name] = { type: lastT, mut: true };
     add_local_global(name, lastT);
@@ -466,7 +479,15 @@ function set_mut(name) {
 }
 function parse_non_callable() {
     let name = prevTok.lexeme;
-    if (match(1500)) {
+    if (match(1300)) {
+        if (!canAssign)
+            error(`cannot assign ${name}`);
+        canAssign = false;
+        let type = parse_type();
+        consume(1500, "expect '=' after lhs");
+        set_non_callable(name, type);
+    }
+    else if (match(1500)) {
         if (!canAssign)
             error(`cannot assign ${name}`);
         canAssign = false;
@@ -503,15 +524,15 @@ function get_non_callable_(table, name, op) {
     emitBytes(op, index);
     lastT = table[name].type;
 }
-function set_non_callable(name) {
+function set_non_callable(name, type) {
     if (current.scopeDepth > 0) {
         set_non_callable_control(name);
     }
     else {
-        set_non_callable_callable(name);
+        set_non_callable_callable(name, type);
     }
 }
-function set_non_callable_callable(name) {
+function set_non_callable_callable(name, explicitT) {
     let type = neverT;
     let ismut = false;
     if (Object.hasOwn(nativeNames, name)) {
@@ -545,6 +566,8 @@ function set_non_callable_callable(name) {
         emitBytes(1430, index);
     }
     else {
+        if (explicitT)
+            assertT(lastT, explicitT, "type didn't match with explicit type");
         tempNames[name] = { type: lastT };
         emitBytes(1400, index);
     }

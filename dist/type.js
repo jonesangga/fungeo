@@ -48,7 +48,8 @@ export class ListT {
         return this.elType.to_str() + "[]";
     }
     equal(other) {
-        return other instanceof ListT;
+        return other instanceof ListT
+            && this.elType.equal(other.elType);
     }
 }
 export class StructT {
