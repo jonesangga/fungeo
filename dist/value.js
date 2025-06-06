@@ -1,5 +1,4 @@
-import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
-import { FGType } from "./literal/type.js";
+import { FGType, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -97,9 +96,6 @@ export class FGCallNative {
     typeof() {
         return new FGType(new CallNativeT(this.input, this.output));
     }
-    equal(other) {
-        return false;
-    }
 }
 export class FGCallUser {
     name;
@@ -124,9 +120,6 @@ export class FGCallUser {
     typeof() {
         return new FGType(new CallUserT(this.input, this.output));
     }
-    equal(other) {
-        return false;
-    }
 }
 export class FGCurry {
     name;
@@ -143,9 +136,6 @@ export class FGCurry {
     }
     typeof() {
         return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
-    }
-    equal(other) {
-        return false;
     }
 }
 export class FGNumber {

@@ -1,5 +1,5 @@
 import { pop, push, vm_output, call, run } from "./vm.js"
-import { CallT, Kind, type GeoObj, type Fillable, KindName, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { CallT, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
 import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
@@ -10,8 +10,8 @@ import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, NumberT, CircleT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT,
-         ellipseT, segmentT, nothingT, stringT, booleanT, numberT,
+import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT,
+         ellipseT, segmentT, nothingT, stringT, numberT,
          colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js"
 
 function _Print(): void {

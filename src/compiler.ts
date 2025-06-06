@@ -3,11 +3,11 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { rectStruct } from "./geo/rect.js"
-import { FGCurry, CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
-import { Method, nativeNames } from "./names.js"
+import { FGCurry, CallT, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
+import { nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
-import { FGType, type Type, NeverT, StructT, NumberT, StringT, ListT, TupleT, neverT, circleT, rectT, numberT, stringT, booleanT, callUserT,
-         CallNativeT, CallUserT, nothingT, canvasT, replT, pictureT, callNativeT } from "./literal/type.js"
+import { FGType, type Type, StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT,
+         CallNativeT, CallUserT, nothingT } from "./literal/type.js"
 
 // For quick debugging.
 let $ = console.log;

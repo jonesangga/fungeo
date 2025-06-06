@@ -3,14 +3,13 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, colorT, complexT, StructT } from "./literal/type.js"
+import { FGType, Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
-import { FGType } from "./literal/type.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
@@ -80,9 +79,9 @@ export type Repl = {
 };
 
 export interface FG {
-    kind:     Kind;
-    to_str(): string;
-    typeof:   () => FGType;
+    kind:   Kind;
+    to_str: () => string;
+    typeof: () => FGType;
 }
 
 export class FGBoolean implements FG {
@@ -133,10 +132,6 @@ export class FGCallNative implements FG {
     typeof(): FGType {
         return new FGType(new CallNativeT(this.input, this.output));
     }
-
-    equal(other: FG) {
-        return false;
-    }
 }
 
 export class FGCallUser implements FG {
@@ -160,10 +155,6 @@ export class FGCallUser implements FG {
     typeof(): FGType {
         return new FGType(new CallUserT(this.input, this.output));
     }
-
-    equal(other: FG) {
-        return false;
-    }
 }
 
 export class FGCurry implements FG {
@@ -181,10 +172,6 @@ export class FGCurry implements FG {
 
     typeof(): FGType {
         return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
-    }
-
-    equal(other: FG) {
-        return false;
     }
 }
 

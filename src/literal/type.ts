@@ -2,6 +2,7 @@
 //
 // TODO: Implement the equal() method.
 //       Test it.
+//       Add AliasT for type alias.
 
 import { type FG, Kind } from "../value.js";
 
