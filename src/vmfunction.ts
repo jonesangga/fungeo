@@ -39,6 +39,16 @@ export let Printf = new FGCallNative("Printf", CallT.Function, _Printf,
     nothingT,
 );
 
+function _Sqrt(): void {
+    let value = pop() as FGNumber;
+    pop();              // The function.
+    push(new FGNumber( Math.sqrt(value.value) ));
+}
+export let Sqrt = new FGCallNative("Sqrt", CallT.Function, _Sqrt,
+    [numberT],
+    numberT,
+);
+
 function _Show(): void {
     let value = pop();
     pop();              // The function.

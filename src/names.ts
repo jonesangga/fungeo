@@ -10,7 +10,7 @@ import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint,
          Cw, Ccw, FlipH, FlipV, Quartet, Cycle,
          MapPic, Help, Clear,
          Ccurv, Descart, ComplexDescart,
-         Push, RGB, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js"
+         Sqrt, Push, RGB, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js"
 import canvas from "./ui/canvas.js"
 import repl   from "./ui/repl.js"
 import fish   from "./data/fish.js"
@@ -77,4 +77,5 @@ export let nativeNames: Names = {
     "Midpoint": { type: callNativeT, value: Midpoint },
     "Rect": { type: rectStruct.value, value: rectStruct },
     "Point": { type: pointStruct.value, value: pointStruct },
+    "Sqrt": { type: callNativeT, value: Sqrt },
 };

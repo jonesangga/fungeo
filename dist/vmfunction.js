@@ -1,5 +1,5 @@
 import { pop, push, vm_output, call, run } from "./vm.js";
-import { FGCallNative, FGCallUser, FGString, FGList } from "./value.js";
+import { FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js";
 import { FGColor } from "./literal/color.js";
 import canvas from "./ui/canvas.js";
 import Circle from "./geo/circle.js";
@@ -25,6 +25,12 @@ function _Printf() {
     vm_output(value.to_str());
 }
 export let Printf = new FGCallNative("Printf", 0, _Printf, [anyT], nothingT);
+function _Sqrt() {
+    let value = pop();
+    pop();
+    push(new FGNumber(Math.sqrt(value.value)));
+}
+export let Sqrt = new FGCallNative("Sqrt", 0, _Sqrt, [numberT], numberT);
 function _Show() {
     let value = pop();
     pop();
