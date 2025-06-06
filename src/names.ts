@@ -15,6 +15,7 @@ import canvas from "./ui/canvas.js"
 import repl   from "./ui/repl.js"
 import fish   from "./data/fish.js"
 import { rectStruct }   from "./geo/rect.js"
+import { pointStruct }   from "./geo/point.js"
 
 export type Method = {
     [name: string]: { type: Type, value: Value },
@@ -75,4 +76,5 @@ export let nativeNames: Names = {
     }},
     "Midpoint": { type: callNativeT, value: Midpoint },
     "Rect": { type: rectStruct.value, value: rectStruct },
+    "Point": { type: pointStruct.value, value: pointStruct },
 };

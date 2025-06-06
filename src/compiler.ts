@@ -3,6 +3,7 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { rectStruct } from "./geo/rect.js"
+import { pointStruct } from "./geo/point.js"
 import { FGCurry, CallT, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
 import { nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
@@ -104,6 +105,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
+    [TokenT.PointT]    : {prefix: null,            infix: null,    precedence: Precedence.Term},
     [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -1297,6 +1299,9 @@ function parse_type(): Type {
             break;
         case TokenT.CircleT:
             type = circleT;
+            break;
+        case TokenT.PointT:
+            type = pointStruct.value;
             break;
         case TokenT.RectT:
             type = rectStruct.value;

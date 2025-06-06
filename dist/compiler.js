@@ -1,6 +1,7 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
 import { rectStruct } from "./geo/rect.js";
+import { pointStruct } from "./geo/point.js";
 import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
@@ -79,6 +80,7 @@ const rules = {
     [1580]: { prefix: null, infix: or, precedence: 210 },
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
     [1590]: { prefix: null, infix: concat_list, precedence: 300 },
+    [2700]: { prefix: null, infix: null, precedence: 300 },
     [2750]: { prefix: null, infix: null, precedence: 300 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
@@ -1010,6 +1012,9 @@ function parse_type() {
             break;
         case 2230:
             type = circleT;
+            break;
+        case 2700:
+            type = pointStruct.value;
             break;
         case 2780:
             type = rectStruct.value;

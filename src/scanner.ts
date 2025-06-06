@@ -57,6 +57,7 @@ export const enum TokenT {
     NCallable = 2540,
     Nonlocal  = 2550,
     NumT      = 2600,
+    PointT    = 2700,
     Proc      = 2750,
     RectT     = 2780,
     Return    = 2800,
@@ -114,6 +115,7 @@ export const TokenTName: {
     [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
+    [TokenT.PointT]: "PointT",
     [TokenT.Proc]: "Proc",
     [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
@@ -206,6 +208,7 @@ function pascal_case(): Token {
         case "Bool":   return token_lexeme( TokenT.BoolT );
         case "Circle": return token_lexeme( TokenT.CircleT );
         case "Num":    return token_lexeme( TokenT.NumT );
+        case "Point":  return token_lexeme( TokenT.PointT );
         case "Rect":   return token_lexeme( TokenT.RectT );
         case "Str":    return token_lexeme( TokenT.StrT );
     }

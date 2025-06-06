@@ -8,9 +8,10 @@ import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
+import { pointStruct } from "./geo/point.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT,
+import { ListT, geoT, fillableT, anyT, circleT, pictureT,
          ellipseT, segmentT, nothingT, stringT, numberT,
          colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js"
 
@@ -193,7 +194,7 @@ function _C_FromPoints(): void {
     push(c);
 }
 export let C_FromPoints = new FGCallNative("C_FromPoints", CallT.Function, _C_FromPoints,
-    [pointT, pointT],
+    [pointStruct.value, pointStruct.value],
     circleT,
 );
 
@@ -262,7 +263,7 @@ function _P(): void {
 }
 export let P = new FGCallNative("P", CallT.Function, _P,
     [numberT, numberT],
-    pointT,
+    pointStruct.value,
 );
 
 function _Paint(): void {
@@ -460,7 +461,7 @@ function _R_FromPoints(): void {
     push(rect);
 }
 export let R_FromPoints = new FGCallNative("R_FromPoints", CallT.Function, _R_FromPoints,
-    [pointT, pointT],
+    [pointStruct.value, pointStruct.value],
     // rectT,
     rectStruct.value,
 );
@@ -487,7 +488,7 @@ function _Seg_FromPoints(): void {
     push(seg);
 }
 export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", CallT.Function, _Seg_FromPoints,
-    [pointT, pointT],
+    [pointStruct.value, pointStruct.value],
     segmentT,
 );
 
@@ -499,7 +500,7 @@ function _Midpoint(): void {
 }
 export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint,
     [segmentT],
-    pointT,
+    pointStruct.value,
 );
 
 function _Help(): void {

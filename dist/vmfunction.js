@@ -8,9 +8,10 @@ import Picture from "./geo/picture.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
 import { rectStruct } from "./geo/rect.js";
+import { pointStruct } from "./geo/point.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
-import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, ellipseT, segmentT, nothingT, stringT, numberT, colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js";
+import { ListT, geoT, fillableT, anyT, circleT, pictureT, ellipseT, segmentT, nothingT, stringT, numberT, colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js";
 function _Print() {
     let value = pop();
     pop();
@@ -138,7 +139,7 @@ function _C_FromPoints() {
     let c = new Circle(p.x, p.y, r);
     push(c);
 }
-export let C_FromPoints = new FGCallNative("C_FromPoints", 0, _C_FromPoints, [pointT, pointT], circleT);
+export let C_FromPoints = new FGCallNative("C_FromPoints", 0, _C_FromPoints, [pointStruct.value, pointStruct.value], circleT);
 function _Ccurv() {
     let bend = pop().value;
     let y = pop().value;
@@ -184,7 +185,7 @@ function _P() {
     let point = new Point(x, y);
     push(point);
 }
-export let P = new FGCallNative("P", 0, _P, [numberT, numberT], pointT);
+export let P = new FGCallNative("P", 0, _P, [numberT, numberT], pointStruct.value);
 function _Paint() {
     let geo = pop();
     let pic = pop();
@@ -279,7 +280,7 @@ function _R_FromPoints() {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [pointT, pointT], rectStruct.value);
+export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [pointStruct.value, pointStruct.value], rectStruct.value);
 function _Seg() {
     let y2 = pop().value;
     let x2 = pop().value;
@@ -297,14 +298,14 @@ function _Seg_FromPoints() {
     let seg = new Segment(p.x, p.y, q.x, q.y);
     push(seg);
 }
-export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", 0, _Seg_FromPoints, [pointT, pointT], segmentT);
+export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", 0, _Seg_FromPoints, [pointStruct.value, pointStruct.value], segmentT);
 function _Midpoint() {
     let segment = pop();
     pop();
     let point = segment.midpoint();
     push(point);
 }
-export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [segmentT], pointT);
+export let Midpoint = new FGCallNative("Midpoint", 0, _Midpoint, [segmentT], pointStruct.value);
 function _Help() {
     pop();
     vm_output(welcome);

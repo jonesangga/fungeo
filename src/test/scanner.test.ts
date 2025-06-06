@@ -87,6 +87,7 @@ describe("scanner each token type", () => {
         [TokenT.PipePipe]: ["||", { kind: TokenT.PipePipe, line: 1, lexeme: "||" }],
         [TokenT.Plus]: ["+", { kind: TokenT.Plus, line: 1, lexeme: "+" }],
         [TokenT.PlusPlus]: ["++", { kind: TokenT.PlusPlus, line: 1, lexeme: "++" }],
+        [TokenT.PointT]: ["Point", { kind: TokenT.PointT, line: 1, lexeme: "Point" }],
         [TokenT.Proc]: ["proc", { kind: TokenT.Proc, line: 1, lexeme: "proc" }],
         [TokenT.RBrace]: ["}", { kind: TokenT.RBrace, line: 1, lexeme: "}" }],
         [TokenT.RBracket]: ["]", { kind: TokenT.RBracket, line: 1, lexeme: "]" }],

@@ -4,8 +4,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Kind } from "../value.js"
-import { FGType, pointT } from "../literal/type.js"
+import { Value, Kind, FGNumber } from "../value.js"
+import { FGType, StructT, pointT, numberT } from "../literal/type.js"
 
 export default class Point {
     kind: Kind.Point = Kind.Point;
@@ -31,4 +31,23 @@ export default class Point {
         c.fillStyle = this.strokeStyle;
         c.fill();
     }
+
+    member(key: keyof typeof s): Value {
+        switch (key) {
+            case "x": return new FGNumber(this.x);
+            case "y": return new FGNumber(this.y);
+            default:
+                unreachable(key);
+        }
+    }
 }
+
+function unreachable(key: never): never {
+    throw new Error();
+}
+
+let s = {
+    x: numberT,
+    y: numberT,
+};
+export const pointStruct = new FGType(new StructT(s));
