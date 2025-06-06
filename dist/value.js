@@ -1,4 +1,4 @@
-import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js";
+import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
 import { FGType } from "./literal/type.js";
 export var Kind;
 (function (Kind) {

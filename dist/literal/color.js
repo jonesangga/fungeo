@@ -1,5 +1,4 @@
-import { colorT } from "../type.js";
-import { FGType } from "./type.js";
+import { FGType, colorT } from "./type.js";
 const colorTVal = new FGType(colorT);
 export class FGColor {
     r;

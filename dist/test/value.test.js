@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js";
 import { Chunk } from "../chunk.js";
-import { numberT } from "../type.js";
+import { numberT } from "../literal/type.js";
 describe("value", () => {
     it("FGBoolean", () => {
         let b = new FGBoolean(false);

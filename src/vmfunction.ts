@@ -12,7 +12,7 @@ import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { ListT, NumberT, CircleT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT,
          ellipseT, segmentT, nothingT, stringT, booleanT, numberT,
-         colorT, CallNativeT, NothingT, AnyT } from "./type.js"
+         colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js"
 
 function _Print(): void {
     let value = pop();

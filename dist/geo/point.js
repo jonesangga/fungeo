@@ -1,7 +1,6 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
-import { pointT } from "../type.js";
-import { FGType } from "../literal/type.js";
+import { FGType, pointT } from "../literal/type.js";
 export default class Point {
     x;
     y;

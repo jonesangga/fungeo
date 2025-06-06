@@ -4,7 +4,7 @@
 //       CLEAN UP THE IMPORTS.
 
 import { type Value } from "./value.js"
-import { type Type, canvasT, replT, pictureT, callNativeT } from "./type.js"
+import { type Type, canvasT, replT, pictureT, callNativeT } from "./literal/type.js"
 import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint,
          C, E, P, Pic, R, Seg, Midpoint,
          Cw, Ccw, FlipH, FlipV, Quartet, Cycle,

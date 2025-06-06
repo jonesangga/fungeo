@@ -3,8 +3,7 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Kind, FGNumber, FGComplex } from "../value.js"
-import { circleT } from "../type.js"
-import { FGType } from "../literal/type.js"
+import { FGType, circleT } from "../literal/type.js"
 
 export default class Circle {
     kind: Kind.Circle = Kind.Circle;

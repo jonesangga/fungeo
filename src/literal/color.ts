@@ -4,8 +4,7 @@
 //       Test it.
 
 import { type FG, Kind } from "../value.js";
-import { colorT } from "../type.js";
-import { FGType } from "./type.js"
+import { FGType, colorT } from "./type.js"
 
 const colorTVal = new FGType(colorT);
 
