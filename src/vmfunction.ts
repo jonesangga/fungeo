@@ -6,6 +6,7 @@ import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
+import { rectStruct } from "./geo/rect.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { ListT, NumberT, CircleT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT,
@@ -427,7 +428,8 @@ function _R(): void {
 }
 export let R = new FGCallNative("R", CallT.Function, _R,
     [numberT, numberT, numberT, numberT],
-    rectT,
+    // rectT,
+    rectStruct.value,
 );
 
 function _R_WithCenter(): void {
@@ -441,7 +443,8 @@ function _R_WithCenter(): void {
 }
 export let R_WithCenter = new FGCallNative("R_WithCenter", CallT.Function, _R_WithCenter,
     [numberT, numberT, numberT, numberT],
-    rectT,
+    // rectT,
+    rectStruct.value,
 );
 
 function _R_FromPoints(): void {
@@ -457,7 +460,8 @@ function _R_FromPoints(): void {
 }
 export let R_FromPoints = new FGCallNative("R_FromPoints", CallT.Function, _R_FromPoints,
     [pointT, pointT],
-    rectT,
+    // rectT,
+    rectStruct.value,
 );
 
 function _Seg(): void {

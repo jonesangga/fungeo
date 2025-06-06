@@ -1,7 +1,22 @@
 # Log
 
+#### 06-05-25
+
+- make rect to be a struct
+
 #### 05-05-25
 
+- add RectT
+
+- remove length field in FGList
+- support Push array el
+
+- now can support pipe without assignment
+- support expression statement
+- add token colon minus `:-`
+
+- can use pipe only on rhs of '='
+- support pipe `|>` operator
 - support drawing a list of GeoObj
 
 #### 04-05-25

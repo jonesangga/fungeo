@@ -3,6 +3,7 @@ import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
+import { rectStruct } from "./geo/rect.js";
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
@@ -47,4 +48,5 @@ export let nativeNames = {
             "FromPoints": { type: callNativeT, value: Seg_FromPoints },
         } },
     "Midpoint": { type: callNativeT, value: Midpoint },
+    "Rect": { type: rectStruct.value, value: rectStruct },
 };

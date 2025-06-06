@@ -1,5 +1,6 @@
 import { FGCurry, FGStruct, FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
+import Rect from "./geo/rect.js";
 let $ = console.log;
 export let stack = [];
 export let stackTop = 0;
@@ -351,9 +352,15 @@ export function run(intercept = false) {
             }
             case 850: {
                 let id = pop().value;
-                let struct = pop();
-                let value = struct.members[id];
-                push(value);
+                let v = pop();
+                if (v instanceof FGStruct) {
+                    let value = v.members[id];
+                    push(value);
+                }
+                else if (v instanceof Rect) {
+                    let value = v.member(id);
+                    push(value);
+                }
                 break;
             }
             case 600: {

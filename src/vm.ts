@@ -4,6 +4,7 @@ import { Op, Chunk } from "./chunk.js"
 import { FGCurry, Kind, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
 import { Names, nativeNames } from "./names.js"
 import { type Type, StructT } from "./type.js"
+import Rect from "./geo/rect.js"
 
 // For quick debugging.
 let $ = console.log;
@@ -419,10 +420,16 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.Member: {
                 let id = (pop() as FGString).value;
-                let struct = pop() as FGStruct;
+                let v = pop();
 
-                let value = struct.members[id];
-                push(value);
+                if (v instanceof FGStruct) {
+                    let value = v.members[id];
+                    push(value);
+                } else if (v instanceof Rect) {
+                    let value = v.member(id as any);
+                    // console.log(new FGNumber(value));
+                    push(value);
+                }
                 break;
             }
 

@@ -1,9 +1,10 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
+import { rectStruct } from "./geo/rect.js";
 import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-import { StructT, NumberT, StringT, ListT, neverT, circleT, rectT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
+import { StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
 let $ = console.log;
 let lastT = neverT;
 let returnT = neverT;
@@ -1011,7 +1012,7 @@ function parse_type() {
             type = circleT;
             break;
         case 2780:
-            type = rectT;
+            type = rectStruct.value;
             break;
         default:
             error("expect parameter type");

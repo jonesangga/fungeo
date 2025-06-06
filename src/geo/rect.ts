@@ -2,8 +2,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind, FGType } from "../value.js"
-import { rectT } from "../type.js"
+import { Value, Kind, FGNumber, FGString, FGType } from "../value.js"
+import { StructT, rectT, numberT } from "../type.js"
 
 export default class Rect {
     kind: Kind.Rect = Kind.Rect;
@@ -16,6 +16,19 @@ export default class Rect {
         public strokeStyle: string = color.black,
         public fillStyle: string = color.nocolor
     ) {}
+
+    member(key: keyof typeof s): Value {
+        switch (key) {
+            case "x": return new FGNumber(this.x);
+            case "y": return new FGNumber(this.y);
+            case "w": return new FGNumber(this.w);
+            case "h": return new FGNumber(this.h);
+            // case "strokeStyle": return new FGString(this.strokeStyle);
+            // case "fillStyle": return new FGString(this.fillStyle);
+            default:
+                unreachable(key);
+        }
+    }
 
     to_str(): string {
         return `R ${this.x} ${this.y} ${this.w} ${this.h}`;
@@ -36,3 +49,15 @@ export default class Rect {
         }
     }
 }
+
+function unreachable(key: never): never {
+    throw new Error();
+}
+
+let s = {
+    x: numberT,
+    y: numberT,
+    w: numberT,
+    h: numberT,
+};
+export const rectStruct = new FGType(new StructT(s));

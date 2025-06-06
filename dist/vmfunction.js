@@ -6,9 +6,10 @@ import Ellipse from "./geo/ellipse.js";
 import Picture from "./geo/picture.js";
 import Point from "./geo/point.js";
 import Rect from "./geo/rect.js";
+import { rectStruct } from "./geo/rect.js";
 import Segment from "./geo/segment.js";
 import { welcome } from "./data/help.js";
-import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, rectT, ellipseT, segmentT, nothingT, stringT, numberT, colorT, CallNativeT, NothingT, AnyT } from "./type.js";
+import { ListT, geoT, fillableT, anyT, circleT, pointT, pictureT, ellipseT, segmentT, nothingT, stringT, numberT, colorT, CallNativeT, NothingT, AnyT } from "./type.js";
 function _Print() {
     let value = pop();
     pop();
@@ -255,7 +256,7 @@ function _R() {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R = new FGCallNative("R", 0, _R, [numberT, numberT, numberT, numberT], rectT);
+export let R = new FGCallNative("R", 0, _R, [numberT, numberT, numberT, numberT], rectStruct.value);
 function _R_WithCenter() {
     let h = pop().value;
     let w = pop().value;
@@ -265,7 +266,7 @@ function _R_WithCenter() {
     let rect = new Rect(x - w / 2, y - h / 2, w, h);
     push(rect);
 }
-export let R_WithCenter = new FGCallNative("R_WithCenter", 0, _R_WithCenter, [numberT, numberT, numberT, numberT], rectT);
+export let R_WithCenter = new FGCallNative("R_WithCenter", 0, _R_WithCenter, [numberT, numberT, numberT, numberT], rectStruct.value);
 function _R_FromPoints() {
     let q = pop();
     let p = pop();
@@ -277,7 +278,7 @@ function _R_FromPoints() {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [pointT, pointT], rectT);
+export let R_FromPoints = new FGCallNative("R_FromPoints", 0, _R_FromPoints, [pointT, pointT], rectStruct.value);
 function _Seg() {
     let y2 = pop().value;
     let x2 = pop().value;

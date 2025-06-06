@@ -14,6 +14,7 @@ import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint,
 import canvas from "./ui/canvas.js"
 import repl   from "./ui/repl.js"
 import fish   from "./data/fish.js"
+import { rectStruct }   from "./geo/rect.js"
 
 export type Method = {
     [name: string]: { type: Type, value: Value },
@@ -73,4 +74,5 @@ export let nativeNames: Names = {
         "FromPoints": { type: callNativeT, value: Seg_FromPoints },
     }},
     "Midpoint": { type: callNativeT, value: Midpoint },
+    "Rect": { type: rectStruct.value, value: rectStruct },
 };

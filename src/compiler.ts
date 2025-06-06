@@ -2,6 +2,7 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
+import { rectStruct } from "./geo/rect.js"
 import { FGCurry, CallT, Kind, KindName, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType, type Value } from "./value.js"
 import { Method, nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
@@ -1298,7 +1299,7 @@ function parse_type(): Type {
             type = circleT;
             break;
         case TokenT.RectT:
-            type = rectT;
+            type = rectStruct.value;
             break;
         default:
             error("expect parameter type");
