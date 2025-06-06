@@ -1,5 +1,6 @@
 import { pop, push, vm_output, call, run } from "./vm.js"
-import { CallT, Kind, type GeoObj, type Fillable, KindName, FGColor, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { CallT, Kind, type GeoObj, type Fillable, KindName, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"

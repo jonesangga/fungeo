@@ -9,6 +9,7 @@ import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
+import { FGColor } from "./literal/color.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
@@ -289,37 +290,6 @@ export class FGString implements FG {
         return false;
     }
 }
-
-export class FGColor implements FG {
-    kind: Kind.Color = Kind.Color;
-
-    constructor(
-        public r: number,
-        public g: number,
-        public b: number,
-        public a: number = 255,
-    ) {}
-
-    to_str(): string {
-        return `Color ${this.r},${this.g},${this.b},${this.a}`;
-    }
-
-    to_hex(): string {
-        return '#' + [this.r, this.g, this.b].map(x => {
-            const hex = x.toString(16)
-            return hex.length === 1 ? '0' + hex : hex
-        }).join('');
-    }
-
-    typeof(): FGType {
-        return new FGType(colorT);
-    }
-
-    equal(other: FG): boolean {
-        return false;
-    }
-}
-
 
 export class FGType implements FG {
     kind: Kind.Type = Kind.Type;
