@@ -1,7 +1,8 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { FGCurry, Kind, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, FGType, type Value, type Comparable } from "./value.js"
+import { FGCurry, Kind, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, type Value, type Comparable } from "./value.js"
+import { FGType } from "./literal/type.js"
 import { Names, nativeNames } from "./names.js"
 import { type Type, StructT } from "./type.js"
 import Rect from "./geo/rect.js"

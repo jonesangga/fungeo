@@ -1,7 +1,8 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind, FGType, Canvas } from "../value.js"
+import { Kind, Canvas } from "../value.js"
 import { canvasT } from "../type.js"
+import { FGType } from "../literal/type.js"
 
 let w = 600;    // Canvas width.
 let h = 600;    // Canvas height.

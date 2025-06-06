@@ -1,5 +1,5 @@
-import { FGType } from "../value.js";
 import { canvasT } from "../type.js";
+import { FGType } from "../literal/type.js";
 let w = 600;
 let h = 600;
 const canvasElem = document.createElement("canvas");

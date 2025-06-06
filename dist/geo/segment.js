@@ -1,8 +1,8 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
-import { FGType } from "../value.js";
 import { segmentT } from "../type.js";
 import Point from "./point.js";
+import { FGType } from "../literal/type.js";
 export default class Segment {
     x1;
     y1;

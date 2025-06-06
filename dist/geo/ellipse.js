@@ -1,7 +1,7 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
-import { FGType } from "../value.js";
 import { ellipseT } from "../type.js";
+import { FGType } from "../literal/type.js";
 export default class Ellipse {
     x;
     y;

@@ -1,4 +1,5 @@
 import { CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./type.js";
+import { FGType } from "./literal/type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -238,22 +239,6 @@ export class FGString {
             return false;
         if ("value" in other)
             return this.value === other.value;
-        return false;
-    }
-}
-export class FGType {
-    value;
-    kind = 650;
-    constructor(value) {
-        this.value = value;
-    }
-    to_str() {
-        return this.value.to_str();
-    }
-    typeof() {
-        return this;
-    }
-    equal(other) {
         return false;
     }
 }

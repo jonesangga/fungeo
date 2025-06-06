@@ -10,6 +10,7 @@ import Picture from "./geo/picture.js"
 import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
+import { FGType } from "./literal/type.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
@@ -287,26 +288,6 @@ export class FGString implements FG {
     equal(other: FG): boolean {
         if (this.kind !== other.kind) return false;
         if ("value" in other) return this.value === other.value;
-        return false;
-    }
-}
-
-export class FGType implements FG {
-    kind: Kind.Type = Kind.Type;
-
-    constructor(
-        public value: Type
-    ) {}
-
-    to_str(): string {
-        return this.value.to_str();
-    }
-
-    typeof(): FGType {
-        return this;
-    }
-
-    equal(other: FG): boolean {
         return false;
     }
 }

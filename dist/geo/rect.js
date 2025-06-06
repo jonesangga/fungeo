@@ -1,7 +1,8 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
-import { FGNumber, FGType } from "../value.js";
+import { FGNumber } from "../value.js";
 import { StructT, rectT, numberT } from "../type.js";
+import { FGType } from "../literal/type.js";
 export default class Rect {
     x;
     y;

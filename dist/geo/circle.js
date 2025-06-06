@@ -1,7 +1,8 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
-import { FGNumber, FGComplex, FGType } from "../value.js";
+import { FGNumber, FGComplex } from "../value.js";
 import { circleT } from "../type.js";
+import { FGType } from "../literal/type.js";
 export default class Circle {
     x;
     y;

@@ -1,7 +1,8 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
 import { rectStruct } from "./geo/rect.js";
-import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGType } from "./value.js";
+import { FGType } from "./literal/type.js";
+import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
 import { StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./type.js";
