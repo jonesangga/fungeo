@@ -248,6 +248,7 @@ export const nothingT = new NothingT();
 export const anyT = new AnyT();
 export const booleanT = new BooleanT();
 export const colorT = new ColorT();
+export const colorTVal = new FGType(colorT);
 export const complexT = new ComplexT();
 export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());

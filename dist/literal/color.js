@@ -1,5 +1,4 @@
-import { FGType, colorT } from "./type.js";
-const colorTVal = new FGType(colorT);
+import { colorTVal } from "./type.js";
 export class FGColor {
     r;
     g;
@@ -15,17 +14,13 @@ export class FGColor {
     to_str() {
         return `Color ${this.r},${this.g},${this.b},${this.a}`;
     }
-    to_hex() {
-        return '#' + [this.r, this.g, this.b].map(x => {
-            const hex = x.toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        }).join('');
-    }
     typeof() {
         return colorTVal;
     }
-    equal(other) {
-        console.log("FGType.equal() is not implemented yet");
-        return false;
+    to_hex() {
+        return '#' + [this.r, this.g, this.b, this.a].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
     }
 }
