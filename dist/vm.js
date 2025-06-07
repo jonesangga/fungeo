@@ -1,7 +1,10 @@
 import { FGCurry, FGStruct, FGBoolean, FGNumber, FGList } from "./value.js";
 import { nativeNames } from "./names.js";
 import Rect from "./geo/rect.js";
+import Point from "./geo/point.js";
+import Circle from "./geo/circle.js";
 let $ = console.log;
+$ = () => { };
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
@@ -121,7 +124,7 @@ export function run(intercept = false) {
             case 1190: {
                 let curry = pop();
                 let pipeArg = pop();
-                console.log(curry, pipeArg);
+                $(curry, pipeArg);
                 push(curry.fn);
                 for (let i = 0; i < curry.args.length; i++)
                     push(curry.args[i]);
@@ -357,7 +360,7 @@ export function run(intercept = false) {
                     let value = v.members[id];
                     push(value);
                 }
-                else if (v instanceof Rect) {
+                else if (v instanceof Rect || v instanceof Point || v instanceof Circle) {
                     let value = v.member(id);
                     push(value);
                 }

@@ -1,10 +1,11 @@
 import { canvasT, replT, pictureT, callNativeT } from "./literal/type.js";
-import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, Sqrt, Push, RGB, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js";
+import { Print, Printf, Show, Padl, Type as TypeFn, Draw, Paint, C, E, P, Pic, R, Seg, Midpoint, Cw, Ccw, FlipH, FlipV, Quartet, Cycle, MapPic, Help, Clear, Ccurv, Descart, ComplexDescart, Abs, Sqrt, Push, RGB, Map, PrintT, R_FromPoints, R_WithCenter, Seg_FromPoints, C_FromPoints, Fill } from "./vmfunction.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import fish from "./data/fish.js";
 import { rectStruct } from "./geo/rect.js";
 import { pointStruct } from "./geo/point.js";
+import { circleStruct } from "./geo/circle.js";
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
@@ -51,5 +52,7 @@ export let nativeNames = {
     "Midpoint": { type: callNativeT, value: Midpoint },
     "Rect": { type: rectStruct.value, value: rectStruct },
     "Point": { type: pointStruct.value, value: pointStruct },
+    "Circle": { type: circleStruct.value, value: circleStruct },
     "Sqrt": { type: callNativeT, value: Sqrt },
+    "Abs": { type: callNativeT, value: Abs },
 };

@@ -4,6 +4,7 @@ import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { rectStruct } from "./geo/rect.js"
 import { pointStruct } from "./geo/point.js"
+import { circleStruct } from "./geo/circle.js"
 import { FGCurry, CallT, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
 import { nativeNames } from "./names.js"
 import { userNames } from "./vm.js"
@@ -12,7 +13,7 @@ import { FGType, type Type, StructT, NumberT, StringT, ListT, neverT, circleT, n
 
 // For quick debugging.
 let $ = console.log;
-// $ = () => {};
+$ = () => {};
 
 let lastT = neverT;
 
@@ -106,7 +107,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
     [TokenT.PointT]    : {prefix: null,            infix: null,    precedence: Precedence.Term},
-    [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.Term},
+    [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RectT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -413,7 +414,7 @@ function pipe(): void {
     parsePrecedence(Precedence.Pipe + 1);
     if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
         error("can only pipe to function");
-    console.log(lastT.input[lastT.input.length - 1], argT);
+    $(lastT.input[lastT.input.length - 1], argT);
     assertT(lastT.input[lastT.input.length - 1], argT, `pipe argT non match`);
 
     emitByte(Op.Pipe);
@@ -897,7 +898,7 @@ function get_callable_control(name_: string): void {
     let arity = inputs.length;
     emitBytes(Op.CallUsr, arity);
     lastT = output;
-    console.log(lastT);
+    $(lastT);
 }
 
 // There is no local scope callable.
@@ -1005,7 +1006,7 @@ function get_global(table: any, name_: string, native: boolean): void {
             args[j] = new FGNumber(0);
 
         let newInput = inputs.slice(i);
-        console.log(newInput);
+        $(newInput);
         let type = new CallUserT(newInput, output);
         curryFn = new FGCurry("dummy", name.value, args);
 
@@ -1014,7 +1015,7 @@ function get_global(table: any, name_: string, native: boolean): void {
         emitBytes(Op.Curry, i);
 
         lastT = type;
-        console.log("lastT in curry: ", lastT);
+        $("lastT in curry: ", lastT);
         // For pipe
         pipeArg = inputs.length;
         pipeOp = native ? Op.CallNat : Op.CallUsr;
@@ -1251,7 +1252,7 @@ function global_non_callable(table: any, name: string, native: boolean): void {
     // let index = makeConstant(new FGString(name));
     // emitBytes(native ? Op.GetNat : Op.GetUsr, index);
     lastT = table[name].type;
-    console.log(table[name], lastT, name);
+    $(table[name], lastT, name);
     // $(name, table, table[name].type);
 }
 
@@ -1298,7 +1299,7 @@ function parse_type(): Type {
             type = stringT;
             break;
         case TokenT.CircleT:
-            type = circleT;
+            type = circleStruct.value;
             break;
         case TokenT.PointT:
             type = pointStruct.value;
@@ -1437,7 +1438,7 @@ function proc(): void {
     // Check return statement
     returnT = nothingT;
     proc_body();
-    console.log("in proc():", returnT, outputT);
+    $("in proc():", returnT, outputT);
     assertT(returnT, outputT, "return type not match");
     if (outputT.equal(nothingT))
         emitBytes(Op.Ret, 0);
@@ -1639,7 +1640,8 @@ function parsePrecedence(precedence: Precedence): void {
 function exprStmt(): void {
     canParseArgument = true;
     parsePrecedence(Precedence.Assignment);
-    emitByte(Op.Pop);
+    if (!lastT.equal(nothingT))
+        emitByte(Op.Pop);
     lastT = nothingT;
 }
 

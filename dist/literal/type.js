@@ -262,7 +262,3 @@ export const rectT = new RectT();
 export const segmentT = new SegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
-const geoUnion = new UnionT([circleT, ellipseT, pictureT, pointT, rectT, segmentT]);
-const geoList = new ListT(geoUnion);
-export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, rectT, segmentT, geoList]);
-export const fillableT = new UnionT([circleT, ellipseT, rectT]);

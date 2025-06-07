@@ -2,11 +2,13 @@ import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
 import { rectStruct } from "./geo/rect.js";
 import { pointStruct } from "./geo/point.js";
+import { circleStruct } from "./geo/circle.js";
 import { FGCurry, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser } from "./value.js";
 import { nativeNames } from "./names.js";
 import { userNames } from "./vm.js";
-import { FGType, StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./literal/type.js";
+import { FGType, StructT, NumberT, StringT, ListT, neverT, numberT, stringT, booleanT, callUserT, CallNativeT, CallUserT, nothingT } from "./literal/type.js";
 let $ = console.log;
+$ = () => { };
 let lastT = neverT;
 let returnT = neverT;
 function assertT(actual, expected, msg) {
@@ -81,7 +83,7 @@ const rules = {
     [1585]: { prefix: null, infix: numeric_binary, precedence: 300 },
     [1590]: { prefix: null, infix: concat_list, precedence: 300 },
     [2700]: { prefix: null, infix: null, precedence: 300 },
-    [2750]: { prefix: null, infix: null, precedence: 300 },
+    [2750]: { prefix: null, infix: null, precedence: 100 },
     [695]: { prefix: null, infix: null, precedence: 100 },
     [700]: { prefix: null, infix: null, precedence: 100 },
     [2780]: { prefix: null, infix: null, precedence: 100 },
@@ -305,7 +307,7 @@ function pipe() {
     parsePrecedence(550 + 1);
     if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
         error("can only pipe to function");
-    console.log(lastT.input[lastT.input.length - 1], argT);
+    $(lastT.input[lastT.input.length - 1], argT);
     assertT(lastT.input[lastT.input.length - 1], argT, `pipe argT non match`);
     emitByte(1190);
     emitBytes(pipeOp, pipeArg);
@@ -700,7 +702,7 @@ function get_callable_control(name_) {
     let arity = inputs.length;
     emitBytes(205, arity);
     lastT = output;
-    console.log(lastT);
+    $(lastT);
 }
 function get_callable_callable(name) {
     if (Object.hasOwn(nativeNames, name)) {
@@ -789,12 +791,12 @@ function get_global(table, name_, native) {
         for (let j = 0; j < i; j++)
             args[j] = new FGNumber(0);
         let newInput = inputs.slice(i);
-        console.log(newInput);
+        $(newInput);
         let type = new CallUserT(newInput, output);
         curryFn = new FGCurry("dummy", name.value, args);
         emitBytes(230, i);
         lastT = type;
-        console.log("lastT in curry: ", lastT);
+        $("lastT in curry: ", lastT);
         pipeArg = inputs.length;
         pipeOp = native ? 200 : 205;
     }
@@ -972,7 +974,7 @@ function set_global(name, mut = false) {
 function global_non_callable(table, name, native) {
     emitConstant(table[name].value);
     lastT = table[name].type;
-    console.log(table[name], lastT, name);
+    $(table[name], lastT, name);
 }
 function parse_fn_type() {
     let got = [];
@@ -1011,7 +1013,7 @@ function parse_type() {
             type = stringT;
             break;
         case 2230:
-            type = circleT;
+            type = circleStruct.value;
             break;
         case 2700:
             type = pointStruct.value;
@@ -1116,7 +1118,7 @@ function proc() {
     consume(300, "expect '{' before proc body");
     returnT = nothingT;
     proc_body();
-    console.log("in proc():", returnT, outputT);
+    $("in proc():", returnT, outputT);
     assertT(returnT, outputT, "return type not match");
     if (outputT.equal(nothingT))
         emitBytes(1300, 0);
@@ -1265,7 +1267,8 @@ function parsePrecedence(precedence) {
 function exprStmt() {
     canParseArgument = true;
     parsePrecedence(200);
-    emitByte(1200);
+    if (!lastT.equal(nothingT))
+        emitByte(1200);
     lastT = nothingT;
 }
 function expression() {

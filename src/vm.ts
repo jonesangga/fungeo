@@ -5,10 +5,12 @@ import { FGCurry, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallU
 import { Names, nativeNames } from "./names.js"
 import { FGType, type Type, StructT } from "./literal/type.js"
 import Rect from "./geo/rect.js"
+import Point from "./geo/point.js"
+import Circle from "./geo/circle.js"
 
 // For quick debugging.
 let $ = console.log;
-// $ = () => {};
+$ = () => {};
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -167,7 +169,7 @@ export function run(intercept: boolean = false): boolean {
             case Op.Pipe: {
                 let curry = pop() as FGCurry;  // The curry fn
                 let pipeArg = pop();
-                console.log(curry, pipeArg);
+                $(curry, pipeArg);
 
                 push(curry.fn);
                 for (let i = 0; i < curry.args.length; i++)
@@ -425,9 +427,8 @@ export function run(intercept: boolean = false): boolean {
                 if (v instanceof FGStruct) {
                     let value = v.members[id];
                     push(value);
-                } else if (v instanceof Rect) {
+                } else if (v instanceof Rect || v instanceof Point || v instanceof Circle) {
                     let value = v.member(id as any);
-                    // console.log(new FGNumber(value));
                     push(value);
                 }
                 break;

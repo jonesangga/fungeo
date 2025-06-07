@@ -2,8 +2,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Kind, FGNumber, FGComplex } from "../value.js"
-import { FGType, circleT } from "../literal/type.js"
+import { Value, Kind, FGNumber, FGComplex } from "../value.js"
+import { FGType, StructT, circleT, numberT } from "../literal/type.js"
 
 export default class Circle {
     kind: Kind.Circle = Kind.Circle;
@@ -29,6 +29,16 @@ export default class Circle {
 
     typeof(): FGType {
         return new FGType(circleT);
+    }
+
+    member(key: keyof typeof s): Value {
+        switch (key) {
+            case "x": return new FGNumber(this.x);
+            case "y": return new FGNumber(this.y);
+            case "r": return new FGNumber(this.r);
+            default:
+                unreachable(key);
+        }
     }
 
     dist(other: Circle): number {
@@ -105,3 +115,14 @@ function isTangent(c1: Circle, c2: Circle): boolean {
 function is_tangent(c1: Circle, c2: Circle, c3: Circle, ca: Circle): boolean {
     return isTangent(ca, c1) && isTangent(ca, c2) && isTangent(ca, c3);
 }
+
+function unreachable(key: never): never {
+    throw new Error();
+}
+
+let s = {
+    x: numberT,
+    y: numberT,
+    r: numberT,
+};
+export const circleStruct = new FGType(new StructT(s));

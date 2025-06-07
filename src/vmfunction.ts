@@ -1,5 +1,5 @@
 import { pop, push, vm_output, call, run } from "./vm.js"
-import { CallT, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { CallT, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGCurry, FGNumber, FGString, FGList } from "./value.js"
 import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
@@ -9,11 +9,17 @@ import Point from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
 import { pointStruct } from "./geo/point.js"
+import { circleStruct } from "./geo/circle.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, geoT, fillableT, anyT, circleT, pictureT,
+import { ListT, UnionT, anyT, pictureT,
          ellipseT, segmentT, nothingT, stringT, numberT,
          colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js"
+
+const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, rectStruct.value, segmentT, circleStruct.value]);
+const geoList = new ListT(geoUnion);
+const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, rectStruct.value, segmentT, circleStruct.value, geoList]);
+const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
 
 function _Print(): void {
     let value = pop();
@@ -45,6 +51,16 @@ function _Sqrt(): void {
     push(new FGNumber( Math.sqrt(value.value) ));
 }
 export let Sqrt = new FGCallNative("Sqrt", CallT.Function, _Sqrt,
+    [numberT],
+    numberT,
+);
+
+function _Abs(): void {
+    let value = pop() as FGNumber;
+    pop();              // The function.
+    push(new FGNumber( Math.abs(value.value) ));
+}
+export let Abs = new FGCallNative("Abs", CallT.Function, _Abs,
     [numberT],
     numberT,
 );
@@ -125,16 +141,29 @@ function _Map(): void {
         }
         push(new FGList(result, callback.output));
     } else if (callback instanceof FGCallUser) {
+        console.log("callback is FGCallUser");
         let result = [];
         for (let i = 0; i < list.value.length; i++) {
             push(list.value[i]);    // dummy
-            push(list.value[i]);    // dummy
-            console.log("callback is FGCallUser");
+            push(list.value[i]);
             call(callback, callback.input.length);
             run(true);
             result.push(pop());
         }
         push(new FGList(result, callback.output));
+    } else if (callback instanceof FGCurry) {
+        console.log("callback is FGCurry");
+        let result = [];
+        for (let i = 0; i < list.value.length; i++) {
+            push(list.value[i]);    // dummy
+            for (let j = 0; j < callback.args.length; j++)
+                push(callback.args[j]);
+            push(list.value[i]);
+            call(callback.fn as unknown as FGCallUser, callback.fn.input.length);
+            run(true);
+            result.push(pop());
+        }
+        push(new FGList(result, callback.fn.output));
     }
 }
 export let Map = new FGCallNative("Map", CallT.Function, _Map,
@@ -192,7 +221,7 @@ function _C(): void {
 }
 export let C = new FGCallNative("C", CallT.Function, _C,
     [numberT, numberT, numberT],
-    circleT,
+    circleStruct.value,
 );
 
 function _C_FromPoints(): void {
@@ -205,7 +234,7 @@ function _C_FromPoints(): void {
 }
 export let C_FromPoints = new FGCallNative("C_FromPoints", CallT.Function, _C_FromPoints,
     [pointStruct.value, pointStruct.value],
-    circleT,
+    circleStruct.value,
 );
 
 function _Ccurv(): void {
@@ -218,7 +247,7 @@ function _Ccurv(): void {
 }
 export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv,
     [numberT, numberT, numberT],
-    circleT,
+    circleStruct.value,
 );
 
 // TODO: Clean up
@@ -231,7 +260,7 @@ function _Descart(): void {
     push(list);
 }
 export const Descart = new FGCallNative("Descart", CallT.Function, _Descart,
-    [circleT, circleT, circleT],
+    [circleStruct.value, circleStruct.value, circleStruct.value],
     new ListT(numberT),
 );
 
@@ -242,12 +271,12 @@ function _ComplexDescart(): void {
     let c2 = pop() as Circle;
     let c1 = pop() as Circle;
     pop();              // The function.
-    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleT);
+    let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleStruct.value);
     push(circles);
 }
 export const ComplexDescart = new FGCallNative("ComplexDescart", CallT.Function, _ComplexDescart,
-    [circleT, circleT, circleT, numberT],
-    new ListT(circleT),
+    [circleStruct.value, circleStruct.value, circleStruct.value, numberT],
+    new ListT(circleStruct.value),
 );
 
 function _E(): void {
