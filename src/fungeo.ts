@@ -1,31 +1,46 @@
-import "./ui/demo.js"
+// import "./ui/demo.js"
 import repl from "./ui/repl.js"
 import canvas from "./ui/canvas.js"
-import { compiler } from "./compiler.js"
+import { parse } from "./parser.js";
+import { compile } from "./compile.js";
+import { typecheck } from "./typechecker.js";
 import { vm } from "./vm.js"
+import { AST, NumberNode, StringNode, BooleanNode, VarNode } from "./ast.js";
 
-repl.place(0, 640);
+repl.place(50, 260);
 canvas.place(650, 0);
-
 vm.init();
 
 function main(source: string): void {
-    let result = compiler.compile(source);
-
-    if (result.ok) {
-        console.log(result.value.chunk.disassemble());
-
-        let vmresult = vm.interpret(result.value);
-        if (vmresult.ok)
-            repl.ok(vmresult.value);
-        else {
-            repl.error(vmresult.error.message);
-            console.log(vmresult.error);
-        }
+    let parseR = parse(source);
+    if (!parseR.ok) {
+        console.log(parseR.error);
+        repl.error(parseR.error.message);
+        return;
     }
+    console.log(parseR.value.to_str(0));
+    let typecheckR = typecheck(parseR.value);
+    if (!typecheckR.ok) {
+        console.log(typecheckR.error);
+        repl.error(typecheckR.error.message);
+        return;
+    }
+    let compileR = compile(parseR.value, typecheckR.value);
+
+    if (!compileR.ok) {
+        console.log(compileR.error);
+        repl.error(compileR.error.message);
+        return;
+    }
+
+    console.log(compileR.value.chunk.disassemble());
+
+    let vmR = vm.interpret(compileR.value);
+    if (vmR.ok)
+        repl.ok(vmR.value);
     else {
-        repl.error(result.error.message);
-        console.log(result.error);
+        repl.error(vmR.error.message);
+        console.log(vmR.error);
     }
 }
 

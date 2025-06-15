@@ -1,3 +1,6 @@
+// THIS WILL BE DELETED LATER.
+// ONLY HERE FOR REFERENCE.
+//
 // @jonesangga, 12-04-2025, MIT License.
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
@@ -5,11 +8,10 @@ import { Op, Chunk } from "./chunk.js"
 import { rectStruct } from "./geo/rect.js"
 import { pointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
-import { FGCurry, CallT, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
-import { nativeNames } from "./names.js"
-import { userNames } from "./vm.js"
+import { FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
+import { names } from "./vm.js"
 import { FGType, type Type, StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT,
-         CallNativeT, CallUserT, nothingT } from "./literal/type.js"
+         FunctionT, CallUserT, nothingT } from "./literal/type.js"
 
 // For quick debugging.
 let $ = console.log;
@@ -66,14 +68,13 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.BoolT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.Callable]  : {prefix: parse_callable,  infix: null,    precedence: Precedence.None},
+    [TokenT.FnName]    : {prefix: parse_callable,  infix: null,    precedence: Precedence.None},
     [TokenT.CircleT]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonMin]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Comma]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.DivBy]     : {prefix: null,            infix: boolean_isdiv,  precedence: Precedence.Term},
-    [TokenT.Dollar]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Dot]       : {prefix: null,            infix: index_struct,    precedence: Precedence.Call},
     [TokenT.Else]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.EOF]       : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -97,17 +98,14 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Let]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Mut]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Minus]     : {prefix: negate,          infix: numeric_binary,  precedence: Precedence.Term},
-    [TokenT.NCallable] : {prefix: parse_non_callable,      infix: null,    precedence: Precedence.None},
-    [TokenT.Nonlocal]  : {prefix: null,            infix: null,    precedence: Precedence.None},
+    [TokenT.VarName]   : {prefix: parse_non_callable,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Percent]   : {prefix: struct_init,     infix: null,    precedence: Precedence.None},
-    [TokenT.Pipe]      : {prefix: null,            infix: pipe,    precedence: Precedence.Pipe},
     [TokenT.PipePipe]  : {prefix: null,            infix: or,      precedence: Precedence.Or},
     [TokenT.Plus]      : {prefix: null,            infix: numeric_binary,  precedence: Precedence.Term},
     [TokenT.PlusPlus]  : {prefix: null,            infix: concat_list,  precedence: Precedence.Term},
     [TokenT.PointT]    : {prefix: null,            infix: null,    precedence: Precedence.Term},
-    [TokenT.Proc]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RBracket]  : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.RectT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -128,7 +126,6 @@ interface Local {
     type:  Type;
     depth: number;
     mut?:  boolean;
-    // index?: number;     // For nonlocal referencing its position in current.locals array
 }
 
 const enum FnT {
@@ -144,7 +141,6 @@ interface Compiler {
     scopeDepth:   number;
     locals:       Local[];
     localGlobals: Local[];
-    // nonlocals:    Local[];
 }
 
 let current: Compiler;
@@ -162,7 +158,6 @@ function begin_compiler(kind: FnT, name: string): void {
         enclosing: current,
         fn: new FGCallUser(
             name,
-            CallT.Function,
             [],
             nothingT,
             new Chunk(name),
@@ -170,7 +165,6 @@ function begin_compiler(kind: FnT, name: string): void {
         kind: kind,
         locals: [],
         localGlobals: [],
-        // nonlocals: [],
         scopeDepth: 0,
     };
     current = compiler;
@@ -404,24 +398,6 @@ function concat_list(): void {
     emitByte(Op.AddList);
 }
 
-// applicable(actual: Type, expected: Type, msg: string) {
-// }
-
-function pipe(): void {
-    let argT = lastT;
-
-    canParseArgument = true;
-    parsePrecedence(Precedence.Pipe + 1);
-    if (!(lastT instanceof CallNativeT) && !(lastT instanceof CallUserT))
-        error("can only pipe to function");
-    $(lastT.input[lastT.input.length - 1], argT);
-    assertT(lastT.input[lastT.input.length - 1], argT, `pipe argT non match`);
-
-    emitByte(Op.Pipe);
-    emitBytes(pipeOp, pipeArg);
-    lastT = lastT.output;
-}
-
 //--------------------------------------------------------------------
 // Parsing literal.
 
@@ -453,7 +429,7 @@ function index_struct(): void {
     let types = Object.values(members);
 
     lastT = neverT;
-    consume(TokenT.NCallable, "expect member name");
+    consume(TokenT.VarName, "expect member name");
     let name = prevTok.lexeme;
     if (!keys.includes(name))
         error(`no member named ${ name } in this struct`);
@@ -463,15 +439,15 @@ function index_struct(): void {
 }
 
 function struct_init(): void {
-    consume(TokenT.Callable, "expect struct name");
+    consume(TokenT.FnName, "expect struct name");
     let name_ = prevTok.lexeme;
 
     consume(TokenT.LBrace, "expect '{' to after struct name");
 
-    if (!Object.hasOwn(userNames, name_))
-        error(`no struct ${ name_ } in userNames`);
+    if (!Object.hasOwn(names, name_))
+        error(`no struct ${ name_ } in names`);
 
-    let name = userNames[name_];
+    let name = names[name_];
 
     if (!(name.value instanceof FGType))
         error(`${ name_} is not an FGType`);
@@ -580,7 +556,7 @@ function resolveLocal(compiler: Compiler, name: string): number {
 
 function parse_let(): void {
     $("in parse_let()");
-    consume(TokenT.NCallable, "expect a name");
+    consume(TokenT.VarName, "expect a name");
     let name = prevTok.lexeme;
 
     consume(TokenT.Eq, "expect '=' after name");
@@ -590,59 +566,6 @@ function parse_let(): void {
     else {
         error("cannot use 'let' in non block");
     }
-}
-
-function parse_mut(): void {
-    $("in parse_mut()");
-    consume(TokenT.NCallable, "expect a name");
-    let name = prevTok.lexeme;
-
-    let explicit = false;
-    let type = neverT;
-    if (match(TokenT.Colon)) {
-        type = parse_type();
-        explicit = true;
-    }
-    consume(TokenT.Eq, "expect '=' after name");
-
-    if (current.scopeDepth > 0) {
-        if (explicit)
-            set_mut_control(name, type);
-        else
-            set_mut_control(name);
-    } else {
-        if (explicit)
-            set_mut_callable(name, type);
-        else
-            set_mut_callable(name);
-    }
-}
-
-// TODO: this is broken!!!
-function set_mut_callable(name: string, explicitT?: Type): void {
-    $("in set_mut_callable");
-    // Make sure it didn't redeclare a name.
-    if (Object.hasOwn(nativeNames, name)
-            || Object.hasOwn(userNames, name)
-            || Object.hasOwn(tempNames, name)) {
-        error(`${ name } already defined`);
-    }
-
-    let index = makeConstant(new FGString(name));
-    lastT = neverT;
-    canParseArgument = true;
-    expression();
-
-    if (explicitT) {
-        $("explicitT in set_mut_callable() is defined:", explicitT);
-        assertT(lastT, explicitT, "type didn't match with explicit type");
-    }
-    emitConstant(new FGType(lastT));
-
-    tempNames[name] = { type: lastT, mut: true };
-    add_local_global(name, lastT);
-    emitBytes(Op.SetMut, index);
-    lastT = nothingT;           // Because assignment is not an expression.
 }
 
 // Non-callable names, keywords, true, false.
@@ -677,14 +600,11 @@ function get_non_callable(name: string): void {
         emitBytes(Op.GetLoc, arg);
         lastT = current.locals[arg].type;
     }
-    else if (Object.hasOwn(nativeNames, name)) {
-        get_non_callable_(nativeNames, name, Op.GetNat);
-    }
-    else if (Object.hasOwn(userNames, name)) {
-        get_non_callable_(userNames, name, Op.GetUsr);
+    else if (Object.hasOwn(names, name)) {
+        get_non_callable_(names, name, Op.GetGlob);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        get_non_callable_(tempNames, name, Op.GetUsr);
+        get_non_callable_(tempNames, name, Op.GetGlob);
     }
     else {
         error(`undefined name ${name}`);
@@ -707,26 +627,15 @@ function set_non_callable(name: string, type?: Type): void {
 
 function set_non_callable_callable(name: string, explicitT?: Type): void {
     let type = neverT;
-    let ismut = false;
 
-    if (Object.hasOwn(nativeNames, name)) {
-        error(`cannot reassign built-in name`);
-    }
-    else if (Object.hasOwn(userNames, name)) {
-        if (userNames[name].mut === true) {
-            ismut = true;
-            type = userNames[name].type;
-        } else {
-            error(`${ name } already defined, not mutable`);
-        }
+    // if (Object.hasOwn(nativeNames, name)) {
+        // error(`cannot reassign built-in name`);
+    // }
+    if (Object.hasOwn(names, name)) {
+        error(`${ name } already defined, not mutable`);
     }
     else if (Object.hasOwn(tempNames, name)) {
-        if (tempNames[name].mut === true) {
-            ismut = true;
-            type = tempNames[name].type;
-        } else {
-            error(`${ name } already defined, not mutable`);
-        }
+        error(`${ name } already defined, not mutable`);
     }
 
     let index = makeConstant(new FGString(name));
@@ -736,16 +645,10 @@ function set_non_callable_callable(name: string, explicitT?: Type): void {
     expression();
     emitConstant(new FGType(lastT));
 
-    if (ismut) {
-        assertT(lastT, type, "reassignment type didn't match");
-        emitBytes(Op.SetMut, index);
-    }
-    else {
-        if (explicitT)
-            assertT(lastT, explicitT, "type didn't match with explicit type");
-        tempNames[name] = { type: lastT };
-        emitBytes(Op.Set, index);
-    }
+    if (explicitT)
+    assertT(lastT, explicitT, "type didn't match with explicit type");
+    tempNames[name] = { type: lastT };
+    emitBytes(Op.Set, index);
     lastT = nothingT; // Because assignment is not an expression.
 }
 
@@ -812,8 +715,6 @@ function parse_callable(): void {
 // NOTE: doesn't support currying yet.
 // TODO: implement currying.
 
-let curryFn: FGCurry | undefined = undefined;
-
 function set_callable(name: string): void {
     let index = makeConstant(new FGString(name));
     lastT = neverT;
@@ -821,27 +722,24 @@ function set_callable(name: string): void {
     parsePrecedence(Precedence.Call);
     emitConstant(new FGType(lastT));
 
-    if (curryFn === undefined)
-        error("undefined curryFn");
-    tempNames[name] = { type: lastT, value: curryFn};
     emitBytes(Op.Set, index);
     lastT = nothingT; // Because assignment is not an expression.
 }
 
 function method(name: string): void {
-    consume(TokenT.Callable, "expect method name after '.'");
+    consume(TokenT.FnName, "expect method name after '.'");
     let methodName = prevTok.lexeme;
 
-    if (name in nativeNames) {
-        if (nativeNames[name].methods
-                && methodName in nativeNames[name].methods) {
-            get_global(nativeNames[name].methods, methodName, true);
-        } else {
-            error(`undefined method ${ methodName } in ${ name }`);
-        }
-    } else {
-        error(`undefined callable ${ name }`);
-    }
+    // if (name in nativeNames) {
+        // if (nativeNames[name].methods
+                // && methodName in nativeNames[name].methods) {
+            // get_global(nativeNames[name].methods, methodName, true);
+        // } else {
+            // error(`undefined method ${ methodName } in ${ name }`);
+        // }
+    // } else {
+        // error(`undefined callable ${ name }`);
+    // }
 }
 
 function get_callable(name: string): void {
@@ -865,7 +763,7 @@ function get_callable_control(name_: string): void {
     $("got local fn arg");
 
     emitBytes(Op.GetLoc, arg);
-    canParseArgument = match(TokenT.Dollar);
+    // canParseArgument = match(TokenT.Dollar);
 
     let name = current.locals[arg];
 
@@ -875,14 +773,6 @@ function get_callable_control(name_: string): void {
 
     let i = 0;
     for ( ; i < inputs.length; i++) {
-        if (check(TokenT.Semicolon)) {
-            $("found semicolon");
-            break;
-        }
-        if (check(TokenT.Pipe)) {
-            $("found pipe");
-            break;
-        }
         lastT = nothingT;
         if (canParseArgument)
             expression();
@@ -896,18 +786,15 @@ function get_callable_control(name_: string): void {
     }
 
     let arity = inputs.length;
-    emitBytes(Op.CallUsr, arity);
+    emitBytes(Op.Call, arity);
     lastT = output;
     $(lastT);
 }
 
 // There is no local scope callable.
 function get_callable_callable(name: string): void {
-    if (Object.hasOwn(nativeNames, name)) {
-        get_global(nativeNames, name, true);
-    }
-    else if (Object.hasOwn(userNames, name)) {
-        get_global(userNames, name, false);
+    if (Object.hasOwn(names, name)) {
+        get_global(names, name, false);
     }
     else if (Object.hasOwn(tempNames, name)) {
         $("in got tempNames", name);
@@ -918,161 +805,55 @@ function get_callable_callable(name: string): void {
     }
 }
 
-function call_curry(name: string, curry: FGCurry): void {
-    $("in call_curry()");
-    let index = makeConstant(new FGString(name));
-    emitBytes(Op.GetUsr, index);
-
-    let inputs = curry.fn.input;
-    let gotTypes: Type[] = [];
-
-    let i = curry.args.length;
-    for ( ; i < inputs.length; i++) {
-        if (check(TokenT.Semicolon)) {
-            $("found semicolon");
-            break;
-        }
-        lastT = nothingT;
-        if (canParseArgument)
-            expression();
-        else
-            parsePrecedence(Precedence.Call);
-
-        gotTypes.push(lastT);
-        if (!inputs[i].equal( lastT )) {
-            error(`in ${curry.name}: expect arg ${i} of type ${ inputs[i].to_str() }, got ${ gotTypes[i].to_str() }`);
-        }
-    }
-
-    emitBytes(Op.CallCur, inputs.length - curry.args.length);
-    if (curry.fn instanceof FGCallNative)
-        emitBytes(Op.CallNat, inputs.length);
-    else
-        emitBytes(Op.CallUsr, inputs.length);
-    lastT = curry.fn.output;
-}
-
 // This also work for procedure that doesn't have parameter.
 // TODO: refactor this!
 //       check canParseArgument in the caller.
 
 function get_global(table: any, name_: string, native: boolean): void {
-    if (!canParseArgument) {
-        $("cannot parse argumet", name_);
-        global_non_callable(table, name_, native);
-        return;
-    }
-    canParseArgument = match(TokenT.Dollar);
+    // if (!canParseArgument) {
+        // $("cannot parse argumet", name_);
+        // global_non_callable(table, name_, native);
+        // return;
+    // }
+    // canParseArgument = match(TokenT.Dollar);
 
-    let name = table[name_];
-    if (name.value instanceof FGCurry) {
-        call_curry(name_, name.value);
-        return;
-    }
-    emitConstant(name.value as FGCallNative);
+    // let name = table[name_];
+    // emitConstant(name.value as FGCallNative);
 
-    let inputs = (name.value as FGCallNative).input;
-    let output = (name.value as FGCallNative).output;
-    let gotTypes: Type[] = [];
+    // let inputs = (name.value as FGCallNative).input;
+    // let output = (name.value as FGCallNative).output;
+    // let gotTypes: Type[] = [];
 
-    let i = 0;
-    for ( ; i < inputs.length; i++) {
-        if (check(TokenT.Semicolon)) {
-            $("found semicolon");
-            break;
-        }
-        if (check(TokenT.Pipe)) {
-            $("found pipe");
-            break;
-        }
-        lastT = nothingT;
-        if (canParseArgument)
-            expression();
-        else
-            parsePrecedence(Precedence.Call);
-        $("in get_global: ", inputs[i], lastT);
+    // let i = 0;
+    // for ( ; i < inputs.length; i++) {
+        // lastT = nothingT;
+        // if (canParseArgument)
+            // expression();
+        // else
+            // parsePrecedence(Precedence.Call);
+        // $("in get_global: ", inputs[i], lastT);
 
-        gotTypes.push(lastT);
-        if (!inputs[i].equal( lastT )) {
-            error(`in ${name_}: expect arg ${i} of type ${ inputs[i].to_str() }, got ${ gotTypes[i].to_str() }`);
-        }
-    }
-
-    if (i !== inputs.length) {
-        $("gonna curry");
-
-        let args: Value[] = [];
-        for (let j = 0; j < i; j++)
-            args[j] = new FGNumber(0);
-
-        let newInput = inputs.slice(i);
-        $(newInput);
-        let type = new CallUserT(newInput, output);
-        curryFn = new FGCurry("dummy", name.value, args);
-
-        // let newType = new FGType(type);
-        // emitConstant(newType);
-        emitBytes(Op.Curry, i);
-
-        lastT = type;
-        $("lastT in curry: ", lastT);
-        // For pipe
-        pipeArg = inputs.length;
-        pipeOp = native ? Op.CallNat : Op.CallUsr;
-    }
-    else {
-        let arity = inputs.length;
-        emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
-        lastT = output;
-    }
-}
-
-// function set_nonlocal(index: number, type: Type): void {
-    // lastT = neverT;
-    // canParseArgument = true;
-    // expression();
-    // emitConstant(new FGType(lastT));
-    // console.log(lastT, type);
-
-    // assertT(lastT, type, "nonlocal reassignment type didn't match");
-    // emitBytes(Op.SetLocN, index);
-
-    // lastT = nothingT;           // Because assignment is not an expression.
-// }
-
-// function parse_nonlocal(): void {
-    // consume(TokenT.NCallable, "expect name after nonlocal");
-    // let name = prevTok.lexeme;
-    // let type = neverT;
-
-    // let index = -1;
-    // for (let i = current.locals.length - 1; i >= 0; i--) {
-        // let local = current.locals[i];
-        // if (local.depth === current.scopeDepth)
-            // continue;
-        // if (name === local.name) {
-            // index = i;
-            // type = local.type;
-            // break;
+        // gotTypes.push(lastT);
+        // if (!inputs[i].equal( lastT )) {
+            // error(`in ${name_}: expect arg ${i} of type ${ inputs[i].to_str() }, got ${ gotTypes[i].to_str() }`);
         // }
     // }
-    // if (index === -1)
-        // error(`there is no ${ name } in nonlocal`);
 
-    // add_nonlocal(name, type, index);
-    // lastT = nothingT;
-// }
+    // let arity = inputs.length;
+    // emitBytes(native ? Op.CallNat : Op.CallUsr, arity);
+    // lastT = output;
+}
 
 function parse_local_global(): void {
-    consume(TokenT.NCallable, "expect name after global");
+    consume(TokenT.VarName, "expect name after global");
     let name = prevTok.lexeme;
     let type = neverT;
 
-    if (Object.hasOwn(nativeNames, name))
-        error("native name is immutable");
-    else if (Object.hasOwn(userNames, name)) {
-        if (userNames[name].mut === true)
-            type = userNames[name].type;
+    // if (Object.hasOwn(nativeNames, name))
+        // error("native name is immutable");
+    if (Object.hasOwn(names, name)) {
+        if (names[name].mut === true)
+            type = names[name].type;
         else
             error(`${ name } already defined, not mutable`);
     }
@@ -1144,12 +925,8 @@ function set_block(name: string, mut: boolean = false): void {
         expression();
         emitConstant(new FGType(lastT));
 
-        if (mut)
-            emitBytes(Op.SetLocM, index);
-        else {
-            current.locals[current.locals.length - 1].type = lastT;
-            emitBytes(Op.SetLoc, index);
-        }
+        current.locals[current.locals.length - 1].type = lastT;
+        emitBytes(Op.SetLoc, index);
 
     }
     lastT = nothingT;
@@ -1195,20 +972,16 @@ function set_global(name: string, mut: boolean = false): void {
 
     // Make sure it didn't redeclare a name.
     if (mut) {
-        if (Object.hasOwn(nativeNames, name)
-            || Object.hasOwn(userNames, name)
+        if (Object.hasOwn(names, name)
             || Object.hasOwn(tempNames, name)) {
             error(`${ name } already defined`);
         }
     }
     else {
-        if (Object.hasOwn(nativeNames, name)) {
-            error(`${ name } already defined`);
-        }
-        else if (Object.hasOwn(userNames, name)) {
-            if (userNames[name].mut === true) {
+        if (Object.hasOwn(names, name)) {
+            if (names[name].mut === true) {
                 ismut = true;
-                type = userNames[name].type;
+                type = names[name].type;
             } else {
                 error(`${ name } already defined, not mutable`);
             }
@@ -1229,20 +1002,8 @@ function set_global(name: string, mut: boolean = false): void {
     expression();
     emitConstant(new FGType(lastT));
 
-    if (mut) {
-        tempNames[name] = { type: lastT, mut: true };
-        add_local_global(name, lastT);
-        emitBytes(Op.SetMut, index);
-    }
-    else if (ismut) {
-        assertT(lastT, type, "reassignment type didn't match");
-        tempNames[name] = { type: lastT, mut: true };   // TODO: is below necessary???
-        emitBytes(Op.SetMut, index);
-    }
-    else {
-        tempNames[name] = { type: lastT };
-        emitBytes(Op.Set, index);
-    }
+    tempNames[name] = { type: lastT };
+    emitBytes(Op.Set, index);
     lastT = nothingT;           // Because assignment is not an expression.
 }
 
@@ -1250,7 +1011,7 @@ function global_non_callable(table: any, name: string, native: boolean): void {
     emitConstant(table[name].value);
 
     // let index = makeConstant(new FGString(name));
-    // emitBytes(native ? Op.GetNat : Op.GetUsr, index);
+    // emitBytes(native ? Op.GetNat : Op.GetGlob, index);
     lastT = table[name].type;
     $(table[name], lastT, name);
     // $(name, table, table[name].type);
@@ -1277,8 +1038,8 @@ function parse_type(): Type {
     let name = prevTok.lexeme;
 
     // Check if type is a struct
-    if (Object.hasOwn(userNames, name)) {
-        let valueName = userNames[name];
+    if (Object.hasOwn(names, name)) {
+        let valueName = names[name];
         if (!(valueName.value instanceof FGType))
             error(`${ name} is not an FGType`);
         let struct = valueName.value.value;
@@ -1321,9 +1082,9 @@ function parse_type(): Type {
 
 // TODO: Check again what that for loop doing? Is it necessary?
 function parse_params(): Type {
-    if (check(TokenT.NCallable) || check(TokenT.Callable))
+    if (check(TokenT.VarName) || check(TokenT.FnName))
         advance();
-    // consume(TokenT.NCallable, "expect parameter name");
+    // consume(TokenT.VarName, "expect parameter name");
     let name = prevTok.lexeme;
 
     for (let i = current.locals.length - 1; i >= 0; i--) {
@@ -1344,7 +1105,7 @@ function parse_params(): Type {
 }
 
 function struct(): void {
-    consume(TokenT.Callable, "expect struct name in PascalCase");
+    consume(TokenT.FnName, "expect struct name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1354,7 +1115,7 @@ function struct(): void {
     let memberTypes: Type[] = [];
     do {
         // parse member name
-        consume(TokenT.NCallable, "expect parameter name");
+        consume(TokenT.VarName, "expect parameter name");
         let name = prevTok.lexeme;
         // memberNames.push(prevTok.lexeme);
 
@@ -1374,7 +1135,7 @@ function struct(): void {
 
 function fn(): void {
     $("in fn()");
-    consume(TokenT.Callable, "expect function name in PascalCase");
+    consume(TokenT.FnName, "expect function name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1413,7 +1174,7 @@ function fn(): void {
 // TODO: Implement recursion. See commented line.
 function proc(): void {
     $("in proc()");
-    consume(TokenT.Callable, "expect procedure name in PascalCase");
+    consume(TokenT.FnName, "expect procedure name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1462,10 +1223,6 @@ function proc_body(): void {
 function add_local(name: string): void {
     current.locals.push({ name, type: nothingT, depth: current.scopeDepth });
 }
-
-// function add_nonlocal(name: string, type: Type, index: number): void {
-    // current.nonlocals.push({ name, type, depth: current.scopeDepth, index });
-// }
 
 function add_local_global(name: string, type: Type): void {
     current.localGlobals.push({ name, type, depth: current.scopeDepth });
@@ -1569,7 +1326,7 @@ function parse_loop(): void {
         consume(TokenT.RBracket, "expect ']' in range");
     }
 
-    if (!match(TokenT.NCallable))
+    if (!match(TokenT.VarName))
         error_at_current("expect name for iterator");
     let name = prevTok.lexeme;
     // No need to check conflicting name because it is the first name in this scope.
@@ -1656,8 +1413,8 @@ function identifierConstant(name: Token): number {
 function declaration(): void {
     if (match(TokenT.Fn)) {
         fn();
-    } else if (match(TokenT.Proc)) {
-        proc();
+    // } else if (match(TokenT.Proc)) {
+        // proc();
     } else if (match(TokenT.Struct)) {
         struct();
     } else {
@@ -1667,21 +1424,17 @@ function declaration(): void {
 
 // TODO: change error message in else to output types in FG.
 function statement(): void {
-    if (match(TokenT.NCallable)) {
+    if (match(TokenT.VarName)) {
         canAssign = true;
         parse_non_callable();
-    } else if (match(TokenT.Callable)) {
+    } else if (match(TokenT.FnName)) {
         canAssign = true;
         canParseArgument = true;
         parse_callable();
     } else if (match(TokenT.Global)) {
         parse_local_global();
-    // } else if (match(TokenT.Nonlocal)) {
-        // parse_nonlocal();
     } else if (match(TokenT.Let)) {
         parse_let();
-    } else if (match(TokenT.Mut)) {
-        parse_mut();
     } else if (match(TokenT.LBrace)) {
         if (!canParseBlock)
             error("forbiden block");
@@ -1728,11 +1481,6 @@ function endScope(): void {
             && current.localGlobals[current.localGlobals.length - 1].depth > current.scopeDepth) {
         current.localGlobals.pop();
     }
-    // while (current.nonlocals.length > 0
-            // && current.nonlocals[current.nonlocals.length - 1].depth > current.scopeDepth) {
-        // // emitByte(Op.Pop);
-        // current.nonlocals.pop();
-    // }
 }
 
 class CompileError extends Error {}

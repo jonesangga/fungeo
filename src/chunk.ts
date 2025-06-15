@@ -6,20 +6,16 @@ export const enum Op {
     Add     = 100,
     AddList = 110,
     AddStr  = 120,
-    CallCur = 190,
-    CallNat = 200,
-    CallUsr = 205,
+    Call    = 200,
     CkExc   = 210,
     CkExcD  = 212,
     CkInc   = 215,
     CkIncD  = 217,
-    Curry   = 230,
     Div     = 300,
     Eq      = 380,
     GEq     = 390,
     GetLoc  = 395,
-    GetNat  = 400,      // Get nativeNames.
-    GetUsr  = 500,      // Get userNames.
+    GetGlob = 500,      // Get names.
     GT      = 530,
     Inc     = 595,
     Index   = 600,
@@ -37,17 +33,14 @@ export const enum Op {
     Mul     = 900,
     Neg     = 1000,
     NEq     = 1010,
+    New     = 1020,
     Not     = 1100,
     Ok      = 1150,
-    Pipe    = 1190,
     Pop     = 1200,
     Ret     = 1300,
     Set     = 1400,
     SetLoc  = 1410,     // Local normal
     SetLocG = 1415,     // Local global
-    SetLocM = 1420,     // Local mutable
-    SetLocN = 1425,     // Local nonlocal
-    SetMut  = 1430,
     Struct  = 1450,
     Sub     = 1500,
 };
@@ -58,20 +51,16 @@ export const OpName: {
     [Op.Add]: "Add",
     [Op.AddList]: "AddList",
     [Op.AddStr]: "AddStr",
-    [Op.CallCur]: "CallCur",
-    [Op.CallNat]: "CallNat",
-    [Op.CallUsr]: "CallUsr",
+    [Op.Call]: "Call",
     [Op.CkExc]: "CkExc",
     [Op.CkExcD]: "CkExcD",
     [Op.CkInc]: "CkInc",
     [Op.CkIncD]: "CkIncD",
-    [Op.Curry]: "Curry",
     [Op.Div]: "Div",
     [Op.Eq]: "Eq",
     [Op.GEq]: "GEq",
     [Op.GetLoc]: "GetLoc",
-    [Op.GetNat]: "GetNat",
-    [Op.GetUsr]: "GetUsr",
+    [Op.GetGlob]: "GetGlob",
     [Op.GT]: "GT",
     [Op.Inc]: "Inc",
     [Op.Index]: "Index",
@@ -89,17 +78,14 @@ export const OpName: {
     [Op.Mul]: "Mul",
     [Op.Neg]: "Neg",
     [Op.NEq]: "NEq",
+    [Op.New]: "New",
     [Op.Not]: "Not",
     [Op.Ok]: "Ok",
-    [Op.Pipe]: "Pipe",
     [Op.Pop]: "Pop",
     [Op.Ret]: "Ret",
     [Op.Set]: "Set",
     [Op.SetLoc]: "SetLoc",
     [Op.SetLocG]: "SetLocG",
-    [Op.SetLocM]: "SetLocM",
-    [Op.SetLocN]: "SetLocN",
-    [Op.SetMut]: "SetMut",
     [Op.Struct]: "Struct",
     [Op.Sub]: "Sub",
 };
@@ -162,24 +148,20 @@ export class Chunk {
             case Op.NEq:
             case Op.Not:
             case Op.Ok:
-            case Op.Pipe:
             case Op.Pop:
             case Op.Sub: {
                 result += name + "\n";
                 return [result, offset + 1];
             }
 
-            case Op.CallCur:
-            case Op.CallNat:
-            case Op.CallUsr:
+            case Op.Call:
             case Op.Struct: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];
             }
 
-            case Op.GetNat:
-            case Op.GetUsr:
+            case Op.GetGlob:
             case Op.Load: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
@@ -198,14 +180,12 @@ export class Chunk {
             case Op.CkExcD:
             case Op.CkInc:
             case Op.CkIncD:
-            case Op.Curry:
             case Op.GetLoc:
             case Op.Inc:
+            case Op.New:
             case Op.Ret:
             case Op.SetLoc:
-            case Op.SetLocG:
-            case Op.SetLocM:
-            case Op.SetLocN: {
+            case Op.SetLocG: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];
@@ -216,14 +196,6 @@ export class Chunk {
                 let varname  = this.values[index].to_str();
 
                 result += `${ padr7(name) } ${ padl4(index) } '${ varname }'\n`;
-                return [result, offset + 2];
-            }
-
-            case Op.SetMut: {
-                let index = this.code[offset + 1];
-                let varname  = this.values[index].to_str();
-
-                result += `${ padr7(name) } ${ padl4(index) } 'mut ${ varname }'\n`;
                 return [result, offset + 2];
             }
 

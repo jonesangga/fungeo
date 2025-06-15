@@ -1,4 +1,4 @@
-import { FGType, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
+import { FGType, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
 export var Kind;
 (function (Kind) {
     Kind[Kind["Nothing"] = 100] = "Nothing";
@@ -8,7 +8,6 @@ export var Kind;
     Kind[Kind["CallUser"] = 450] = "CallUser";
     Kind[Kind["Color"] = 455] = "Color";
     Kind[Kind["Complex"] = 460] = "Complex";
-    Kind[Kind["Curry"] = 465] = "Curry";
     Kind[Kind["List"] = 470] = "List";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
@@ -33,7 +32,6 @@ export const KindName = {
     [700]: "Circle",
     [455]: "Color",
     [460]: "Complex",
-    [465]: "Curry",
     [750]: "Ellipse",
     [470]: "List",
     [100]: "Nothing",
@@ -67,75 +65,40 @@ export class FGBoolean {
         return false;
     }
 }
-export var CallT;
-(function (CallT) {
-    CallT[CallT["Function"] = 0] = "Function";
-    CallT[CallT["Procedure"] = 1] = "Procedure";
-})(CallT || (CallT = {}));
-;
 export class FGCallNative {
     name;
-    callType;
     value;
-    input;
-    output;
+    sig;
     kind = 400;
-    constructor(name, callType, value, input, output) {
+    constructor(name, value, sig) {
         this.name = name;
-        this.callType = callType;
         this.value = value;
-        this.input = input;
-        this.output = output;
+        this.sig = sig;
     }
     to_str() {
-        if (this.callType === 0)
-            return `{fn ${this.name}}`;
-        else
-            return `{proc ${this.name}}`;
+        return `{fn ${this.name}}`;
     }
     typeof() {
-        return new FGType(new CallNativeT(this.input, this.output));
+        return new FGType(this.sig);
     }
 }
 export class FGCallUser {
     name;
-    callType;
     input;
     output;
     chunk;
     kind = 450;
-    constructor(name, callType, input, output, chunk) {
+    constructor(name, input, output, chunk) {
         this.name = name;
-        this.callType = callType;
         this.input = input;
         this.output = output;
         this.chunk = chunk;
     }
     to_str() {
-        if (this.callType === 0)
-            return `{fn ${this.name}}`;
-        else
-            return `{proc ${this.name}}`;
+        return `{fn ${this.name}}`;
     }
     typeof() {
         return new FGType(new CallUserT(this.input, this.output));
-    }
-}
-export class FGCurry {
-    name;
-    fn;
-    args;
-    kind = 465;
-    constructor(name, fn, args) {
-        this.name = name;
-        this.fn = fn;
-        this.args = args;
-    }
-    to_str() {
-        return `{curry ${this.name}}`;
-    }
-    typeof() {
-        return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
 }
 export class FGNumber {

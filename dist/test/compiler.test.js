@@ -511,12 +511,12 @@ describe("compiler: user function", () => {
     const tests = [
         ["define and call user function 1 arg", `fn Double x: Num -> Num = x * 2 a = Double 10`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 4, 800, 5, 205, 1, 800, 6, 1400, 3,
+                800, 4, 800, 5, 200, 1, 800, 6, 1400, 3,
                 1150,
             ]],
         ["define and call user function 2 arg", `fn Add x: Num, y: Num -> Num = x + y a = Add 2 3`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 4, 800, 5, 800, 6, 205, 2, 800, 7, 1400, 3,
+                800, 4, 800, 5, 800, 6, 200, 2, 800, 7, 1400, 3,
                 1150,
             ]],
     ];
@@ -526,12 +526,12 @@ describe("compiler: user procedure", () => {
     const tests = [
         ["define and call user procedure 1 arg", `proc Print_double x: Num { Print $ x * 2 } Print_double 10`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 3, 800, 4, 205, 1,
+                800, 3, 800, 4, 200, 1,
                 1150,
             ]],
         ["define and call user procedure 2 arg", `proc Print_add x: Num, y: Num { Print $ x + y } Print_add 10 20`, [
                 800, 1, 800, 2, 1400, 0,
-                800, 3, 800, 4, 800, 5, 205, 2,
+                800, 3, 800, 4, 800, 5, 200, 2,
                 1150,
             ]],
     ];

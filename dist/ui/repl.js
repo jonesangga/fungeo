@@ -1,53 +1,49 @@
-const container = document.createElement("div");
-document.body.appendChild(container);
-container.style.position = "absolute";
-container.style.display = "flex";
-container.style.top = "0px";
-container.style.left = "0px";
-container.style.background = "#ff0";
-container.style.zIndex = "10";
-const holder = document.createElement("div");
-container.appendChild(holder);
-holder.style.position = "unset";
-holder.style.width = "10px";
-holder.style.height = "30px";
-holder.style.background = "#000";
-const input = document.createElement("textarea");
-container.appendChild(input);
-input.style.fontSize = "16px";
-input.focus();
-input.cols = 20;
-input.rows = 1;
-input.wrap = "off";
-input.style.position = "unset";
-input.style.minWidth = "560px";
-input.style.maxWidth = "600px";
-input.style.marginLeft = "5px";
-input.style.padding = "0px 5px";
-input.style.border = "1px solid #000";
-input.style.background = "#eee";
-input.style.overflow = "hidden";
-const output = document.createElement("pre");
-container.appendChild(output);
-output.style.position = "absolute";
-output.style.top = "25px";
-output.style.left = "15px";
-output.style.width = "250px";
-output.style.border = "1px solid #000";
-output.style.fontSize = "11px";
-output.style.textWrap = "wrap";
-output.style.visibility = "hidden";
-const colorOk = "#70d196";
-const colorFail = "#e85b5b";
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(`
+body {
+    font-family: monospace;
+    font-size: 16px;
+}
+textarea {
+    margin-top: 10px;
+    min-width:  300px;
+    max-width:  600px;
+    background: #eee;
+    border:     1px solid #000;
+    overflow:   hidden;
+    font-size:  inherit;
+}
+button {
+    font-size:    inherit;
+    font-family:  inherit;
+    margin-right: 10px;
+}`);
+document.adoptedStyleSheets.push(sheet);
+let fontSize = 16;
+const controller = document.createElement("div");
+document.body.appendChild(controller);
+controller.style.position = "absolute";
+controller.style.top = "0px";
+controller.style.left = "0px";
+controller.style.display = "flex";
+controller.style.flexDirection = "column";
+controller.style.zIndex = "999";
+const buttonArea = document.createElement("div");
+controller.appendChild(buttonArea);
+const colorOk = "#caf8dc";
+const colorError = "#fee";
 let offsetX = 0;
 let offsetY = 0;
 let history = [{ code: "" }];
 let historyViewIdx = 1;
-let savedLine = "";
-holder.addEventListener("mousedown", mousedown_cb);
-function mousedown_cb(e) {
+let savedCode = "";
+const dragBtn = document.createElement("button");
+buttonArea.appendChild(dragBtn);
+dragBtn.innerHTML = "drag";
+dragBtn.addEventListener("mousedown", drag_btn_cb);
+function drag_btn_cb(e) {
     if (e.button === 0) {
-        let b = container.getBoundingClientRect();
+        let b = controller.getBoundingClientRect();
         offsetX = e.clientX - b.left;
         offsetY = e.clientY - b.top;
         window.addEventListener("mousemove", mousemove_cb);
@@ -59,160 +55,198 @@ function mousemove_cb(e) {
         window.removeEventListener("mousemove", mousemove_cb);
     }
     else {
-        container.style.left = e.pageX - offsetX + "px";
-        container.style.top = e.pageY - offsetY + "px";
+        controller.style.left = e.pageX - offsetX + "px";
+        controller.style.top = e.pageY - offsetY + "px";
     }
 }
-input.addEventListener("input", input_resize);
-input.addEventListener("keydown", input_binding);
-function input_reset() {
-    input.style.height = "auto";
-    input.style.height = "1lh";
-    input.style.width = "210px";
-    output.style.top = "calc(1lh + " + 10 + "px)";
+const minusBtn = document.createElement("button");
+buttonArea.appendChild(minusBtn);
+minusBtn.innerHTML = "-";
+const plusBtn = document.createElement("button");
+buttonArea.appendChild(plusBtn);
+plusBtn.innerHTML = "+";
+minusBtn.addEventListener("mousedown", minus_btn_cb);
+plusBtn.addEventListener("mousedown", plus_btn_cb);
+function minus_btn_cb() {
+    if (fontSize <= 10)
+        return;
+    fontSize--;
+    update_font_size();
 }
-function input_resize() {
-    input.style.height = "auto";
-    input.style.height = input.scrollHeight + "px";
-    input.style.width = "auto";
-    input.style.width = input.scrollWidth + "px";
-    output.style.top = input.scrollHeight + 10 + "px";
+function plus_btn_cb() {
+    if (fontSize >= 30)
+        return;
+    fontSize++;
+    update_font_size();
 }
-input_resize();
-function input_binding(e) {
+function update_font_size() {
+    terminal.style.fontSize = fontSize + "px";
+    buttonArea.style.fontSize = fontSize + "px";
+    inputArea.style.fontSize = fontSize + "px";
+    input_area_resize();
+}
+const inputArea = document.createElement("textarea");
+controller.appendChild(inputArea);
+inputArea.cols = 20;
+inputArea.rows = 1;
+inputArea.wrap = "off";
+inputArea.focus();
+inputArea.addEventListener("input", input_area_resize);
+inputArea.addEventListener("keydown", input_area_binding);
+function input_area_resize() {
+    inputArea.style.height = "auto";
+    inputArea.style.height = inputArea.scrollHeight + "px";
+    inputArea.style.width = "auto";
+    inputArea.style.width = inputArea.scrollWidth + "px";
+}
+input_area_resize();
+function input_area_binding(e) {
     if (!e.shiftKey)
         return;
     if (e.key === "ArrowUp" && !e.repeat) {
-        if (historyViewIdx > 1) {
-            if (historyViewIdx === history.length) {
-                savedLine = input.value;
-            }
-            historyViewIdx--;
-            input.value = history[historyViewIdx].code;
-            input_resize();
-        }
         e.preventDefault();
+        if (historyViewIdx <= 1)
+            return;
+        if (historyViewIdx === history.length)
+            savedCode = inputArea.value;
+        historyViewIdx--;
+        inputArea.value = history[historyViewIdx].code;
+        input_area_resize();
     }
     else if (e.key === "ArrowDown" && !e.repeat) {
-        if (historyViewIdx < history.length - 1) {
+        e.preventDefault();
+        if (historyViewIdx >= history.length)
+            return;
+        if (historyViewIdx === history.length - 1) {
             historyViewIdx++;
-            input.value = history[historyViewIdx].code;
+            inputArea.value = savedCode;
         }
-        else if (historyViewIdx === history.length - 1) {
+        else {
             historyViewIdx++;
-            input.value = savedLine;
+            inputArea.value = history[historyViewIdx].code;
         }
-        input_resize();
+        input_area_resize();
     }
     else if (e.key === "Enter" && !e.repeat) {
-        let source = input.value.trim();
-        if (source !== "") {
-            input.value = "";
-            input_reset();
-            if (history[history.length - 1].code !== source) {
-                history.push({ code: source });
-            }
-            historyViewIdx = history.length;
-            terminal_add_code(source);
-            repl.callback(source);
-            terminal_update();
-        }
         e.preventDefault();
+        let source = inputArea.value.trim();
+        if (source === "")
+            return;
+        inputArea.value = "";
+        input_area_resize();
+        if (history[history.length - 1].code !== source)
+            history.push({ code: source });
+        historyViewIdx = history.length;
+        terminal_push(source);
+        repl.callback(source);
+        terminal_update();
     }
+}
+const resultArea = document.createElement("pre");
+controller.appendChild(resultArea);
+resultArea.style.marginTop = "10px";
+resultArea.style.border = "1px solid #000";
+resultArea.style.textWrap = "wrap";
+resultArea.style.background = "#eee";
+resultArea.style.visibility = "hidden";
+const termBtn = document.createElement("button");
+buttonArea.appendChild(termBtn);
+termBtn.innerHTML = "terminal";
+termBtn.addEventListener("mousedown", term_btn_cb);
+function term_btn_cb() {
+    resultArea.style.visibility = "hidden";
+    terminal.style.visibility = showTerminal ? "hidden" : "visible";
+    showTerminal = !showTerminal;
+}
+const terminal = document.createElement("div");
+document.body.appendChild(terminal);
+terminal.style.position = "absolute";
+terminal.style.top = "0px";
+terminal.style.left = "0px";
+terminal.style.width = "600px";
+terminal.style.height = "100vh";
+terminal.style.border = "1px solid #000";
+terminal.style.background = "#eee";
+terminal.style.overflow = "auto";
+terminal.style.whiteSpace = "pre";
+let showTerminal = true;
+function terminal_update() {
+    terminal.scrollTop = terminal.scrollHeight;
+}
+function terminal_push(text, bg) {
+    const div = document.createElement("div");
+    terminal.appendChild(div);
+    div.innerHTML = text;
+    div.style.borderBottom = "1px solid #000";
+    if (typeof bg !== "undefined")
+        div.style.background = bg;
 }
 const repl = {
     kind: 2500,
     reset() {
         history = [{ code: "" }];
         historyViewIdx = 1;
-        savedLine = "";
+        savedCode = "";
         terminal.innerHTML = "";
     },
-    to_str() { return "repl"; },
+    to_str() {
+        return "repl";
+    },
     callback(source) {
         console.log(source);
+        if (source === "") {
+            resultArea.style.visibility = "hidden";
+        }
+        else if (source.length <= 5) {
+            this.ok("ok: source length is " + source.length);
+        }
+        else {
+            this.error("error: source length is " + source.length);
+        }
     },
     set_callback(fn) {
         this.callback = fn;
     },
     from_script(source) {
         source = source.trim();
-        if (source !== "") {
-            input.value = "";
-            input_reset();
-            if (history[history.length - 1].code !== source) {
-                history.push({ code: source });
-            }
-            historyViewIdx = history.length;
-            terminal_add_code(source);
-            this.callback(source);
-            terminal_update();
-        }
+        if (source === "")
+            return;
+        inputArea.value = "";
+        input_area_resize();
+        if (history[history.length - 1].code !== source)
+            history.push({ code: source });
+        historyViewIdx = history.length;
+        terminal_push(source);
+        this.callback(source);
+        terminal_update();
     },
     place(x, y) {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
             return;
         }
-        container.style.left = x + "px";
-        container.style.top = y + "px";
+        controller.style.left = x + "px";
+        controller.style.top = y + "px";
     },
     ok(message) {
-        holder.style.background = colorOk;
         if (message === "")
             return;
-        terminal_add_code(message, 1);
+        terminal_push(message, colorOk);
         history[history.length - 1].output = message;
-        if (!terminalShow) {
-            if (message === "") {
-                output.style.visibility = "hidden";
-            }
-            else {
-                output.style.visibility = "visible";
-                output.style.borderColor = colorOk;
-                output.innerHTML = message;
-            }
+        if (!showTerminal) {
+            resultArea.style.visibility = "visible";
+            resultArea.style.background = colorOk;
+            resultArea.innerHTML = message;
         }
     },
     error(message) {
-        terminal_add_code(message, 0);
+        terminal_push(message, colorError);
         history[history.length - 1].output = message;
-        holder.style.background = colorFail;
-        if (!terminalShow) {
-            output.style.visibility = "visible";
-            output.style.borderColor = colorFail;
-            output.innerHTML = message;
+        if (!showTerminal) {
+            resultArea.style.visibility = "visible";
+            resultArea.style.background = colorError;
+            resultArea.innerHTML = message;
         }
     }
 };
-const terminal = document.createElement("div");
-document.body.appendChild(terminal);
-terminal.style.position = "absolute";
-terminal.style.top = "35px";
-terminal.style.left = "0px";
-terminal.style.width = "600px";
-terminal.style.height = "500px";
-terminal.style.border = "1px solid #000";
-terminal.style.fontSize = "16px";
-terminal.style.background = "#eee";
-terminal.style.overflow = "auto";
-terminal.style.fontFamily = "monospace";
-terminal.style.whiteSpace = "pre";
-let terminalShow = true;
-function terminal_update() {
-    terminal.scrollTop = terminal.scrollHeight;
-}
-function terminal_add_code(code, type) {
-    const div = document.createElement("div");
-    div.style.fontSize = "16px";
-    div.style.borderBottom = "1px solid #000";
-    if (type === 0) {
-        div.style.background = "#fee";
-    }
-    else if (type === 1) {
-        div.style.background = "#caf8dc";
-    }
-    div.innerHTML = code;
-    terminal.appendChild(div);
-}
 export default repl;

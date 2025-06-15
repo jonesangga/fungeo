@@ -1,16 +1,15 @@
-import { FGCurry, FGStruct, FGBoolean, FGNumber, FGList } from "./value.js";
-import { nativeNames } from "./names.js";
+import { FGStruct, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
+import { nativeNames } from "./vmfunction.js";
 import Rect from "./geo/rect.js";
 import Point from "./geo/point.js";
 import Circle from "./geo/circle.js";
 let $ = console.log;
-$ = () => { };
 export let stack = [];
 export let stackTop = 0;
 let frames = [];
 let currFrame;
 let currChunk;
-export let userNames = {};
+export let names = {};
 export function push(value) {
     stack[stackTop++] = value;
 }
@@ -97,40 +96,6 @@ export function run(intercept = false) {
                 push(a.add(b));
                 break;
             }
-            case 230: {
-                let applied = read_byte();
-                let fn = peek(applied);
-                let args = [];
-                for (let i = 0; i < applied; i++)
-                    args[applied - i - 1] = pop();
-                pop();
-                let curry = new FGCurry("dummy", fn, args);
-                push(curry);
-                break;
-            }
-            case 190: {
-                let n = read_byte();
-                let args = [];
-                for (let i = 0; i < n; i++)
-                    args.push(pop());
-                let curry = pop();
-                push(curry.fn);
-                for (let i = 0; i < curry.args.length; i++)
-                    push(curry.args[i]);
-                for (let i = 0; i < n; i++)
-                    push(args[n - i - 1]);
-                break;
-            }
-            case 1190: {
-                let curry = pop();
-                let pipeArg = pop();
-                $(curry, pipeArg);
-                push(curry.fn);
-                for (let i = 0; i < curry.args.length; i++)
-                    push(curry.args[i]);
-                push(pipeArg);
-                break;
-            }
             case 1450: {
                 let arity = read_byte();
                 let got = [];
@@ -150,13 +115,10 @@ export function run(intercept = false) {
             case 200: {
                 let arity = read_byte();
                 let fn = peek(arity);
-                fn.value();
-                break;
-            }
-            case 205: {
-                let arity = read_byte();
-                let fn = peek(arity);
-                call(fn, arity);
+                if (fn instanceof FGCallNative)
+                    fn.value();
+                else
+                    call(fn, arity);
                 break;
             }
             case 300: {
@@ -304,15 +266,9 @@ export function run(intercept = false) {
                 push(read_constant());
                 break;
             }
-            case 400: {
-                let name = read_string();
-                let value = nativeNames[name].value;
-                push(value);
-                break;
-            }
             case 500: {
                 let name = read_string();
-                let value = userNames[name].value;
+                let value = names[name].value;
                 push(value);
                 break;
             }
@@ -328,18 +284,17 @@ export function run(intercept = false) {
                 push(a);
                 break;
             }
-            case 1400: {
+            case 1020: {
                 let name = read_string();
                 let type = pop().value;
                 let value = pop();
-                userNames[name] = { type, value };
+                names[name] = { type, value };
                 break;
             }
-            case 1430: {
+            case 1400: {
                 let name = read_string();
-                let type = pop().value;
                 let value = pop();
-                userNames[name] = { type, value, mut: true };
+                names[name].value = value;
                 break;
             }
             case 700: {
@@ -384,21 +339,11 @@ export function run(intercept = false) {
                 stack[currFrame.slots + read_byte()] = peek(0);
                 break;
             }
-            case 1420: {
-                pop();
-                stack[currFrame.slots + read_byte()] = pop();
-                break;
-            }
-            case 1425: {
-                pop();
-                stack[currFrame.slots + read_byte()] = pop();
-                break;
-            }
             case 1415: {
                 let name = read_string();
                 let type = pop().value;
                 let value = pop();
-                userNames[name].value = value;
+                names[name].value = value;
                 break;
             }
             case 1200: {
@@ -437,7 +382,7 @@ class RuntimeError extends Error {
 export const vm = {
     init() {
         stack_reset();
-        userNames = {};
+        names = { ...nativeNames };
     },
     interpret(fn) {
         TESTING = false;

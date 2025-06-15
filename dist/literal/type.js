@@ -114,7 +114,7 @@ export class UnionT {
         return this.value.some(val => val.equal(other));
     }
 }
-export class CallNativeT {
+export class FunctionT {
     input;
     output;
     constructor(input, output) {
@@ -126,7 +126,9 @@ export class CallNativeT {
         return input + " -> " + this.output.to_str();
     }
     equal(other) {
-        return other instanceof CallNativeT;
+        return other instanceof FunctionT
+            && this.input.every((inp, i) => inp.equal(other.input[i]))
+            && this.output.equal(other.output);
     }
 }
 export class CallUserT {
@@ -250,7 +252,7 @@ export const booleanT = new BooleanT();
 export const colorT = new ColorT();
 export const colorTVal = new FGType(colorT);
 export const complexT = new ComplexT();
-export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
+export const functionT = new FunctionT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();

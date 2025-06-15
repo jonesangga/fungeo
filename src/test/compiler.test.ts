@@ -380,7 +380,7 @@ describe("compiler: block", () => {
         ["SetLoc GetLoc in {}", `if true {let a = 2 Print a}`, [
             Op.Load, 0, Op.JmpF, 16, Op.Pop,
             Op.Load, 1, Op.Load, 2, Op.SetLoc, 0,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1, Op.Pop,
+            Op.Load, 3, Op.GetLoc, 0, Op.Call, 1, Op.Pop,
             Op.Jmp, 1, Op.Pop, Op.Ok,
         ]],
         // ["nested {}", `{a = 2 {a = 3 Print a} Print a}`, [
@@ -422,9 +422,9 @@ describe("compiler: if", () => {
     const tests: CodeTest = [
         ["one statement each branch", `if true Print "correct" else Print "wrong"`, [
             Op.Load, 0, Op.JmpF, 9, Op.Pop,
-            Op.Load, 1, Op.Load, 2, Op.CallNat, 1,
+            Op.Load, 1, Op.Load, 2, Op.Call, 1,
             Op.Jmp, 7, Op.Pop,
-            Op.Load, 3, Op.Load, 4, Op.CallNat, 1,
+            Op.Load, 3, Op.Load, 4, Op.Call, 1,
             Op.Ok,
         ]],
     ];
@@ -448,7 +448,7 @@ describe("compiler loop", () => {
         ["closed increasing default loop", `[10,15]i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.CkInc, 0, Op.JmpF, 11, Op.Pop,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1,
+            Op.Load, 3, Op.GetLoc, 0, Op.Call, 1,
             Op.Inc, 0, Op.JmpBack, -15,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
@@ -456,7 +456,7 @@ describe("compiler loop", () => {
         ["open left increasing default loop", `(10,15]i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.Jmp, 11, Op.CkInc, 0, Op.JmpF, 11, Op.Pop,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1,
+            Op.Load, 3, Op.GetLoc, 0, Op.Call, 1,
             Op.Inc, 0, Op.JmpBack, -15,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
@@ -464,7 +464,7 @@ describe("compiler loop", () => {
         ["open right increasing default loop", `[10,15)i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.CkExc, 0, Op.JmpF, 11, Op.Pop,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1,
+            Op.Load, 3, Op.GetLoc, 0, Op.Call, 1,
             Op.Inc, 0, Op.JmpBack, -15,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
@@ -472,7 +472,7 @@ describe("compiler loop", () => {
         ["open increasing default loop", `(10,15)i Print i`, [
             Op.Load, 0, Op.Load, 1, Op.Load, 2,
             Op.Loop, Op.Jmp, 11, Op.CkExc, 0, Op.JmpF, 11, Op.Pop,
-            Op.Load, 3, Op.GetLoc, 0, Op.CallNat, 1,
+            Op.Load, 3, Op.GetLoc, 0, Op.Call, 1,
             Op.Inc, 0, Op.JmpBack, -15,
             Op.Pop, Op.Pop, Op.Pop, Op.Pop,
             Op.Ok,
@@ -559,27 +559,27 @@ describe("compiler: global assignment error", () => {
 describe("compiler: native function", () => {
     const tests: CodeTest = [
         ["call native function 1 arg", `Print 2`, [
-            Op.Load, 0, Op.Load, 1, Op.CallNat, 1, Op.Ok,
+            Op.Load, 0, Op.Load, 1, Op.Call, 1, Op.Ok,
         ]],
         ["call native function 2 args", `p = P 100 200`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            Op.CallNat, 2, Op.Load, 4, Op.Set, 0, Op.Ok,
+            Op.Call, 2, Op.Load, 4, Op.Set, 0, Op.Ok,
         ]],
         ["call native function 3 args", `c = C 100 200 50`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4,
-            Op.CallNat, 3, Op.Load, 5, Op.Set, 0, Op.Ok,
+            Op.Call, 3, Op.Load, 5, Op.Set, 0, Op.Ok,
         ]],
         ["call native function 4 args", `r = R 100 200 300 400`, [
             Op.Load, 1, Op.Load, 2, Op.Load, 3, Op.Load, 4, Op.Load, 5,
-            Op.CallNat, 4, Op.Load, 6, Op.Set, 0, Op.Ok,
+            Op.Call, 4, Op.Load, 6, Op.Set, 0, Op.Ok,
         ]],
         // ["call native function v1 2 args", `p = P 100 200 q = P 300 400 s = Seg p q`, [
             // Op.Load, 1, Op.Load, 2, Op.Load, 3,
-            // Op.CallNat, 2, 0, Op.Load, 4, Op.Set, 0,
+            // Op.Call, 2, 0, Op.Load, 4, Op.Set, 0,
             // Op.Load, 6, Op.Load, 7, Op.Load, 8,
-            // Op.CallNat, 2, 0, Op.Load, 9, Op.Set, 5,
+            // Op.Call, 2, 0, Op.Load, 9, Op.Set, 5,
             // Op.Load, 11, Op.GetUsr, 12, Op.GetUsr, 13,
-            // Op.CallNat, 2, 1, Op.Load, 14, Op.Set, 10,
+            // Op.Call, 2, 1, Op.Load, 14, Op.Set, 10,
             // Op.Ok,
         // ]],
     ];
@@ -592,7 +592,7 @@ describe("compiler: native function", () => {
 describe("compiler: native procedure", () => {
     const tests: CodeTest = [
         ["call native procedure 0 arg", `Help`, [
-            Op.Load, 0, Op.CallNat, 0, Op.Ok,
+            Op.Load, 0, Op.Call, 0, Op.Ok,
         ]],
     ];
     matchCode(tests);
@@ -606,12 +606,12 @@ describe("compiler: user function", () => {
     const tests: CodeTest = [
         ["define and call user function 1 arg", `fn Double x: Num -> Num = x * 2 a = Double 10`, [
             Op.Load, 1, Op.Load, 2, Op.Set, 0,
-            Op.Load, 4, Op.Load, 5, Op.CallUsr, 1, Op.Load, 6, Op.Set, 3,
+            Op.Load, 4, Op.Load, 5, Op.Call, 1, Op.Load, 6, Op.Set, 3,
             Op.Ok,
         ]],
         ["define and call user function 2 arg", `fn Add x: Num, y: Num -> Num = x + y a = Add 2 3`, [
             Op.Load, 1, Op.Load, 2, Op.Set, 0,
-            Op.Load, 4, Op.Load, 5, Op.Load, 6, Op.CallUsr, 2, Op.Load, 7, Op.Set, 3,
+            Op.Load, 4, Op.Load, 5, Op.Load, 6, Op.Call, 2, Op.Load, 7, Op.Set, 3,
             Op.Ok,
         ]],
     ];
@@ -625,12 +625,12 @@ describe("compiler: user procedure", () => {
     const tests: CodeTest = [
         ["define and call user procedure 1 arg", `proc Print_double x: Num { Print $ x * 2 } Print_double 10`, [
             Op.Load, 1, Op.Load, 2, Op.Set, 0,
-            Op.Load, 3, Op.Load, 4, Op.CallUsr, 1,
+            Op.Load, 3, Op.Load, 4, Op.Call, 1,
             Op.Ok,
         ]],
         ["define and call user procedure 2 arg", `proc Print_add x: Num, y: Num { Print $ x + y } Print_add 10 20`, [
             Op.Load, 1, Op.Load, 2, Op.Set, 0,
-            Op.Load, 3, Op.Load, 4, Op.Load, 5, Op.CallUsr, 2,
+            Op.Load, 3, Op.Load, 4, Op.Load, 5, Op.Call, 2,
             Op.Ok,
         ]],
     ];

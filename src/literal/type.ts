@@ -140,25 +140,39 @@ export class UnionT implements Type {
     }
 }
 
-export class CallNativeT implements Type {
-    constructor(
-        public input: Type[],
-        public output: Type
-    ) {}
+// export class FunctionT implements Type {
+    // constructor(public input:  Map<string, Type>,
+                // public output: Type) {}
+
+    // to_str(): string {
+        // return "FunctionT, not implememented yet";
+    // }
+
+    // equal(other: Type): boolean {
+        // return other instanceof FunctionT;
+    // }
+// }
+
+export class FunctionT implements Type {
+    constructor(public input:  Type[],
+                public output: Type) {}
+
     to_str(): string {
         let input = this.input.map(v => v.to_str()).join(" -> ");
         return input + " -> " + this.output.to_str();
     }
+
     equal(other: Type): boolean {
-        return other instanceof CallNativeT;
+        return other instanceof FunctionT
+            && this.input.every((inp, i) => inp.equal(other.input[i]))
+            && this.output.equal(other.output);
     }
 }
 
 export class CallUserT implements Type {
-    constructor(
-        public input: Type[],
-        public output: Type
-    ) {}
+    constructor(public input:  Type[],
+                public output: Type) {}
+
     to_str(): string {
         let input = this.input.map(v => {
             if (v instanceof CallUserT)
@@ -285,7 +299,7 @@ export const booleanT = new BooleanT();
 export const colorT = new ColorT();
 export const colorTVal = new FGType(colorT);
 export const complexT = new ComplexT();
-export const callNativeT = new CallNativeT([new AnyT()], new AnyT());
+export const functionT = new FunctionT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();

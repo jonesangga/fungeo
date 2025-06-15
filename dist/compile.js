@@ -1,0 +1,106 @@
+import { Chunk } from "./chunk.js";
+import { BinaryTable } from "./ast.js";
+import { names } from "./vm.js";
+import { FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
+import { FGType, nothingT } from "./literal/type.js";
+class CodeGen {
+    visitNumber(node) {
+        emitConstant(new FGNumber(node.value), node.line);
+    }
+    visitString(node) {
+        emitConstant(new FGString(node.value), node.line);
+    }
+    visitBoolean(node) {
+        emitConstant(new FGBoolean(node.value), node.line);
+    }
+    visitBinary(node) {
+        node.left.visit(this);
+        node.right.visit(this);
+        emitByte(BinaryTable[node.op].op, node.line);
+    }
+    visitFn(node) {
+        emitConstant(names[node.name].value, node.line);
+    }
+    visitVar(node) {
+        let index = makeConstant(new FGString(node.name));
+        emitBytes(500, index, node.line);
+    }
+    visitAssign(node) {
+        let index = makeConstant(new FGString(node.name));
+        node.value.visit(this);
+        emitBytes(1400, index, node.line);
+    }
+    visitVarDecl(node) {
+        let index = makeConstant(new FGString(node.name));
+        node.init.visit(this);
+        let type = tempNames[node.name].type;
+        emitConstant(new FGType(type), node.line);
+        emitBytes(1020, index, node.line);
+    }
+    visitExprStmt(node) {
+        node.expr.visit(this);
+        emitByte(1200, node.line);
+    }
+    visitFile(node) {
+        node.stmts.forEach(stmt => stmt.visit(this));
+    }
+    visitCall(node) {
+        node.callee.visit(this);
+        node.args.forEach(arg => arg.visit(this));
+        let arity = node.args.length;
+        emitBytes(200, arity, node.line);
+    }
+}
+function emitByte(byte, line) {
+    curr_chunk().write(byte, line);
+}
+function emitBytes(byte1, byte2, line) {
+    emitByte(byte1, line);
+    emitByte(byte2, line);
+}
+function emitConstant(value, line) {
+    emitBytes(800, makeConstant(value), line);
+}
+function emitReturn() {
+    emitByte(1150, -1);
+}
+function makeConstant(value) {
+    return curr_chunk().add_value(value);
+}
+let current;
+function curr_chunk() {
+    return current.fn.chunk;
+}
+function begin_compiler(name) {
+    let compiler = {
+        enclosing: current,
+        fn: new FGCallUser(name, [], nothingT, new Chunk(name)),
+        scopeDepth: 0,
+    };
+    current = compiler;
+}
+function end_compiler() {
+    emitReturn();
+    let fn = current.fn;
+    current = current.enclosing;
+    return fn;
+}
+let tempNames = {};
+export function compile(ast, name) {
+    tempNames = name;
+    begin_compiler("TOP");
+    let codegen = new CodeGen();
+    try {
+        ast.visit(codegen);
+        return {
+            ok: true,
+            value: end_compiler(),
+        };
+    }
+    catch (error) {
+        return {
+            ok: false,
+            error: (error instanceof Error) ? error : new Error("unknown error"),
+        };
+    }
+}

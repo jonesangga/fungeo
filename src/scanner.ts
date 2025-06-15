@@ -4,7 +4,6 @@
 
 export const enum TokenT {
     Comma     = 100,    // Single character.
-    Dollar    = 200,
     Dot       = 210,
     Hash      = 250,
     LBrace    = 300,
@@ -34,12 +33,11 @@ export const enum TokenT {
     Less      = 1550,
     LessEq    = 1555,
     LR        = 1560,
-    Pipe      = 1575,
     PipePipe  = 1580,
     Plus      = 1585,
     PlusPlus  = 1590,
-    Callable  = 1650,   // Literals.
-    False     = 1700,
+    False     = 1700,   // Literals.
+    FnName    = 1720,
     Number    = 1800,
     String    = 1900,
     True      = 2000,
@@ -54,16 +52,14 @@ export const enum TokenT {
     Global    = 2450,
     Let       = 2460,
     Mut       = 2500,
-    NCallable = 2540,
-    Nonlocal  = 2550,
     NumT      = 2600,
     PointT    = 2700,
-    Proc      = 2750,
     RectT     = 2780,
     Return    = 2800,
     StrT      = 2900,
     Struct    = 2910,
     Then      = 3000,
+    VarName   = 3100,
 };
 
 export const TokenTName: {
@@ -75,14 +71,13 @@ export const TokenTName: {
     [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
-    [TokenT.Callable]: "Callable",
+    [TokenT.FnName]: "FnName",
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
     [TokenT.ColonMin]: "ColonMin",
     [TokenT.Comma]: "Comma",
     [TokenT.DivBy]: "DivBy",
-    [TokenT.Dollar]: "Dollar",
     [TokenT.Dot]: "Dot",
     [TokenT.Else]: "Else",
     [TokenT.EOF]: "EOF",
@@ -106,17 +101,14 @@ export const TokenTName: {
     [TokenT.Let]: "Let",
     [TokenT.Minus]: "Minus",
     [TokenT.Mut]: "Mut",
-    [TokenT.NCallable]: "NCallable",
-    [TokenT.Nonlocal]: "Nonlocal",
+    [TokenT.VarName]: "VarName",
     [TokenT.Number]: "Number",
     [TokenT.NumT]: "NumT",
     [TokenT.Percent]: "Percent",
-    [TokenT.Pipe]: "Pipe",
     [TokenT.PipePipe]: "PipePipe",
     [TokenT.Plus]: "Plus",
     [TokenT.PlusPlus]: "PlusPlus",
     [TokenT.PointT]: "PointT",
-    [TokenT.Proc]: "Proc",
     [TokenT.RBrace]: "RBrace",
     [TokenT.RBracket]: "RBracket",
     [TokenT.RectT]: "RectT",
@@ -212,7 +204,7 @@ function pascal_case(): Token {
         case "Rect":   return token_lexeme( TokenT.RectT );
         case "Str":    return token_lexeme( TokenT.StrT );
     }
-    return token_lexeme( TokenT.Callable );
+    return token_lexeme( TokenT.FnName );
 }
 
 // Scan non-callable names, keywords, true, false.
@@ -229,14 +221,12 @@ function non_pascal_case(): Token {
         case "global":   return token_lexeme( TokenT.Global );
         case "let":      return token_lexeme( TokenT.Let );
         case "mut":      return token_lexeme( TokenT.Mut );
-        case "nonlocal": return token_lexeme( TokenT.Nonlocal );
-        case "proc":     return token_lexeme( TokenT.Proc );
         case "return":   return token_lexeme( TokenT.Return );
         case "struct":   return token_lexeme( TokenT.Struct );
         case "then":     return token_lexeme( TokenT.Then );
         case "true":     return token_lexeme( TokenT.True );
     }
-    return token_lexeme( TokenT.NCallable );
+    return token_lexeme( TokenT.VarName );
 }
 
 function number_(): Token {
@@ -321,7 +311,6 @@ export const scanner = {
             case ']': return token_lexeme(TokenT.RBracket);
             case '{': return token_lexeme(TokenT.LBrace);
             case '}': return token_lexeme(TokenT.RBrace);
-            case '$': return token_lexeme(TokenT.Dollar);
             case '#': return token_lexeme(TokenT.Hash);
             case ';': return token_lexeme(TokenT.Semicolon);
             case ',': return token_lexeme(TokenT.Comma);
@@ -333,7 +322,6 @@ export const scanner = {
                 match('>') ? TokenT.Arrow : TokenT.Minus);
             case '|': {
                 if (match('|')) return token_lexeme(TokenT.PipePipe);
-                if (match('>')) return token_lexeme(TokenT.Pipe);
                 return token_lexeme(TokenT.DivBy);
             }
             case '&': return token_lexeme(

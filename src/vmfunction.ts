@@ -1,5 +1,5 @@
-import { pop, push, vm_output, call, run } from "./vm.js"
-import { CallT, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGCurry, FGNumber, FGString, FGList } from "./value.js"
+import { pop, push, vm_output } from "./vm.js"
+import { type Value, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
 import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
@@ -12,9 +12,12 @@ import { pointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
-import { ListT, UnionT, anyT, pictureT,
+import { type Type, ListT, UnionT, anyT, pictureT, FunctionT,
          ellipseT, segmentT, nothingT, stringT, numberT,
-         colorT, CallNativeT, NothingT, AnyT } from "./literal/type.js"
+         colorT, canvasT, replT, NothingT, AnyT } from "./literal/type.js"
+
+import fish from "./data/fish.js"
+import repl from "./ui/repl.js"
 
 const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, rectStruct.value, segmentT, circleStruct.value]);
 const geoList = new ListT(geoUnion);
@@ -26,13 +29,8 @@ function _Print(): void {
     pop();              // The function.
     vm_output( value.to_str() + "\n" );
 }
-export let Print = new FGCallNative("Print", CallT.Function, _Print,
-    [anyT],
-    nothingT,
-);
-export const PrintT = new CallNativeT(
-    [new AnyT()],
-    new NothingT()
+let Print = new FGCallNative("Print", _Print,
+    new FunctionT([anyT], nothingT)
 );
 
 function _Printf(): void {
@@ -40,9 +38,8 @@ function _Printf(): void {
     pop();              // The function.
     vm_output( value.to_str() );
 }
-export let Printf = new FGCallNative("Printf", CallT.Function, _Printf,
-    [anyT],
-    nothingT,
+let Printf = new FGCallNative("Printf", _Printf,
+    new FunctionT([anyT], nothingT)
 );
 
 function _Sqrt(): void {
@@ -50,9 +47,8 @@ function _Sqrt(): void {
     pop();              // The function.
     push(new FGNumber( Math.sqrt(value.value) ));
 }
-export let Sqrt = new FGCallNative("Sqrt", CallT.Function, _Sqrt,
-    [numberT],
-    numberT,
+let Sqrt = new FGCallNative("Sqrt", _Sqrt,
+    new FunctionT([numberT], numberT)
 );
 
 function _Abs(): void {
@@ -60,9 +56,8 @@ function _Abs(): void {
     pop();              // The function.
     push(new FGNumber( Math.abs(value.value) ));
 }
-export let Abs = new FGCallNative("Abs", CallT.Function, _Abs,
-    [numberT],
-    numberT,
+let Abs = new FGCallNative("Abs", _Abs,
+    new FunctionT([numberT], numberT)
 );
 
 function _Show(): void {
@@ -70,9 +65,8 @@ function _Show(): void {
     pop();              // The function.
     push(new FGString( value.to_str() ));
 }
-export let Show = new FGCallNative("Show", CallT.Function, _Show,
-    [numberT],
-    stringT,
+let Show = new FGCallNative("Show", _Show,
+    new FunctionT([numberT], stringT)
 );
 
 function _Padl(): void {
@@ -84,9 +78,8 @@ function _Padl(): void {
     let result = (filler.repeat(width) + text).slice(-width);
     push(new FGString(result));
 }
-export let Padl = new FGCallNative("Padl", CallT.Function, _Padl,
-    [stringT, numberT, stringT],
-    stringT,
+let Padl = new FGCallNative("Padl", _Padl,
+    new FunctionT([stringT, numberT, stringT], stringT)
 );
 
 function _RGB(): void {
@@ -96,20 +89,18 @@ function _RGB(): void {
     pop();              // The function.
     push(new FGColor(r, g, b));
 }
-export let RGB = new FGCallNative("RGB", CallT.Function, _RGB,
-    [numberT, numberT, numberT],
-    colorT,
+let RGB = new FGCallNative("RGB", _RGB,
+    new FunctionT([numberT, numberT, numberT], colorT)
 );
 
 // TODO: Think about this again. We lose the type information because that is on table not on stack or on the value.
-function _Type(): void {
+function _TypeFn(): void {
     let value = pop();
     pop();              // The function.
     push((value as FGCallNative).typeof());
 }
-export let Type = new FGCallNative("Type", CallT.Function, _Type,
-    [anyT],
-    stringT,
+let TypeFn = new FGCallNative("TypeFn", _TypeFn,
+    new FunctionT([anyT], stringT)
 );
 
 // TODO: not type safe, change to use generic.
@@ -119,56 +110,8 @@ function _Push(): void {
     pop();              // The function.
     list.value.push(el);
 }
-export let Push = new FGCallNative("Push", CallT.Function, _Push,
-    [new ListT(anyT), anyT],
-    nothingT,
-);
-
-function _Map(): void {
-    console.log("in _Map()");
-    let list = pop() as FGList;
-    let callback = pop();
-    console.log(list, callback);
-    pop();              // The function.
-    if (callback instanceof FGCallNative) {
-        console.log("callback is FGCallNative");
-        let result = [];
-        for (let i = 0; i < list.value.length; i++) {
-            push(list.value[i]);    // dummy
-            push(list.value[i]);
-            callback.value();
-            result.push(pop());
-        }
-        push(new FGList(result, callback.output));
-    } else if (callback instanceof FGCallUser) {
-        console.log("callback is FGCallUser");
-        let result = [];
-        for (let i = 0; i < list.value.length; i++) {
-            push(list.value[i]);    // dummy
-            push(list.value[i]);
-            call(callback, callback.input.length);
-            run(true);
-            result.push(pop());
-        }
-        push(new FGList(result, callback.output));
-    } else if (callback instanceof FGCurry) {
-        console.log("callback is FGCurry");
-        let result = [];
-        for (let i = 0; i < list.value.length; i++) {
-            push(list.value[i]);    // dummy
-            for (let j = 0; j < callback.args.length; j++)
-                push(callback.args[j]);
-            push(list.value[i]);
-            call(callback.fn as unknown as FGCallUser, callback.fn.input.length);
-            run(true);
-            result.push(pop());
-        }
-        push(new FGList(result, callback.fn.output));
-    }
-}
-export let Map = new FGCallNative("Map", CallT.Function, _Map,
-    [anyT, new ListT(anyT)],
-    new ListT(anyT),
+let Push = new FGCallNative("Push", _Push,
+    new FunctionT([new ListT(anyT), anyT], nothingT)
 );
 
 let on_scrn: GeoObj[] = [];
@@ -193,9 +136,8 @@ function _Draw(): void {
     }
     draw_onScreen();
 }
-export let Draw = new FGCallNative("Draw", CallT.Function, _Draw,
-    [geoT],
-    nothingT,
+let Draw = new FGCallNative("Draw", _Draw,
+    new FunctionT([geoT], nothingT)
 );
 
 function _Fill(): void {
@@ -206,9 +148,8 @@ function _Fill(): void {
     v.fillStyle = color.to_hex();
     draw_onScreen();
 }
-export let Fill = new FGCallNative("Fill", CallT.Function, _Fill,
-    [colorT, fillableT],
-    nothingT,
+let Fill = new FGCallNative("Fill", _Fill,
+    new FunctionT([colorT, fillableT], nothingT)
 );
 
 function _C(): void {
@@ -219,9 +160,8 @@ function _C(): void {
     let c = new Circle(x, y, r);
     push(c);
 }
-export let C = new FGCallNative("C", CallT.Function, _C,
-    [numberT, numberT, numberT],
-    circleStruct.value,
+let C = new FGCallNative("C", _C,
+    new FunctionT([numberT, numberT, numberT], circleStruct.value)
 );
 
 function _C_FromPoints(): void {
@@ -232,9 +172,8 @@ function _C_FromPoints(): void {
     let c = new Circle(p.x, p.y, r);
     push(c);
 }
-export let C_FromPoints = new FGCallNative("C_FromPoints", CallT.Function, _C_FromPoints,
-    [pointStruct.value, pointStruct.value],
-    circleStruct.value,
+let C_FromPoints = new FGCallNative("C_FromPoints", _C_FromPoints,
+    new FunctionT([pointStruct.value, pointStruct.value], circleStruct.value)
 );
 
 function _Ccurv(): void {
@@ -245,9 +184,8 @@ function _Ccurv(): void {
     let c = Circle.with_bend(x, y, bend);
     push(c);
 }
-export const Ccurv = new FGCallNative("Ccurv", CallT.Function, _Ccurv,
-    [numberT, numberT, numberT],
-    circleStruct.value,
+const Ccurv = new FGCallNative("Ccurv", _Ccurv,
+    new FunctionT([numberT, numberT, numberT], circleStruct.value)
 );
 
 // TODO: Clean up
@@ -259,9 +197,11 @@ function _Descart(): void {
     let list = new FGList(Circle.descartes(c1, c2, c3), numberT);
     push(list);
 }
-export const Descart = new FGCallNative("Descart", CallT.Function, _Descart,
-    [circleStruct.value, circleStruct.value, circleStruct.value],
-    new ListT(numberT),
+const Descart = new FGCallNative("Descart", _Descart,
+    new FunctionT(
+        [circleStruct.value, circleStruct.value, circleStruct.value],
+        new ListT(numberT),
+    )
 );
 
 // TODO: Clean up
@@ -274,9 +214,11 @@ function _ComplexDescart(): void {
     let circles = new FGList(Circle.complex_descartes(c1, c2, c3, curv), circleStruct.value);
     push(circles);
 }
-export const ComplexDescart = new FGCallNative("ComplexDescart", CallT.Function, _ComplexDescart,
-    [circleStruct.value, circleStruct.value, circleStruct.value, numberT],
-    new ListT(circleStruct.value),
+const ComplexDescart = new FGCallNative("ComplexDescart", _ComplexDescart,
+    new FunctionT(
+        [circleStruct.value, circleStruct.value, circleStruct.value, numberT],
+        new ListT(circleStruct.value),
+    )
 );
 
 function _E(): void {
@@ -288,9 +230,11 @@ function _E(): void {
     let e = new Ellipse(x, y, rx, ry);
     push(e);
 }
-export let E = new FGCallNative("E", CallT.Function, _E,
-    [numberT, numberT, numberT, numberT],
-    ellipseT,
+let E = new FGCallNative("E", _E,
+    new FunctionT(
+        [numberT, numberT, numberT, numberT],
+        ellipseT,
+    )
 );
 
 function _P(): void {
@@ -300,9 +244,11 @@ function _P(): void {
     let point = new Point(x, y);
     push(point);
 }
-export let P = new FGCallNative("P", CallT.Function, _P,
-    [numberT, numberT],
-    pointStruct.value,
+let P = new FGCallNative("P", _P,
+    new FunctionT(
+        [numberT, numberT],
+        pointStruct.value,
+    )
 );
 
 function _Paint(): void {
@@ -312,9 +258,8 @@ function _Paint(): void {
     pic.objs.push(geo);
     draw_onScreen();
 }
-export let Paint = new FGCallNative("Paint", CallT.Function, _Paint,
-    [pictureT, geoT],
-    nothingT,
+let Paint = new FGCallNative("Paint", _Paint,
+    new FunctionT([pictureT, geoT], nothingT)
 );
 
 function _Cw(): void {
@@ -322,9 +267,8 @@ function _Cw(): void {
     pop();              // The function.
     push(pic.cw());
 }
-export let Cw = new FGCallNative("Cw", CallT.Function, _Cw,
-    [pictureT],
-    pictureT,
+let Cw = new FGCallNative("Cw", _Cw,
+    new FunctionT([pictureT], pictureT)
 );
 
 function _Ccw(): void {
@@ -332,9 +276,8 @@ function _Ccw(): void {
     pop();              // The function.
     push(pic.ccw());
 }
-export let Ccw = new FGCallNative("Ccw", CallT.Function, _Ccw,
-    [pictureT],
-    pictureT,
+let Ccw = new FGCallNative("Ccw", _Ccw,
+    new FunctionT([pictureT], pictureT)
 );
 
 function _FlipH(): void {
@@ -342,9 +285,8 @@ function _FlipH(): void {
     pop();              // The function.
     push(pic.fliph());
 }
-export let FlipH = new FGCallNative("FlipH", CallT.Function, _FlipH,
-    [pictureT],
-    pictureT,
+let FlipH = new FGCallNative("FlipH", _FlipH,
+    new FunctionT([pictureT], pictureT)
 );
 
 function _FlipV(): void {
@@ -352,9 +294,8 @@ function _FlipV(): void {
     pop();              // The function.
     push(pic.flipv());
 }
-export let FlipV = new FGCallNative("FlipV", CallT.Function, _FlipV,
-    [pictureT],
-    pictureT,
+let FlipV = new FGCallNative("FlipV", _FlipV,
+    new FunctionT([pictureT], pictureT)
 );
 
 // TODO: clean Above and Beside later.
@@ -374,7 +315,7 @@ export let FlipV = new FGCallNative("FlipV", CallT.Function, _FlipV,
         // push(Picture.above(rtop, rbottom, top, bottom));
     // }
 // }
-// export let Above = new FGCallNative("Above", CallT.Function, _Above, [
+// let Above = new FGCallNative("Above", _Above, [
     // {
         // input:  [pictureT, pictureT],
         // output: pictureT,
@@ -400,7 +341,7 @@ export let FlipV = new FGCallNative("FlipV", CallT.Function, _FlipV,
         // push(Picture.beside(rleft, rright, left, right));
     // }
 // }
-// export let Beside = new FGCallNative("Beside", CallT.Function, _Beside, [
+// let Beside = new FGCallNative("Beside", _Beside, [
     // {
         // input:  [pictureT, pictureT],
         // output: pictureT
@@ -419,9 +360,11 @@ function _Quartet(): void {
     pop();              // The function.
     push(Picture.quartet(p, q, r, s));
 }
-export let Quartet = new FGCallNative("Quartet", CallT.Function, _Quartet,
-    [pictureT, pictureT, pictureT, pictureT],
-    pictureT,
+let Quartet = new FGCallNative("Quartet", _Quartet,
+    new FunctionT(
+        [pictureT, pictureT, pictureT, pictureT],
+        pictureT,
+    )
 );
 
 function _Cycle(): void {
@@ -429,9 +372,8 @@ function _Cycle(): void {
     pop();              // The function.
     push(Picture.cycle(p));
 }
-export let Cycle = new FGCallNative("Cycle", CallT.Function, _Cycle,
-    [pictureT],
-    pictureT,
+let Cycle = new FGCallNative("Cycle", _Cycle,
+    new FunctionT([pictureT], pictureT)
 );
 
 function _MapPic(): void {
@@ -441,9 +383,8 @@ function _MapPic(): void {
     src.map_to(target);
     draw_onScreen();
 }
-export let MapPic = new FGCallNative("MapPic", CallT.Function, _MapPic,
-    [pictureT, pictureT],
-    nothingT,
+let MapPic = new FGCallNative("MapPic", _MapPic,
+    new FunctionT([pictureT, pictureT], nothingT)
 );
 
 function _Pic(): void {
@@ -453,9 +394,8 @@ function _Pic(): void {
     let pic = new Picture(w, h);
     push(pic);
 }
-export let Pic = new FGCallNative("Pic", CallT.Function, _Pic,
-    [numberT, numberT],
-    pictureT,
+let Pic = new FGCallNative("Pic", _Pic,
+    new FunctionT([numberT, numberT], pictureT)
 );
 
 function _R(): void {
@@ -467,10 +407,11 @@ function _R(): void {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R = new FGCallNative("R", CallT.Function, _R,
-    [numberT, numberT, numberT, numberT],
-    // rectT,
-    rectStruct.value,
+let R = new FGCallNative("R", _R,
+    new FunctionT(
+        [numberT, numberT, numberT, numberT],
+        rectStruct.value,
+    )
 );
 
 function _R_WithCenter(): void {
@@ -482,10 +423,11 @@ function _R_WithCenter(): void {
     let rect = new Rect(x-w/2, y-h/2, w, h);
     push(rect);
 }
-export let R_WithCenter = new FGCallNative("R_WithCenter", CallT.Function, _R_WithCenter,
-    [numberT, numberT, numberT, numberT],
-    // rectT,
-    rectStruct.value,
+let R_WithCenter = new FGCallNative("R_WithCenter", _R_WithCenter,
+    new FunctionT(
+        [numberT, numberT, numberT, numberT],
+        rectStruct.value,
+    )
 );
 
 function _R_FromPoints(): void {
@@ -499,10 +441,11 @@ function _R_FromPoints(): void {
     let rect = new Rect(x, y, w, h);
     push(rect);
 }
-export let R_FromPoints = new FGCallNative("R_FromPoints", CallT.Function, _R_FromPoints,
-    [pointStruct.value, pointStruct.value],
-    // rectT,
-    rectStruct.value,
+let R_FromPoints = new FGCallNative("R_FromPoints", _R_FromPoints,
+    new FunctionT(
+        [pointStruct.value, pointStruct.value],
+        rectStruct.value,
+    )
 );
 
 function _Seg(): void {
@@ -514,9 +457,11 @@ function _Seg(): void {
     let seg = new Segment(x1, y1, x2, y2);
     push(seg);
 }
-export let Seg = new FGCallNative("Seg", CallT.Function, _Seg,
-    [numberT, numberT, numberT, numberT],
-    segmentT,
+let Seg = new FGCallNative("Seg", _Seg,
+    new FunctionT(
+        [numberT, numberT, numberT, numberT],
+        segmentT,
+    )
 );
 
 function _Seg_FromPoints(): void {
@@ -526,9 +471,11 @@ function _Seg_FromPoints(): void {
     let seg = new Segment(p.x, p.y, q.x, q.y);
     push(seg);
 }
-export let Seg_FromPoints = new FGCallNative("Seg.FromPoints", CallT.Function, _Seg_FromPoints,
-    [pointStruct.value, pointStruct.value],
-    segmentT,
+let Seg_FromPoints = new FGCallNative("Seg.FromPoints", _Seg_FromPoints,
+    new FunctionT(
+        [pointStruct.value, pointStruct.value],
+        segmentT,
+    )
 );
 
 function _Midpoint(): void {
@@ -537,18 +484,16 @@ function _Midpoint(): void {
     let point = segment.midpoint();
     push(point);
 }
-export let Midpoint = new FGCallNative("Midpoint", CallT.Function, _Midpoint,
-    [segmentT],
-    pointStruct.value,
+let Midpoint = new FGCallNative("Midpoint", _Midpoint,
+    new FunctionT([segmentT], pointStruct.value)
 );
 
 function _Help(): void {
     pop();              // The function.
     vm_output( welcome );
 }
-export let Help = new FGCallNative("Help", CallT.Procedure, _Help,
-    [],
-    nothingT,
+let Help = new FGCallNative("Help",  _Help,
+    new FunctionT([], nothingT)
 );
 
 function _Clear(): void {
@@ -556,7 +501,70 @@ function _Clear(): void {
     canvas.clear();
     on_scrn = [];
 }
-export let Clear = new FGCallNative("Clear", CallT.Procedure, _Clear,
-    [],
-    nothingT,
+let Clear = new FGCallNative("Clear",  _Clear,
+    new FunctionT([], nothingT)
 );
+
+export type Method = {
+    [name: string]: { type: Type, value: Value },
+}
+
+export type Names = {
+    [name: string]: { type: Type, value: Value, mut?: boolean, methods?: Method },
+};
+
+export let nativeNames: Names = {
+    // UI objects.
+    "canvas": { type: canvasT, value: canvas },
+    "repl":   { type: replT, value: repl },
+
+    // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
+    "fishp": { type: pictureT, value: fish.p },
+    "fishq": { type: pictureT, value: fish.q },
+    "fishr": { type: pictureT, value: fish.r },
+    "fishs": { type: pictureT, value: fish.s },
+
+    "Help":   { type: Help.sig, value: Help },
+    "Print":  { type: Print.sig, value: Print },
+    "Push":   { type: Push.sig, value: Push },
+    "RGB":    { type: RGB.sig, value: RGB },
+    "Printf": { type: Printf.sig, value: Printf },
+    "Show":   { type: Show.sig, value: Show },
+    "Padl":   { type: Padl.sig, value: Padl },
+    "Type":   { type: TypeFn.sig, value: TypeFn },
+    "Draw":   { type: Draw.sig, value: Draw },
+    "Fill":   { type: Fill.sig, value: Fill },
+    "Clear":  { type: Clear.sig, value: Clear },
+    "Paint":  { type: Paint.sig, value: Paint },
+    "C":      { type: C.sig, value: C, methods: {
+        "FromPoints": { type: C_FromPoints.sig, value: C_FromPoints },
+    }},
+    "Ccurv":   { type: Ccurv.sig, value: Ccurv },
+    "Descart": { type: Descart.sig, value: Descart },
+    "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
+    "E":      { type: E.sig, value: E },
+    "P":      { type: P.sig, value: P },
+    "Pic":    { type: Pic.sig, value: Pic },
+    "Cw":     { type: Cw.sig, value: Cw },
+    "Ccw":    { type: Ccw.sig, value: Ccw },
+    "FlipH":  { type: FlipH.sig, value: FlipH },
+    "FlipV":  { type: FlipV.sig, value: FlipV },
+    // "Above":  { type: functionT, value: Above },
+    // "Beside": { type: functionT, value: Beside },
+    "Quartet": { type: Quartet.sig, value: Quartet },
+    "Cycle":  { type: Cycle.sig, value: Cycle },
+    "MapPic": { type: MapPic.sig, value: MapPic },
+    "R":      { type: R.sig, value: R, methods: {
+        "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
+        "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },
+    }},
+    "Seg":    { type: Seg.sig, value: Seg, methods: {
+        "FromPoints": { type: Seg_FromPoints.sig, value: Seg_FromPoints },
+    }},
+    "Midpoint": { type: Midpoint.sig, value: Midpoint },
+    "Rect": { type: rectStruct.value, value: rectStruct },
+    "Point": { type: pointStruct.value, value: pointStruct },
+    "Circle": { type: circleStruct.value, value: circleStruct },
+    "Sqrt": { type: Sqrt.sig, value: Sqrt },
+    "Abs": { type: Abs.sig, value: Abs },
+};

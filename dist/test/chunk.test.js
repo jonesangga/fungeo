@@ -79,8 +79,7 @@ describe("chunk disassemble op arg", () => {
 });
 describe("chunk disassemble op arg and value", () => {
     const tests = [
-        [400, "0000  100 GetNat     0 '123'\n"],
-        [500, "0000  100 GetUsr     0 '123'\n"],
+        [500, "0000  100 GetGlob    0 '123'\n"],
         [800, "0000  100 Load       0 '123'\n"],
     ];
     for (let [op, expected] of tests) {
@@ -126,28 +125,6 @@ describe("chunk disassemble op jumps", () => {
     }
 });
 describe("chunk disassemble op calls", () => {
-    it("Op.CallNat", () => {
-        let chunk = new Chunk("test chunk");
-        let arity = 1;
-        let ver = 1;
-        chunk.write(200, 123);
-        chunk.write(arity, 123);
-        chunk.write(ver, 123);
-        let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallNat    1\n");
-        equal(offset, 2);
-    });
-    it("Op.CallUsr", () => {
-        let chunk = new Chunk("test chunk");
-        let arity = 1;
-        let ver = 1;
-        chunk.write(205, 123);
-        chunk.write(arity, 123);
-        chunk.write(ver, 123);
-        let [result, offset] = chunk.disassemble_instr(0);
-        deepEqual(result, "0000  123 CallUsr    1\n");
-        equal(offset, 2);
-    });
 });
 describe("chunk disassemble default", () => {
     it("default", () => {

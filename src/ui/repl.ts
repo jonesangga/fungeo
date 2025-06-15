@@ -1,72 +1,77 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
-//  container:  Contains four components below.
-//  holder:     Drag it to move container.
-//  input:      Textarea to input code.
-//  terminal:   List all histories, outputs and errors. Hidden by default.
-//  output:     A small console for displaying the executed code output (if any),
-//              and also error message when terminal is hidden. Hidden by default.
+// This module contains 2 main things: controller and terminal.
+// Controller contains 3 things: buttonArea, inputArea, and resultArea.
+//   buttonArea:
+//     dragBtn:  Drag it to move the controller.
+//     plusBtn:  Increase UI font size.
+//     minusBtn: Decrease UI font size.
+//     termBtn:  Toggle terminal.
+//   inputArea:  Place to input code.
+//   resultArea: When terminal is hidden, displays the output or error message of the last executed code.
+// Terminal contains all histories, outputs and errors. Hidden by default.
 
 import { Kind, type Repl } from "../value.js"
 import { welcome } from "../data/help.js"
 
-const container = document.createElement("div");
-document.body.appendChild(container);
-container.style.position   = "absolute";
-container.style.display    = "flex";
-container.style.top        = "0px";
-container.style.left       = "0px";
-container.style.background = "#ff0";
-container.style.zIndex     = "10";
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(`
+body {
+    font-family: monospace;
+    font-size: 16px;
+}
+textarea {
+    margin-top: 10px;
+    min-width:  300px;
+    max-width:  600px;
+    background: #eee;
+    border:     1px solid #000;
+    overflow:   hidden;
+    font-size:  inherit;
+}
+button {
+    font-size:    inherit;
+    font-family:  inherit;
+    margin-right: 10px;
+}`);
 
-const holder = document.createElement("div");
-container.appendChild(holder);
-holder.style.position   = "unset";
-holder.style.width      = "10px";
-holder.style.height     = "30px";
-holder.style.background = "#000";
+document.adoptedStyleSheets.push(sheet);
 
-const input = document.createElement("textarea");
-container.appendChild(input);
-input.style.fontSize   = "16px";
-input.focus();
-input.cols = 20;
-input.rows = 1;
-input.wrap = "off";
-input.style.position   = "unset";
-input.style.minWidth   = "560px";
-input.style.maxWidth   = "600px";
-input.style.marginLeft = "5px";
-input.style.padding    = "0px 5px";
-input.style.border     = "1px solid #000";
-input.style.background = "#eee";
-input.style.overflow   = "hidden";
+let fontSize = 16; // For all font in UI.
 
-const output = document.createElement("pre");
-container.appendChild(output);
-output.style.position   = "absolute";
-output.style.top        = "25px";
-output.style.left       = "15px";
-output.style.width      = "250px";
-output.style.border     = "1px solid #000";
-output.style.fontSize   = "11px";
-output.style.textWrap   = "wrap";
-output.style.visibility = "hidden";
+const controller = document.createElement("div");
+document.body.appendChild(controller);
+controller.style.position      = "absolute";
+controller.style.top           = "0px";
+controller.style.left          = "0px";
+controller.style.display       = "flex";
+controller.style.flexDirection = "column";
+controller.style.zIndex        = "999";
 
-const colorOk   = "#70d196"; // Soft green.
-const colorFail = "#e85b5b"; // Soft red.
+const buttonArea = document.createElement("div");
+controller.appendChild(buttonArea);
+
+const colorOk = "#caf8dc"; // Soft green.
+const colorError = "#fee"; // Soft red.
 let offsetX = 0;
 let offsetY = 0;
 let history: { code: string, output?: string }[] = [{ code: "" }];
-let historyViewIdx    = 1;
-let savedLine         = ""; // Save line when going to view history.
+let historyViewIdx = 1;
+let savedCode = "";     // Save line before starting to view history.
 
-holder.addEventListener("mousedown", mousedown_cb); // Note: "mousedown" not fired multiple times when holding down.
+//--------------------------------------------------------------------
+// Drag buttons to move repl.
 
-function mousedown_cb(e: any): void {
-    // We only support mouse left button.
+const dragBtn = document.createElement("button");
+buttonArea.appendChild(dragBtn);
+dragBtn.innerHTML = "drag";
+
+dragBtn.addEventListener("mousedown", drag_btn_cb); // Note: "mousedown" is not fired multiple times when holding down.
+
+// Only handle mouse left button.
+function drag_btn_cb(e: any): void {
     if (e.button === 0) {
-        let b = container.getBoundingClientRect();
+        let b = controller.getBoundingClientRect();
         offsetX = e.clientX - b.left;
         offsetY = e.clientY - b.top;
         window.addEventListener("mousemove", mousemove_cb);
@@ -78,110 +83,218 @@ function mousemove_cb(e: any): void {
     if (e.buttons === 0) {
         window.removeEventListener("mousemove", mousemove_cb);
     } else {
-        container.style.left = e.pageX - offsetX + "px";
-        container.style.top  = e.pageY - offsetY + "px";
+        controller.style.left = e.pageX - offsetX + "px";
+        controller.style.top  = e.pageY - offsetY + "px";
     }
 }
 
-input.addEventListener("input", input_resize);
-input.addEventListener("keydown", input_binding);
+//--------------------------------------------------------------------
+// +/- buttons to increase/decrease font size.
 
-function input_reset(): void {
-    input.style.height = "auto"
-    input.style.height = "1lh";
-    input.style.width  = "210px"; // min-width + padding-left + padding-right.
-    output.style.top   = "calc(1lh + " + 10 + "px)";
+const minusBtn = document.createElement("button");
+buttonArea.appendChild(minusBtn);
+minusBtn.innerHTML = "-";
+
+const plusBtn = document.createElement("button");
+buttonArea.appendChild(plusBtn);
+plusBtn.innerHTML = "+";
+
+minusBtn.addEventListener("mousedown", minus_btn_cb);
+plusBtn.addEventListener("mousedown", plus_btn_cb);
+
+function minus_btn_cb(): void {
+    if (fontSize <= 10) return;
+    fontSize--;
+    update_font_size();
 }
 
-function input_resize(): void {
-    input.style.height = "auto"
-    input.style.height = input.scrollHeight + "px";
-    input.style.width  = "auto"
-    input.style.width  = input.scrollWidth + "px";
-    output.style.top   = input.scrollHeight + 10 + "px";
+function plus_btn_cb(): void {
+    if (fontSize >= 30) return;
+    fontSize++;
+    update_font_size();
 }
-input_resize();
 
-function input_binding(e: any): void {
-    if (!e.shiftKey) return;
+function update_font_size() {
+    terminal.style.fontSize = fontSize + "px";
+    buttonArea.style.fontSize = fontSize + "px";
+    inputArea.style.fontSize   = fontSize + "px";
+    input_area_resize();
+}
+
+//--------------------------------------------------------------------
+// Input Area.
+
+const inputArea = document.createElement("textarea");
+controller.appendChild(inputArea);
+inputArea.cols = 20;
+inputArea.rows = 1;
+inputArea.wrap = "off";
+inputArea.focus();
+
+inputArea.addEventListener("input", input_area_resize);
+inputArea.addEventListener("keydown", input_area_binding);
+
+function input_area_resize(): void {
+    inputArea.style.height = "auto"
+    inputArea.style.height = inputArea.scrollHeight + "px";
+    inputArea.style.width  = "auto"
+    inputArea.style.width  = inputArea.scrollWidth + "px";
+}
+input_area_resize();
+
+function input_area_binding(e: any): void {
+    if (!e.shiftKey) return;    // Since all supported bindings include Shift key.
 
     if (e.key === "ArrowUp" && !e.repeat) {
-        if (historyViewIdx > 1) {
-            if (historyViewIdx === history.length) {
-                savedLine = input.value;
-            }
-            historyViewIdx--;
-            input.value = history[historyViewIdx].code;
-            input_resize();
-        }
-        e.preventDefault(); // To prevent cursor moves to beginning of text.
+        e.preventDefault();                 // To prevent cursor moving to beginning of text.
+        if (historyViewIdx <= 1) return;    // We are at the top of history.
+
+        // Save the code that user currently write before starting viewing the history.
+        if (historyViewIdx === history.length)
+            savedCode = inputArea.value;
+
+        historyViewIdx--;
+        inputArea.value = history[historyViewIdx].code;
+        input_area_resize();
     }
     else if (e.key === "ArrowDown" && !e.repeat) {
-        if (historyViewIdx < history.length - 1) {
-            historyViewIdx++;
-            input.value = history[historyViewIdx].code;
-        } else if (historyViewIdx === history.length - 1) {
-            historyViewIdx++;
-            input.value = savedLine;
-        }
-        input_resize(); // To prevent cursor moves to end of text.
+        e.preventDefault();                             // To prevent cursor moving to end of text.
+        if (historyViewIdx >= history.length) return;   // We are at the bottom of history.
 
+        if (historyViewIdx === history.length - 1) {
+            historyViewIdx++;
+            inputArea.value = savedCode;    // Put back the saved code.
+        } else {
+            historyViewIdx++;
+            inputArea.value = history[historyViewIdx].code;
+        }
+        input_area_resize();
     }
     else if (e.key === "Enter" && !e.repeat) {
-        let source = input.value.trim();
-        if (source !== "") {
-            input.value = "";
-            input_reset();
-
-            if (history[history.length - 1].code !== source) {
-                history.push({ code: source });
-            }
-            historyViewIdx = history.length;
-            terminal_add_code(source);
-
-            repl.callback(source);
-            terminal_update();
-        }
         e.preventDefault();
+        let source = inputArea.value.trim();
+        if (source === "") return;
+
+        inputArea.value = "";
+        input_area_resize();
+
+        if (history[history.length - 1].code !== source)
+            history.push({ code: source });
+
+        historyViewIdx = history.length;
+        terminal_push(source);
+
+        repl.callback(source);
+        terminal_update();
     }
 }
 
+//--------------------------------------------------------------------
+// Output Area for displaying program's output or error message
+// when terminal is not shown.
+
+const resultArea = document.createElement("pre");
+controller.appendChild(resultArea);
+resultArea.style.marginTop  = "10px";
+resultArea.style.border     = "1px solid #000";
+resultArea.style.textWrap   = "wrap";
+resultArea.style.background = "#eee";
+resultArea.style.visibility = "hidden";
+
+//--------------------------------------------------------------------
+// Termninal
+
+const termBtn = document.createElement("button");
+buttonArea.appendChild(termBtn);
+termBtn.innerHTML = "terminal";
+
+termBtn.addEventListener("mousedown", term_btn_cb);
+
+function term_btn_cb(): void {
+    resultArea.style.visibility = "hidden";
+    terminal.style.visibility = showTerminal ? "hidden" : "visible";
+    showTerminal = !showTerminal;
+}
+
+const terminal = document.createElement("div");
+document.body.appendChild(terminal);
+terminal.style.position   = "absolute";
+terminal.style.top        = "0px";
+terminal.style.left       = "0px";
+terminal.style.width      = "600px";
+terminal.style.height     = "100vh";
+terminal.style.border     = "1px solid #000";
+terminal.style.background = "#eee";
+terminal.style.overflow   = "auto";
+terminal.style.whiteSpace = "pre";
+// terminal.style.visibility = "hidden";
+
+let showTerminal = true;
+
+function terminal_update(): void {
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function terminal_push(text: string, bg?: string): void {
+    const div = document.createElement("div");
+    terminal.appendChild(div);
+    div.innerHTML = text;
+    div.style.borderBottom = "1px solid #000";
+
+    if (typeof bg !== "undefined")
+        div.style.background = bg;
+}
+
+// terminal_push(welcome, colorOk);
 
 const repl: Repl = {
     kind: Kind.Repl,
 
     reset(): void {
         history = [{ code: "" }];
-        historyViewIdx    = 1;
-        savedLine         = ""; // Save line when going to view history.
+        historyViewIdx     = 1;
+        savedCode          = ""; // Save line when going to view history.
         terminal.innerHTML = "";
     },
 
-    to_str(): string { return "repl"; },
+    to_str(): string {
+        return "repl";
+    },
+
+    // This is a default callback. Used only for testing.
+    // You should set your own callback using set_callback() below.
 
     callback(source: string): void {
         console.log(source);
+        if (source === "") {
+            resultArea.style.visibility = "hidden";
+        } else if (source.length <= 5) {
+            this.ok("ok: source length is " + source.length);
+        } else {
+            this.error("error: source length is " + source.length);
+        }
     },
 
     set_callback(fn: (source: string) => void): void {
         this.callback = fn;
     },
 
+    // This is only for testing using input and output files.
     from_script(source: string): void {
         source = source.trim();
-        if (source !== "") {
-            input.value = "";
-            input_reset();
+        if (source === "") return;
 
-            if (history[history.length - 1].code !== source) {
-                history.push({ code: source });
-            }
-            historyViewIdx = history.length;
-            terminal_add_code(source);
+        inputArea.value = "";
+        input_area_resize();
 
-            this.callback(source);
-            terminal_update();
-        }
+        if (history[history.length - 1].code !== source)
+            history.push({ code: source });
+
+        historyViewIdx = history.length;
+        terminal_push(source);
+
+        this.callback(source);
+        terminal_update();
     },
 
     place(x: number, y: number): void {
@@ -189,80 +302,32 @@ const repl: Repl = {
             console.log("invalid place");
             return;
         }
-        container.style.left = x + "px";
-        container.style.top  = y + "px";
+        controller.style.left = x + "px";
+        controller.style.top  = y + "px";
     },
 
     ok(message: string): void {
-        holder.style.background = colorOk;
         if (message === "") return;
-        terminal_add_code(message, 1);
+        terminal_push(message, colorOk);
         history[history.length - 1].output = message;
 
-        if (!terminalShow) {
-            if (message === "") {
-                output.style.visibility  = "hidden";
-            } else {
-                output.style.visibility  = "visible";
-                output.style.borderColor = colorOk;
-                output.innerHTML = message;
-            }
+        if (!showTerminal) {
+            resultArea.style.visibility = "visible";
+            resultArea.style.background = colorOk;
+            resultArea.innerHTML        = message;
         }
     },
  
     error(message: string): void {
-        terminal_add_code(message, 0);
+        terminal_push(message, colorError);
         history[history.length - 1].output = message;
-        holder.style.background  = colorFail;
 
-        if (!terminalShow) {
-            output.style.visibility  = "visible";
-            output.style.borderColor = colorFail;
-            output.innerHTML = message;
+        if (!showTerminal) {
+            resultArea.style.visibility = "visible";
+            resultArea.style.background = colorError;
+            resultArea.innerHTML        = message;
         }
     }
 }
-
-//--------------------------------------------------------------------
-// Termninal
-//
-// TODO: Add <span> for coloring error message.
-//       Change it to be an object and add its name in names object.
-
-const terminal = document.createElement("div");
-document.body.appendChild(terminal);
-terminal.style.position   = "absolute";
-terminal.style.top        = "35px";
-terminal.style.left       = "0px";
-terminal.style.width      = "600px";
-terminal.style.height     = "500px";
-terminal.style.border     = "1px solid #000";
-terminal.style.fontSize   = "16px";
-terminal.style.background = "#eee";
-terminal.style.overflow   = "auto";
-terminal.style.fontFamily = "monospace";
-terminal.style.whiteSpace = "pre";
-// terminal.style.visibility = "hidden";
-
-let terminalShow = true;
-
-function terminal_update(): void {
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function terminal_add_code(code: string, type?: number): void {
-    const div = document.createElement("div");
-    div.style.fontSize   = "16px";
-    div.style.borderBottom     = "1px solid #000";
-    if (type === 0) {
-        div.style.background     = "#fee";
-    } else if (type === 1) {
-        div.style.background     = "#caf8dc";
-    }
-    div.innerHTML = code;
-    terminal.appendChild(div);
-}
-
-// terminal_add_code(welcome);
 
 export default repl;

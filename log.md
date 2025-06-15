@@ -1,5 +1,36 @@
 # Log
 
+#### 15-06-25
+
+- add description for typecheck error "type: 1: at ...."
+- fix bug: this should be error
+    let a = Print(2)
+- change NCallable and Callable to VarName and FnName in scanner.ts
+- add description for parser error "parser: 1: at ...."
+- change VarNode and FnNode value field to name
+- join CallNat and CallUsr into Call
+
+
+- move names to vmfunction
+- change the ui, make button for termninal toogle
+
+- build ast
+- create new branch ast
+
+----------------------------------------------------------------------
+
+- make Abs function
+- struct for Circle
+- add Sqrt function
+- change pointT as pointStruct
+- add Point type to scanner
+- test FGColor
+- clean up color.ts
+- move type to the same file as FGType
+- move FGType to its own file in literal/
+- move FGColor to its own file in literal/
+- create literal folder
+
 #### 06-05-25
 
 - make rect to be a struct

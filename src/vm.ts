@@ -1,16 +1,16 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { FGCurry, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, type Value, type Comparable } from "./value.js"
-import { Names, nativeNames } from "./names.js"
-import { FGType, type Type, StructT } from "./literal/type.js"
+import { type Value, type Comparable, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js"
+import { Names, nativeNames } from "./vmfunction.js"
+import { type Type, FGType, StructT } from "./literal/type.js"
 import Rect from "./geo/rect.js"
 import Point from "./geo/point.js"
 import Circle from "./geo/circle.js"
 
 // For quick debugging.
 let $ = console.log;
-$ = () => {};
+// $ = () => {};
 
 // These are exported only for vm.test.
 export let stack: Value[] = [];
@@ -20,7 +20,7 @@ let frames: CallFrame[] = [];
 let currFrame: CallFrame;
 let currChunk: Chunk;
 
-export let userNames: Names = {};
+export let names: Names = {};
 
 //--------------------------------------------------------------------
 // Stack functions.
@@ -138,46 +138,6 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.Curry: {
-                let applied = read_byte();
-                let fn = peek(applied) as FGCallNative;
-
-                let args: Value[] = [];
-                for (let i = 0; i < applied; i++)
-                    args[applied - i - 1] = pop();
-                pop(); // The  source fn
-
-                let curry = new FGCurry("dummy", fn, args);
-                push(curry);
-                break;
-            }
-            case Op.CallCur: {
-                let n = read_byte();
-                // pop args;
-                let args: Value[] = [];
-                for (let i = 0; i < n; i++)
-                    args.push(pop());
-                let curry = pop() as FGCurry;  // The curry fn
-                push(curry.fn);
-                for (let i = 0; i < curry.args.length; i++)
-                    push(curry.args[i]);
-
-                for (let i = 0; i < n; i++)
-                    push(args[n-i-1]);
-                break;
-            }
-            case Op.Pipe: {
-                let curry = pop() as FGCurry;  // The curry fn
-                let pipeArg = pop();
-                $(curry, pipeArg);
-
-                push(curry.fn);
-                for (let i = 0; i < curry.args.length; i++)
-                    push(curry.args[i]);
-
-                push(pipeArg);
-                break;
-            }
             case Op.Struct: {
                 let arity = read_byte();
                 let got: Value[] = [];
@@ -195,16 +155,14 @@ export function run(intercept: boolean = false): boolean {
                 push(newStruct);
                 break;
             }
-            case Op.CallNat: {
+
+            case Op.Call: {
                 let arity = read_byte();
-                let fn = peek(arity) as FGCallNative;
-                fn.value();
-                break;
-            }
-            case Op.CallUsr: {
-                let arity = read_byte();
-                let fn = peek(arity) as FGCallUser;
-                call(fn, arity);
+                let fn = peek(arity);
+                if (fn instanceof FGCallNative)
+                    fn.value();
+                else
+                    call(fn as FGCallUser, arity);
                 break;
             }
 
@@ -361,16 +319,9 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.GetNat: {
+            case Op.GetGlob: {
                 let name = read_string();
-                let value = nativeNames[name].value as Value;
-                push(value);
-                break;
-            }
-
-            case Op.GetUsr: {
-                let name = read_string();
-                let value = userNames[name].value as Value;
+                let value = names[name].value as Value;
                 push(value);
                 break;
             }
@@ -389,21 +340,18 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.Set: {
+            case Op.New: {
                 let name  = read_string();
                 let type  = (pop() as FGType).value;
                 let value = pop();
-
-                userNames[name] = { type, value };
+                names[name] = { type, value };
                 break;
             }
 
-            case Op.SetMut: {
+            case Op.Set: {
                 let name  = read_string();
-                let type  = (pop() as FGType).value;
                 let value = pop();
-
-                userNames[name] = { type, value, mut: true };
+                names[name].value = value;
                 break;
             }
 
@@ -458,27 +406,14 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.SetLocM: {
-                pop();      // Its type
-                stack[currFrame.slots + read_byte()] = pop();
-                break;
-            }
-
-            // TODO: think again. This is similar to above. Only for documentation and debugging?
-            case Op.SetLocN: {
-                pop();      // Its type
-                stack[currFrame.slots + read_byte()] = pop();
-                break;
-            }
-
             // TODO: it is redundant to assign type again. The type is same.
             case Op.SetLocG: {
                 let name  = read_string();
                 let type  = (pop() as FGType).value;
                 let value = pop();
 
-                // userNames[name] = { type, value };
-                userNames[name].value = value;
+                // names[name] = { type, value };
+                names[name].value = value;
                 break;
             }
 
@@ -527,17 +462,17 @@ let TESTING = true;
 
 class RuntimeError extends Error {}
 
-type Result<T, E = Error> =
+type Result<T> =
     | { ok: true, value: T }
-    | { ok: false, error: E };
+    | { ok: false, error: Error };
 
 export const vm = {
     init(): void {
         stack_reset();
-        userNames = {};
+        names = {...nativeNames};
     },
 
-    interpret(fn: FGCallUser): Result<string, Error> {
+    interpret(fn: FGCallUser): Result<string> {
         TESTING = false;
         output = "";
 
@@ -561,7 +496,7 @@ export const vm = {
         call(fn, 0);
     },
 
-    step(): Result<string, Error> {
+    step(): Result<string> {
         try {
             run();
             return { ok: true, value: output };

@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { FGType, Type, CallNativeT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
+import { FGType, Type, FunctionT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -20,7 +20,6 @@ export const enum Kind {
     CallUser = 450,
     Color    = 455,
     Complex  = 460,
-    Curry    = 465,
     List     = 470,
     Number   = 500,
     String   = 600,
@@ -47,7 +46,6 @@ export const KindName: {
     [Kind.Circle]: "Circle",
     [Kind.Color]: "Color",
     [Kind.Complex]: "Complex",
-    [Kind.Curry]: "Curry",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
     [Kind.Nothing]: "Nothing",
@@ -106,31 +104,19 @@ export class FGBoolean implements FG {
     }
 }
 
-export const enum CallT {
-    Function,
-    Procedure,
-};
-
 export class FGCallNative implements FG {
     kind: Kind.CallNative = Kind.CallNative;
 
-    constructor(
-        public name:     string,
-        public callType: CallT,
-        public value:    () => void,
-        public input:    Type[],
-        public output:   Type
-    ) {}
+    constructor(public name:  string,
+                public value: () => void,
+                public sig:   FunctionT) {}
 
     to_str(): string {
-        if (this.callType === CallT.Function)
-            return `{fn ${ this.name }}`;
-        else
-            return `{proc ${ this.name }}`;
+        return `{fn ${ this.name }}`;
     }
 
     typeof(): FGType {
-        return new FGType(new CallNativeT(this.input, this.output));
+        return new FGType(this.sig);
     }
 }
 
@@ -138,40 +124,18 @@ export class FGCallUser implements FG {
     kind: Kind.CallUser = Kind.CallUser;
 
     constructor(
-        public name:     string,
-        public callType: CallT,
-        public input:    Type[],
-        public output:   Type,
-        public chunk:    Chunk,
+        public name:   string,
+        public input:  Type[],
+        public output: Type,
+        public chunk:  Chunk,
     ) {}
 
     to_str(): string {
-        if (this.callType === CallT.Function)
-            return `{fn ${ this.name }}`;
-        else
-            return `{proc ${ this.name }}`;
+        return `{fn ${ this.name }}`;
     }
 
     typeof(): FGType {
         return new FGType(new CallUserT(this.input, this.output));
-    }
-}
-
-export class FGCurry implements FG {
-    kind: Kind.Curry = Kind.Curry;
-
-    constructor(
-        public name: string,
-        public fn: FGCallNative,
-        public args: Value[]
-    ) {}
-
-    to_str(): string {
-        return `{curry ${ this.name }}`;
-    }
-
-    typeof(): FGType {
-        return new FGType(new CallUserT(this.fn.input.slice(this.args.length), this.fn.output));
     }
 }
 
@@ -312,7 +276,6 @@ export class FGStruct implements FG {
     ) {}
 
     to_str(): string {
-        // return "struct";
         return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
     }
 
@@ -327,7 +290,7 @@ export class FGStruct implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGCurry | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
 export type Fillable = Circle | Ellipse | Rect;

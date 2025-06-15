@@ -3,20 +3,16 @@ export var Op;
     Op[Op["Add"] = 100] = "Add";
     Op[Op["AddList"] = 110] = "AddList";
     Op[Op["AddStr"] = 120] = "AddStr";
-    Op[Op["CallCur"] = 190] = "CallCur";
-    Op[Op["CallNat"] = 200] = "CallNat";
-    Op[Op["CallUsr"] = 205] = "CallUsr";
+    Op[Op["Call"] = 200] = "Call";
     Op[Op["CkExc"] = 210] = "CkExc";
     Op[Op["CkExcD"] = 212] = "CkExcD";
     Op[Op["CkInc"] = 215] = "CkInc";
     Op[Op["CkIncD"] = 217] = "CkIncD";
-    Op[Op["Curry"] = 230] = "Curry";
     Op[Op["Div"] = 300] = "Div";
     Op[Op["Eq"] = 380] = "Eq";
     Op[Op["GEq"] = 390] = "GEq";
     Op[Op["GetLoc"] = 395] = "GetLoc";
-    Op[Op["GetNat"] = 400] = "GetNat";
-    Op[Op["GetUsr"] = 500] = "GetUsr";
+    Op[Op["GetGlob"] = 500] = "GetGlob";
     Op[Op["GT"] = 530] = "GT";
     Op[Op["Inc"] = 595] = "Inc";
     Op[Op["Index"] = 600] = "Index";
@@ -34,17 +30,14 @@ export var Op;
     Op[Op["Mul"] = 900] = "Mul";
     Op[Op["Neg"] = 1000] = "Neg";
     Op[Op["NEq"] = 1010] = "NEq";
+    Op[Op["New"] = 1020] = "New";
     Op[Op["Not"] = 1100] = "Not";
     Op[Op["Ok"] = 1150] = "Ok";
-    Op[Op["Pipe"] = 1190] = "Pipe";
     Op[Op["Pop"] = 1200] = "Pop";
     Op[Op["Ret"] = 1300] = "Ret";
     Op[Op["Set"] = 1400] = "Set";
     Op[Op["SetLoc"] = 1410] = "SetLoc";
     Op[Op["SetLocG"] = 1415] = "SetLocG";
-    Op[Op["SetLocM"] = 1420] = "SetLocM";
-    Op[Op["SetLocN"] = 1425] = "SetLocN";
-    Op[Op["SetMut"] = 1430] = "SetMut";
     Op[Op["Struct"] = 1450] = "Struct";
     Op[Op["Sub"] = 1500] = "Sub";
 })(Op || (Op = {}));
@@ -53,20 +46,16 @@ export const OpName = {
     [100]: "Add",
     [110]: "AddList",
     [120]: "AddStr",
-    [190]: "CallCur",
-    [200]: "CallNat",
-    [205]: "CallUsr",
+    [200]: "Call",
     [210]: "CkExc",
     [212]: "CkExcD",
     [215]: "CkInc",
     [217]: "CkIncD",
-    [230]: "Curry",
     [300]: "Div",
     [380]: "Eq",
     [390]: "GEq",
     [395]: "GetLoc",
-    [400]: "GetNat",
-    [500]: "GetUsr",
+    [500]: "GetGlob",
     [530]: "GT",
     [595]: "Inc",
     [600]: "Index",
@@ -84,17 +73,14 @@ export const OpName = {
     [900]: "Mul",
     [1000]: "Neg",
     [1010]: "NEq",
+    [1020]: "New",
     [1100]: "Not",
     [1150]: "Ok",
-    [1190]: "Pipe",
     [1200]: "Pop",
     [1300]: "Ret",
     [1400]: "Set",
     [1410]: "SetLoc",
     [1415]: "SetLocG",
-    [1420]: "SetLocM",
-    [1425]: "SetLocN",
-    [1430]: "SetMut",
     [1450]: "Struct",
     [1500]: "Sub",
 };
@@ -151,21 +137,17 @@ export class Chunk {
             case 1010:
             case 1100:
             case 1150:
-            case 1190:
             case 1200:
             case 1500: {
                 result += name + "\n";
                 return [result, offset + 1];
             }
-            case 190:
             case 200:
-            case 205:
             case 1450: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
             }
-            case 400:
             case 500:
             case 800: {
                 let index = this.code[offset + 1];
@@ -183,14 +165,12 @@ export class Chunk {
             case 212:
             case 215:
             case 217:
-            case 230:
             case 395:
             case 595:
+            case 1020:
             case 1300:
             case 1410:
-            case 1415:
-            case 1420:
-            case 1425: {
+            case 1415: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
@@ -199,12 +179,6 @@ export class Chunk {
                 let index = this.code[offset + 1];
                 let varname = this.values[index].to_str();
                 result += `${padr7(name)} ${padl4(index)} '${varname}'\n`;
-                return [result, offset + 2];
-            }
-            case 1430: {
-                let index = this.code[offset + 1];
-                let varname = this.values[index].to_str();
-                result += `${padr7(name)} ${padl4(index)} 'mut ${varname}'\n`;
                 return [result, offset + 2];
             }
             case 700: {

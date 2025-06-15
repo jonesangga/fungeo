@@ -1,7 +1,6 @@
 export var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
-    TokenT[TokenT["Dollar"] = 200] = "Dollar";
     TokenT[TokenT["Dot"] = 210] = "Dot";
     TokenT[TokenT["Hash"] = 250] = "Hash";
     TokenT[TokenT["LBrace"] = 300] = "LBrace";
@@ -31,12 +30,11 @@ export var TokenT;
     TokenT[TokenT["Less"] = 1550] = "Less";
     TokenT[TokenT["LessEq"] = 1555] = "LessEq";
     TokenT[TokenT["LR"] = 1560] = "LR";
-    TokenT[TokenT["Pipe"] = 1575] = "Pipe";
     TokenT[TokenT["PipePipe"] = 1580] = "PipePipe";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
-    TokenT[TokenT["Callable"] = 1650] = "Callable";
     TokenT[TokenT["False"] = 1700] = "False";
+    TokenT[TokenT["FnName"] = 1720] = "FnName";
     TokenT[TokenT["Number"] = 1800] = "Number";
     TokenT[TokenT["String"] = 1900] = "String";
     TokenT[TokenT["True"] = 2000] = "True";
@@ -51,16 +49,14 @@ export var TokenT;
     TokenT[TokenT["Global"] = 2450] = "Global";
     TokenT[TokenT["Let"] = 2460] = "Let";
     TokenT[TokenT["Mut"] = 2500] = "Mut";
-    TokenT[TokenT["NCallable"] = 2540] = "NCallable";
-    TokenT[TokenT["Nonlocal"] = 2550] = "Nonlocal";
     TokenT[TokenT["NumT"] = 2600] = "NumT";
     TokenT[TokenT["PointT"] = 2700] = "PointT";
-    TokenT[TokenT["Proc"] = 2750] = "Proc";
     TokenT[TokenT["RectT"] = 2780] = "RectT";
     TokenT[TokenT["Return"] = 2800] = "Return";
     TokenT[TokenT["StrT"] = 2900] = "StrT";
     TokenT[TokenT["Struct"] = 2910] = "Struct";
     TokenT[TokenT["Then"] = 3000] = "Then";
+    TokenT[TokenT["VarName"] = 3100] = "VarName";
 })(TokenT || (TokenT = {}));
 ;
 export const TokenTName = {
@@ -70,14 +66,13 @@ export const TokenTName = {
     [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
-    [1650]: "Callable",
+    [1720]: "FnName",
     [2230]: "CircleT",
     [1300]: "Colon",
     [1400]: "ColonEq",
     [1410]: "ColonMin",
     [100]: "Comma",
     [1450]: "DivBy",
-    [200]: "Dollar",
     [210]: "Dot",
     [2300]: "Else",
     [2100]: "EOF",
@@ -101,17 +96,14 @@ export const TokenTName = {
     [2460]: "Let",
     [600]: "Minus",
     [2500]: "Mut",
-    [2540]: "NCallable",
-    [2550]: "Nonlocal",
+    [3100]: "VarName",
     [1800]: "Number",
     [2600]: "NumT",
     [670]: "Percent",
-    [1575]: "Pipe",
     [1580]: "PipePipe",
     [1585]: "Plus",
     [1590]: "PlusPlus",
     [2700]: "PointT",
-    [2750]: "Proc",
     [695]: "RBrace",
     [700]: "RBracket",
     [2780]: "RectT",
@@ -186,7 +178,7 @@ function pascal_case() {
         case "Rect": return token_lexeme(2780);
         case "Str": return token_lexeme(2900);
     }
-    return token_lexeme(1650);
+    return token_lexeme(1720);
 }
 function non_pascal_case() {
     while (is_alpha(peek()) || is_digit(peek()))
@@ -200,14 +192,12 @@ function non_pascal_case() {
         case "global": return token_lexeme(2450);
         case "let": return token_lexeme(2460);
         case "mut": return token_lexeme(2500);
-        case "nonlocal": return token_lexeme(2550);
-        case "proc": return token_lexeme(2750);
         case "return": return token_lexeme(2800);
         case "struct": return token_lexeme(2910);
         case "then": return token_lexeme(3000);
         case "true": return token_lexeme(2000);
     }
-    return token_lexeme(2540);
+    return token_lexeme(3100);
 }
 function number_() {
     while (is_digit(peek()))
@@ -285,7 +275,6 @@ export const scanner = {
             case ']': return token_lexeme(700);
             case '{': return token_lexeme(300);
             case '}': return token_lexeme(695);
-            case '$': return token_lexeme(200);
             case '#': return token_lexeme(250);
             case ';': return token_lexeme(900);
             case ',': return token_lexeme(100);
@@ -296,8 +285,6 @@ export const scanner = {
             case '|': {
                 if (match('|'))
                     return token_lexeme(1580);
-                if (match('>'))
-                    return token_lexeme(1575);
                 return token_lexeme(1450);
             }
             case '&': return token_lexeme(match('&') ? 1190 : 1180);

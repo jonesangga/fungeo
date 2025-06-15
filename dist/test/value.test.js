@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
-import { equal, deepEqual } from "node:assert/strict";
-import { FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js";
+import { equal } from "node:assert/strict";
+import { FGBoolean, FGCallUser, FGNumber, FGString } from "../value.js";
 import { Chunk } from "../chunk.js";
 import { numberT } from "../literal/type.js";
 describe("value", () => {
@@ -10,20 +10,10 @@ describe("value", () => {
         equal(b.value, false);
         equal(b.to_str(), "false");
     });
-    it("FGCallNative", () => {
-        let f = () => { return; };
-        let b = new FGCallNative("f", 0, f, [numberT], numberT);
-        equal(b.kind, 400);
-        equal(b.name, "f");
-        equal(b.callType, 0);
-        deepEqual(b.value, f);
-        equal(b.to_str(), "{fn f}");
-    });
     it("FGCallUser", () => {
-        let b = new FGCallUser("testfn", 0, [numberT], numberT, new Chunk(""));
+        let b = new FGCallUser("testfn", [numberT], numberT, new Chunk(""));
         equal(b.kind, 450);
         equal(b.name, "testfn");
-        equal(b.callType, 0);
         equal(b.to_str(), "{fn testfn}");
     });
     it("FGNumber", () => {
