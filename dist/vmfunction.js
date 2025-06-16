@@ -165,14 +165,13 @@ function _E() {
     push(e);
 }
 let E = new FGCallNative("E", _E, new FunctionT([numberT, numberT, numberT, numberT], ellipseT));
-function _P() {
+function _Pt() {
     let y = pop().value;
     let x = pop().value;
     pop();
-    let point = new Point(x, y);
-    push(point);
+    push(new Point(x, y));
 }
-let P = new FGCallNative("P", _P, new FunctionT([numberT, numberT], pointStruct.value));
+let Pt = new FGCallNative("Pt", _Pt, new FunctionT([numberT, numberT], pointStruct.value));
 function _Paint() {
     let geo = pop();
     let pic = pop();
@@ -330,7 +329,7 @@ export let nativeNames = {
     "Descart": { type: Descart.sig, value: Descart },
     "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     "E": { type: E.sig, value: E },
-    "P": { type: P.sig, value: P },
+    "Pt": { type: Pt.sig, value: Pt },
     "Pic": { type: Pic.sig, value: Pic },
     "Cw": { type: Cw.sig, value: Cw },
     "Ccw": { type: Ccw.sig, value: Ccw },

@@ -237,14 +237,15 @@ let E = new FGCallNative("E", _E,
     )
 );
 
-function _P(): void {
+// Create a Point.
+// TODO: Think about that pointStruct.value.
+function _Pt(): void {
     let y = (pop() as FGNumber).value;
     let x = (pop() as FGNumber).value;
     pop();              // The function.
-    let point = new Point(x, y);
-    push(point);
+    push(new Point(x, y));
 }
-let P = new FGCallNative("P", _P,
+let Pt = new FGCallNative("Pt", _Pt,
     new FunctionT(
         [numberT, numberT],
         pointStruct.value,
@@ -543,7 +544,7 @@ export let nativeNames: Names = {
     "Descart": { type: Descart.sig, value: Descart },
     "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     "E":      { type: E.sig, value: E },
-    "P":      { type: P.sig, value: P },
+    "Pt":     { type: Pt.sig, value: Pt },
     "Pic":    { type: Pic.sig, value: Pic },
     "Cw":     { type: Cw.sig, value: Cw },
     "Ccw":    { type: Ccw.sig, value: Ccw },
