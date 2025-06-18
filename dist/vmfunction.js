@@ -20,37 +20,37 @@ const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, circleStruct.value, geoList]);
 export const richgeoT = new UnionT([richPointStruct.value]);
 const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
-function _Print() {
+function _print() {
     let value = pop();
     pop();
     vm_output(value.to_str() + "\n");
 }
-let Print = new FGCallNative("Print", _Print, new FunctionT([anyT], nothingT));
-function _Printf() {
+let print = new FGCallNative("print", _print, new FunctionT([anyT], nothingT));
+function _printf() {
     let value = pop();
     pop();
     vm_output(value.to_str());
 }
-let Printf = new FGCallNative("Printf", _Printf, new FunctionT([anyT], nothingT));
-function _Sqrt() {
+let printf = new FGCallNative("printf", _printf, new FunctionT([anyT], nothingT));
+function _sqrt() {
     let value = pop();
     pop();
     push(new FGNumber(Math.sqrt(value.value)));
 }
-let Sqrt = new FGCallNative("Sqrt", _Sqrt, new FunctionT([numberT], numberT));
-function _Abs() {
+let sqrt = new FGCallNative("sqrt", _sqrt, new FunctionT([numberT], numberT));
+function _abs() {
     let value = pop();
     pop();
     push(new FGNumber(Math.abs(value.value)));
 }
-let Abs = new FGCallNative("Abs", _Abs, new FunctionT([numberT], numberT));
-function _Show() {
+let abs = new FGCallNative("abs", _abs, new FunctionT([numberT], numberT));
+function _show() {
     let value = pop();
     pop();
     push(new FGString(value.to_str()));
 }
-let Show = new FGCallNative("Show", _Show, new FunctionT([numberT], stringT));
-function _Padl() {
+let show = new FGCallNative("show", _show, new FunctionT([numberT], stringT));
+function _padl() {
     let filler = pop().value;
     let width = pop().value;
     let text = pop().value;
@@ -58,7 +58,7 @@ function _Padl() {
     let result = (filler.repeat(width) + text).slice(-width);
     push(new FGString(result));
 }
-let Padl = new FGCallNative("Padl", _Padl, new FunctionT([stringT, numberT, stringT], stringT));
+let padl = new FGCallNative("padl", _padl, new FunctionT([stringT, numberT, stringT], stringT));
 function _RGB() {
     let b = pop().value;
     let g = pop().value;
@@ -97,7 +97,7 @@ function isGeo(v) {
 function isRichGeo(v) {
     return [910].includes(v.kind);
 }
-function _Draw() {
+function _draw() {
     let v = pop();
     pop();
     if (v instanceof FGList) {
@@ -116,15 +116,15 @@ function _Draw() {
     }
     draw_onScreen();
 }
-let Draw = new FGCallNative("Draw", _Draw, new FunctionT([geoT], nothingT));
-function _Label() {
+let draw = new FGCallNative("draw", _draw, new FunctionT([geoT], nothingT));
+function _label() {
     let label = pop().value;
     let v = pop();
     pop();
     v.label = label;
     draw_onScreen();
 }
-let Label = new FGCallNative("Label", _Label, new FunctionT([richgeoT, stringT], nothingT));
+let label = new FGCallNative("label", _label, new FunctionT([richgeoT, stringT], nothingT));
 function _Fill() {
     console.log("in _Fill()");
     let v = pop();
@@ -134,7 +134,7 @@ function _Fill() {
     draw_onScreen();
 }
 let Fill = new FGCallNative("Fill", _Fill, new FunctionT([colorT, fillableT], nothingT));
-function _C() {
+function _circle() {
     let r = pop().value;
     let y = pop().value;
     let x = pop().value;
@@ -142,7 +142,7 @@ function _C() {
     let c = new Circle(x, y, r);
     push(c);
 }
-let C = new FGCallNative("C", _C, new FunctionT([numberT, numberT, numberT], circleStruct.value));
+let circle = new FGCallNative("circle", _circle, new FunctionT([numberT, numberT, numberT], circleStruct.value));
 function _C_FromPoints() {
     let q = pop();
     let p = pop();
@@ -190,20 +190,20 @@ function _E() {
     push(e);
 }
 let E = new FGCallNative("E", _E, new FunctionT([numberT, numberT, numberT, numberT], ellipseT));
-function _Pt() {
+function _pt() {
     let y = pop().value;
     let x = pop().value;
     pop();
     push(new Point(x, y));
 }
-let Pt = new FGCallNative("Pt", _Pt, new FunctionT([numberT, numberT], pointStruct.value));
-function _RPt() {
+let pt = new FGCallNative("pt", _pt, new FunctionT([numberT, numberT], pointStruct.value));
+function _rpt() {
     let y = pop().value;
     let x = pop().value;
     pop();
     push(new RichPoint(x, y));
 }
-let RPt = new FGCallNative("RPt", _RPt, new FunctionT([numberT, numberT], richPointStruct.value));
+let rpt = new FGCallNative("rpt", _rpt, new FunctionT([numberT, numberT], richPointStruct.value));
 function _Paint() {
     let geo = pop();
     let pic = pop();
@@ -299,7 +299,7 @@ function _R_FromPoints() {
     push(rect);
 }
 let R_FromPoints = new FGCallNative("R_FromPoints", _R_FromPoints, new FunctionT([pointStruct.value, pointStruct.value], rectStruct.value));
-function _Seg() {
+function _seg() {
     let y2 = pop().value;
     let x2 = pop().value;
     let y1 = pop().value;
@@ -308,7 +308,7 @@ function _Seg() {
     let seg = new Segment(x1, y1, x2, y2);
     push(seg);
 }
-let Seg = new FGCallNative("Seg", _Seg, new FunctionT([numberT, numberT, numberT, numberT], segmentT));
+let seg = new FGCallNative("seg", _seg, new FunctionT([numberT, numberT, numberT, numberT], segmentT));
 function _Seg_FromPoints() {
     let q = pop();
     let p = pop();
@@ -324,17 +324,17 @@ function _Midpoint() {
     push(point);
 }
 let Midpoint = new FGCallNative("Midpoint", _Midpoint, new FunctionT([segmentT], pointStruct.value));
-function _Help() {
+function _help() {
     pop();
     vm_output(welcome);
 }
-let Help = new FGCallNative("Help", _Help, new FunctionT([], nothingT));
-function _Clear() {
+let help = new FGCallNative("help", _help, new FunctionT([], nothingT));
+function _clear() {
     pop();
     canvas.clear();
     on_scrn = [];
 }
-let Clear = new FGCallNative("Clear", _Clear, new FunctionT([], nothingT));
+let clear = new FGCallNative("clear", _clear, new FunctionT([], nothingT));
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
@@ -342,28 +342,28 @@ export let nativeNames = {
     "fishq": { type: pictureT, value: fish.q },
     "fishr": { type: pictureT, value: fish.r },
     "fishs": { type: pictureT, value: fish.s },
-    "Help": { type: Help.sig, value: Help },
-    "Print": { type: Print.sig, value: Print },
+    "help": { type: help.sig, value: help },
+    "print": { type: print.sig, value: print },
     "Push": { type: Push.sig, value: Push },
     "RGB": { type: RGB.sig, value: RGB },
-    "Printf": { type: Printf.sig, value: Printf },
-    "Show": { type: Show.sig, value: Show },
-    "Label": { type: Label.sig, value: Label },
-    "Padl": { type: Padl.sig, value: Padl },
+    "printf": { type: printf.sig, value: printf },
+    "show": { type: show.sig, value: show },
+    "label": { type: label.sig, value: label },
+    "padl": { type: padl.sig, value: padl },
     "Type": { type: TypeFn.sig, value: TypeFn },
-    "Draw": { type: Draw.sig, value: Draw },
+    "draw": { type: draw.sig, value: draw },
     "Fill": { type: Fill.sig, value: Fill },
-    "Clear": { type: Clear.sig, value: Clear },
+    "clear": { type: clear.sig, value: clear },
     "Paint": { type: Paint.sig, value: Paint },
-    "C": { type: C.sig, value: C, methods: {
+    "circle": { type: circle.sig, value: circle, methods: {
             "FromPoints": { type: C_FromPoints.sig, value: C_FromPoints },
         } },
     "Ccurv": { type: Ccurv.sig, value: Ccurv },
     "Descart": { type: Descart.sig, value: Descart },
     "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     "E": { type: E.sig, value: E },
-    "Pt": { type: Pt.sig, value: Pt },
-    "RPt": { type: RPt.sig, value: RPt },
+    "pt": { type: pt.sig, value: pt },
+    "rpt": { type: rpt.sig, value: rpt },
     "Pic": { type: Pic.sig, value: Pic },
     "Cw": { type: Cw.sig, value: Cw },
     "Ccw": { type: Ccw.sig, value: Ccw },
@@ -376,13 +376,13 @@ export let nativeNames = {
             "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
             "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },
         } },
-    "Seg": { type: Seg.sig, value: Seg, methods: {
+    "seg": { type: seg.sig, value: seg, methods: {
             "FromPoints": { type: Seg_FromPoints.sig, value: Seg_FromPoints },
         } },
     "Midpoint": { type: Midpoint.sig, value: Midpoint },
     "Rect": { type: rectStruct.value, value: rectStruct },
     "Point": { type: pointStruct.value, value: pointStruct },
     "Circle": { type: circleStruct.value, value: circleStruct },
-    "Sqrt": { type: Sqrt.sig, value: Sqrt },
-    "Abs": { type: Abs.sig, value: Abs },
+    "sqrt": { type: sqrt.sig, value: sqrt },
+    "abs": { type: abs.sig, value: abs },
 };
