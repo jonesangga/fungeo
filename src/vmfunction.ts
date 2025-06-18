@@ -10,19 +10,19 @@ import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
 import { pointStruct, richPointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
-import Segment from "./geo/segment.js"
+import { Segment, RichSegment } from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { type Type, ListT, UnionT, anyT, pictureT, FunctionT,
-         ellipseT, segmentT, nothingT, stringT, numberT,
+         ellipseT, segmentT, richSegmentT, nothingT, stringT, numberT,
          colorT, canvasT, replT, NothingT, AnyT } from "./literal/type.js"
 
 import fish from "./data/fish.js"
 import repl from "./ui/repl.js"
 
-const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, circleStruct.value]);
+const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, circleStruct.value, geoList]);
-export const richgeoT = new UnionT([richPointStruct.value]);
+const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value, geoList]);
+export const richgeoT = new UnionT([richPointStruct.value, richSegmentT]);
 const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
 
 function _print(): void {
@@ -129,11 +129,11 @@ function draw_onScreen() {
 }
 
 function isGeo(v: Value): v is GeoObj {
-    return [Kind.Circle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.Segment].includes(v.kind);
+    return [Kind.Circle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.RichSegment, Kind.Segment].includes(v.kind);
 }
 
 function isRichGeo(v: Value): v is RichGeoObj {
-    return [Kind.RichPoint].includes(v.kind);
+    return [Kind.RichPoint, Kind.RichSegment].includes(v.kind);
 }
 
 function _draw(): void {
@@ -508,6 +508,25 @@ let seg = new FGCallNative("seg", _seg,
     )
 );
 
+function _rseg(): void {
+    let y2 = (pop() as FGNumber).value;
+    let x2 = (pop() as FGNumber).value;
+    let y1 = (pop() as FGNumber).value;
+    let x1 = (pop() as FGNumber).value;
+    pop();              // The function.
+    let p = new RichPoint(x1, y1);
+    p.label = "P";
+    let q = new RichPoint(x2, y2);
+    q.label = "Q";
+    push(new RichSegment(p, q));
+}
+let rseg = new FGCallNative("rseg", _rseg,
+    new FunctionT(
+        [numberT, numberT, numberT, numberT],
+        richSegmentT,
+    )
+);
+
 function _Seg_FromPoints(): void {
     let q = pop() as Point;
     let p = pop() as Point;
@@ -604,6 +623,7 @@ export let nativeNames: Names = {
         "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
         "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },
     }},
+    "rseg":   { type: rseg.sig, value: rseg },
     "seg":    { type: seg.sig, value: seg, methods: {
         "FromPoints": { type: Seg_FromPoints.sig, value: Seg_FromPoints },
     }},

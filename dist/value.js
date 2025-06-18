@@ -19,6 +19,7 @@ export var Kind;
     Kind[Kind["Point"] = 850] = "Point";
     Kind[Kind["Rect"] = 900] = "Rect";
     Kind[Kind["RichPoint"] = 910] = "RichPoint";
+    Kind[Kind["RichSegment"] = 920] = "RichSegment";
     Kind[Kind["Segment"] = 1000] = "Segment";
     Kind[Kind["Canvas"] = 2000] = "Canvas";
     Kind[Kind["Repl"] = 2500] = "Repl";
@@ -42,6 +43,7 @@ export const KindName = {
     [900]: "Rect",
     [2500]: "Repl",
     [910]: "RichPoint",
+    [920]: "RichSegment",
     [1000]: "Segment",
     [600]: "String",
     [610]: "Struct",

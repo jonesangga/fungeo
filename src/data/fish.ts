@@ -10,7 +10,7 @@
 // TODO: Make test (visual).
 
 import Picture from "../geo/picture.js"
-import Segment from "../geo/segment.js"
+import { Segment } from "../geo/segment.js"
 
 // From https://frank-buss.de/lisp/functional.html (the y coordinates are flipped).
 const _fish = {

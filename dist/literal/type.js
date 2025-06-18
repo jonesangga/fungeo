@@ -232,6 +232,14 @@ export class SegmentT {
         return other instanceof SegmentT;
     }
 }
+export class RichSegmentT {
+    to_str() {
+        return "RichSegment";
+    }
+    equal(other) {
+        return other instanceof RichSegmentT;
+    }
+}
 export class CanvasT {
     to_str() {
         return "Canvas";
@@ -265,5 +273,6 @@ export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
+export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
 import { Kind } from "../../value.js"
 import { color } from "../../data/constant.js"
-import Segment from "../../geo/segment.js"
+import { Segment } from "../../geo/segment.js"
 
 describe("Segment", () => {
     it("create Segment with default color", () => {

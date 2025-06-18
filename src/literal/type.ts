@@ -276,6 +276,15 @@ export class SegmentT implements Type {
     }
 }
 
+export class RichSegmentT implements Type {
+    to_str(): string {
+        return "RichSegment";
+    }
+    equal(other: Type): boolean {
+        return other instanceof RichSegmentT;
+    }
+}
+
 export class CanvasT implements Type {
     to_str(): string {
         return "Canvas";
@@ -311,5 +320,6 @@ export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
+export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
