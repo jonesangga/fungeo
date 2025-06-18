@@ -46,6 +46,10 @@ class TypeChecker {
         return nothingT;
     }
     visitVarDecl(node) {
+        if (Object.hasOwn(tempNames, node.name) ||
+            Object.hasOwn(names, node.name)) {
+            error(node.line, `${node.name} already defined`);
+        }
         let type = node.init.visit(this);
         if (type.equal(nothingT))
             error(node.init.line, `cannot assign to nothingT`);

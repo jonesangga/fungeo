@@ -7,32 +7,33 @@ import { FGType, Type, FunctionT, CallUserT, ListT, booleanT, numberT, stringT, 
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
-import Point from "./geo/point.js"
+import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
 import Segment from "./geo/segment.js"
 
 export const enum Kind {
-    Nothing  = 100,
-    Any      = 200,
-    Boolean  = 300,     // Literal.
+    Nothing    = 100,
+    Any        = 200,
+    Boolean    = 300,     // Literal.
     CallNative = 400,
-    CallUser = 450,
-    Color    = 455,
-    Complex  = 460,
-    List     = 470,
-    Number   = 500,
-    String   = 600,
-    Struct   = 610,
-    Type     = 650,
-    Circle   = 700,     // Geometry.
-    Ellipse  = 750,
-    Picture  = 840,
-    Point    = 850,
-    Rect     = 900,
-    Segment  = 1000,
-    Canvas   = 2000,    // UI.
-    Repl     = 2500,
+    CallUser   = 450,
+    Color      = 455,
+    Complex    = 460,
+    List       = 470,
+    Number     = 500,
+    String     = 600,
+    Struct     = 610,
+    Type       = 650,
+    Circle     = 700,     // Geometry.
+    Ellipse    = 750,
+    Picture    = 840,
+    Point      = 850,
+    Rect       = 900,
+    RichPoint  = 910,
+    Segment    = 1000,
+    Canvas     = 2000,    // UI.
+    Repl       = 2500,
 };
 
 export const KindName: {
@@ -54,6 +55,7 @@ export const KindName: {
     [Kind.Point]: "Point",
     [Kind.Rect]: "Rect",
     [Kind.Repl]: "Repl",
+    [Kind.RichPoint]: "RichPoint",
     [Kind.Segment]: "Segment",
     [Kind.String]: "String",
     [Kind.Struct]: "Struct",
@@ -292,7 +294,8 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Ellipse | Picture | Point | Rect | Segment;
+export type GeoObj = Circle | Ellipse | Picture | Point | Rect | RichPoint | Segment;
+export type RichGeoObj = RichPoint;
 export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;

@@ -132,8 +132,10 @@ export class UnionT implements Type {
         public value: Type[]
     ) {}
     to_str(): string {
-        // return "Union";
-        return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
+        if (this.value.length === 1) // No need parens.
+            return this.value[0].to_str();
+        else
+            return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
     }
     equal(other: Type): boolean {
         return this.value.some(val => val.equal(other));

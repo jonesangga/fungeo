@@ -1,5 +1,11 @@
 # Log
 
+#### 18-06-25
+
+- make richgeoT in vmfunction, use it for Lable()
+- create RPt
+- change P function to Pt
+
 #### 15-06-25
 
 - add description for typecheck error "type: 1: at ...."

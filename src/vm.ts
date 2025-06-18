@@ -1,11 +1,11 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { type Value, type Comparable, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js"
-import { Names, nativeNames } from "./vmfunction.js"
+import { type Value, type Comparable, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js"
+import { Names, nativeNames, richgeoT } from "./vmfunction.js"
 import { type Type, FGType, StructT } from "./literal/type.js"
 import Rect from "./geo/rect.js"
-import Point from "./geo/point.js"
+import { Point } from "./geo/point.js"
 import Circle from "./geo/circle.js"
 
 // For quick debugging.
@@ -344,6 +344,8 @@ export function run(intercept: boolean = false): boolean {
                 let name  = read_string();
                 let type  = (pop() as FGType).value;
                 let value = pop();
+                if (richgeoT.equal(type))
+                    (value as RichGeoObj).label = name;
                 names[name] = { type, value };
                 break;
             }

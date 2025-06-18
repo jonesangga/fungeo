@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
 import { color } from "../../data/constant.js";
-import Point from "../../geo/point.js";
+import { Point } from "../../geo/point.js";
 describe("Point", () => {
     it("create Point with default color", () => {
         let p = new Point(10, 20);

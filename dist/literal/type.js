@@ -108,7 +108,10 @@ export class UnionT {
         this.value = value;
     }
     to_str() {
-        return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
+        if (this.value.length === 1)
+            return this.value[0].to_str();
+        else
+            return "(" + this.value.map(v => v.to_str()).join(" | ") + ")";
     }
     equal(other) {
         return this.value.some(val => val.equal(other));

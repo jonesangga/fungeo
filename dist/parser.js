@@ -174,11 +174,12 @@ function declaration() {
     }
 }
 function var_decl() {
+    let line = prevTok.line;
     consume(3100, "expect variable name");
     let name = prevTok.lexeme;
     consume(1500, "expect '=' in variable declaration");
     let init = expression();
-    return new VarDeclNode(0, name, init);
+    return new VarDeclNode(line, name, init);
 }
 function stmt() {
     if (match(3100)) {

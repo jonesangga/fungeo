@@ -1,7 +1,7 @@
 import { FGStruct, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
-import { nativeNames } from "./vmfunction.js";
+import { nativeNames, richgeoT } from "./vmfunction.js";
 import Rect from "./geo/rect.js";
-import Point from "./geo/point.js";
+import { Point } from "./geo/point.js";
 import Circle from "./geo/circle.js";
 let $ = console.log;
 export let stack = [];
@@ -288,6 +288,8 @@ export function run(intercept = false) {
                 let name = read_string();
                 let type = pop().value;
                 let value = pop();
+                if (richgeoT.equal(type))
+                    value.label = name;
                 names[name] = { type, value };
                 break;
             }

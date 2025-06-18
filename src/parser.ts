@@ -226,11 +226,12 @@ function declaration(): AST {
 
 // Declaration must be followed by initialization.
 function var_decl(): VarDeclNode {
+    let line = prevTok.line;
     consume(TokenT.VarName, "expect variable name");
     let name = prevTok.lexeme;
     consume(TokenT.Eq, "expect '=' in variable declaration");
     let init = expression();
-    return new VarDeclNode(0, name, init);
+    return new VarDeclNode(line, name, init);
 }
 
 // TODO: Support function assignment in case TokenT.FnName.

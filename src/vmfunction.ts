@@ -1,14 +1,14 @@
 import { pop, push, vm_output } from "./vm.js"
-import { type Value, type GeoObj, type Fillable, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
+import { type Value, type GeoObj, type RichGeoObj, type Fillable, Kind, FGCallNative, FGCallUser, FGNumber, FGString, FGList } from "./value.js"
 import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
-import Point from "./geo/point.js"
+import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
-import { pointStruct } from "./geo/point.js"
+import { pointStruct, richPointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
 import Segment from "./geo/segment.js"
 import { welcome } from "./data/help.js"
@@ -19,9 +19,10 @@ import { type Type, ListT, UnionT, anyT, pictureT, FunctionT,
 import fish from "./data/fish.js"
 import repl from "./ui/repl.js"
 
-const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, rectStruct.value, segmentT, circleStruct.value]);
+const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, circleStruct.value]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, rectStruct.value, segmentT, circleStruct.value, geoList]);
+const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, circleStruct.value, geoList]);
+export const richgeoT = new UnionT([richPointStruct.value]);
 const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
 
 function _Print(): void {
@@ -115,12 +116,24 @@ let Push = new FGCallNative("Push", _Push,
 );
 
 let on_scrn: GeoObj[] = [];
+let label_on_scrn: RichGeoObj[] = [];
 
 function draw_onScreen() {
     canvas.clear();
     for (let obj of on_scrn) {
         obj.draw();
     }
+    for (let obj of label_on_scrn) {
+        obj.draw_label();
+    }
+}
+
+function isGeo(v: Value): v is GeoObj {
+    return [Kind.Circle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.Segment].includes(v.kind);
+}
+
+function isRichGeo(v: Value): v is RichGeoObj {
+    return [Kind.RichPoint].includes(v.kind);
 }
 
 function _Draw(): void {
@@ -128,16 +141,33 @@ function _Draw(): void {
     pop();              // The function.
     if (v instanceof FGList) {
         for (let i of v.value) {
-            on_scrn.push(i as GeoObj);
+            if (isGeo(i))
+                on_scrn.push(i);
+            if (isRichGeo(i))
+                label_on_scrn.push(i);
         }
     }
     else {
-        on_scrn.push(v as GeoObj);
+        if (isGeo(v))
+            on_scrn.push(v);
+        if (isRichGeo(v))
+            label_on_scrn.push(v);
     }
     draw_onScreen();
 }
 let Draw = new FGCallNative("Draw", _Draw,
     new FunctionT([geoT], nothingT)
+);
+
+function _Label(): void {
+    let label = (pop() as FGString).value;
+    let v = pop() as RichGeoObj;
+    pop();              // The function.
+    v.label = label;
+    draw_onScreen();
+}
+let Label = new FGCallNative("Label", _Label,
+    new FunctionT([richgeoT, stringT], nothingT)
 );
 
 function _Fill(): void {
@@ -249,6 +279,19 @@ let Pt = new FGCallNative("Pt", _Pt,
     new FunctionT(
         [numberT, numberT],
         pointStruct.value,
+    )
+);
+
+function _RPt(): void {
+    let y = (pop() as FGNumber).value;
+    let x = (pop() as FGNumber).value;
+    pop();              // The function.
+    push(new RichPoint(x, y));
+}
+let RPt = new FGCallNative("RPt", _RPt,
+    new FunctionT(
+        [numberT, numberT],
+        richPointStruct.value,
     )
 );
 
@@ -531,6 +574,7 @@ export let nativeNames: Names = {
     "RGB":    { type: RGB.sig, value: RGB },
     "Printf": { type: Printf.sig, value: Printf },
     "Show":   { type: Show.sig, value: Show },
+    "Label":  { type: Label.sig, value: Label },
     "Padl":   { type: Padl.sig, value: Padl },
     "Type":   { type: TypeFn.sig, value: TypeFn },
     "Draw":   { type: Draw.sig, value: Draw },
@@ -545,6 +589,7 @@ export let nativeNames: Names = {
     "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     "E":      { type: E.sig, value: E },
     "Pt":     { type: Pt.sig, value: Pt },
+    "RPt":    { type: RPt.sig, value: RPt },
     "Pic":    { type: Pic.sig, value: Pic },
     "Cw":     { type: Cw.sig, value: Cw },
     "Ccw":    { type: Ccw.sig, value: Ccw },
