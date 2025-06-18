@@ -1,8 +1,8 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, FnNode, NumberNode,
-         StringNode, VarDeclNode, VarNode, Visitor } from "./ast.js";
+import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode,
+         NumberNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Value, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
 import { FGType, type Type, nothingT } from "./literal/type.js"
@@ -26,18 +26,14 @@ class CodeGen implements Visitor<void> {
         emitByte(BinaryTable[node.op].op, node.line);
     }
 
-    visitFn(node: FnNode): void {
-        emitConstant(names[node.name].value, node.line);
-    }
-
-    visitVar(node: VarNode): void {
+    visitIdent(node: IdentNode): void {
         let index = makeConstant(new FGString(node.name));
         emitBytes(Op.GetGlob, index, node.line);
     }
 
     visitAssign(node: AssignNode): void {
-        let index = makeConstant(new FGString(node.name));
-        node.value.visit(this);
+        let index = makeConstant(new FGString(node.left.name));
+        node.right.visit(this);
         emitBytes(Op.Set, index, node.line);
     }
 

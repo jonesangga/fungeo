@@ -47,11 +47,11 @@ describe("scanner each token type", () => {
         [2200]: ["@", { kind: 2200, line: 1, lexeme: "unexpected character @" }],
         [1700]: ["false", { kind: 1700, line: 1, lexeme: "false" }],
         [2320]: ["fn", { kind: 2320, line: 1, lexeme: "fn" }],
-        [1720]: ["Display", { kind: 1720, line: 1, lexeme: "Display" }],
         [2450]: ["global", { kind: 2450, line: 1, lexeme: "global" }],
         [1520]: [">", { kind: 1520, line: 1, lexeme: ">" }],
         [1525]: [">=", { kind: 1525, line: 1, lexeme: ">=" }],
         [250]: ["#", { kind: 250, line: 1, lexeme: "#" }],
+        [1730]: ["print", { kind: 1730, line: 1, lexeme: "print" }],
         [2400]: ["if", { kind: 2400, line: 1, lexeme: "if" }],
         [2405]: ["ifx", { kind: 2405, line: 1, lexeme: "ifx" }],
         [300]: ["{", { kind: 300, line: 1, lexeme: "{" }],
@@ -83,7 +83,6 @@ describe("scanner each token type", () => {
         [2910]: ["struct", { kind: 2910, line: 1, lexeme: "struct" }],
         [3000]: ["then", { kind: 3000, line: 1, lexeme: "then" }],
         [2000]: ["true", { kind: 2000, line: 1, lexeme: "true" }],
-        [3100]: ["kasukasu", { kind: 3100, line: 1, lexeme: "kasukasu" }],
     };
     for (let [input, expected] of Object.values(tests)) {
         it(`scan ${input}`, () => {

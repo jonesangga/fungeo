@@ -1,6 +1,5 @@
 import { Chunk } from "./chunk.js";
 import { BinaryTable } from "./ast.js";
-import { names } from "./vm.js";
 import { FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
 import { FGType, nothingT } from "./literal/type.js";
 class CodeGen {
@@ -18,16 +17,13 @@ class CodeGen {
         node.right.visit(this);
         emitByte(BinaryTable[node.op].op, node.line);
     }
-    visitFn(node) {
-        emitConstant(names[node.name].value, node.line);
-    }
-    visitVar(node) {
+    visitIdent(node) {
         let index = makeConstant(new FGString(node.name));
         emitBytes(500, index, node.line);
     }
     visitAssign(node) {
-        let index = makeConstant(new FGString(node.name));
-        node.value.visit(this);
+        let index = makeConstant(new FGString(node.left.name));
+        node.right.visit(this);
         emitBytes(1400, index, node.line);
     }
     visitVarDecl(node) {

@@ -34,7 +34,7 @@ export var TokenT;
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
     TokenT[TokenT["False"] = 1700] = "False";
-    TokenT[TokenT["FnName"] = 1720] = "FnName";
+    TokenT[TokenT["Ident"] = 1730] = "Ident";
     TokenT[TokenT["Number"] = 1800] = "Number";
     TokenT[TokenT["String"] = 1900] = "String";
     TokenT[TokenT["True"] = 2000] = "True";
@@ -56,7 +56,6 @@ export var TokenT;
     TokenT[TokenT["StrT"] = 2900] = "StrT";
     TokenT[TokenT["Struct"] = 2910] = "Struct";
     TokenT[TokenT["Then"] = 3000] = "Then";
-    TokenT[TokenT["VarName"] = 3100] = "VarName";
 })(TokenT || (TokenT = {}));
 ;
 export const TokenTName = {
@@ -66,7 +65,6 @@ export const TokenTName = {
     [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
-    [1720]: "FnName",
     [2230]: "CircleT",
     [1300]: "Colon",
     [1400]: "ColonEq",
@@ -85,6 +83,7 @@ export const TokenTName = {
     [1520]: "Greater",
     [1525]: "GreaterEq",
     [250]: "Hash",
+    [1730]: "Ident",
     [2400]: "If",
     [2405]: "Ifx",
     [300]: "LBrace",
@@ -96,7 +95,6 @@ export const TokenTName = {
     [2460]: "Let",
     [600]: "Minus",
     [2500]: "Mut",
-    [3100]: "VarName",
     [1800]: "Number",
     [2600]: "NumT",
     [670]: "Percent",
@@ -124,12 +122,6 @@ let current = 0;
 let line = 1;
 function is_digit(c) {
     return c >= '0' && c <= '9';
-}
-function is_lower(c) {
-    return c >= 'a' && c <= 'z';
-}
-function is_upper(c) {
-    return c >= 'A' && c <= 'Z';
 }
 function is_alpha(c) {
     return (c >= 'a' && c <= 'z') ||
@@ -167,23 +159,12 @@ function token_string(kind) {
 function token_error(message) {
     return { kind: 2200, lexeme: message, line };
 }
-function pascal_case() {
+function identifier() {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
     switch (source.slice(start, current)) {
         case "Bool": return token_lexeme(2220);
         case "Circle": return token_lexeme(2230);
-        case "Num": return token_lexeme(2600);
-        case "Point": return token_lexeme(2700);
-        case "Rect": return token_lexeme(2780);
-        case "Str": return token_lexeme(2900);
-    }
-    return token_lexeme(1720);
-}
-function non_pascal_case() {
-    while (is_alpha(peek()) || is_digit(peek()))
-        advance();
-    switch (source.slice(start, current)) {
         case "else": return token_lexeme(2300);
         case "false": return token_lexeme(1700);
         case "fn": return token_lexeme(2320);
@@ -192,12 +173,16 @@ function non_pascal_case() {
         case "global": return token_lexeme(2450);
         case "let": return token_lexeme(2460);
         case "mut": return token_lexeme(2500);
+        case "Num": return token_lexeme(2600);
+        case "Point": return token_lexeme(2700);
+        case "Rect": return token_lexeme(2780);
         case "return": return token_lexeme(2800);
+        case "Str": return token_lexeme(2900);
         case "struct": return token_lexeme(2910);
         case "then": return token_lexeme(3000);
         case "true": return token_lexeme(2000);
     }
-    return token_lexeme(3100);
+    return token_lexeme(1730);
 }
 function number_() {
     while (is_digit(peek()))
@@ -262,10 +247,8 @@ export const scanner = {
         let c = advance();
         if (is_digit(c))
             return number_();
-        if (is_lower(c))
-            return non_pascal_case();
-        if (is_upper(c))
-            return pascal_case();
+        if (is_alpha(c))
+            return identifier();
         switch (c) {
             case '.': return token_lexeme(210);
             case '%': return token_lexeme(670);

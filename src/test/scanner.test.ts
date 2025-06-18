@@ -61,11 +61,11 @@ describe("scanner each token type", () => {
         [TokenT.Error]: ["@", { kind: TokenT.Error, line: 1, lexeme: "unexpected character @" }],
         [TokenT.False]: ["false", { kind: TokenT.False, line: 1, lexeme: "false" }],
         [TokenT.Fn]: ["fn", { kind: TokenT.Fn, line: 1, lexeme: "fn" }],
-        [TokenT.FnName]: ["Display", { kind: TokenT.FnName, line: 1, lexeme: "Display" }],
         [TokenT.Global]: ["global", { kind: TokenT.Global, line: 1, lexeme: "global" }],
         [TokenT.Greater]: [">", { kind: TokenT.Greater, line: 1, lexeme: ">" }],
         [TokenT.GreaterEq]: [">=", { kind: TokenT.GreaterEq, line: 1, lexeme: ">=" }],
         [TokenT.Hash]: ["#", { kind: TokenT.Hash, line: 1, lexeme: "#" }],
+        [TokenT.Ident]: ["print", { kind: TokenT.Ident, line: 1, lexeme: "print" }],
         [TokenT.If]: ["if", { kind: TokenT.If, line: 1, lexeme: "if" }],
         [TokenT.Ifx]: ["ifx", { kind: TokenT.Ifx, line: 1, lexeme: "ifx" }],
         [TokenT.LBrace]: ["{", { kind: TokenT.LBrace, line: 1, lexeme: "{" }],
@@ -97,7 +97,6 @@ describe("scanner each token type", () => {
         [TokenT.Struct]: ["struct", { kind: TokenT.Struct, line: 1, lexeme: "struct" }],
         [TokenT.Then]: ["then", { kind: TokenT.Then, line: 1, lexeme: "then" }],
         [TokenT.True]: ["true", { kind: TokenT.True, line: 1, lexeme: "true" }],
-        [TokenT.VarName]: ["kasukasu", { kind: TokenT.VarName, line: 1, lexeme: "kasukasu" }],
     };
 
     for (let [input, expected] of Object.values(tests)) {

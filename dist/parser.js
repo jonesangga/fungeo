@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, FnNode, NumberNode, StringNode, VarDeclNode, VarNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode, NumberNode, StringNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -30,16 +30,16 @@ const rules = {
     [210]: { prefix: null, infix: null, prec: 600 },
     [2300]: { prefix: null, infix: null, prec: 100 },
     [2100]: { prefix: null, infix: null, prec: 100 },
-    [1500]: { prefix: null, infix: null, prec: 100 },
+    [1500]: { prefix: null, infix: assign_var, prec: 200 },
     [1505]: { prefix: null, infix: null, prec: 230 },
     [2200]: { prefix: null, infix: null, prec: 100 },
     [1700]: { prefix: parse_boolean, infix: null, prec: 100 },
     [2320]: { prefix: null, infix: null, prec: 100 },
-    [1720]: { prefix: parse_fnname, infix: null, prec: 100 },
     [2450]: { prefix: null, infix: null, prec: 100 },
     [1520]: { prefix: null, infix: null, prec: 250 },
     [1525]: { prefix: null, infix: null, prec: 250 },
     [250]: { prefix: null, infix: null, prec: 100 },
+    [1730]: { prefix: parse_ident, infix: null, prec: 100 },
     [2400]: { prefix: null, infix: null, prec: 100 },
     [2405]: { prefix: null, infix: null, prec: 100 },
     [300]: { prefix: null, infix: null, prec: 100 },
@@ -71,7 +71,6 @@ const rules = {
     [2910]: { prefix: null, infix: null, prec: 100 },
     [3000]: { prefix: null, infix: null, prec: 100 },
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
-    [3100]: { prefix: parse_varname, infix: null, prec: 100 },
 };
 let invalidTok = { kind: 2100, line: -1, lexeme: "" };
 let currTok = invalidTok;
@@ -125,14 +124,6 @@ function parse_number() {
 function parse_string() {
     return new StringNode(prevTok.line, prevTok.lexeme);
 }
-function parse_fnname() {
-    return new FnNode(prevTok.line, prevTok.lexeme);
-}
-function call_fn() {
-    let lhs = parse_fnname();
-    consume(500, "expect '(' in function call");
-    return call(lhs);
-}
 function call(lhs) {
     let line = prevTok.line;
     let args = [];
@@ -144,15 +135,15 @@ function call(lhs) {
     consume(800, "expect ')' after argument list");
     return new CallNode(line, lhs, args);
 }
-function parse_varname() {
-    return new VarNode(prevTok.line, prevTok.lexeme);
+function parse_ident() {
+    return new IdentNode(prevTok.line, prevTok.lexeme);
 }
-function assign_var() {
-    let name = prevTok.lexeme;
-    consume(1500, "expect '=' in assignmet");
+function assign_var(lhs) {
+    if (!(lhs instanceof IdentNode))
+        error("invalid assignment target");
     let line = prevTok.line;
-    let rhs = expression();
-    return new AssignNode(line, name, rhs);
+    let rhs = parse_prec(200 + 1);
+    return new AssignNode(line, lhs, rhs);
 }
 function numeric_binary(lhs) {
     let operator = prevTok.kind;
@@ -175,18 +166,15 @@ function declaration() {
 }
 function var_decl() {
     let line = prevTok.line;
-    consume(3100, "expect variable name");
+    consume(1730, "expect variable name");
     let name = prevTok.lexeme;
     consume(1500, "expect '=' in variable declaration");
     let init = expression();
     return new VarDeclNode(line, name, init);
 }
 function stmt() {
-    if (match(3100)) {
-        return assign_var();
-    }
-    else if (match(1720)) {
-        return call_fn();
+    if (check(1730)) {
+        return expression();
     }
     else if (match(1410)) {
         return expr_stmt();

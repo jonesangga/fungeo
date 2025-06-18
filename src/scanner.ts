@@ -37,7 +37,7 @@ export const enum TokenT {
     Plus      = 1585,
     PlusPlus  = 1590,
     False     = 1700,   // Literals.
-    FnName    = 1720,
+    Ident     = 1730,
     Number    = 1800,
     String    = 1900,
     True      = 2000,
@@ -59,7 +59,6 @@ export const enum TokenT {
     StrT      = 2900,
     Struct    = 2910,
     Then      = 3000,
-    VarName   = 3100,
 };
 
 export const TokenTName: {
@@ -71,7 +70,6 @@ export const TokenTName: {
     [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
-    [TokenT.FnName]: "FnName",
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
@@ -90,6 +88,7 @@ export const TokenTName: {
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
     [TokenT.Hash]: "Hash",
+    [TokenT.Ident]: "Ident",
     [TokenT.If]: "If",
     [TokenT.Ifx]: "Ifx",
     [TokenT.LBrace]: "LBrace",
@@ -101,7 +100,6 @@ export const TokenTName: {
     [TokenT.Let]: "Let",
     [TokenT.Minus]: "Minus",
     [TokenT.Mut]: "Mut",
-    [TokenT.VarName]: "VarName",
     [TokenT.Number]: "Number",
     [TokenT.NumT]: "NumT",
     [TokenT.Percent]: "Percent",
@@ -137,14 +135,6 @@ let line    = 1;
 
 function is_digit(c: string): boolean {
     return c >= '0' && c <= '9';
-}
-
-function is_lower(c: string): boolean {
-    return c >= 'a' && c <= 'z';
-}
-
-function is_upper(c: string): boolean {
-    return c >= 'A' && c <= 'Z';
 }
 
 function is_alpha(c: string): boolean {
@@ -191,28 +181,13 @@ function token_error(message: string): Token {
     return { kind: TokenT.Error, lexeme: message, line };
 }
 
-// Scan functions, procedures, and types.
-function pascal_case(): Token {
+function identifier(): Token {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
 
     switch (source.slice(start, current)) {
-        case "Bool":   return token_lexeme( TokenT.BoolT );
-        case "Circle": return token_lexeme( TokenT.CircleT );
-        case "Num":    return token_lexeme( TokenT.NumT );
-        case "Point":  return token_lexeme( TokenT.PointT );
-        case "Rect":   return token_lexeme( TokenT.RectT );
-        case "Str":    return token_lexeme( TokenT.StrT );
-    }
-    return token_lexeme( TokenT.FnName );
-}
-
-// Scan non-callable names, keywords, true, false.
-function non_pascal_case(): Token {
-    while (is_alpha(peek()) || is_digit(peek()))
-        advance();
-
-    switch (source.slice(start, current)) {
+        case "Bool":     return token_lexeme( TokenT.BoolT );
+        case "Circle":   return token_lexeme( TokenT.CircleT );
         case "else":     return token_lexeme( TokenT.Else );
         case "false":    return token_lexeme( TokenT.False );
         case "fn":       return token_lexeme( TokenT.Fn );
@@ -221,12 +196,16 @@ function non_pascal_case(): Token {
         case "global":   return token_lexeme( TokenT.Global );
         case "let":      return token_lexeme( TokenT.Let );
         case "mut":      return token_lexeme( TokenT.Mut );
+        case "Num":      return token_lexeme( TokenT.NumT );
+        case "Point":    return token_lexeme( TokenT.PointT );
+        case "Rect":     return token_lexeme( TokenT.RectT );
         case "return":   return token_lexeme( TokenT.Return );
+        case "Str":      return token_lexeme( TokenT.StrT );
         case "struct":   return token_lexeme( TokenT.Struct );
         case "then":     return token_lexeme( TokenT.Then );
         case "true":     return token_lexeme( TokenT.True );
     }
-    return token_lexeme( TokenT.VarName );
+    return token_lexeme( TokenT.Ident );
 }
 
 function number_(): Token {
@@ -299,8 +278,7 @@ export const scanner = {
 
         let c = advance();
         if (is_digit(c)) return number_();
-        if (is_lower(c)) return non_pascal_case();
-        if (is_upper(c)) return pascal_case();
+        if (is_alpha(c)) return identifier();
         
         switch (c) {
             case '.': return token_lexeme(TokenT.Dot);

@@ -5,7 +5,6 @@ import { parse } from "./parser.js";
 import { compile } from "./compile.js";
 import { typecheck } from "./typechecker.js";
 import { vm } from "./vm.js"
-import { AST, NumberNode, StringNode, BooleanNode, VarNode } from "./ast.js";
 
 repl.place(50, 260);
 canvas.place(650, 0);

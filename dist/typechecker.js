@@ -33,16 +33,13 @@ class TypeChecker {
         assertType(type, node.right.visit(this), node.right.line);
         return type;
     }
-    visitFn(node) {
-        return resolveVar(node.name, node.line);
-    }
-    visitVar(node) {
+    visitIdent(node) {
         return resolveVar(node.name, node.line);
     }
     visitAssign(node) {
-        let varType = resolveVar(node.name, node.line);
-        let valueType = node.value.visit(this);
-        assertType(varType, valueType, node.value.line);
+        let varType = node.left.visit(this);
+        let valueType = node.right.visit(this);
+        assertType(varType, valueType, node.right.line);
         return nothingT;
     }
     visitVarDecl(node) {

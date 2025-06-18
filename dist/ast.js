@@ -1,18 +1,18 @@
 import { numberT } from "./literal/type.js";
 export class AssignNode {
     line;
-    name;
-    value;
-    constructor(line, name, value) {
+    left;
+    right;
+    constructor(line, left, right) {
         this.line = line;
-        this.name = name;
-        this.value = value;
+        this.left = left;
+        this.right = right;
     }
     to_str(level) {
         return indent(level) + "Assign(\n"
-            + indent(level + 2) + this.name
+            + indent(level + 2) + this.left.to_str(level + 2)
             + "\n"
-            + this.value.to_str(level + 2)
+            + this.right.to_str(level + 2)
             + "\n"
             + indent(level) + ")";
     }
@@ -126,7 +126,7 @@ export class FileNode {
         return v.visitFile(this);
     }
 }
-export class FnNode {
+export class IdentNode {
     line;
     name;
     constructor(line, name) {
@@ -134,10 +134,10 @@ export class FnNode {
         this.name = name;
     }
     to_str(level) {
-        return indent(level) + "Fn(" + this.name + ")";
+        return indent(level) + "Ident(" + this.name + ")";
     }
     visit(v) {
-        return v.visitFn(this);
+        return v.visitIdent(this);
     }
 }
 export class NumberNode {
@@ -187,20 +187,6 @@ export class VarDeclNode {
     }
     visit(v) {
         return v.visitVarDecl(this);
-    }
-}
-export class VarNode {
-    line;
-    name;
-    constructor(line, name) {
-        this.line = line;
-        this.name = name;
-    }
-    to_str(level) {
-        return indent(level) + "Var(" + this.name + ")";
-    }
-    visit(v) {
-        return v.visitVar(this);
     }
 }
 function indent(level) {

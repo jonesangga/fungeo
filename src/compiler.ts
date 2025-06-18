@@ -68,7 +68,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: not,             infix: null,    precedence: Precedence.None},
     [TokenT.BangEq]    : {prefix: null,            infix: neq,     precedence: Precedence.Equality},
     [TokenT.BoolT]     : {prefix: null,            infix: null,    precedence: Precedence.None},
-    [TokenT.FnName]    : {prefix: parse_callable,  infix: null,    precedence: Precedence.None},
+    // [TokenT.FnName]    : {prefix: parse_callable,  infix: null,    precedence: Precedence.None},
     [TokenT.CircleT]   : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Colon]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.ColonEq]   : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -87,6 +87,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Greater]   : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.GreaterEq] : {prefix: null,            infix: boolean_compare, precedence: Precedence.Comparison},
     [TokenT.Hash]      : {prefix: length_list,     infix: null,    precedence: Precedence.None},
+    [TokenT.Ident]     : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.If]        : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Ifx]       : {prefix: parse_ifx,       infix: null,    precedence: Precedence.None},
     [TokenT.LBrace]    : {prefix: null,            infix: null,    precedence: Precedence.None},
@@ -98,7 +99,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Let]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Mut]       : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Minus]     : {prefix: negate,          infix: numeric_binary,  precedence: Precedence.Term},
-    [TokenT.VarName]   : {prefix: parse_non_callable,      infix: null,    precedence: Precedence.None},
+    // [TokenT.VarName]   : {prefix: parse_non_callable,      infix: null,    precedence: Precedence.None},
     [TokenT.Number]    : {prefix: parse_number,    infix: null,    precedence: Precedence.None},
     [TokenT.NumT]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Percent]   : {prefix: struct_init,     infix: null,    precedence: Precedence.None},
@@ -429,7 +430,7 @@ function index_struct(): void {
     let types = Object.values(members);
 
     lastT = neverT;
-    consume(TokenT.VarName, "expect member name");
+    // consume(TokenT.VarName, "expect member name");
     let name = prevTok.lexeme;
     if (!keys.includes(name))
         error(`no member named ${ name } in this struct`);
@@ -439,7 +440,7 @@ function index_struct(): void {
 }
 
 function struct_init(): void {
-    consume(TokenT.FnName, "expect struct name");
+    // consume(TokenT.FnName, "expect struct name");
     let name_ = prevTok.lexeme;
 
     consume(TokenT.LBrace, "expect '{' to after struct name");
@@ -556,7 +557,7 @@ function resolveLocal(compiler: Compiler, name: string): number {
 
 function parse_let(): void {
     $("in parse_let()");
-    consume(TokenT.VarName, "expect a name");
+    // consume(TokenT.VarName, "expect a name");
     let name = prevTok.lexeme;
 
     consume(TokenT.Eq, "expect '=' after name");
@@ -727,7 +728,7 @@ function set_callable(name: string): void {
 }
 
 function method(name: string): void {
-    consume(TokenT.FnName, "expect method name after '.'");
+    // consume(TokenT.FnName, "expect method name after '.'");
     let methodName = prevTok.lexeme;
 
     // if (name in nativeNames) {
@@ -845,7 +846,7 @@ function get_global(table: any, name_: string, native: boolean): void {
 }
 
 function parse_local_global(): void {
-    consume(TokenT.VarName, "expect name after global");
+    // consume(TokenT.VarName, "expect name after global");
     let name = prevTok.lexeme;
     let type = neverT;
 
@@ -1082,8 +1083,8 @@ function parse_type(): Type {
 
 // TODO: Check again what that for loop doing? Is it necessary?
 function parse_params(): Type {
-    if (check(TokenT.VarName) || check(TokenT.FnName))
-        advance();
+    // if (check(TokenT.VarName) || check(TokenT.FnName))
+        // advance();
     // consume(TokenT.VarName, "expect parameter name");
     let name = prevTok.lexeme;
 
@@ -1105,7 +1106,7 @@ function parse_params(): Type {
 }
 
 function struct(): void {
-    consume(TokenT.FnName, "expect struct name in PascalCase");
+    // consume(TokenT.FnName, "expect struct name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1115,7 +1116,7 @@ function struct(): void {
     let memberTypes: Type[] = [];
     do {
         // parse member name
-        consume(TokenT.VarName, "expect parameter name");
+        // consume(TokenT.VarName, "expect parameter name");
         let name = prevTok.lexeme;
         // memberNames.push(prevTok.lexeme);
 
@@ -1135,7 +1136,7 @@ function struct(): void {
 
 function fn(): void {
     $("in fn()");
-    consume(TokenT.FnName, "expect function name in PascalCase");
+    // consume(TokenT.FnName, "expect function name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1174,7 +1175,7 @@ function fn(): void {
 // TODO: Implement recursion. See commented line.
 function proc(): void {
     $("in proc()");
-    consume(TokenT.FnName, "expect procedure name in PascalCase");
+    // consume(TokenT.FnName, "expect procedure name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
 
@@ -1326,8 +1327,8 @@ function parse_loop(): void {
         consume(TokenT.RBracket, "expect ']' in range");
     }
 
-    if (!match(TokenT.VarName))
-        error_at_current("expect name for iterator");
+    // if (!match(TokenT.VarName))
+        // error_at_current("expect name for iterator");
     let name = prevTok.lexeme;
     // No need to check conflicting name because it is the first name in this scope.
     current.locals[start].name = name;  // Patch the _Start name.
@@ -1424,14 +1425,14 @@ function declaration(): void {
 
 // TODO: change error message in else to output types in FG.
 function statement(): void {
-    if (match(TokenT.VarName)) {
-        canAssign = true;
-        parse_non_callable();
-    } else if (match(TokenT.FnName)) {
-        canAssign = true;
-        canParseArgument = true;
-        parse_callable();
-    } else if (match(TokenT.Global)) {
+    // if (match(TokenT.VarName)) {
+        // canAssign = true;
+        // parse_non_callable();
+    // } else if (match(TokenT.FnName)) {
+        // canAssign = true;
+        // canParseArgument = true;
+        // parse_callable();
+    if (match(TokenT.Global)) {
         parse_local_global();
     } else if (match(TokenT.Let)) {
         parse_let();

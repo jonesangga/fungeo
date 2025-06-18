@@ -11,9 +11,8 @@ export interface Visitor<T> {
     visitBoolean  (node: BooleanNode):  T;
     visitCall     (node: CallNode):     T;
     visitExprStmt (node: ExprStmtNode): T;
-    visitFn       (node: FnNode):       T;
     visitFile     (node: FileNode):     T;
-    visitVar      (node: VarNode):      T;
+    visitIdent    (node: IdentNode):    T;
     visitNumber   (node: NumberNode):   T;
     visitString   (node: StringNode):   T;
     visitVarDecl  (node: VarDeclNode):  T;
@@ -27,14 +26,14 @@ export interface AST {
 
 export class AssignNode implements AST {
     constructor(public line:  number,
-                public name:  string,
-                public value: AST) {}
+                public left:  IdentNode,
+                public right: AST) {}
 
     to_str(level: number): string {
         return indent(level) + "Assign(\n"
-            + indent(level + 2) + this.name
+            + indent(level + 2) + this.left.to_str(level + 2)
             + "\n"
-            + this.value.to_str(level + 2)
+            + this.right.to_str(level + 2)
             + "\n"
             + indent(level) + ")";
     }
@@ -145,16 +144,16 @@ export class FileNode implements AST {
     }
 }
 
-export class FnNode implements AST {
+export class IdentNode implements AST {
     constructor(public line: number,
                 public name: string) {}
 
     to_str(level: number): string {
-        return indent(level) + "Fn(" + this.name + ")";
+        return indent(level) + "Ident(" + this.name + ")";
     }
 
     visit<T>(v: Visitor<T>): T {
-        return v.visitFn(this);
+        return v.visitIdent(this);
     }
 }
 
@@ -200,19 +199,6 @@ export class VarDeclNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitVarDecl(this);
-    }
-}
-
-export class VarNode implements AST {
-    constructor(public line: number,
-                public name: string) {}
-
-    to_str(level: number): string {
-        return indent(level) + "Var(" + this.name + ")";
-    }
-
-    visit<T>(v: Visitor<T>): T {
-        return v.visitVar(this);
     }
 }
 

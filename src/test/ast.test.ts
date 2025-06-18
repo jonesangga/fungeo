@@ -3,7 +3,7 @@
 // import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
-import { AST, NumberNode, StringNode, BooleanNode, VarNode, FnNode, VarDeclNode,
+import { AST, NumberNode, StringNode, BooleanNode, VarDeclNode,
          BinaryTable, BinaryNode, FileNode, CallNode } from "../ast.js";
 
 describe("ast to_str() method", () => {

@@ -3,8 +3,8 @@
 // TODO: Test error messages in file.
 
 import { type Token, TokenT, scanner } from "./scanner.js"
-import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, FnNode, NumberNode,
-         StringNode, VarDeclNode, VarNode } from "./ast.js";
+import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode,
+         NumberNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -42,16 +42,16 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Dot]       : {prefix: null,             infix: null,            prec: Prec.Call},
     [TokenT.Else]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.EOF]       : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.Eq]        : {prefix: null,             infix: null,            prec: Prec.None},
+    [TokenT.Eq]        : {prefix: null,             infix: assign_var,      prec: Prec.Assignment},
     [TokenT.EqEq]      : {prefix: null,             infix: null,            prec: Prec.Equality},
     [TokenT.Error]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.False]     : {prefix: parse_boolean,    infix: null,            prec: Prec.None},
     [TokenT.Fn]        : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.FnName]    : {prefix: parse_fnname,     infix: null,            prec: Prec.None},
     [TokenT.Global]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Greater]   : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.GreaterEq] : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.Hash]      : {prefix: null,             infix: null,            prec: Prec.None},
+    [TokenT.Ident]     : {prefix: parse_ident,      infix: null,            prec: Prec.None},
     [TokenT.If]        : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Ifx]       : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.LBrace]    : {prefix: null,             infix: null,            prec: Prec.None},
@@ -83,7 +83,6 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Struct]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Then]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.True]      : {prefix: parse_boolean,    infix: null,            prec: Prec.None},
-    [TokenT.VarName]   : {prefix: parse_varname,    infix: null,            prec: Prec.None},
 }
 
 let invalidTok = { kind: TokenT.EOF, line: -1, lexeme: "" };
@@ -162,18 +161,8 @@ function parse_string(): StringNode {
     return new StringNode(prevTok.line, prevTok.lexeme);
 }
 
-function parse_fnname(): FnNode {
-    return new FnNode(prevTok.line, prevTok.lexeme);
-}
-
 // Currently there is no namespace.
 // TODO: Support parsing the `.` in namespace, like `Seg.FromPoints()`.
-function call_fn(): CallNode {
-    let lhs = parse_fnname();
-    consume(TokenT.LParen, "expect '(' in function call");
-    return call(lhs);
-}
-
 function call(lhs: AST): CallNode {
     let line = prevTok.line;
     let args: AST[] = [];
@@ -186,18 +175,16 @@ function call(lhs: AST): CallNode {
     return new CallNode(line, lhs, args);
 }
 
-function parse_varname(): VarNode {
-    return new VarNode(prevTok.line, prevTok.lexeme);
+function parse_ident(): IdentNode {
+    return new IdentNode(prevTok.line, prevTok.lexeme);
 }
 
-// Support like `a.x = 2`.
-function assign_var(): AssignNode {
-    let name = prevTok.lexeme;
-    consume(TokenT.Eq, "expect '=' in assignmet");
-
+function assign_var(lhs: AST): AssignNode {
+    if (!(lhs instanceof IdentNode))
+        error("invalid assignment target");
     let line = prevTok.line;
-    let rhs = expression();
-    return new AssignNode(line, name, rhs);
+    let rhs = parse_prec(Prec.Assignment + 1);
+    return new AssignNode(line, lhs, rhs);
 }
 
 //--------------------------------------------------------------------
@@ -227,22 +214,16 @@ function declaration(): AST {
 // Declaration must be followed by initialization.
 function var_decl(): VarDeclNode {
     let line = prevTok.line;
-    consume(TokenT.VarName, "expect variable name");
+    consume(TokenT.Ident, "expect variable name");
     let name = prevTok.lexeme;
     consume(TokenT.Eq, "expect '=' in variable declaration");
     let init = expression();
     return new VarDeclNode(line, name, init);
 }
 
-// TODO: Support function assignment in case TokenT.FnName.
 function stmt(): AST {
-    if (match(TokenT.VarName)) {
-        return assign_var();
-    }
-    else if (match(TokenT.FnName)) {
-        // Since function declaration need keyword `fn` and expression statement is not supported,
-        // if we found function name at the beginning of statement then it must be a function call.
-        return call_fn();
+    if (check(TokenT.Ident)) {
+        return expression();
     }
     else if (match(TokenT.ColonMin)) {
         return expr_stmt();

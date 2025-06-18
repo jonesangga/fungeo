@@ -41,7 +41,6 @@ const rules = {
     [1200]: { prefix: not, infix: null, precedence: 100 },
     [1210]: { prefix: null, infix: neq, precedence: 230 },
     [2220]: { prefix: null, infix: null, precedence: 100 },
-    [1720]: { prefix: parse_callable, infix: null, precedence: 100 },
     [2230]: { prefix: null, infix: null, precedence: 100 },
     [1300]: { prefix: null, infix: null, precedence: 100 },
     [1400]: { prefix: null, infix: null, precedence: 100 },
@@ -60,6 +59,7 @@ const rules = {
     [1520]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [1525]: { prefix: null, infix: boolean_compare, precedence: 250 },
     [250]: { prefix: length_list, infix: null, precedence: 100 },
+    [1730]: { prefix: null, infix: null, precedence: 100 },
     [2400]: { prefix: null, infix: null, precedence: 100 },
     [2405]: { prefix: parse_ifx, infix: null, precedence: 100 },
     [300]: { prefix: null, infix: null, precedence: 100 },
@@ -71,7 +71,6 @@ const rules = {
     [2460]: { prefix: null, infix: null, precedence: 100 },
     [2500]: { prefix: null, infix: null, precedence: 100 },
     [600]: { prefix: negate, infix: numeric_binary, precedence: 300 },
-    [3100]: { prefix: parse_non_callable, infix: null, precedence: 100 },
     [1800]: { prefix: parse_number, infix: null, precedence: 100 },
     [2600]: { prefix: null, infix: null, precedence: 100 },
     [670]: { prefix: struct_init, infix: null, precedence: 100 },
@@ -319,7 +318,6 @@ function index_struct() {
     let keys = Object.keys(members);
     let types = Object.values(members);
     lastT = neverT;
-    consume(3100, "expect member name");
     let name = prevTok.lexeme;
     if (!keys.includes(name))
         error(`no member named ${name} in this struct`);
@@ -328,7 +326,6 @@ function index_struct() {
     lastT = members[name];
 }
 function struct_init() {
-    consume(1720, "expect struct name");
     let name_ = prevTok.lexeme;
     consume(300, "expect '{' to after struct name");
     if (!Object.hasOwn(names, name_))
@@ -415,7 +412,6 @@ function resolveLocal(compiler, name) {
 }
 function parse_let() {
     $("in parse_let()");
-    consume(3100, "expect a name");
     let name = prevTok.lexeme;
     consume(1500, "expect '=' after name");
     if (current.scopeDepth > 0) {
@@ -550,7 +546,6 @@ function set_callable(name) {
     lastT = nothingT;
 }
 function method(name) {
-    consume(1720, "expect method name after '.'");
     let methodName = prevTok.lexeme;
 }
 function get_callable(name) {
@@ -607,7 +602,6 @@ function get_callable_callable(name) {
 function get_global(table, name_, native) {
 }
 function parse_local_global() {
-    consume(3100, "expect name after global");
     let name = prevTok.lexeme;
     let type = neverT;
     if (Object.hasOwn(names, name)) {
@@ -810,8 +804,6 @@ function parse_type() {
     return type;
 }
 function parse_params() {
-    if (check(3100) || check(1720))
-        advance();
     let name = prevTok.lexeme;
     for (let i = current.locals.length - 1; i >= 0; i--) {
         let local = current.locals[i];
@@ -829,7 +821,6 @@ function parse_params() {
     return type;
 }
 function struct() {
-    consume(1720, "expect struct name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
     consume(300, "expect '{' to after struct name");
@@ -837,7 +828,6 @@ function struct() {
     let memberNames = [];
     let memberTypes = [];
     do {
-        consume(3100, "expect parameter name");
         let name = prevTok.lexeme;
         consume(1300, "expect `:` after parameter name");
         let type = parse_type();
@@ -851,7 +841,6 @@ function struct() {
 }
 function fn() {
     $("in fn()");
-    consume(1720, "expect function name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
     begin_compiler(0, name);
@@ -879,7 +868,6 @@ function fn() {
 }
 function proc() {
     $("in proc()");
-    consume(1720, "expect procedure name in PascalCase");
     let name = prevTok.lexeme;
     let index = makeConstant(new FGString(name));
     begin_compiler(0, name);
@@ -992,8 +980,6 @@ function parse_loop() {
         openRight = false;
         consume(700, "expect ']' in range");
     }
-    if (!match(3100))
-        error_at_current("expect name for iterator");
     let name = prevTok.lexeme;
     current.locals[start].name = name;
     emitByte(805);
@@ -1067,16 +1053,7 @@ function declaration() {
     }
 }
 function statement() {
-    if (match(3100)) {
-        canAssign = true;
-        parse_non_callable();
-    }
-    else if (match(1720)) {
-        canAssign = true;
-        canParseArgument = true;
-        parse_callable();
-    }
-    else if (match(2450)) {
+    if (match(2450)) {
         parse_local_global();
     }
     else if (match(2460)) {
