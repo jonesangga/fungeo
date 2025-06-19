@@ -1,4 +1,4 @@
-import { FGStruct, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
+import { FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { nativeNames, richgeoT } from "./vmfunction.js";
 let $ = console.log;
 export let stack = [];
@@ -91,22 +91,6 @@ export function run(intercept = false) {
                 let b = pop();
                 let a = pop();
                 push(a.add(b));
-                break;
-            }
-            case 1450: {
-                let arity = read_byte();
-                let got = [];
-                for (let i = 0; i < arity; i++)
-                    got[arity - i - 1] = pop();
-                let struct = pop();
-                let members = struct.value.members;
-                let keys = Object.keys(members);
-                let ms = {};
-                for (let i = 0; i < keys.length; i++) {
-                    ms[keys[i]] = got[i];
-                }
-                let newStruct = new FGStruct(ms);
-                push(newStruct);
                 break;
             }
             case 200: {

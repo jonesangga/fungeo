@@ -68,28 +68,6 @@ export class ListT {
             && this.elType.equal(other.elType);
     }
 }
-export class StructT {
-    members;
-    constructor(members) {
-        this.members = members;
-    }
-    to_str() {
-        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
-    }
-    equal(other) {
-        if (!(other instanceof StructT))
-            return false;
-        let membersA = Object.keys(this.members);
-        let membersB = Object.keys(other.members);
-        if (membersA.length !== membersB.length)
-            return false;
-        for (let i = 0; i < membersA.length; i++) {
-            if (!this.members[membersA[i]].equal(other.members[membersB[i]]))
-                return false;
-        }
-        return true;
-    }
-}
 export class TupleT {
     values;
     constructor(values) {
@@ -185,11 +163,28 @@ export class StringT {
     }
 }
 export class CircleT {
+    field = {
+        x: numberT,
+        y: numberT,
+        r: numberT,
+    };
     to_str() {
         return "Circle";
     }
     equal(other) {
         return other instanceof CircleT;
+    }
+}
+export class RichCircleT {
+    field = {
+        p: richPointT,
+        q: richPointT,
+    };
+    to_str() {
+        return "RichCircle";
+    }
+    equal(other) {
+        return other instanceof RichCircleT;
     }
 }
 export class EllipseT {
@@ -298,6 +293,7 @@ export const ellipseT = new EllipseT();
 export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const richPointT = new RichPointT();
+export const richCircleT = new RichCircleT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();

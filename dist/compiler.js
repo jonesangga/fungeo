@@ -1,10 +1,8 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
-import { rectStruct } from "./geo/rect.js";
-import { circleStruct } from "./geo/circle.js";
 import { FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
 import { names } from "./vm.js";
-import { FGType, StructT, NumberT, StringT, ListT, neverT, numberT, stringT, booleanT, callUserT, CallUserT, nothingT } from "./literal/type.js";
+import { FGType, NumberT, StringT, ListT, neverT, numberT, stringT, booleanT, callUserT, CallUserT, nothingT } from "./literal/type.js";
 let $ = console.log;
 $ = () => { };
 let lastT = neverT;
@@ -311,46 +309,8 @@ function parse_string() {
     lastT = stringT;
 }
 function index_struct() {
-    if (!(lastT instanceof StructT))
-        error("can only index a struct");
-    let members = lastT.members;
-    let keys = Object.keys(members);
-    let types = Object.values(members);
-    lastT = neverT;
-    let name = prevTok.lexeme;
-    if (!keys.includes(name))
-        error(`no member named ${name} in this struct`);
-    emitConstant(new FGString(name));
-    emitByte(850);
-    lastT = members[name];
 }
 function struct_init() {
-    let name_ = prevTok.lexeme;
-    consume(300, "expect '{' to after struct name");
-    if (!Object.hasOwn(names, name_))
-        error(`no struct ${name_} in names`);
-    let name = names[name_];
-    if (!(name.value instanceof FGType))
-        error(`${name_} is not an FGType`);
-    emitConstant(name.value);
-    let struct = name.value.value;
-    if (!(struct instanceof StructT))
-        error(`${name_} is not a struct`);
-    let members = struct.members;
-    let types = Object.values(members);
-    let i = 0;
-    for (; i < types.length; i++) {
-        lastT = nothingT;
-        canParseArgument = true;
-        expression();
-        if (!types[i].equal(lastT))
-            error(`in ${name_}: expect arg ${i} of type ${types[i].to_str()}, got ${lastT.to_str()}`);
-        if (i < types.length - 1)
-            consume(100, "expect ',' to after struct members");
-    }
-    consume(695, "expect '}' to after struct members");
-    emitBytes(1450, types.length);
-    lastT = struct;
 }
 function parse_list() {
     let length = 0;
@@ -763,15 +723,6 @@ function parse_type() {
     }
     advance();
     let name = prevTok.lexeme;
-    if (Object.hasOwn(names, name)) {
-        let valueName = names[name];
-        if (!(valueName.value instanceof FGType))
-            error(`${name} is not an FGType`);
-        let struct = valueName.value.value;
-        if (!(struct instanceof StructT))
-            error(`${name} is not a struct`);
-        return struct;
-    }
     let type;
     switch (prevTok.kind) {
         case 2220:
@@ -782,12 +733,6 @@ function parse_type() {
             break;
         case 2900:
             type = stringT;
-            break;
-        case 2230:
-            type = circleStruct.value;
-            break;
-        case 2780:
-            type = rectStruct.value;
             break;
         default:
             error("expect parameter type");
@@ -830,9 +775,6 @@ function struct() {
         s[name] = type;
     } while (match(100));
     consume(695, "expect '}' to after struct members");
-    let struct = new FGType(new StructT(s));
-    emitConstant(struct);
-    emitConstant(struct);
     emitBytes(1400, index);
 }
 function fn() {

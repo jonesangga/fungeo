@@ -5,11 +5,11 @@
 
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
-import { rectStruct } from "./geo/rect.js"
-import { circleStruct } from "./geo/circle.js"
+// import { rectStruct } from "./geo/rect.js"
+// import { circleStruct } from "./geo/circle.js"
 import { FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
 import { names } from "./vm.js"
-import { FGType, type Type, StructT, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT,
+import { FGType, type Type, NumberT, StringT, ListT, neverT, circleT, numberT, stringT, booleanT, callUserT,
          FunctionT, CallUserT, nothingT } from "./literal/type.js"
 
 // For quick debugging.
@@ -421,62 +421,62 @@ function parse_string(): void {
 }
 
 function index_struct(): void {
-    if (!(lastT instanceof StructT))
-        error("can only index a struct");
+    // if (!(lastT instanceof StructT))
+        // error("can only index a struct");
 
-    let members = lastT.members;
-    let keys = Object.keys(members);
-    let types = Object.values(members);
+    // let members = lastT.members;
+    // let keys = Object.keys(members);
+    // let types = Object.values(members);
 
-    lastT = neverT;
-    // consume(TokenT.VarName, "expect member name");
-    let name = prevTok.lexeme;
-    if (!keys.includes(name))
-        error(`no member named ${ name } in this struct`);
-    emitConstant(new FGString(name));
-    emitByte(Op.Member);
-    lastT = members[name];
+    // lastT = neverT;
+    // // consume(TokenT.VarName, "expect member name");
+    // let name = prevTok.lexeme;
+    // if (!keys.includes(name))
+        // error(`no member named ${ name } in this struct`);
+    // emitConstant(new FGString(name));
+    // emitByte(Op.Member);
+    // lastT = members[name];
 }
 
 function struct_init(): void {
     // consume(TokenT.FnName, "expect struct name");
-    let name_ = prevTok.lexeme;
+    // let name_ = prevTok.lexeme;
 
-    consume(TokenT.LBrace, "expect '{' to after struct name");
+    // consume(TokenT.LBrace, "expect '{' to after struct name");
 
-    if (!Object.hasOwn(names, name_))
-        error(`no struct ${ name_ } in names`);
+    // if (!Object.hasOwn(names, name_))
+        // error(`no struct ${ name_ } in names`);
 
-    let name = names[name_];
+    // let name = names[name_];
 
-    if (!(name.value instanceof FGType))
-        error(`${ name_} is not an FGType`);
-    emitConstant(name.value);
+    // if (!(name.value instanceof FGType))
+        // error(`${ name_} is not an FGType`);
+    // emitConstant(name.value);
 
-    let struct = name.value.value;
+    // let struct = name.value.value;
 
-    if (!(struct instanceof StructT))
-        error(`${ name_} is not a struct`);
-    let members = struct.members;
-    let types = Object.values(members);
+    // // if (!(struct instanceof StructT))
+        // // error(`${ name_} is not a struct`);
+    // let members = struct.members;
+    // let types = Object.values(members);
 
-    let i = 0;
-    for ( ; i < types.length; i++) {
-        lastT = nothingT;
-        canParseArgument = true;
-        expression();
+    // let i = 0;
+    // for ( ; i < types.length; i++) {
+        // lastT = nothingT;
+        // canParseArgument = true;
+        // expression();
 
-        if (!types[i].equal( lastT ))
-            error(`in ${name_}: expect arg ${i} of type ${ types[i].to_str() }, got ${ lastT.to_str() }`);
+        // if (!types[i].equal( lastT ))
+            // error(`in ${name_}: expect arg ${i} of type ${ types[i].to_str() }, got ${ lastT.to_str() }`);
 
-        if (i < types.length - 1)
-            consume(TokenT.Comma, "expect ',' to after struct members");
-    }
+        // if (i < types.length - 1)
+            // consume(TokenT.Comma, "expect ',' to after struct members");
+    // }
 
-    consume(TokenT.RBrace, "expect '}' to after struct members");
+    // consume(TokenT.RBrace, "expect '}' to after struct members");
 
-    emitBytes(Op.Struct, types.length);
-    lastT = struct;
+    // emitBytes(Op.Struct, types.length);
+    // lastT = struct;
 }
 
 function parse_list(): void {
@@ -1038,15 +1038,15 @@ function parse_type(): Type {
     let name = prevTok.lexeme;
 
     // Check if type is a struct
-    if (Object.hasOwn(names, name)) {
-        let valueName = names[name];
-        if (!(valueName.value instanceof FGType))
-            error(`${ name} is not an FGType`);
-        let struct = valueName.value.value;
-        if (!(struct instanceof StructT))
-            error(`${ name } is not a struct`);
-        return struct;
-    }
+    // if (Object.hasOwn(names, name)) {
+        // let valueName = names[name];
+        // if (!(valueName.value instanceof FGType))
+            // error(`${ name} is not an FGType`);
+        // let struct = valueName.value.value;
+        // if (!(struct instanceof StructT))
+            // error(`${ name } is not a struct`);
+        // return struct;
+    // }
 
     let type: Type;
     switch (prevTok.kind) {
@@ -1059,12 +1059,12 @@ function parse_type(): Type {
         case TokenT.StrT:
             type = stringT;
             break;
-        case TokenT.CircleT:
-            type = circleStruct.value;
-            break;
-        case TokenT.RectT:
-            type = rectStruct.value;
-            break;
+        // case TokenT.CircleT:
+            // type = circleStruct.value;
+            // break;
+        // case TokenT.RectT:
+            // type = rectStruct.value;
+            // break;
         default:
             error("expect parameter type");
     }
@@ -1124,9 +1124,9 @@ function struct(): void {
     } while (match(TokenT.Comma));
 
     consume(TokenT.RBrace, "expect '}' to after struct members");
-    let struct = new FGType(new StructT(s));
-    emitConstant(struct);
-    emitConstant(struct);
+    // let struct = new FGType(new StructT(s));
+    // emitConstant(struct);
+    // emitConstant(struct);
     emitBytes(Op.Set, index);
 }
 

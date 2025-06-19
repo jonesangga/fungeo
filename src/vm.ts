@@ -1,12 +1,10 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { type Value, type Comparable, FGStruct, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js"
+import { type Value, type Comparable, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js"
 import { Names, nativeNames, richgeoT } from "./vmfunction.js"
-import { type Type, FGType, StructT } from "./literal/type.js"
-import Rect from "./geo/rect.js"
+import { type Type, FGType } from "./literal/type.js"
 import { Point } from "./geo/point.js"
-import Circle from "./geo/circle.js"
 
 // For quick debugging.
 let $ = console.log;
@@ -138,23 +136,23 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.Struct: {
-                let arity = read_byte();
-                let got: Value[] = [];
-                for (let i = 0; i < arity; i++)
-                    got[arity-i-1] = pop();
+            // case Op.Struct: {
+                // let arity = read_byte();
+                // let got: Value[] = [];
+                // for (let i = 0; i < arity; i++)
+                    // got[arity-i-1] = pop();
 
-                let struct = pop() as FGType;
-                let members = (struct.value as StructT).members;
-                let keys = Object.keys(members);
-                let ms: {[key: string]: Value} = {};
-                for (let i = 0; i < keys.length; i++) {
-                    ms[keys[i]] = got[i];
-                }
-                let newStruct = new FGStruct(ms);
-                push(newStruct);
-                break;
-            }
+                // let struct = pop() as FGType;
+                // let members = (struct.value as StructT).members;
+                // let keys = Object.keys(members);
+                // let ms: {[key: string]: Value} = {};
+                // for (let i = 0; i < keys.length; i++) {
+                    // ms[keys[i]] = got[i];
+                // }
+                // let newStruct = new FGStruct(ms);
+                // push(newStruct);
+                // break;
+            // }
 
             case Op.Call: {
                 let arity = read_byte();
@@ -326,6 +324,7 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
+            // TODO: as Point is a hack because not all GeoObj have 'field' property.
             case Op.GetProp: {
                 let obj = pop() as Point;
                 let prop = read_string();

@@ -90,28 +90,28 @@ export class ListT implements Type {
     }
 }
 
-export class StructT implements Type {
-    constructor(
-        // public memberT: Type[]
-        public members: { [key: string]: Type },
-    ) {}
-    to_str(): string {
-        return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
-    }
-    equal(other: Type): boolean {
-        if (!(other instanceof StructT))
-            return false;
-        let membersA = Object.keys(this.members);
-        let membersB = Object.keys(other.members);
-        if (membersA.length !== membersB.length)
-            return false;
-        for (let i = 0; i < membersA.length; i++) {
-            if (!this.members[membersA[i]].equal(other.members[membersB[i]]))
-                return false;
-        }
-        return true;
-    }
-}
+// export class StructT implements Type {
+    // constructor(
+        // // public memberT: Type[]
+        // public members: { [key: string]: Type },
+    // ) {}
+    // to_str(): string {
+        // return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
+    // }
+    // equal(other: Type): boolean {
+        // if (!(other instanceof StructT))
+            // return false;
+        // let membersA = Object.keys(this.members);
+        // let membersB = Object.keys(other.members);
+        // if (membersA.length !== membersB.length)
+            // return false;
+        // for (let i = 0; i < membersA.length; i++) {
+            // if (!this.members[membersA[i]].equal(other.members[membersB[i]]))
+                // return false;
+        // }
+        // return true;
+    // }
+// }
 
 // TODO: update to_str()
 export class TupleT implements Type {
@@ -223,11 +223,29 @@ export class StringT implements Type {
 }
 
 export class CircleT implements Type {
+    field: Record<string, Type> = {
+        x: numberT,
+        y: numberT,
+        r: numberT,
+    };
     to_str(): string {
         return "Circle";
     }
     equal(other: Type): boolean {
         return other instanceof CircleT;
+    }
+}
+
+export class RichCircleT implements Type {
+    field: Record<string, Type> = {
+        p: richPointT,
+        q: richPointT,
+    };
+    to_str(): string {
+        return "RichCircle";
+    }
+    equal(other: Type): boolean {
+        return other instanceof RichCircleT;
     }
 }
 
@@ -346,10 +364,11 @@ export const ellipseT = new EllipseT();
 export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const richPointT = new RichPointT();
+export const richCircleT = new RichCircleT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
-export type GeoT = PointT | RichPointT | SegmentT | RichSegmentT;
+export type GeoT = CircleT | RichCircleT| PointT | RichPointT | SegmentT | RichSegmentT;

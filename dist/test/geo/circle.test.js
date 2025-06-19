@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
 import { color } from "../../data/constant.js";
-import Circle from "../../geo/circle.js";
+import { Circle } from "../../geo/circle.js";
 describe("Circle", () => {
     it("create Circle with default color", () => {
         let c = new Circle(10, 20, 30);

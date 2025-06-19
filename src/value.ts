@@ -4,9 +4,9 @@
 
 import { Chunk } from "./chunk.js"
 import { FGType, Type, FunctionT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
-import Circle from "./geo/circle.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
+import { Circle, RichCircle } from "./geo/circle.js"
 import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
@@ -30,6 +30,7 @@ export const enum Kind {
     Picture    = 840,
     Point      = 850,
     Rect       = 900,
+    RichCircle = 905,
     RichPoint  = 910,
     RichSegment = 920,
     Segment    = 1000,
@@ -56,6 +57,7 @@ export const KindName: {
     [Kind.Point]: "Point",
     [Kind.Rect]: "Rect",
     [Kind.Repl]: "Repl",
+    [Kind.RichCircle]: "RichCircle",
     [Kind.RichPoint]: "RichPoint",
     [Kind.RichSegment]: "RichSegment",
     [Kind.Segment]: "Segment",
@@ -296,7 +298,7 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Ellipse | Picture | Point | Rect | RichPoint | RichSegment | Segment;
+export type GeoObj = Circle | Ellipse | Picture | Point | Rect | RichCircle | RichPoint | RichSegment | Segment;
 export type RichGeoObj = RichPoint;
 export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;

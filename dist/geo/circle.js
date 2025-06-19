@@ -1,8 +1,8 @@
 import { c } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { FGNumber, FGComplex } from "../value.js";
-import { FGType, StructT, circleT, numberT } from "../literal/type.js";
-export default class Circle {
+import { FGType, circleT } from "../literal/type.js";
+export class Circle {
     x;
     y;
     r;
@@ -10,12 +10,16 @@ export default class Circle {
     fillStyle;
     kind = 700;
     bend;
+    field = {};
     constructor(x, y, r, strokeStyle = color.black, fillStyle = color.nocolor) {
         this.x = x;
         this.y = y;
         this.r = r;
         this.strokeStyle = strokeStyle;
         this.fillStyle = fillStyle;
+        this.field["x"] = new FGNumber(this.x);
+        this.field["y"] = new FGNumber(this.y);
+        this.field["r"] = new FGNumber(this.r);
     }
     static with_bend(x, y, bend) {
         let c = new Circle(x, y, Math.abs(1 / bend));
@@ -27,15 +31,6 @@ export default class Circle {
     }
     typeof() {
         return new FGType(circleT);
-    }
-    member(key) {
-        switch (key) {
-            case "x": return new FGNumber(this.x);
-            case "y": return new FGNumber(this.y);
-            case "r": return new FGNumber(this.r);
-            default:
-                unreachable(key);
-        }
     }
     dist(other) {
         return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);
@@ -97,12 +92,53 @@ function isTangent(c1, c2) {
 function is_tangent(c1, c2, c3, ca) {
     return isTangent(ca, c1) && isTangent(ca, c2) && isTangent(ca, c3);
 }
-function unreachable(key) {
-    throw new Error();
+export class RichCircle {
+    p;
+    q;
+    label;
+    strokeStyle;
+    fillStyle;
+    kind = 905;
+    r;
+    field = {};
+    constructor(p, q, label = "", strokeStyle = color.black, fillStyle = color.nocolor) {
+        this.p = p;
+        this.q = q;
+        this.label = label;
+        this.strokeStyle = strokeStyle;
+        this.fillStyle = fillStyle;
+        this.r = Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
+        this.field["p"] = this.p;
+        this.field["q"] = this.q;
+    }
+    to_str() {
+        return `C ${this.p.to_str()} ${this.q.to_str()}`;
+    }
+    typeof() {
+        return new FGType(circleT);
+    }
+    draw() {
+        c.beginPath();
+        c.arc(this.p.x, this.p.y, this.r, 0, TAU);
+        if (this.fillStyle !== "") {
+            c.fillStyle = this.fillStyle;
+            c.fill();
+        }
+        if (this.strokeStyle !== "") {
+            c.strokeStyle = this.strokeStyle;
+            c.stroke();
+        }
+        this.p.draw();
+        this.q.draw();
+    }
+    draw_label() {
+        this.p.draw_label();
+        this.q.draw_label();
+        c.fillStyle = this.strokeStyle;
+        c.textBaseline = "top";
+        c.font = "16px monospace";
+        let x = this.p.x + this.r * Math.cos(Math.PI * 5 / 4);
+        let y = this.p.y + this.r * Math.sin(Math.PI * 5 / 4);
+        c.fillText(this.label, x + 0, y + 0);
+    }
 }
-let s = {
-    x: numberT,
-    y: numberT,
-    r: numberT,
-};
-export const circleStruct = new FGType(new StructT(s));
