@@ -6,12 +6,13 @@
 
 import { c } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind } from "../value.js"
+import { Value, Kind, FGNumber } from "../value.js"
 import { Point, RichPoint } from "./point.js"
 import { FGType, segmentT } from "../literal/type.js"
 
 export class Segment {
     kind: Kind.Segment = Kind.Segment;
+    field: Record<string, Value> = {};
 
     constructor( 
         public x1: number,
@@ -19,7 +20,12 @@ export class Segment {
         public x2: number,
         public y2: number,
         public strokeStyle: string = color.black
-    ) {}
+    ) {
+        this.field["x1"] = new FGNumber(this.x1);
+        this.field["y1"] = new FGNumber(this.y1);
+        this.field["x2"] = new FGNumber(this.x2);
+        this.field["y2"] = new FGNumber(this.y2);
+    }
 
     to_str(): string {
         return `Seg ${this.x1} ${this.y1} ${this.x2} ${this.y2}`;
@@ -44,13 +50,17 @@ export class Segment {
 
 export class RichSegment {
     kind: Kind.RichSegment = Kind.RichSegment;
+    field: Record<string, Value> = {};
 
     constructor(
         public p: RichPoint,
         public q: RichPoint,
         public label: string = "",
         public strokeStyle: string = color.black
-    ) {}
+    ) {
+        this.field["p"] = this.p;
+        this.field["q"] = this.q;
+    }
 
     to_str(): string {
         return `rseg ${this.p.x} ${this.p.y} ${this.q.x} ${this.q.y}`;

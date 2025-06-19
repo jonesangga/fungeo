@@ -241,6 +241,12 @@ export class RectT {
     }
 }
 export class SegmentT {
+    field = {
+        x1: numberT,
+        y1: numberT,
+        x2: numberT,
+        y2: numberT,
+    };
     to_str() {
         return "Segment";
     }
@@ -249,6 +255,10 @@ export class SegmentT {
     }
 }
 export class RichSegmentT {
+    field = {
+        p: richPointT,
+        q: richPointT,
+    };
     to_str() {
         return "RichSegment";
     }

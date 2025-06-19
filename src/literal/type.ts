@@ -285,6 +285,12 @@ export class RectT implements Type {
 }
 
 export class SegmentT implements Type {
+    field: Record<string, Type> = {
+        x1: numberT,
+        y1: numberT,
+        x2: numberT,
+        y2: numberT,
+    };
     to_str(): string {
         return "Segment";
     }
@@ -294,6 +300,10 @@ export class SegmentT implements Type {
 }
 
 export class RichSegmentT implements Type {
+    field: Record<string, Type> = {
+        p: richPointT,
+        q: richPointT,
+    };
     to_str(): string {
         return "RichSegment";
     }
@@ -342,4 +352,4 @@ export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
-export type GeoT = PointT | RichPointT;
+export type GeoT = PointT | RichPointT | SegmentT | RichSegmentT;

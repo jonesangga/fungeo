@@ -1,5 +1,6 @@
 import { c } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
+import { FGNumber } from "../value.js";
 import { Point } from "./point.js";
 import { FGType, segmentT } from "../literal/type.js";
 export class Segment {
@@ -9,12 +10,17 @@ export class Segment {
     y2;
     strokeStyle;
     kind = 1000;
+    field = {};
     constructor(x1, y1, x2, y2, strokeStyle = color.black) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
         this.strokeStyle = strokeStyle;
+        this.field["x1"] = new FGNumber(this.x1);
+        this.field["y1"] = new FGNumber(this.y1);
+        this.field["x2"] = new FGNumber(this.x2);
+        this.field["y2"] = new FGNumber(this.y2);
     }
     to_str() {
         return `Seg ${this.x1} ${this.y1} ${this.x2} ${this.y2}`;
@@ -39,11 +45,14 @@ export class RichSegment {
     label;
     strokeStyle;
     kind = 920;
+    field = {};
     constructor(p, q, label = "", strokeStyle = color.black) {
         this.p = p;
         this.q = q;
         this.label = label;
         this.strokeStyle = strokeStyle;
+        this.field["p"] = this.p;
+        this.field["q"] = this.q;
     }
     to_str() {
         return `rseg ${this.p.x} ${this.p.y} ${this.q.x} ${this.q.y}`;
