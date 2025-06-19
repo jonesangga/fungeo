@@ -13,6 +13,7 @@ export var Op;
     Op[Op["GEq"] = 390] = "GEq";
     Op[Op["GetLoc"] = 395] = "GetLoc";
     Op[Op["GetGlob"] = 500] = "GetGlob";
+    Op[Op["GetProp"] = 520] = "GetProp";
     Op[Op["GT"] = 530] = "GT";
     Op[Op["Inc"] = 595] = "Inc";
     Op[Op["Index"] = 600] = "Index";
@@ -56,6 +57,7 @@ export const OpName = {
     [390]: "GEq",
     [395]: "GetLoc",
     [500]: "GetGlob",
+    [520]: "GetProp",
     [530]: "GT",
     [595]: "Inc",
     [600]: "Index",
@@ -149,6 +151,7 @@ export class Chunk {
                 return [result, offset + 2];
             }
             case 500:
+            case 520:
             case 800: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;

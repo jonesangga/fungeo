@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode, NumberNode, StringNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, NumberNode, StringNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -27,7 +27,7 @@ const rules = {
     [1410]: { prefix: null, infix: null, prec: 100 },
     [100]: { prefix: null, infix: null, prec: 100 },
     [1450]: { prefix: null, infix: null, prec: 300 },
-    [210]: { prefix: null, infix: null, prec: 600 },
+    [210]: { prefix: null, infix: dot, prec: 600 },
     [2300]: { prefix: null, infix: null, prec: 100 },
     [2100]: { prefix: null, infix: null, prec: 100 },
     [1500]: { prefix: null, infix: assign_var, prec: 200 },
@@ -144,6 +144,12 @@ function assign_var(lhs) {
     let line = prevTok.line;
     let rhs = parse_prec(200 + 1);
     return new AssignNode(line, lhs, rhs);
+}
+function dot(lhs) {
+    let line = prevTok.line;
+    consume(1730, "expect property name after '.'");
+    let rhs = prevTok.lexeme;
+    return new GetPropNode(line, lhs, rhs);
 }
 function numeric_binary(lhs) {
     let operator = prevTok.kind;

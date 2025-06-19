@@ -250,6 +250,10 @@ export class PictureT implements Type {
 }
 
 export class PointT implements Type {
+    field: Record<string, Type> = {
+        x: numberT,
+        y: numberT,
+    };
     to_str(): string {
         return "Point";
     }

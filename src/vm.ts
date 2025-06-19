@@ -326,6 +326,14 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
+            case Op.GetProp: {
+                let obj = pop() as Point;
+                let prop = read_string();
+                let value = obj.field[prop];
+                push(value);
+                break;
+            }
+
             case Op.Neg: {
                 let a = pop() as FGNumber;
                 a.value *= -1;
@@ -367,20 +375,6 @@ export function run(intercept: boolean = false): boolean {
             case Op.Len: {
                 let list = pop() as FGList;
                 push(new FGNumber(list.value.length));
-                break;
-            }
-
-            case Op.Member: {
-                let id = (pop() as FGString).value;
-                let v = pop();
-
-                if (v instanceof FGStruct) {
-                    let value = v.members[id];
-                    push(value);
-                } else if (v instanceof Rect || v instanceof Point || v instanceof Circle) {
-                    let value = v.member(id as any);
-                    push(value);
-                }
                 break;
             }
 

@@ -1,6 +1,6 @@
 import { BinaryTable } from "./ast.js";
 import { names } from "./vm.js";
-import { FunctionT, numberT, stringT, booleanT, nothingT } from "./literal/type.js";
+import { FunctionT, numberT, PointT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
     let result = "type: " + line + ": " + message;
     throw new Error(result);
@@ -55,6 +55,14 @@ class TypeChecker {
     }
     visitExprStmt(node) {
         return node.expr.visit(this);
+    }
+    visitGetProp(node) {
+        let objType = node.obj.visit(this);
+        if (!(objType instanceof PointT))
+            error(node.line, "no obj");
+        if (!Object.hasOwn(objType.field, node.prop))
+            error(node.line, `no prop ${node.prop} in obj`);
+        return objType.field[node.prop];
     }
     visitFile(node) {
         node.stmts.forEach(stmt => stmt.visit(this));

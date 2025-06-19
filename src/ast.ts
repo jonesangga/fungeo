@@ -12,6 +12,7 @@ export interface Visitor<T> {
     visitCall     (node: CallNode):     T;
     visitExprStmt (node: ExprStmtNode): T;
     visitFile     (node: FileNode):     T;
+    visitGetProp  (node: GetPropNode):  T;
     visitIdent    (node: IdentNode):    T;
     visitNumber   (node: NumberNode):   T;
     visitString   (node: StringNode):   T;
@@ -40,6 +41,25 @@ export class AssignNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitAssign(this);
+    }
+}
+
+export class GetPropNode implements AST {
+    constructor(public line: number,
+                public obj:  AST,
+                public prop: string) {}
+
+    to_str(level: number): string {
+        return indent(level) + "GetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitGetProp(this);
     }
 }
 

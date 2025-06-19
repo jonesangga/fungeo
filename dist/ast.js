@@ -20,6 +20,27 @@ export class AssignNode {
         return v.visitAssign(this);
     }
 }
+export class GetPropNode {
+    line;
+    obj;
+    prop;
+    constructor(line, obj, prop) {
+        this.line = line;
+        this.obj = obj;
+        this.prop = prop;
+    }
+    to_str(level) {
+        return indent(level) + "GetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitGetProp(this);
+    }
+}
 export var BinaryOp;
 (function (BinaryOp) {
     BinaryOp[BinaryOp["Add"] = 0] = "Add";

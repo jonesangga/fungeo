@@ -16,6 +16,7 @@ export const enum Op {
     GEq     = 390,
     GetLoc  = 395,
     GetGlob = 500,      // Get names.
+    GetProp = 520,
     GT      = 530,
     Inc     = 595,
     Index   = 600,
@@ -61,6 +62,7 @@ export const OpName: {
     [Op.GEq]: "GEq",
     [Op.GetLoc]: "GetLoc",
     [Op.GetGlob]: "GetGlob",
+    [Op.GetProp]: "GetProp",
     [Op.GT]: "GT",
     [Op.Inc]: "Inc",
     [Op.Index]: "Index",
@@ -162,6 +164,7 @@ export class Chunk {
             }
 
             case Op.GetGlob:
+            case Op.GetProp:
             case Op.Load: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;

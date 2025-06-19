@@ -8,20 +8,20 @@ import Picture from "./geo/picture.js"
 import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
-import { pointStruct, richPointStruct } from "./geo/point.js"
+import { richPointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
 import { Segment, RichSegment } from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { type Type, ListT, UnionT, anyT, pictureT, FunctionT,
-         ellipseT, segmentT, richSegmentT, nothingT, stringT, numberT,
+         ellipseT, segmentT, richSegmentT, nothingT, pointT, stringT, numberT,
          colorT, canvasT, replT, NothingT, AnyT } from "./literal/type.js"
 
 import fish from "./data/fish.js"
 import repl from "./ui/repl.js"
 
-const geoUnion = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value]);
+const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointStruct.value, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value, geoList]);
+const geoT = new UnionT([ellipseT, pictureT, pointT, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value, geoList]);
 export const richgeoT = new UnionT([richPointStruct.value, richSegmentT]);
 const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
 
@@ -203,7 +203,7 @@ function _C_FromPoints(): void {
     push(c);
 }
 let C_FromPoints = new FGCallNative("C_FromPoints", _C_FromPoints,
-    new FunctionT([pointStruct.value, pointStruct.value], circleStruct.value)
+    new FunctionT([pointT, pointT], circleStruct.value)
 );
 
 function _Ccurv(): void {
@@ -278,7 +278,7 @@ function _pt(): void {
 let pt = new FGCallNative("pt", _pt,
     new FunctionT(
         [numberT, numberT],
-        pointStruct.value,
+        pointT,
     )
 );
 
@@ -487,7 +487,7 @@ function _R_FromPoints(): void {
 }
 let R_FromPoints = new FGCallNative("R_FromPoints", _R_FromPoints,
     new FunctionT(
-        [pointStruct.value, pointStruct.value],
+        [pointT, pointT],
         rectStruct.value,
     )
 );
@@ -536,7 +536,7 @@ function _Seg_FromPoints(): void {
 }
 let Seg_FromPoints = new FGCallNative("Seg.FromPoints", _Seg_FromPoints,
     new FunctionT(
-        [pointStruct.value, pointStruct.value],
+        [pointT, pointT],
         segmentT,
     )
 );
@@ -548,7 +548,7 @@ function _Midpoint(): void {
     push(point);
 }
 let Midpoint = new FGCallNative("Midpoint", _Midpoint,
-    new FunctionT([segmentT], pointStruct.value)
+    new FunctionT([segmentT], pointT)
 );
 
 function _help(): void {
@@ -629,7 +629,7 @@ export let nativeNames: Names = {
     }},
     "Midpoint": { type: Midpoint.sig, value: Midpoint },
     "Rect": { type: rectStruct.value, value: rectStruct },
-    "Point": { type: pointStruct.value, value: pointStruct },
+    "Point": { type: pointT, value: pt },
     "Circle": { type: circleStruct.value, value: circleStruct },
     "sqrt": { type: sqrt.sig, value: sqrt },
     "abs": { type: abs.sig, value: abs },

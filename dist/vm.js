@@ -1,8 +1,5 @@
 import { FGStruct, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { nativeNames, richgeoT } from "./vmfunction.js";
-import Rect from "./geo/rect.js";
-import { Point } from "./geo/point.js";
-import Circle from "./geo/circle.js";
 let $ = console.log;
 export let stack = [];
 export let stackTop = 0;
@@ -272,6 +269,13 @@ export function run(intercept = false) {
                 push(value);
                 break;
             }
+            case 520: {
+                let obj = pop();
+                let prop = read_string();
+                let value = obj.field[prop];
+                push(value);
+                break;
+            }
             case 1000: {
                 let a = pop();
                 a.value *= -1;
@@ -308,19 +312,6 @@ export function run(intercept = false) {
             case 680: {
                 let list = pop();
                 push(new FGNumber(list.value.length));
-                break;
-            }
-            case 850: {
-                let id = pop().value;
-                let v = pop();
-                if (v instanceof FGStruct) {
-                    let value = v.members[id];
-                    push(value);
-                }
-                else if (v instanceof Rect || v instanceof Point || v instanceof Circle) {
-                    let value = v.member(id);
-                    push(value);
-                }
                 break;
             }
             case 600: {

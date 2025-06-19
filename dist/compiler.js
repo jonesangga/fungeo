@@ -1,7 +1,6 @@
 import { TokenTName, scanner } from "./scanner.js";
 import { Chunk } from "./chunk.js";
 import { rectStruct } from "./geo/rect.js";
-import { pointStruct } from "./geo/point.js";
 import { circleStruct } from "./geo/circle.js";
 import { FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js";
 import { names } from "./vm.js";
@@ -786,9 +785,6 @@ function parse_type() {
             break;
         case 2230:
             type = circleStruct.value;
-            break;
-        case 2700:
-            type = pointStruct.value;
             break;
         case 2780:
             type = rectStruct.value;

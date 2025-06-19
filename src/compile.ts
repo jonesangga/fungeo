@@ -1,7 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode,
+import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          NumberNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Value, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
@@ -35,6 +35,12 @@ class CodeGen implements Visitor<void> {
         let index = makeConstant(new FGString(node.left.name));
         node.right.visit(this);
         emitBytes(Op.Set, index, node.line);
+    }
+
+    visitGetProp(node: GetPropNode): void {
+        node.obj.visit(this);
+        let index = makeConstant(new FGString(node.prop));
+        emitBytes(Op.GetProp, index, node.line);
     }
 
     visitVarDecl(node: VarDeclNode): void {

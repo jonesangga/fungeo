@@ -3,7 +3,7 @@
 // TODO: Test error messages in file.
 
 import { type Token, TokenT, scanner } from "./scanner.js"
-import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode,
+import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          NumberNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
@@ -39,7 +39,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.ColonMin]  : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Comma]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.DivBy]     : {prefix: null,             infix: null,            prec: Prec.Term},
-    [TokenT.Dot]       : {prefix: null,             infix: null,            prec: Prec.Call},
+    [TokenT.Dot]       : {prefix: null,             infix: dot,             prec: Prec.Call},
     [TokenT.Else]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.EOF]       : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Eq]        : {prefix: null,             infix: assign_var,      prec: Prec.Assignment},
@@ -185,6 +185,13 @@ function assign_var(lhs: AST): AssignNode {
     let line = prevTok.line;
     let rhs = parse_prec(Prec.Assignment + 1);
     return new AssignNode(line, lhs, rhs);
+}
+
+function dot(lhs: AST): GetPropNode {
+    let line = prevTok.line;
+    consume(TokenT.Ident, "expect property name after '.'");
+    let rhs = prevTok.lexeme;
+    return new GetPropNode(line, lhs, rhs);
 }
 
 //--------------------------------------------------------------------

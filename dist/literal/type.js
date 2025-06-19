@@ -209,6 +209,10 @@ export class PictureT {
     }
 }
 export class PointT {
+    field = {
+        x: numberT,
+        y: numberT,
+    };
     to_str() {
         return "Point";
     }

@@ -8,11 +8,28 @@ export class Point {
     lineWidth;
     strokeStyle;
     kind = 850;
+    field = {};
     constructor(x, y, lineWidth = 8, strokeStyle = color.black) {
         this.x = x;
         this.y = y;
         this.lineWidth = lineWidth;
         this.strokeStyle = strokeStyle;
+        this.field["x"] = new FGNumber(this.x);
+        this.field["y"] = new FGNumber(this.y);
+    }
+    set(key, v) {
+        switch (key) {
+            case "x": {
+                this.field.x = v;
+                this.x = v.value;
+                break;
+            }
+            case "y": {
+                this.field.y = v;
+                this.y = v.value;
+                break;
+            }
+        }
     }
     to_str() {
         return `Pt ${this.x} ${this.y}`;
@@ -25,14 +42,6 @@ export class Point {
         c.arc(this.x, this.y, this.lineWidth / 2, 0, TAU);
         c.fillStyle = this.strokeStyle;
         c.fill();
-    }
-    member(key) {
-        switch (key) {
-            case "x": return new FGNumber(this.x);
-            case "y": return new FGNumber(this.y);
-            default:
-                unreachable(key);
-        }
     }
 }
 export class RichPoint {
@@ -79,11 +88,6 @@ export class RichPoint {
 function unreachable(key) {
     throw new Error();
 }
-let s = {
-    x: numberT,
-    y: numberT,
-};
-export const pointStruct = new FGType(new StructT(s));
 let rs = {
     x: numberT,
     y: numberT,

@@ -6,7 +6,6 @@
 import { TokenT, TokenTName, type Token, scanner } from "./scanner.js"
 import { Op, Chunk } from "./chunk.js"
 import { rectStruct } from "./geo/rect.js"
-import { pointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
 import { FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, type Value } from "./value.js"
 import { names } from "./vm.js"
@@ -1062,9 +1061,6 @@ function parse_type(): Type {
             break;
         case TokenT.CircleT:
             type = circleStruct.value;
-            break;
-        case TokenT.PointT:
-            type = pointStruct.value;
             break;
         case TokenT.RectT:
             type = rectStruct.value;

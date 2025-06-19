@@ -1,9 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, IdentNode,
+import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          NumberNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
-import { type Type, FunctionT, numberT, stringT, booleanT, nothingT } from "./literal/type.js"
+import { type Type, FunctionT, numberT, PointT, stringT, booleanT, nothingT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = "type: " + line + ": " + message;
@@ -69,6 +69,15 @@ class TypeChecker implements Visitor<Type> {
 
     visitExprStmt(node: ExprStmtNode): Type {
         return node.expr.visit(this);
+    }
+
+    visitGetProp(node: GetPropNode): Type {
+        let objType = node.obj.visit(this);
+        if (!(objType instanceof PointT))
+            error(node.line, "no obj");
+        if (!Object.hasOwn(objType.field, node.prop))
+            error(node.line, `no prop ${ node.prop } in obj`);
+        return objType.field[node.prop];
     }
 
     visitFile(node: FileNode): Type {
