@@ -220,6 +220,18 @@ export class PointT {
         return other instanceof PointT;
     }
 }
+export class RichPointT {
+    field = {
+        x: numberT,
+        y: numberT,
+    };
+    to_str() {
+        return "RichPoint";
+    }
+    equal(other) {
+        return other instanceof RichPointT;
+    }
+}
 export class RectT {
     to_str() {
         return "Rect";
@@ -275,6 +287,7 @@ export const circleT = new CircleT();
 export const ellipseT = new EllipseT();
 export const pictureT = new PictureT();
 export const pointT = new PointT();
+export const richPointT = new RichPointT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();

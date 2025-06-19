@@ -5,7 +5,7 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Value, Kind, FGNumber, FGString } from "../value.js"
-import { type Type, FGType, StructT, pointT, numberT, stringT } from "../literal/type.js"
+import { type Type, FGType, StructT, pointT, richPointT, numberT, stringT } from "../literal/type.js"
 
 export class Point {
     kind: Kind.Point = Kind.Point;
@@ -54,6 +54,7 @@ export class Point {
 
 export class RichPoint {
     kind: Kind.RichPoint = Kind.RichPoint;
+    field: Record<string, Value> = {};
 
     constructor(
         public x: number,
@@ -61,14 +62,17 @@ export class RichPoint {
         public lineWidth: number = 8,
         public strokeStyle: string = color.blue,
         public label: string = ""
-    ) {}
+    ) {
+        this.field["x"] = new FGNumber(this.x);
+        this.field["y"] = new FGNumber(this.y);
+    }
 
     to_str(): string {
         return `RPt ${this.x} ${this.y}`;
     }
 
     typeof(): FGType {
-        return new FGType(pointT);
+        return new FGType(richPointT);
     }
 
     draw(): void {
@@ -76,6 +80,8 @@ export class RichPoint {
         c.arc(this.x, this.y, this.lineWidth/2, 0, TAU);
         c.fillStyle = this.strokeStyle;
         c.fill();
+        c.strokeStyle = "#000";
+        c.stroke();
     }
 
     draw_label(): void {
@@ -83,25 +89,4 @@ export class RichPoint {
         c.font = "16px monospace"
         c.fillText(this.label, this.x + 5, this.y - 5);
     }
-
-    member(key: keyof typeof rs): Value {
-        switch (key) {
-            case "x": return new FGNumber(this.x);
-            case "y": return new FGNumber(this.y);
-            case "label": return new FGString(this.label);
-            default:
-                unreachable(key);
-        }
-    }
 }
-
-function unreachable(key: never): never {
-    throw new Error();
-}
-
-let rs = {
-    x: numberT,
-    y: numberT,
-    label: stringT,
-};
-export const richPointStruct = new FGType(new StructT(rs));

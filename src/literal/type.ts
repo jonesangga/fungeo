@@ -262,6 +262,19 @@ export class PointT implements Type {
     }
 }
 
+export class RichPointT implements Type {
+    field: Record<string, Type> = {
+        x: numberT,
+        y: numberT,
+    };
+    to_str(): string {
+        return "RichPoint";
+    }
+    equal(other: Type): boolean {
+        return other instanceof RichPointT;
+    }
+}
+
 export class RectT implements Type {
     to_str(): string {
         return "Rect";
@@ -322,8 +335,11 @@ export const circleT = new CircleT();
 export const ellipseT = new EllipseT();
 export const pictureT = new PictureT();
 export const pointT = new PointT();
+export const richPointT = new RichPointT();
 export const rectT = new RectT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
+
+export type GeoT = PointT | RichPointT;

@@ -8,21 +8,20 @@ import Picture from "./geo/picture.js"
 import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { rectStruct } from "./geo/rect.js"
-import { richPointStruct } from "./geo/point.js"
 import { circleStruct } from "./geo/circle.js"
 import { Segment, RichSegment } from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { type Type, ListT, UnionT, anyT, pictureT, FunctionT,
-         ellipseT, segmentT, richSegmentT, nothingT, pointT, stringT, numberT,
+         ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, stringT, numberT,
          colorT, canvasT, replT, NothingT, AnyT } from "./literal/type.js"
 
 import fish from "./data/fish.js"
 import repl from "./ui/repl.js"
 
-const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value]);
+const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, rectStruct.value, segmentT, richSegmentT, circleStruct.value]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointT, richPointStruct.value, rectStruct.value, segmentT, richSegmentT, circleStruct.value, geoList]);
-export const richgeoT = new UnionT([richPointStruct.value, richSegmentT]);
+const geoT = new UnionT([ellipseT, pictureT, pointT, richPointT, rectStruct.value, segmentT, richSegmentT, circleStruct.value, geoList]);
+export const richgeoT = new UnionT([richPointT, richSegmentT]);
 const fillableT = new UnionT([circleStruct.value, ellipseT, rectStruct.value]);
 
 function _print(): void {
@@ -291,7 +290,7 @@ function _rpt(): void {
 let rpt = new FGCallNative("rpt", _rpt,
     new FunctionT(
         [numberT, numberT],
-        richPointStruct.value,
+        richPointT,
     )
 );
 
