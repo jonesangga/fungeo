@@ -65,6 +65,18 @@ class TypeChecker {
             error(node.line, `no prop ${node.prop} in obj`);
         return field[node.prop];
     }
+    visitSetProp(node) {
+        let objType = node.obj.visit(this);
+        if (!("field" in objType))
+            error(node.line, "no obj");
+        let field = objType.field;
+        if (!Object.hasOwn(field, node.prop))
+            error(node.line, `no prop ${node.prop} in obj`);
+        let fieldType = field[node.prop];
+        let valueType = node.value.visit(this);
+        assertType(fieldType, valueType, node.value.line);
+        return nothingT;
+    }
     visitFile(node) {
         node.stmts.forEach(stmt => stmt.visit(this));
         return nothingT;

@@ -31,6 +31,12 @@ class CodeGen {
         let index = makeConstant(new FGString(node.prop));
         emitBytes(520, index, node.line);
     }
+    visitSetProp(node) {
+        node.obj.visit(this);
+        let index = makeConstant(new FGString(node.prop));
+        node.value.visit(this);
+        emitBytes(1430, index, node.line);
+    }
     visitVarDecl(node) {
         let index = makeConstant(new FGString(node.name));
         node.init.visit(this);

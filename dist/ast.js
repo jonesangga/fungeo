@@ -41,6 +41,31 @@ export class GetPropNode {
         return v.visitGetProp(this);
     }
 }
+export class SetPropNode {
+    line;
+    obj;
+    prop;
+    value;
+    constructor(line, obj, prop, value) {
+        this.line = line;
+        this.obj = obj;
+        this.prop = prop;
+        this.value = value;
+    }
+    to_str(level) {
+        return indent(level) + "SetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + this.value.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitSetProp(this);
+    }
+}
 export var BinaryOp;
 (function (BinaryOp) {
     BinaryOp[BinaryOp["Add"] = 0] = "Add";

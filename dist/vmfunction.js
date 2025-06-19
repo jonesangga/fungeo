@@ -350,6 +350,7 @@ function _clear() {
     pop();
     canvas.clear();
     on_scrn = [];
+    label_on_scrn = [];
 }
 let clear = new FGCallNative("clear", _clear, new FunctionT([], nothingT));
 export let nativeNames = {

@@ -92,6 +92,8 @@ function isTangent(c1, c2) {
 function is_tangent(c1, c2, c3, ca) {
     return isTangent(ca, c1) && isTangent(ca, c2) && isTangent(ca, c3);
 }
+let cos_ = Math.cos(Math.PI * 5 / 4);
+let sin_ = Math.sin(Math.PI * 5 / 4);
 export class RichCircle {
     p;
     q;
@@ -111,6 +113,9 @@ export class RichCircle {
         this.field["p"] = this.p;
         this.field["q"] = this.q;
     }
+    radius() {
+        return Math.sqrt((this.p.x - this.q.x) ** 2 + (this.p.y - this.q.y) ** 2);
+    }
     to_str() {
         return `C ${this.p.to_str()} ${this.q.to_str()}`;
     }
@@ -119,6 +124,7 @@ export class RichCircle {
     }
     draw() {
         c.beginPath();
+        this.r = this.radius();
         c.arc(this.p.x, this.p.y, this.r, 0, TAU);
         if (this.fillStyle !== "") {
             c.fillStyle = this.fillStyle;
@@ -137,8 +143,8 @@ export class RichCircle {
         c.fillStyle = this.strokeStyle;
         c.textBaseline = "top";
         c.font = "16px monospace";
-        let x = this.p.x + this.r * Math.cos(Math.PI * 5 / 4);
-        let y = this.p.y + this.r * Math.sin(Math.PI * 5 / 4);
+        let x = this.p.x + this.r * cos_;
+        let y = this.p.y + this.r * sin_;
         c.fillText(this.label, x + 0, y + 0);
     }
 }

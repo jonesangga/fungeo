@@ -42,6 +42,7 @@ export const enum Op {
     Set     = 1400,
     SetLoc  = 1410,     // Local normal
     SetLocG = 1415,     // Local global
+    SetProp = 1430,
     Struct  = 1450,
     Sub     = 1500,
 };
@@ -88,6 +89,7 @@ export const OpName: {
     [Op.Set]: "Set",
     [Op.SetLoc]: "SetLoc",
     [Op.SetLocG]: "SetLocG",
+    [Op.SetProp]: "SetProp",
     [Op.Struct]: "Struct",
     [Op.Sub]: "Sub",
 };
@@ -194,7 +196,8 @@ export class Chunk {
                 return [result, offset + 2];
             }
 
-            case Op.Set: {
+            case Op.Set:
+            case Op.SetProp: {
                 let index = this.code[offset + 1];
                 let varname  = this.values[index].to_str();
 

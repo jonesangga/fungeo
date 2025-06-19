@@ -4,7 +4,7 @@
 
 import { type Token, TokenT, scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         NumberNode, StringNode, VarDeclNode } from "./ast.js";
+         NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -187,11 +187,17 @@ function assign_var(lhs: AST): AssignNode {
     return new AssignNode(line, lhs, rhs);
 }
 
-function dot(lhs: AST): GetPropNode {
+function dot(obj: AST): GetPropNode | SetPropNode {
     let line = prevTok.line;
     consume(TokenT.Ident, "expect property name after '.'");
-    let rhs = prevTok.lexeme;
-    return new GetPropNode(line, lhs, rhs);
+    let name = prevTok.lexeme;
+
+    // Setter.
+    if (match(TokenT.Eq)) {
+        let rhs = expression();
+        return new SetPropNode(line, obj, name, rhs);
+    }
+    return new GetPropNode(line, obj, name);
 }
 
 //--------------------------------------------------------------------

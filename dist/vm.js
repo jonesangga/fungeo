@@ -260,6 +260,13 @@ export function run(intercept = false) {
                 push(value);
                 break;
             }
+            case 1430: {
+                let value = pop();
+                let obj = pop();
+                let prop = read_string();
+                obj.set(prop, value);
+                break;
+            }
             case 1000: {
                 let a = pop();
                 a.value *= -1;

@@ -333,6 +333,14 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
+            case Op.SetProp: {
+                let value = pop();
+                let obj = pop() as Point;
+                let prop = read_string();
+                obj.set(prop, value);
+                break;
+            }
+
             case Op.Neg: {
                 let a = pop() as FGNumber;
                 a.value *= -1;

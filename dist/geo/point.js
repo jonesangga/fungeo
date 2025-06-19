@@ -18,6 +18,8 @@ export class Point {
         this.field["y"] = new FGNumber(this.y);
     }
     set(key, v) {
+        if (!(v instanceof FGNumber))
+            throw new Error("setter error");
         switch (key) {
             case "x": {
                 this.field.x = v;
@@ -60,6 +62,22 @@ export class RichPoint {
         this.label = label;
         this.field["x"] = new FGNumber(this.x);
         this.field["y"] = new FGNumber(this.y);
+    }
+    set(key, v) {
+        if (!(v instanceof FGNumber))
+            throw new Error("setter error");
+        switch (key) {
+            case "x": {
+                this.field.x = v;
+                this.x = v.value;
+                break;
+            }
+            case "y": {
+                this.field.y = v;
+                this.y = v.value;
+                break;
+            }
+        }
     }
     to_str() {
         return `RPt ${this.x} ${this.y}`;
