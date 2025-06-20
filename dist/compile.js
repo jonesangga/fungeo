@@ -12,6 +12,13 @@ class CodeGen {
     visitBoolean(node) {
         emitConstant(new FGBoolean(node.value), node.line);
     }
+    visitList(node) {
+        for (let item of node.items) {
+            item.visit(this);
+        }
+        emitConstant(new FGType(node.elType), node.line);
+        emitBytes(700, node.items.length, node.line);
+    }
     visitBinary(node) {
         node.left.visit(this);
         node.right.visit(this);

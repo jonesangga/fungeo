@@ -3,7 +3,7 @@
 // TODO: Test this.
 
 import { Op } from "./chunk.js"
-import { type Type, numberT } from "./literal/type.js"
+import { type Type, numberT, anyT } from "./literal/type.js"
 
 export interface Visitor<T> {
     visitAssign   (node: AssignNode):   T;
@@ -14,6 +14,7 @@ export interface Visitor<T> {
     visitFile     (node: FileNode):     T;
     visitGetProp  (node: GetPropNode):  T;
     visitIdent    (node: IdentNode):    T;
+    visitList     (node: ListNode):     T;
     visitNumber   (node: NumberNode):   T;
     visitSetProp  (node: SetPropNode):  T;
     visitString   (node: StringNode):   T;
@@ -200,6 +201,21 @@ export class IdentNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitIdent(this);
+    }
+}
+
+// TODO: fix to_str() later.
+export class ListNode implements AST {
+    constructor(public line:   number,
+                public items:  AST[],
+                public elType: Type = anyT) {}
+
+    to_str(level: number): string {
+        return indent(level) + "List(" + this.items.map(item => item.to_str(0)).join(", ") + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitList(this);
     }
 }
 

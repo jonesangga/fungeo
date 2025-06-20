@@ -4,7 +4,7 @@
 
 import { type Token, TokenT, scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+         ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -55,7 +55,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.If]        : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Ifx]       : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.LBrace]    : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.LBracket]  : {prefix: null,             infix: null,            prec: Prec.Call},
+    [TokenT.LBracket]  : {prefix: parse_list,       infix: null,            prec: Prec.None},
     [TokenT.Less]      : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.LessEq]    : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.LParen]    : {prefix: null,             infix: call,            prec: Prec.Call},
@@ -177,6 +177,18 @@ function call(lhs: AST): CallNode {
 
 function parse_ident(): IdentNode {
     return new IdentNode(prevTok.line, prevTok.lexeme);
+}
+
+function parse_list(): ListNode {
+    let line = prevTok.line;
+    let items: AST[] = [];
+    if (!check(TokenT.RBracket)) {
+        do {
+            items.push(expression());
+        } while (match(TokenT.Comma));
+    }
+    consume(TokenT.RBracket, "expect ']' after list items");
+    return new ListNode(line, items);
 }
 
 function assign_var(lhs: AST): AssignNode {

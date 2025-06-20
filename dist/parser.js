@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -43,7 +43,7 @@ const rules = {
     [2400]: { prefix: null, infix: null, prec: 100 },
     [2405]: { prefix: null, infix: null, prec: 100 },
     [300]: { prefix: null, infix: null, prec: 100 },
-    [400]: { prefix: null, infix: null, prec: 600 },
+    [400]: { prefix: parse_list, infix: null, prec: 100 },
     [1550]: { prefix: null, infix: null, prec: 250 },
     [1555]: { prefix: null, infix: null, prec: 250 },
     [500]: { prefix: null, infix: call, prec: 600 },
@@ -137,6 +137,17 @@ function call(lhs) {
 }
 function parse_ident() {
     return new IdentNode(prevTok.line, prevTok.lexeme);
+}
+function parse_list() {
+    let line = prevTok.line;
+    let items = [];
+    if (!check(700)) {
+        do {
+            items.push(expression());
+        } while (match(100));
+    }
+    consume(700, "expect ']' after list items");
+    return new ListNode(line, items);
 }
 function assign_var(lhs) {
     if (!(lhs instanceof IdentNode))

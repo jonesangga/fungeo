@@ -1,6 +1,6 @@
 import { BinaryTable } from "./ast.js";
 import { names } from "./vm.js";
-import { FunctionT, OverloadT, numberT, stringT, booleanT, nothingT } from "./literal/type.js";
+import { FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
     let result = "type: " + line + ": " + message;
     throw new Error(result);
@@ -20,6 +20,14 @@ function resolveVar(name, line) {
 class TypeChecker {
     visitNumber(node) {
         return numberT;
+    }
+    visitList(node) {
+        let elType = node.items[0].visit(this);
+        for (let i = 1; i < node.items.length; i++) {
+            assertType(elType, node.items[i].visit(this), node.line);
+        }
+        node.elType = elType;
+        return new ListT(elType);
     }
     visitString(node) {
         return stringT;

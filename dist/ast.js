@@ -1,4 +1,4 @@
-import { numberT } from "./literal/type.js";
+import { numberT, anyT } from "./literal/type.js";
 export class AssignNode {
     line;
     left;
@@ -188,6 +188,22 @@ export class IdentNode {
     }
     visit(v) {
         return v.visitIdent(this);
+    }
+}
+export class ListNode {
+    line;
+    items;
+    elType;
+    constructor(line, items, elType = anyT) {
+        this.line = line;
+        this.items = items;
+        this.elType = elType;
+    }
+    to_str(level) {
+        return indent(level) + "List(" + this.items.map(item => item.to_str(0)).join(", ") + ")";
+    }
+    visit(v) {
+        return v.visitList(this);
     }
 }
 export class NumberNode {

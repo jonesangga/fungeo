@@ -1,9 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
+         ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
-import { type Type, FunctionT, OverloadT, numberT, PointT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
+import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = "type: " + line + ": " + message;
@@ -27,6 +27,16 @@ function resolveVar(name: string, line: number): Type {
 class TypeChecker implements Visitor<Type> {
     visitNumber(node: NumberNode): Type {
         return numberT;
+    }
+
+    // For now assuming the list is not empty.
+    visitList(node: ListNode): Type {
+        let elType = node.items[0].visit(this);
+        for (let i = 1; i < node.items.length; i++) {
+            assertType(elType, node.items[i].visit(this), node.line);
+        }
+        node.elType = elType;
+        return new ListT(elType);
     }
 
     visitString(node: StringNode): Type {
