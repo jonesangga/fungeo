@@ -213,7 +213,6 @@ export class Chunk {
 
             case Op.List: {
                 let length       = this.code[offset + 1];
-
                 result += `${ padr7(name) } ${ padl4(length) }\n`;
                 return [result, offset + 2];
             }

@@ -19,6 +19,11 @@ class CodeGen {
         emitConstant(new FGType(node.elType), node.line);
         emitBytes(700, node.items.length, node.line);
     }
+    visitIndex(node) {
+        node.list.visit(this);
+        node.index.visit(this);
+        emitByte(600, node.line);
+    }
     visitBinary(node) {
         node.left.visit(this);
         node.right.visit(this);

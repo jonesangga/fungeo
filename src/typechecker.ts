@@ -1,7 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
+         IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
 
@@ -37,6 +37,15 @@ class TypeChecker implements Visitor<Type> {
         }
         node.elType = elType;
         return new ListT(elType);
+    }
+
+    visitIndex(node: IndexNode): Type {
+        let listType = node.list.visit(this);
+        if (!(listType instanceof ListT))
+            error(node.line, "attempt to index non-list");
+        let index = node.index.visit(this);
+        assertType(index, numberT, node.line);
+        return listType.elType;
     }
 
     visitString(node: StringNode): Type {

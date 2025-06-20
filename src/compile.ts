@@ -2,7 +2,7 @@
 
 import { Op, Chunk } from "./chunk.js"
 import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
+         IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Value, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
 import { FGType, type Type, nothingT } from "./literal/type.js"
@@ -26,6 +26,12 @@ class CodeGen implements Visitor<void> {
         }
         emitConstant(new FGType(node.elType), node.line);
         emitBytes(Op.List, node.items.length, node.line);
+    }
+
+    visitIndex(node: IndexNode): void {
+        node.list.visit(this);
+        node.index.visit(this);
+        emitByte(Op.Index, node.line);
     }
 
     visitBinary(node: BinaryNode): void {

@@ -4,7 +4,7 @@
 
 import { type Token, TokenT, scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+         IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -55,7 +55,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.If]        : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Ifx]       : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.LBrace]    : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.LBracket]  : {prefix: parse_list,       infix: null,            prec: Prec.None},
+    [TokenT.LBracket]  : {prefix: parse_list,       infix: index_list,      prec: Prec.Call},
     [TokenT.Less]      : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.LessEq]    : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.LParen]    : {prefix: null,             infix: call,            prec: Prec.Call},
@@ -189,6 +189,14 @@ function parse_list(): ListNode {
     }
     consume(TokenT.RBracket, "expect ']' after list items");
     return new ListNode(line, items);
+}
+
+// TODO: how about list[i][j]?
+function index_list(lhs: AST): IndexNode {
+    let line = prevTok.line;
+    let rhs = expression();
+    consume(TokenT.RBracket, "expect ']' after list indexing");
+    return new IndexNode(line, lhs, rhs);
 }
 
 function assign_var(lhs: AST): AssignNode {

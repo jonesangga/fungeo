@@ -102,6 +102,27 @@ export class BinaryNode {
         return v.visitBinary(this);
     }
 }
+export class IndexNode {
+    line;
+    list;
+    index;
+    constructor(line, list, index) {
+        this.line = line;
+        this.list = list;
+        this.index = index;
+    }
+    to_str(level) {
+        return indent(level) + "Index(\n"
+            + this.list.to_str(level + 2)
+            + "\n"
+            + this.index.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitIndex(this);
+    }
+}
 export class BooleanNode {
     line;
     value;

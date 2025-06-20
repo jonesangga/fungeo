@@ -29,6 +29,14 @@ class TypeChecker {
         node.elType = elType;
         return new ListT(elType);
     }
+    visitIndex(node) {
+        let listType = node.list.visit(this);
+        if (!(listType instanceof ListT))
+            error(node.line, "attempt to index non-list");
+        let index = node.index.visit(this);
+        assertType(index, numberT, node.line);
+        return listType.elType;
+    }
     visitString(node) {
         return stringT;
     }

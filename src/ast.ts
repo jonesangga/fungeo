@@ -14,6 +14,7 @@ export interface Visitor<T> {
     visitFile     (node: FileNode):     T;
     visitGetProp  (node: GetPropNode):  T;
     visitIdent    (node: IdentNode):    T;
+    visitIndex    (node: IndexNode):    T;
     visitList     (node: ListNode):     T;
     visitNumber   (node: NumberNode):   T;
     visitSetProp  (node: SetPropNode):  T;
@@ -120,6 +121,25 @@ export class BinaryNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitBinary(this);
+    }
+}
+
+export class IndexNode implements AST {
+    constructor(public line:  number,
+                public list:  AST,
+                public index: AST) {}
+
+    to_str(level: number): string {
+        return indent(level) + "Index(\n"
+            + this.list.to_str(level + 2)
+            + "\n"
+            + this.index.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitIndex(this);
     }
 }
 
