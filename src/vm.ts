@@ -156,9 +156,10 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.Call: {
                 let arity = read_byte();
+                let ver = read_byte();
                 let fn = peek(arity);
                 if (fn instanceof FGCallNative)
-                    fn.value();
+                    fn.value(ver);
                 else
                     call(fn as FGCallUser, arity);
                 break;

@@ -146,12 +146,18 @@ export class Chunk {
                 result += name + "\n";
                 return [result, offset + 1];
             }
-            case 200:
             case 1450: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)}\n`;
                 return [result, offset + 2];
             }
+            case 200: {
+                let index = this.code[offset + 1];
+                let ver = this.code[offset + 2];
+                result += `${padr7(name)} ${padl4(index)} ver ${ver}\n`;
+                return [result, offset + 3];
+            }
+            case 1020:
             case 500:
             case 520:
             case 800: {
@@ -172,7 +178,6 @@ export class Chunk {
             case 217:
             case 395:
             case 595:
-            case 1020:
             case 1300:
             case 1410:
             case 1415: {

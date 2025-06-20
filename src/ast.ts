@@ -138,6 +138,7 @@ export class BooleanNode implements AST {
 export class CallNode implements AST {
     constructor(public line:   number,
                 public callee: AST,
+                public ver:    number,
                 public args:   AST[]) {}
 
     to_str(level: number): string {
@@ -146,6 +147,8 @@ export class CallNode implements AST {
             + "\n"
             + indent(level + 2) + "[\n"
             + this.args.map(arg => arg.to_str(level + 4)).join("\n")
+            + "\n"
+            + indent(level + 4) + "ver " + this.ver
             + "\n"
             + indent(level + 2) + "]\n"
             + indent(level) + ")";

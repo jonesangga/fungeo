@@ -142,19 +142,6 @@ export class UnionT implements Type {
     }
 }
 
-// export class FunctionT implements Type {
-    // constructor(public input:  Map<string, Type>,
-                // public output: Type) {}
-
-    // to_str(): string {
-        // return "FunctionT, not implememented yet";
-    // }
-
-    // equal(other: Type): boolean {
-        // return other instanceof FunctionT;
-    // }
-// }
-
 export class FunctionT implements Type {
     constructor(public input:  Type[],
                 public output: Type) {}
@@ -168,6 +155,25 @@ export class FunctionT implements Type {
         return other instanceof FunctionT
             && this.input.every((inp, i) => inp.equal(other.input[i]))
             && this.output.equal(other.output);
+    }
+}
+
+export class OverloadT implements Type {
+    constructor(public sigs: FunctionT[]) {}
+
+    // TODO: fix this.
+    to_str(): string {
+        // let input = this.input.map(v => v.to_str()).join(" -> ");
+        // return input + " -> " + this.output.to_str();
+        return "OverloadT, not implemented";
+    }
+
+    // TODO: fix this.
+    equal(other: Type): boolean {
+        return false;
+        // return other instanceof FunctionT
+            // && this.input.every((inp, i) => inp.equal(other.input[i]))
+            // && this.output.equal(other.output);
     }
 }
 

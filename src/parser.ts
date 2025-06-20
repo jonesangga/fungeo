@@ -172,7 +172,7 @@ function call(lhs: AST): CallNode {
         } while (match(TokenT.Comma));
     }
     consume(TokenT.RParen, "expect ')' after argument list");
-    return new CallNode(line, lhs, args);
+    return new CallNode(line, lhs, -1, args);   // -1 is dummy. It is completed in typechecker.
 }
 
 function parse_ident(): IdentNode {

@@ -3,7 +3,7 @@
 import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
-import { type Type, FunctionT, numberT, PointT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
+import { type Type, FunctionT, OverloadT, numberT, PointT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = "type: " + line + ": " + message;
@@ -102,15 +102,25 @@ class TypeChecker implements Visitor<Type> {
     visitCall(node: CallNode): Type {
         let fnType = node.callee.visit(this);
         console.log(fnType);
-        if (!(fnType instanceof FunctionT))
+        if (!(fnType instanceof OverloadT))
             error(node.callee.line, `${node.callee} is not a function`);
         let input: Type[] = [];
-        let output = fnType.output;
         node.args.forEach(arg => input.push(arg.visit(this)));
-        let got = new FunctionT(input, output);
-        assertType(fnType, got, node.line);
-        return fnType.output;
+        let [ver, type] = overload(input, fnType, node.line);
+        node.ver = ver;
+        return type;
     }
+}
+
+function overload(input: Type[], fn: OverloadT, line: number): [number, Type] {
+    for (let i = 0; i < fn.sigs.length; i++) {
+        let sig = fn.sigs[i];
+        let output = sig.output;
+        let got = new FunctionT(input, output);
+        if (sig.equal(got))
+            return [i, output];
+    }
+    error(line, "no matching fn sig");
 }
 
 // TODO: Change this later.

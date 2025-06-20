@@ -158,13 +158,20 @@ export class Chunk {
                 return [result, offset + 1];
             }
 
-            case Op.Call:
             case Op.Struct: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) }\n`;
                 return [result, offset + 2];
             }
 
+            case Op.Call: {
+                let index = this.code[offset + 1];
+                let ver = this.code[offset + 2];
+                result += `${ padr7(name) } ${ padl4(index) } ver ${ ver }\n`;
+                return [result, offset + 3];
+            }
+
+            case Op.New:
             case Op.GetGlob:
             case Op.GetProp:
             case Op.Load: {
@@ -187,7 +194,6 @@ export class Chunk {
             case Op.CkIncD:
             case Op.GetLoc:
             case Op.Inc:
-            case Op.New:
             case Op.Ret:
             case Op.SetLoc:
             case Op.SetLocG: {

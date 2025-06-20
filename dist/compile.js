@@ -56,6 +56,7 @@ class CodeGen {
         node.args.forEach(arg => arg.visit(this));
         let arity = node.args.length;
         emitBytes(200, arity, node.line);
+        emitByte(node.ver, node.line);
     }
 }
 function emitByte(byte, line) {

@@ -95,9 +95,10 @@ export function run(intercept = false) {
             }
             case 200: {
                 let arity = read_byte();
+                let ver = read_byte();
                 let fn = peek(arity);
                 if (fn instanceof FGCallNative)
-                    fn.value();
+                    fn.value(ver);
                 else
                     call(fn, arity);
                 break;

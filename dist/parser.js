@@ -133,7 +133,7 @@ function call(lhs) {
         } while (match(100));
     }
     consume(800, "expect ')' after argument list");
-    return new CallNode(line, lhs, args);
+    return new CallNode(line, lhs, -1, args);
 }
 function parse_ident() {
     return new IdentNode(prevTok.line, prevTok.lexeme);

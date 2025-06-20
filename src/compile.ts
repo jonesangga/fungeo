@@ -72,6 +72,7 @@ class CodeGen implements Visitor<void> {
         node.args.forEach(arg => arg.visit(this));
         let arity = node.args.length;
         emitBytes(Op.Call, arity, node.line);
+        emitByte(node.ver, node.line);
     }
 }
 

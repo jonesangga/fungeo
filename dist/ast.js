@@ -119,10 +119,12 @@ export class BooleanNode {
 export class CallNode {
     line;
     callee;
+    ver;
     args;
-    constructor(line, callee, args) {
+    constructor(line, callee, ver, args) {
         this.line = line;
         this.callee = callee;
+        this.ver = ver;
         this.args = args;
     }
     to_str(level) {
@@ -131,6 +133,8 @@ export class CallNode {
             + "\n"
             + indent(level + 2) + "[\n"
             + this.args.map(arg => arg.to_str(level + 4)).join("\n")
+            + "\n"
+            + indent(level + 4) + "ver " + this.ver
             + "\n"
             + indent(level + 2) + "]\n"
             + indent(level) + ")";

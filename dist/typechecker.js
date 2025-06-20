@@ -1,6 +1,6 @@
 import { BinaryTable } from "./ast.js";
 import { names } from "./vm.js";
-import { FunctionT, numberT, stringT, booleanT, nothingT } from "./literal/type.js";
+import { FunctionT, OverloadT, numberT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
     let result = "type: " + line + ": " + message;
     throw new Error(result);
@@ -84,15 +84,24 @@ class TypeChecker {
     visitCall(node) {
         let fnType = node.callee.visit(this);
         console.log(fnType);
-        if (!(fnType instanceof FunctionT))
+        if (!(fnType instanceof OverloadT))
             error(node.callee.line, `${node.callee} is not a function`);
         let input = [];
-        let output = fnType.output;
         node.args.forEach(arg => input.push(arg.visit(this)));
-        let got = new FunctionT(input, output);
-        assertType(fnType, got, node.line);
-        return fnType.output;
+        let [ver, type] = overload(input, fnType, node.line);
+        node.ver = ver;
+        return type;
     }
+}
+function overload(input, fn, line) {
+    for (let i = 0; i < fn.sigs.length; i++) {
+        let sig = fn.sigs[i];
+        let output = sig.output;
+        let got = new FunctionT(input, output);
+        if (sig.equal(got))
+            return [i, output];
+    }
+    error(line, "no matching fn sig");
 }
 let tempNames = {};
 export function typecheck(ast) {

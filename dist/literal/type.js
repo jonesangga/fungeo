@@ -112,6 +112,18 @@ export class FunctionT {
             && this.output.equal(other.output);
     }
 }
+export class OverloadT {
+    sigs;
+    constructor(sigs) {
+        this.sigs = sigs;
+    }
+    to_str() {
+        return "OverloadT, not implemented";
+    }
+    equal(other) {
+        return false;
+    }
+}
 export class CallUserT {
     input;
     output;
