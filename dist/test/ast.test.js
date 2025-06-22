@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, IdentNode, NumberNode, StringNode, VarDeclNode } from "../ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, IdentNode, NumberNode, StringNode, VarDeclNode } from "../ast.js";
 function populateTemplate(strings, ...subs) {
     let raw = strings.raw;
     let result = "";
@@ -88,6 +88,29 @@ describe("ast node's to_str() method", () => {
               Add(
                 Number(2)
                 Number(5)
+              )
+            )`);
+    });
+    it("FileNode", () => {
+        let node = new FileNode(1000, [
+            new VarDeclNode(2000, "a", new NumberNode(2000, 2)),
+            new CallVoidNode(3000, new CallNode(3000, new IdentNode(3000, "print"), [new IdentNode(3000, "a")], 0)),
+        ]);
+        let str = node.to_str(0);
+        equal(str, undent `
+            File(
+              VarDecl(
+                a
+                Number(2)
+              )
+              CallVoid(
+                Call(
+                  Ident(print)
+                  [
+                    Ident(a)
+                  ]
+                  0
+                )
               )
             )`);
     });

@@ -175,7 +175,7 @@ export class FileNode implements AST {
 
     to_str(level: number): string {
         return indent(level) + "File(\n"
-            + this.stmts.reduce((acc, curr) => acc + curr.to_str(level + 2), "")
+            + this.stmts.map(stmt => stmt.to_str(level + 2)).join("\n")
             + indent(level) + "\n)";
     }
 

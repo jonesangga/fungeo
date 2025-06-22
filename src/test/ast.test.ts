@@ -159,24 +159,48 @@ describe("ast node's to_str() method", () => {
             )`);
     });
 
-    // it("FileNode", () => {
-        // // let a = 2 print(a)
-        // let node = new FileNode(
-            // 1000,
-            // new
-            // [new NumberNode(20, 10)],
-        // );
+    it("FileNode", () => {
+        // let a = 2
+        // print(a)
+        let node = new FileNode(
+            1000,
+            [
+                new VarDeclNode(
+                    2000,
+                    "a",
+                    new NumberNode(2000, 2),
+                ),
+                new CallVoidNode(
+                    3000,
+                    new CallNode(
+                        3000,
+                        new IdentNode(3000, "print"),
+                        [new IdentNode(3000, "a")],
+                        0,
+                    ),
+                ),
+            ],
+        );
 
-        // let str = node.to_str(0);
+        let str = node.to_str(0);
 
-        // equal(str, undent`
-            // File(
-              // Add(
-                // Number(2)
-                // Number(5)
-              // )
-            // )`);
-    // });
+        equal(str, undent`
+            File(
+              VarDecl(
+                a
+                Number(2)
+              )
+              CallVoid(
+                Call(
+                  Ident(print)
+                  [
+                    Ident(a)
+                  ]
+                  0
+                )
+              )
+            )`);
+    });
 
     it("IdentNode", () => {
         // a
