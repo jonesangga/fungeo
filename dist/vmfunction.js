@@ -3,10 +3,10 @@ import { FGCallNative, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import fish from "./data/fish.js";
 import repl from "./ui/repl.js";
-import { Circle } from "./geo/circle.js";
-import { Point } from "./geo/point.js";
+import { Circle, RichCircle } from "./geo/circle.js";
+import { Point, RichPoint } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
-import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, numberT, canvasT, replT } from "./literal/type.js";
+import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
@@ -59,6 +59,16 @@ function _draw(ver) {
 let draw = new FGCallNative("draw", _draw, new OverloadT([
     new FunctionT([geoT], nothingT),
 ]));
+function _label(ver) {
+    let label = pop().value;
+    let v = pop();
+    pop();
+    v.label = label;
+    draw_onScreen();
+}
+let label = new FGCallNative("label", _label, new OverloadT([
+    new FunctionT([richgeoT, stringT], nothingT),
+]));
 function _circle(ver) {
     if (ver === 0) {
         let r = pop().value;
@@ -89,6 +99,16 @@ function _intersect(ver) {
 }
 let intersect = new FGCallNative("intersect", _intersect, new OverloadT([
     new FunctionT([circleT, circleT], new ListT(pointT)),
+    new FunctionT([richCircleT, richCircleT], new ListT(richPointT)),
+]));
+function _rcircle(ver) {
+    let q = pop();
+    let p = pop();
+    pop();
+    push(new RichCircle(p, q));
+}
+let rcircle = new FGCallNative("rcircle", _rcircle, new OverloadT([
+    new FunctionT([richPointT, richPointT], richCircleT),
 ]));
 function _pt(ver) {
     let y = pop().value;
@@ -98,6 +118,15 @@ function _pt(ver) {
 }
 let pt = new FGCallNative("pt", _pt, new OverloadT([
     new FunctionT([numberT, numberT], pointT),
+]));
+function _rpt(ver) {
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    push(new RichPoint(x, y));
+}
+let rpt = new FGCallNative("rpt", _rpt, new OverloadT([
+    new FunctionT([numberT, numberT], richPointT),
 ]));
 function _segment(ver) {
     if (ver === 0) {
@@ -128,8 +157,11 @@ export let nativeNames = {
     "fishs": { type: pictureT, value: fish.s },
     "print": { type: print.sig, value: print },
     "draw": { type: draw.sig, value: draw },
+    "label": { type: label.sig, value: label },
     "circle": { type: circle.sig, value: circle },
+    "rcircle": { type: rcircle.sig, value: rcircle },
     "intersect": { type: intersect.sig, value: intersect },
     "pt": { type: pt.sig, value: pt },
+    "rpt": { type: rpt.sig, value: rpt },
     "segment": { type: segment.sig, value: segment },
 };

@@ -159,16 +159,18 @@ let draw = new FGCallNative("draw", _draw,
     ])
 );
 
-// function _label(): void {
-    // let label = (pop() as FGString).value;
-    // let v = pop() as RichGeoObj;
-    // pop();              // The function.
-    // v.label = label;
-    // draw_onScreen();
-// }
-// let label = new FGCallNative("label", _label,
-    // new FunctionT([richgeoT, stringT], nothingT)
-// );
+function _label(ver: number): void {
+    let label = (pop() as FGString).value;
+    let v = pop() as RichGeoObj;
+    pop();              // The function.
+    v.label = label;
+    draw_onScreen();
+}
+let label = new FGCallNative("label", _label,
+    new OverloadT([
+        new FunctionT([richgeoT, stringT], nothingT),
+    ])
+);
 
 // function _Fill(): void {
     // console.log("in _Fill()");
@@ -216,18 +218,21 @@ function _intersect(ver: number): void {
 let intersect = new FGCallNative("intersect", _intersect,
     new OverloadT([
         new FunctionT([circleT, circleT], new ListT(pointT)),
+        new FunctionT([richCircleT, richCircleT], new ListT(richPointT)),
     ])
 );
 
-// function _rcircle(): void {
-    // let q = (pop() as RichPoint);
-    // let p = (pop() as RichPoint);
-    // pop();              // The function.
-    // push(new RichCircle(p, q));
-// }
-// let rcircle = new FGCallNative("rcircle", _rcircle,
-    // new FunctionT([richPointT, richPointT], richCircleT)
-// );
+function _rcircle(ver: number): void {
+    let q = (pop() as RichPoint);
+    let p = (pop() as RichPoint);
+    pop();              // The function.
+    push(new RichCircle(p, q));
+}
+let rcircle = new FGCallNative("rcircle", _rcircle,
+    new OverloadT([
+        new FunctionT([richPointT, richPointT], richCircleT),
+    ])
+);
 
 // function _Ccurv(): void {
     // let bend = (pop() as FGNumber).value;
@@ -302,18 +307,17 @@ let pt = new FGCallNative("pt", _pt,
     ])
 );
 
-// function _rpt(): void {
-    // let y = (pop() as FGNumber).value;
-    // let x = (pop() as FGNumber).value;
-    // pop();              // The function.
-    // push(new RichPoint(x, y));
-// }
-// let rpt = new FGCallNative("rpt", _rpt,
-    // new FunctionT(
-        // [numberT, numberT],
-        // richPointT,
-    // )
-// );
+function _rpt(ver: number): void {
+    let y = (pop() as FGNumber).value;
+    let x = (pop() as FGNumber).value;
+    pop();              // The function.
+    push(new RichPoint(x, y));
+}
+let rpt = new FGCallNative("rpt", _rpt,
+    new OverloadT([
+        new FunctionT([numberT, numberT], richPointT),
+    ])
+);
 
 // function _Paint(): void {
     // let geo = pop() as GeoObj;
@@ -610,23 +614,23 @@ export let nativeNames: Names = {
     // "RGB":    { type: RGB.sig, value: RGB },
     // "printf": { type: printf.sig, value: printf },
     // "show":   { type: show.sig, value: show },
-    // "label":  { type: label.sig, value: label },
     // "padl":   { type: padl.sig, value: padl },
     // "Type":   { type: TypeFn.sig, value: TypeFn },
     "draw":   { type: draw.sig, value: draw },
+    "label":  { type: label.sig, value: label },
     // "Fill":   { type: Fill.sig, value: Fill },
     // "clear":  { type: clear.sig, value: clear },
     // "Paint":  { type: Paint.sig, value: Paint },
-    // "rcircle": { type: rcircle.sig, value: rcircle },
     // "Ccurv":   { type: Ccurv.sig, value: Ccurv },
     // "Descart": { type: Descart.sig, value: Descart },
     // "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     // "E":      { type: E.sig, value: E },
     "circle":    { type: circle.sig, value: circle },
+    "rcircle":   { type: rcircle.sig, value: rcircle },
     "intersect": { type: intersect.sig, value: intersect },
     "pt":        { type: pt.sig, value: pt },
+    "rpt":       { type: rpt.sig, value: rpt },
     "segment":   { type: segment.sig, value: segment },
-    // "rpt":    { type: rpt.sig, value: rpt },
     // "Pic":    { type: Pic.sig, value: Pic },
     // "Cw":     { type: Cw.sig, value: Cw },
     // "Ccw":    { type: Ccw.sig, value: Ccw },

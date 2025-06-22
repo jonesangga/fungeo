@@ -56,12 +56,12 @@ export class Circle {
 
     // TODO: simplify this.
     intersect(other: Circle): Point[] {
-        let x1 = this.x
-        let y1 = this.y
-        let r1 = this.r
-        let x2 = other.x
-        let y2 = other.y
-        let r2 = other.r
+        let x1 = this.x;
+        let y1 = this.y;
+        let r1 = this.r;
+        let x2 = other.x;
+        let y2 = other.y;
+        let r2 = other.r;
 
         let dx = x1 - x2;
         let dy = y1 - y2;
@@ -203,5 +203,39 @@ export class RichCircle {
         let x = this.p.x + this.r * cos_;
         let y = this.p.y + this.r * sin_;
         c.fillText(this.label, x + 0, y + 0);
+    }
+
+    // TODO: simplify this. Half of this is duplicate with the same method in Circle class.
+    intersect(other: RichCircle): RichPoint[] {
+        let x1 = this.p.x;
+        let y1 = this.p.y;
+        let r1 = this.radius();
+        let x2 = other.p.x;
+        let y2 = other.p.y;
+        let r2 = other.radius();
+
+        let dx = x1 - x2;
+        let dy = y1 - y2;
+        let R = Math.sqrt(dx * dx + dy * dy);
+        if (!(Math.abs(r1 - r2) <= R && R <= r1 + r2))
+            return [];
+
+        let R2 = R * R;
+        let R4 = R2 * R2;
+        let a = (r1*r1 - r2*r2) / (2*R2);
+        let r2r2 = (r1*r1 - r2*r2);
+        let c = Math.sqrt(2 * (r1*r1 + r2*r2) / R2 - (r2r2 * r2r2) / R4 - 1);
+
+        let fx = (x1+x2) / 2 + a * (x2-x1);
+        let gx = c * (y2-y1) / 2;
+        let ix1 = fx + gx;
+        let ix2 = fx - gx;
+
+        let fy = (y1+y2) / 2 + a * (y2-y1);
+        let gy = c * (x1-x2) / 2;
+        let iy1 = fy + gy;
+        let iy2 = fy - gy;
+
+        return [new RichPoint(ix1, iy1), new RichPoint(ix2, iy2)];
     }
 }
