@@ -1,7 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { Op, Chunk } from "./chunk.js"
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AST, AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Value, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
@@ -37,7 +37,7 @@ class CodeGen implements Visitor<void> {
     visitBinary(node: BinaryNode): void {
         node.left.visit(this);
         node.right.visit(this);
-        emitByte(BinaryTable[node.op].op, node.line);
+        emitByte(binaryTable[node.op].op, node.line);
     }
 
     visitIdent(node: IdentNode): void {
@@ -82,7 +82,7 @@ class CodeGen implements Visitor<void> {
     }
 
     visitCall(node: CallNode): void {
-        node.callee.visit(this);
+        node.name.visit(this);
         node.args.forEach(arg => arg.visit(this));
         let arity = node.args.length;
         emitBytes(Op.Call, arity, node.line);

@@ -10,7 +10,7 @@ export class AssignNode {
     }
     to_str(level) {
         return indent(level) + "Assign(\n"
-            + indent(level + 2) + this.left.to_str(level + 2)
+            + this.left.to_str(level + 2)
             + "\n"
             + this.right.to_str(level + 2)
             + "\n"
@@ -20,52 +20,6 @@ export class AssignNode {
         return v.visitAssign(this);
     }
 }
-export class GetPropNode {
-    line;
-    obj;
-    prop;
-    constructor(line, obj, prop) {
-        this.line = line;
-        this.obj = obj;
-        this.prop = prop;
-    }
-    to_str(level) {
-        return indent(level) + "GetProp(\n"
-            + this.obj.to_str(level + 2)
-            + "\n"
-            + indent(level + 2) + this.prop
-            + "\n"
-            + indent(level) + ")";
-    }
-    visit(v) {
-        return v.visitGetProp(this);
-    }
-}
-export class SetPropNode {
-    line;
-    obj;
-    prop;
-    value;
-    constructor(line, obj, prop, value) {
-        this.line = line;
-        this.obj = obj;
-        this.prop = prop;
-        this.value = value;
-    }
-    to_str(level) {
-        return indent(level) + "SetProp(\n"
-            + this.obj.to_str(level + 2)
-            + "\n"
-            + indent(level + 2) + this.prop
-            + "\n"
-            + this.value.to_str(level + 2)
-            + "\n"
-            + indent(level) + ")";
-    }
-    visit(v) {
-        return v.visitSetProp(this);
-    }
-}
 export var BinaryOp;
 (function (BinaryOp) {
     BinaryOp[BinaryOp["Add"] = 0] = "Add";
@@ -73,11 +27,11 @@ export var BinaryOp;
     BinaryOp[BinaryOp["Multiply"] = 2] = "Multiply";
     BinaryOp[BinaryOp["Subtract"] = 3] = "Subtract";
 })(BinaryOp || (BinaryOp = {}));
-export const BinaryTable = {
-    [0]: { name: "Add", op: 100, type: numberT },
-    [1]: { name: "Divide", op: 300, type: numberT },
-    [2]: { name: "Multiply", op: 900, type: numberT },
-    [3]: { name: "Subtract", op: 1500, type: numberT },
+export const binaryTable = {
+    [0]: { name: "Add", op: 100, result: numberT },
+    [1]: { name: "Divide", op: 300, result: numberT },
+    [2]: { name: "Multiply", op: 900, result: numberT },
+    [3]: { name: "Subtract", op: 1500, result: numberT },
 };
 export class BinaryNode {
     line;
@@ -91,7 +45,7 @@ export class BinaryNode {
         this.right = right;
     }
     to_str(level) {
-        return indent(level) + BinaryTable[this.op].name + "(\n"
+        return indent(level) + binaryTable[this.op].name + "(\n"
             + this.left.to_str(level + 2)
             + "\n"
             + this.right.to_str(level + 2)
@@ -100,27 +54,6 @@ export class BinaryNode {
     }
     visit(v) {
         return v.visitBinary(this);
-    }
-}
-export class IndexNode {
-    line;
-    list;
-    index;
-    constructor(line, list, index) {
-        this.line = line;
-        this.list = list;
-        this.index = index;
-    }
-    to_str(level) {
-        return indent(level) + "Index(\n"
-            + this.list.to_str(level + 2)
-            + "\n"
-            + this.index.to_str(level + 2)
-            + "\n"
-            + indent(level) + ")";
-    }
-    visit(v) {
-        return v.visitIndex(this);
     }
 }
 export class BooleanNode {
@@ -139,25 +72,25 @@ export class BooleanNode {
 }
 export class CallNode {
     line;
-    callee;
-    ver;
+    name;
     args;
-    constructor(line, callee, ver, args) {
+    ver;
+    constructor(line, name, args, ver) {
         this.line = line;
-        this.callee = callee;
-        this.ver = ver;
+        this.name = name;
         this.args = args;
+        this.ver = ver;
     }
     to_str(level) {
         return indent(level) + "Call(\n"
-            + this.callee.to_str(level + 2)
+            + this.name.to_str(level + 2)
             + "\n"
             + indent(level + 2) + "[\n"
             + this.args.map(arg => arg.to_str(level + 4)).join("\n")
             + "\n"
-            + indent(level + 4) + "ver " + this.ver
-            + "\n"
             + indent(level + 2) + "]\n"
+            + indent(level + 2) + this.ver
+            + "\n"
             + indent(level) + ")";
     }
     visit(v) {
@@ -206,12 +139,33 @@ export class FileNode {
         this.stmts = stmts;
     }
     to_str(level) {
-        return "File(\n"
+        return indent(level) + "File(\n"
             + this.stmts.reduce((acc, curr) => acc + curr.to_str(level + 2), "")
-            + "\n)";
+            + indent(level) + "\n)";
     }
     visit(v) {
         return v.visitFile(this);
+    }
+}
+export class GetPropNode {
+    line;
+    obj;
+    prop;
+    constructor(line, obj, prop) {
+        this.line = line;
+        this.obj = obj;
+        this.prop = prop;
+    }
+    to_str(level) {
+        return indent(level) + "GetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitGetProp(this);
     }
 }
 export class IdentNode {
@@ -226,6 +180,27 @@ export class IdentNode {
     }
     visit(v) {
         return v.visitIdent(this);
+    }
+}
+export class IndexNode {
+    line;
+    list;
+    index;
+    constructor(line, list, index) {
+        this.line = line;
+        this.list = list;
+        this.index = index;
+    }
+    to_str(level) {
+        return indent(level) + "Index(\n"
+            + this.list.to_str(level + 2)
+            + "\n"
+            + this.index.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitIndex(this);
     }
 }
 export class ListNode {
@@ -256,6 +231,31 @@ export class NumberNode {
     }
     visit(v) {
         return v.visitNumber(this);
+    }
+}
+export class SetPropNode {
+    line;
+    obj;
+    prop;
+    value;
+    constructor(line, obj, prop, value) {
+        this.line = line;
+        this.obj = obj;
+        this.prop = prop;
+        this.value = value;
+    }
+    to_str(level) {
+        return indent(level) + "SetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + this.value.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitSetProp(this);
     }
 }
 export class StringNode {

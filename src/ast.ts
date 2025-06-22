@@ -1,6 +1,6 @@
 // @jonesangga, 08-06-2025, MIT License.
 //
-// TODO: Test this.
+// TODO: Complete the test.
 
 import { Op } from "./chunk.js"
 import { type Type, numberT, anyT } from "./literal/type.js"
@@ -29,6 +29,10 @@ export interface AST {
     visit<T>(v: Visitor<T>): T;
 }
 
+// This is for identifier (including function) assignment.
+// For property assignment use SetPropNode.
+// TODO: Think about array element assignment.
+
 export class AssignNode implements AST {
     constructor(public line:  number,
                 public left:  IdentNode,
@@ -36,7 +40,7 @@ export class AssignNode implements AST {
 
     to_str(level: number): string {
         return indent(level) + "Assign(\n"
-            + indent(level + 2) + this.left.to_str(level + 2)
+            + this.left.to_str(level + 2)
             + "\n"
             + this.right.to_str(level + 2)
             + "\n"
@@ -48,47 +52,6 @@ export class AssignNode implements AST {
     }
 }
 
-export class GetPropNode implements AST {
-    constructor(public line: number,
-                public obj:  AST,
-                public prop: string) {}
-
-    to_str(level: number): string {
-        return indent(level) + "GetProp(\n"
-            + this.obj.to_str(level + 2)
-            + "\n"
-            + indent(level + 2) + this.prop
-            + "\n"
-            + indent(level) + ")";
-    }
-
-    visit<T>(v: Visitor<T>): T {
-        return v.visitGetProp(this);
-    }
-}
-
-export class SetPropNode implements AST {
-    constructor(public line:  number,
-                public obj:   AST,
-                public prop:  string,
-                public value: AST) {}
-
-    to_str(level: number): string {
-        return indent(level) + "SetProp(\n"
-            + this.obj.to_str(level + 2)
-            + "\n"
-            + indent(level + 2) + this.prop
-            + "\n"
-            + this.value.to_str(level + 2)
-            + "\n"
-            + indent(level) + ")";
-    }
-
-    visit<T>(v: Visitor<T>): T {
-        return v.visitSetProp(this);
-    }
-}
-
 export const enum BinaryOp {
     Add,
     Divide,
@@ -96,14 +59,17 @@ export const enum BinaryOp {
     Subtract,
 }
 
-export const BinaryTable: {
-    [N in (keyof typeof BinaryOp) as (typeof BinaryOp)[N]]: { name: N, op: Op, type: Type }
+export const binaryTable: {
+    [N in (keyof typeof BinaryOp) as (typeof BinaryOp)[N]]: { name: N, op: Op, result: Type }
 } = {
-    [BinaryOp.Add]:      { name: "Add",      op: Op.Add, type: numberT },
-    [BinaryOp.Divide]:   { name: "Divide",   op: Op.Div, type: numberT },
-    [BinaryOp.Multiply]: { name: "Multiply", op: Op.Mul, type: numberT },
-    [BinaryOp.Subtract]: { name: "Subtract", op: Op.Sub, type: numberT },
+    [BinaryOp.Add]:      { name: "Add",      op: Op.Add, result: numberT },
+    [BinaryOp.Divide]:   { name: "Divide",   op: Op.Div, result: numberT },
+    [BinaryOp.Multiply]: { name: "Multiply", op: Op.Mul, result: numberT },
+    [BinaryOp.Subtract]: { name: "Subtract", op: Op.Sub, result: numberT },
 };
+
+// For now only arithmetic operations.
+// TODO: Add comparison, logic, string concat.
 
 export class BinaryNode implements AST {
     constructor(public line:  number,
@@ -112,7 +78,7 @@ export class BinaryNode implements AST {
                 public right: AST) {}
 
     to_str(level: number): string {
-        return indent(level) + BinaryTable[this.op].name + "(\n"
+        return indent(level) + binaryTable[this.op].name + "(\n"
             + this.left.to_str(level + 2)
             + "\n"
             + this.right.to_str(level + 2)
@@ -122,25 +88,6 @@ export class BinaryNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitBinary(this);
-    }
-}
-
-export class IndexNode implements AST {
-    constructor(public line:  number,
-                public list:  AST,
-                public index: AST) {}
-
-    to_str(level: number): string {
-        return indent(level) + "Index(\n"
-            + this.list.to_str(level + 2)
-            + "\n"
-            + this.index.to_str(level + 2)
-            + "\n"
-            + indent(level) + ")";
-    }
-
-    visit<T>(v: Visitor<T>): T {
-        return v.visitIndex(this);
     }
 }
 
@@ -157,22 +104,25 @@ export class BooleanNode implements AST {
     }
 }
 
+// Currently doesn't support lambda function,
+// hence the `name` is always an IdentNode.
+
 export class CallNode implements AST {
-    constructor(public line:   number,
-                public callee: AST,
-                public ver:    number,
-                public args:   AST[]) {}
+    constructor(public line: number,
+                public name: IdentNode,
+                public args: AST[],
+                public ver:  number) {}
 
     to_str(level: number): string {
         return indent(level) + "Call(\n"
-            + this.callee.to_str(level + 2)
+            + this.name.to_str(level + 2)
             + "\n"
             + indent(level + 2) + "[\n"
             + this.args.map(arg => arg.to_str(level + 4)).join("\n")
             + "\n"
-            + indent(level + 4) + "ver " + this.ver
-            + "\n"
             + indent(level + 2) + "]\n"
+            + indent(level + 2) + this.ver
+            + "\n"
             + indent(level) + ")";
     }
 
@@ -180,6 +130,12 @@ export class CallNode implements AST {
         return v.visitCall(this);
     }
 }
+
+// This is a wrapper for CallNode to make sure user handles the return value
+// of function call in a statement that only has function call.
+// Unless keyword :- is used for explicit expression statement.
+//
+// TODO: Should I remove the wrapper and duplicate the CallNode?
 
 export class CallVoidNode implements AST {
     constructor(public line: number,
@@ -218,13 +174,32 @@ export class FileNode implements AST {
                 public stmts: AST[]) {}
 
     to_str(level: number): string {
-        return "File(\n"
+        return indent(level) + "File(\n"
             + this.stmts.reduce((acc, curr) => acc + curr.to_str(level + 2), "")
-            + "\n)";
+            + indent(level) + "\n)";
     }
 
     visit<T>(v: Visitor<T>): T {
         return v.visitFile(this);
+    }
+}
+
+export class GetPropNode implements AST {
+    constructor(public line: number,
+                public obj:  AST,
+                public prop: string) {}
+
+    to_str(level: number): string {
+        return indent(level) + "GetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitGetProp(this);
     }
 }
 
@@ -238,6 +213,25 @@ export class IdentNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitIdent(this);
+    }
+}
+
+export class IndexNode implements AST {
+    constructor(public line:  number,
+                public list:  AST,
+                public index: AST) {}
+
+    to_str(level: number): string {
+        return indent(level) + "Index(\n"
+            + this.list.to_str(level + 2)
+            + "\n"
+            + this.index.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitIndex(this);
     }
 }
 
@@ -266,6 +260,28 @@ export class NumberNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitNumber(this);
+    }
+}
+
+export class SetPropNode implements AST {
+    constructor(public line:  number,
+                public obj:   AST,
+                public prop:  string,
+                public value: AST) {}
+
+    to_str(level: number): string {
+        return indent(level) + "SetProp(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.prop
+            + "\n"
+            + this.value.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitSetProp(this);
     }
 }
 

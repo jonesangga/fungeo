@@ -1,6 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AST, AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
@@ -57,7 +57,7 @@ class TypeChecker implements Visitor<Type> {
     }
 
     visitBinary(node: BinaryNode): Type {
-        let type = BinaryTable[node.op].type;
+        let type = binaryTable[node.op].result;
         assertType(type, node.left.visit(this), node.left.line);
         assertType(type, node.right.visit(this), node.right.line);
         return type;
@@ -119,10 +119,10 @@ class TypeChecker implements Visitor<Type> {
     }
 
     visitCall(node: CallNode): Type {
-        let fnType = node.callee.visit(this);
+        let fnType = node.name.visit(this);
         console.log(fnType);
         if (!(fnType instanceof OverloadT))
-            error(node.callee.line, `${node.callee} is not a function`);
+            error(node.name.line, `${node.name} is not a function`);
         let input: Type[] = [];
         node.args.forEach(arg => input.push(arg.visit(this)));
         let [ver, type] = overload(input, fnType, node.line);

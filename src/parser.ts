@@ -164,6 +164,8 @@ function parse_string(): StringNode {
 // Currently there is no namespace.
 // TODO: Support parsing the `.` in namespace, like `Seg.FromPoints()`.
 function call(lhs: AST): CallNode {
+    if (!(lhs instanceof IdentNode))
+        error("invalid syntax for function call");
     let line = prevTok.line;
     let args: AST[] = [];
     if (!check(TokenT.RParen)) {
@@ -172,7 +174,7 @@ function call(lhs: AST): CallNode {
         } while (match(TokenT.Comma));
     }
     consume(TokenT.RParen, "expect ')' after argument list");
-    return new CallNode(line, lhs, -1, args);   // -1 is dummy. It is completed in typechecker.
+    return new CallNode(line, lhs, args, -1);   // The version -1 is dummy. It is completed in typechecker.
 }
 
 function parse_ident(): IdentNode {

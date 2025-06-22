@@ -1,4 +1,4 @@
-import { BinaryTable } from "./ast.js";
+import { binaryTable } from "./ast.js";
 import { names } from "./vm.js";
 import { FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
@@ -44,7 +44,7 @@ class TypeChecker {
         return booleanT;
     }
     visitBinary(node) {
-        let type = BinaryTable[node.op].type;
+        let type = binaryTable[node.op].result;
         assertType(type, node.left.visit(this), node.left.line);
         assertType(type, node.right.visit(this), node.right.line);
         return type;
@@ -98,10 +98,10 @@ class TypeChecker {
         return nothingT;
     }
     visitCall(node) {
-        let fnType = node.callee.visit(this);
+        let fnType = node.name.visit(this);
         console.log(fnType);
         if (!(fnType instanceof OverloadT))
-            error(node.callee.line, `${node.callee} is not a function`);
+            error(node.name.line, `${node.name} is not a function`);
         let input = [];
         node.args.forEach(arg => input.push(arg.visit(this)));
         let [ver, type] = overload(input, fnType, node.line);

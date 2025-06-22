@@ -125,6 +125,8 @@ function parse_string() {
     return new StringNode(prevTok.line, prevTok.lexeme);
 }
 function call(lhs) {
+    if (!(lhs instanceof IdentNode))
+        error("invalid syntax for function call");
     let line = prevTok.line;
     let args = [];
     if (!check(800)) {
@@ -133,7 +135,7 @@ function call(lhs) {
         } while (match(100));
     }
     consume(800, "expect ')' after argument list");
-    return new CallNode(line, lhs, -1, args);
+    return new CallNode(line, lhs, args, -1);
 }
 function parse_ident() {
     return new IdentNode(prevTok.line, prevTok.lexeme);
