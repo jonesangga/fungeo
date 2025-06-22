@@ -205,6 +205,20 @@ let circle = new FGCallNative("circle", _circle,
     ])
 );
 
+function _intersect(ver: number): void {
+    let q = pop() as Circle;
+    let p = pop() as Circle;
+    pop();              // The function.
+    let points = p.intersect(q);
+    let res = new FGList(points, pointT);
+    push(res);
+}
+let intersect = new FGCallNative("intersect", _intersect,
+    new OverloadT([
+        new FunctionT([circleT, circleT], new ListT(pointT)),
+    ])
+);
+
 // function _rcircle(): void {
     // let q = (pop() as RichPoint);
     // let p = (pop() as RichPoint);
@@ -609,6 +623,7 @@ export let nativeNames: Names = {
     // "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     // "E":      { type: E.sig, value: E },
     "circle":    { type: circle.sig, value: circle },
+    "intersect": { type: intersect.sig, value: intersect },
     "pt":        { type: pt.sig, value: pt },
     "segment":   { type: segment.sig, value: segment },
     // "rpt":    { type: rpt.sig, value: rpt },

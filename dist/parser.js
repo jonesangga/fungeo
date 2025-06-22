@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -201,12 +201,20 @@ function var_decl() {
 }
 function stmt() {
     if (check(1730)) {
-        return expression();
+        return assign_or_call_void();
     }
     else if (match(1410)) {
         return expr_stmt();
     }
     error_at_current("forbiden expr stmt");
+}
+function assign_or_call_void() {
+    let ast = expression();
+    if (ast instanceof AssignNode)
+        return ast;
+    if (ast instanceof CallNode)
+        return new CallVoidNode(ast.line, ast);
+    error("use :- for expression statement");
 }
 function expr_stmt() {
     let line = prevTok.line;

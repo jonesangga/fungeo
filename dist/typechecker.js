@@ -108,6 +108,12 @@ class TypeChecker {
         node.ver = ver;
         return type;
     }
+    visitCallVoid(node) {
+        let returnT = node.node.visit(this);
+        if (!nothingT.equal(returnT))
+            error(node.line, "unused return value");
+        return nothingT;
+    }
 }
 function overload(input, fn, line) {
     for (let i = 0; i < fn.sigs.length; i++) {

@@ -3,7 +3,7 @@
 // TODO: Test error messages in file.
 
 import { type Token, TokenT, scanner } from "./scanner.js"
-import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
@@ -256,12 +256,22 @@ function var_decl(): VarDeclNode {
 
 function stmt(): AST {
     if (check(TokenT.Ident)) {
-        return expression();
+        // It is either assignment or calling function that doesn't return value.
+        return assign_or_call_void();
     }
     else if (match(TokenT.ColonMin)) {
         return expr_stmt();
     }
     error_at_current("forbiden expr stmt");
+}
+
+function assign_or_call_void(): AssignNode | CallVoidNode {
+    let ast = expression();
+    if (ast instanceof AssignNode)
+        return ast;
+    if (ast instanceof CallNode)
+        return new CallVoidNode(ast.line, ast);
+    error("use :- for expression statement");
 }
 
 function expr_stmt(): ExprStmtNode {

@@ -10,6 +10,7 @@ export interface Visitor<T> {
     visitBinary   (node: BinaryNode):   T;
     visitBoolean  (node: BooleanNode):  T;
     visitCall     (node: CallNode):     T;
+    visitCallVoid (node: CallVoidNode): T;
     visitExprStmt (node: ExprStmtNode): T;
     visitFile     (node: FileNode):     T;
     visitGetProp  (node: GetPropNode):  T;
@@ -177,6 +178,22 @@ export class CallNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitCall(this);
+    }
+}
+
+export class CallVoidNode implements AST {
+    constructor(public line: number,
+                public node: CallNode) {}
+
+    to_str(level: number): string {
+        return indent(level) + "CallVoid(\n"
+            + this.node.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitCallVoid(this);
     }
 }
 

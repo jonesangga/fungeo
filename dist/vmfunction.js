@@ -79,6 +79,17 @@ let circle = new FGCallNative("circle", _circle, new OverloadT([
     new FunctionT([numberT, numberT, numberT], circleT),
     new FunctionT([pointT, pointT], circleT),
 ]));
+function _intersect(ver) {
+    let q = pop();
+    let p = pop();
+    pop();
+    let points = p.intersect(q);
+    let res = new FGList(points, pointT);
+    push(res);
+}
+let intersect = new FGCallNative("intersect", _intersect, new OverloadT([
+    new FunctionT([circleT, circleT], new ListT(pointT)),
+]));
 function _pt(ver) {
     let y = pop().value;
     let x = pop().value;
@@ -118,6 +129,7 @@ export let nativeNames = {
     "print": { type: print.sig, value: print },
     "draw": { type: draw.sig, value: draw },
     "circle": { type: circle.sig, value: circle },
+    "intersect": { type: intersect.sig, value: intersect },
     "pt": { type: pt.sig, value: pt },
     "segment": { type: segment.sig, value: segment },
 };

@@ -70,6 +70,9 @@ class CodeGen {
         emitBytes(200, arity, node.line);
         emitByte(node.ver, node.line);
     }
+    visitCallVoid(node) {
+        node.node.visit(this);
+    }
 }
 function emitByte(byte, line) {
     curr_chunk().write(byte, line);

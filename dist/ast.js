@@ -164,6 +164,23 @@ export class CallNode {
         return v.visitCall(this);
     }
 }
+export class CallVoidNode {
+    line;
+    node;
+    constructor(line, node) {
+        this.line = line;
+        this.node = node;
+    }
+    to_str(level) {
+        return indent(level) + "CallVoid(\n"
+            + this.node.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitCallVoid(this);
+    }
+}
 export class ExprStmtNode {
     line;
     expr;

@@ -1,6 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AST, AssignNode, BinaryNode, BinaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
@@ -128,6 +128,13 @@ class TypeChecker implements Visitor<Type> {
         let [ver, type] = overload(input, fnType, node.line);
         node.ver = ver;
         return type;
+    }
+
+    visitCallVoid(node: CallVoidNode): Type {
+        let returnT = node.node.visit(this);
+        if (!nothingT.equal(returnT))
+            error(node.line, "unused return value");
+        return nothingT;
     }
 }
 
