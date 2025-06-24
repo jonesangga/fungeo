@@ -542,24 +542,32 @@ let segment = new FGCallNative("segment", _segment,
     ])
 );
 
-// function _rseg(): void {
-    // let y2 = (pop() as FGNumber).value;
-    // let x2 = (pop() as FGNumber).value;
-    // let y1 = (pop() as FGNumber).value;
-    // let x1 = (pop() as FGNumber).value;
-    // pop();              // The function.
-    // let p = new RichPoint(x1, y1);
-    // p.label = "P";
-    // let q = new RichPoint(x2, y2);
-    // q.label = "Q";
-    // push(new RichSegment(p, q));
-// }
-// let rseg = new FGCallNative("rseg", _rseg,
-    // new FunctionT(
-        // [numberT, numberT, numberT, numberT],
-        // richSegmentT,
-    // )
-// );
+function _rsegment(ver: number): void {
+    if (ver === 0) {
+        let y2 = (pop() as FGNumber).value;
+        let x2 = (pop() as FGNumber).value;
+        let y1 = (pop() as FGNumber).value;
+        let x1 = (pop() as FGNumber).value;
+        pop();              // The function.
+        let p = new RichPoint(x1, y1);
+        p.label = "P";
+        let q = new RichPoint(x2, y2);
+        q.label = "Q";
+        push(new RichSegment(p, q));
+    }
+    else if (ver === 1) {
+        let q = pop() as RichPoint;
+        let p = pop() as RichPoint;
+        pop();              // The function.
+        push(new RichSegment(p, q));
+    }
+}
+let rsegment = new FGCallNative("rsegment", _rsegment,
+    new OverloadT([
+        new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
+        new FunctionT([richPointT, richPointT], richSegmentT),
+    ])
+);
 
 // function _Midpoint(): void {
     // let segment = pop() as Segment;
@@ -631,6 +639,7 @@ export let nativeNames: Names = {
     "pt":        { type: pt.sig, value: pt },
     "rpt":       { type: rpt.sig, value: rpt },
     "segment":   { type: segment.sig, value: segment },
+    "rsegment":  { type: rsegment.sig, value: rsegment },
     // "Pic":    { type: Pic.sig, value: Pic },
     // "Cw":     { type: Cw.sig, value: Cw },
     // "Ccw":    { type: Ccw.sig, value: Ccw },
@@ -645,7 +654,6 @@ export let nativeNames: Names = {
         // "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
         // "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },
     // }},
-    // "rseg":   { type: rseg.sig, value: rseg },
     // "Midpoint": { type: Midpoint.sig, value: Midpoint },
     // "sqrt": { type: sqrt.sig, value: sqrt },
     // "abs": { type: abs.sig, value: abs },

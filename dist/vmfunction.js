@@ -5,7 +5,7 @@ import fish from "./data/fish.js";
 import repl from "./ui/repl.js";
 import { Circle, RichCircle } from "./geo/circle.js";
 import { Point, RichPoint } from "./geo/point.js";
-import { Segment } from "./geo/segment.js";
+import { Segment, RichSegment } from "./geo/segment.js";
 import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
@@ -148,6 +148,30 @@ let segment = new FGCallNative("segment", _segment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], segmentT),
     new FunctionT([pointT, pointT], segmentT),
 ]));
+function _rsegment(ver) {
+    if (ver === 0) {
+        let y2 = pop().value;
+        let x2 = pop().value;
+        let y1 = pop().value;
+        let x1 = pop().value;
+        pop();
+        let p = new RichPoint(x1, y1);
+        p.label = "P";
+        let q = new RichPoint(x2, y2);
+        q.label = "Q";
+        push(new RichSegment(p, q));
+    }
+    else if (ver === 1) {
+        let q = pop();
+        let p = pop();
+        pop();
+        push(new RichSegment(p, q));
+    }
+}
+let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
+    new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
+    new FunctionT([richPointT, richPointT], richSegmentT),
+]));
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
@@ -164,4 +188,5 @@ export let nativeNames = {
     "pt": { type: pt.sig, value: pt },
     "rpt": { type: rpt.sig, value: rpt },
     "segment": { type: segment.sig, value: segment },
+    "rsegment": { type: rsegment.sig, value: rsegment },
 };
