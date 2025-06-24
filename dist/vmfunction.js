@@ -111,22 +111,38 @@ let rcircle = new FGCallNative("rcircle", _rcircle, new OverloadT([
     new FunctionT([richPointT, richPointT], richCircleT),
 ]));
 function _pt(ver) {
-    let y = pop().value;
-    let x = pop().value;
-    pop();
-    push(new Point(x, y));
+    if (ver === 0) {
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        push(new Point(x, y));
+    }
+    else if (ver === 1) {
+        let rp = pop();
+        pop();
+        push(new Point(rp.x, rp.y));
+    }
 }
 let pt = new FGCallNative("pt", _pt, new OverloadT([
     new FunctionT([numberT, numberT], pointT),
+    new FunctionT([richPointT], pointT),
 ]));
 function _rpt(ver) {
-    let y = pop().value;
-    let x = pop().value;
-    pop();
-    push(new RichPoint(x, y));
+    if (ver === 0) {
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        push(new RichPoint(x, y));
+    }
+    else {
+        let p = pop();
+        pop();
+        push(new RichPoint(p.x, p.y));
+    }
 }
 let rpt = new FGCallNative("rpt", _rpt, new OverloadT([
     new FunctionT([numberT, numberT], richPointT),
+    new FunctionT([pointT], richPointT),
 ]));
 function _segment(ver) {
     if (ver === 0) {

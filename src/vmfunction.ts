@@ -296,26 +296,42 @@ let rcircle = new FGCallNative("rcircle", _rcircle,
 // );
 
 function _pt(ver: number): void {
-    let y = (pop() as FGNumber).value;
-    let x = (pop() as FGNumber).value;
-    pop();              // The function.
-    push(new Point(x, y));
+    if (ver === 0) {
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(new Point(x, y));
+    }
+    else if (ver === 1) {
+        let rp = pop() as RichPoint;
+        pop();              // The function.
+        push(new Point(rp.x, rp.y));
+    }
 }
 let pt = new FGCallNative("pt", _pt,
     new OverloadT([
         new FunctionT([numberT, numberT], pointT),
+        new FunctionT([richPointT], pointT),
     ])
 );
 
 function _rpt(ver: number): void {
-    let y = (pop() as FGNumber).value;
-    let x = (pop() as FGNumber).value;
-    pop();              // The function.
-    push(new RichPoint(x, y));
+    if (ver === 0) {
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(new RichPoint(x, y));
+    }
+    else {
+        let p = pop() as Point;
+        pop();              // The function.
+        push(new RichPoint(p.x, p.y));
+    }
 }
 let rpt = new FGCallNative("rpt", _rpt,
     new OverloadT([
         new FunctionT([numberT, numberT], richPointT),
+        new FunctionT([pointT], richPointT),
     ])
 );
 
