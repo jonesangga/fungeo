@@ -84,10 +84,17 @@ function _circle(ver) {
         let r = Math.sqrt((q.x - p.x) ** 2 + (q.y - p.y) ** 2);
         push(new Circle(p.x, p.y, r));
     }
+    else if (ver === 2) {
+        let r = pop().value;
+        let p = pop();
+        pop();
+        push(new Circle(p.x, p.y, r));
+    }
 }
 let circle = new FGCallNative("circle", _circle, new OverloadT([
     new FunctionT([numberT, numberT, numberT], circleT),
     new FunctionT([pointT, pointT], circleT),
+    new FunctionT([pointT, numberT], circleT),
 ]));
 function _intersect(ver) {
     let q = pop();
