@@ -1,4 +1,4 @@
-// import "./ui/demo.js"
+import "./ui/demo.js"
 import repl from "./ui/repl.js"
 import canvas from "./ui/canvas.js"
 import { parse } from "./parser.js";

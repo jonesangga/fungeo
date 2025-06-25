@@ -1,3 +1,4 @@
+import { showDemoSelect, toggleDemo } from "./demo.js";
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(`
 body {
@@ -155,9 +156,17 @@ termBtn.innerHTML = "terminal";
 termBtn.addEventListener("mousedown", term_btn_cb);
 function term_btn_cb() {
     resultArea.style.visibility = "hidden";
-    terminal.style.visibility = showTerminal ? "hidden" : "visible";
+    if (showTerminal) {
+        terminal.style.visibility = "hidden";
+        termBtn.style.border = "revert";
+    }
+    else {
+        terminal.style.visibility = "visible";
+        termBtn.style.border = "4px solid #000";
+    }
     showTerminal = !showTerminal;
 }
+let showTerminal = false;
 const terminal = document.createElement("div");
 document.body.appendChild(terminal);
 terminal.style.position = "absolute";
@@ -169,7 +178,7 @@ terminal.style.border = "1px solid #000";
 terminal.style.background = "#eee";
 terminal.style.overflow = "auto";
 terminal.style.whiteSpace = "pre";
-let showTerminal = true;
+terminal.style.visibility = showTerminal ? "visible" : "hidden";
 function terminal_update() {
     terminal.scrollTop = terminal.scrollHeight;
 }
@@ -180,6 +189,17 @@ function terminal_push(text, bg) {
     div.style.borderBottom = "1px solid #000";
     if (typeof bg !== "undefined")
         div.style.background = bg;
+}
+const demoBtn = document.createElement("button");
+buttonArea.appendChild(demoBtn);
+demoBtn.innerHTML = "demo";
+demoBtn.addEventListener("mousedown", demo_btn_cb);
+function demo_btn_cb() {
+    if (showDemoSelect)
+        demoBtn.style.border = "revert";
+    else
+        demoBtn.style.border = "4px solid #000";
+    toggleDemo();
 }
 const repl = {
     kind: 2500,

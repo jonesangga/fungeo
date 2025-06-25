@@ -11,8 +11,9 @@
 //   resultArea: When terminal is hidden, displays the output or error message of the last executed code.
 // Terminal contains all histories, outputs and errors. Hidden by default.
 
-import { Kind, type Repl } from "../value.js"
-import { welcome } from "../data/help.js"
+import { Kind, type Repl } from "../value.js";
+import { welcome } from "../data/help.js";
+import { showDemoSelect, toggleDemo } from "./demo.js";
 
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(`
@@ -212,9 +213,18 @@ termBtn.addEventListener("mousedown", term_btn_cb);
 
 function term_btn_cb(): void {
     resultArea.style.visibility = "hidden";
-    terminal.style.visibility = showTerminal ? "hidden" : "visible";
+    if (showTerminal) {
+        terminal.style.visibility = "hidden";
+        termBtn.style.border = "revert";
+    }
+    else {
+        terminal.style.visibility = "visible";
+        termBtn.style.border = "4px solid #000";
+    }
     showTerminal = !showTerminal;
 }
+
+let showTerminal = false;
 
 const terminal = document.createElement("div");
 document.body.appendChild(terminal);
@@ -227,9 +237,7 @@ terminal.style.border     = "1px solid #000";
 terminal.style.background = "#eee";
 terminal.style.overflow   = "auto";
 terminal.style.whiteSpace = "pre";
-// terminal.style.visibility = "hidden";
-
-let showTerminal = true;
+terminal.style.visibility = showTerminal ? "visible" : "hidden";
 
 function terminal_update(): void {
     terminal.scrollTop = terminal.scrollHeight;
@@ -246,6 +254,25 @@ function terminal_push(text: string, bg?: string): void {
 }
 
 // terminal_push(welcome, colorOk);
+
+//--------------------------------------------------------------------
+// Demo.
+
+const demoBtn = document.createElement("button");
+buttonArea.appendChild(demoBtn);
+demoBtn.innerHTML = "demo";
+
+demoBtn.addEventListener("mousedown", demo_btn_cb);
+
+function demo_btn_cb(): void {
+    if (showDemoSelect)
+        demoBtn.style.border = "revert";
+    else
+        demoBtn.style.border = "4px solid #000";
+    toggleDemo();
+}
+
+//--------------------------------------------------------------------
 
 const repl: Repl = {
     kind: Kind.Repl,

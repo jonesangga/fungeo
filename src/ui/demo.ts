@@ -2,27 +2,31 @@ import repl from "./repl.js"
 import { vm } from "../vm.js"
 
 const files = [
-    ["fibonacci", "fibonacci.fg"],
-    ["fizzbuzz", "fizzbuzz.fg"],
-    ["demo1", "demo1.fg"],
-    ["demo2", "demo2.fg"],
-    ["demo3", "demo3.fg"],
-    ["demo4", "demo4.fg"],
+    ["book 1 prop 1", "demo1.fg"],
 ];
 
-const selectEl = document.createElement("select");
-document.body.appendChild(selectEl);
-selectEl.style.position = "absolute";
-selectEl.style.fontSize = "16px";
+export let showDemoSelect = false;
+
+const demoSelect = document.createElement("select");
+document.body.appendChild(demoSelect);
+demoSelect.style.position = "absolute";
+demoSelect.style.fontSize = "16px";
+demoSelect.style.visibility = showDemoSelect ? "visible" : "hidden";
+
+export function toggleDemo(): void {
+    demoSelect.style.visibility = showDemoSelect ? "hidden" : "visible";
+    showDemoSelect = !showDemoSelect;
+}
+
 let option = "<option value='-1'>Demo (will reset)</option>";
 
 for (let i = 0; i < files.length; i++) {
     option += `<option value="${ i }">${ files[i][0] }</option>`;
 }
 
-selectEl.innerHTML = option;
-selectEl.onchange = () => {
-    let value = parseInt(selectEl.value);
+demoSelect.innerHTML = option;
+demoSelect.onchange = () => {
+    let value = parseInt(demoSelect.value);
     if (value === -1) return;
     get_data("demo/" + files[value][1]);
 };

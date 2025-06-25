@@ -1,2 +1,23 @@
-n = 1
-Print $ "this is demo " <> Show n
+// book 1, prop 1
+let A = rpt(120, 120)
+let B = rpt(180, 180)
+let AB = rsegment(A, B)
+draw(A)
+draw(B)
+draw(AB)
+
+let S = rcircle(A, length(AB))
+draw(S)
+let T = rcircle(B, length(AB))
+draw(T)
+
+let ps = intersect(S, T)
+let C = ps[0]
+draw(C)
+let AC = rsegment(A, C)
+let BC = rsegment(B, C)
+draw(AC)
+draw(BC)
+print(length(AB))
+print(length(AC))
+print(length(BC))

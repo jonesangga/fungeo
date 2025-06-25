@@ -1,4 +1,0 @@
-fn Fib n: Num -> Num =
-  ifx n < 2
-    then n
-    else Fib (n - 1) + Fib (n - 2)
