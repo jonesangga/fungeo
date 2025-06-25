@@ -1,5 +1,5 @@
 import { pop, push, vm_output } from "./vm.js";
-import { FGCallNative, FGList } from "./value.js";
+import { FGCallNative, FGNumber, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import fish from "./data/fish.js";
 import repl from "./ui/repl.js";
@@ -164,6 +164,22 @@ let segment = new FGCallNative("segment", _segment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], segmentT),
     new FunctionT([pointT, pointT], segmentT),
 ]));
+function _length(ver) {
+    if (ver === 0) {
+        let s = pop();
+        pop();
+        push(new FGNumber(s.length()));
+    }
+    else if (ver === 1) {
+        let s = pop();
+        pop();
+        push(new FGNumber(s.length()));
+    }
+}
+let length = new FGCallNative("length", _length, new OverloadT([
+    new FunctionT([segmentT], numberT),
+    new FunctionT([richSegmentT], numberT),
+]));
 function _rsegment(ver) {
     if (ver === 0) {
         let y2 = pop().value;
@@ -205,4 +221,5 @@ export let nativeNames = {
     "rpt": { type: rpt.sig, value: rpt },
     "segment": { type: segment.sig, value: segment },
     "rsegment": { type: rsegment.sig, value: rsegment },
+    "length": { type: length.sig, value: length },
 };

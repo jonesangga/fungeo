@@ -35,6 +35,10 @@ export class Segment {
         return new FGType(segmentT);
     }
 
+    length(): number {
+        return Math.sqrt((this.x2 - this.x1)**2 + (this.y2 - this.y1)**2);
+    }
+
     draw(): void {
         c.beginPath();
         c.moveTo(this.x1, this.y1);
@@ -68,6 +72,10 @@ export class RichSegment {
 
     typeof(): FGType {
         return new FGType(segmentT);
+    }
+
+    length(): number {
+        return Math.sqrt((this.q.x - this.p.x)**2 + (this.q.y - this.p.y)**2);
     }
 
     draw(): void {

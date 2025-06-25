@@ -558,6 +558,25 @@ let segment = new FGCallNative("segment", _segment,
     ])
 );
 
+function _length(ver: number): void {
+    if (ver === 0) {
+        let s = pop() as Segment;
+        pop();              // The function.
+        push(new FGNumber(s.length()));
+    }
+    else if (ver === 1) {
+        let s = pop() as RichSegment;
+        pop();              // The function.
+        push(new FGNumber(s.length()));
+    }
+}
+let length = new FGCallNative("length", _length,
+    new OverloadT([
+        new FunctionT([segmentT], numberT),
+        new FunctionT([richSegmentT], numberT),
+    ])
+);
+
 function _rsegment(ver: number): void {
     if (ver === 0) {
         let y2 = (pop() as FGNumber).value;
@@ -656,6 +675,7 @@ export let nativeNames: Names = {
     "rpt":       { type: rpt.sig, value: rpt },
     "segment":   { type: segment.sig, value: segment },
     "rsegment":  { type: rsegment.sig, value: rsegment },
+    "length":    { type: length.sig, value: length },
     // "Pic":    { type: Pic.sig, value: Pic },
     // "Cw":     { type: Cw.sig, value: Cw },
     // "Ccw":    { type: Ccw.sig, value: Ccw },
