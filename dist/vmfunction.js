@@ -102,13 +102,23 @@ let intersect = new FGCallNative("intersect", _intersect, new OverloadT([
     new FunctionT([richCircleT, richCircleT], new ListT(richPointT)),
 ]));
 function _rcircle(ver) {
-    let q = pop();
-    let p = pop();
-    pop();
-    push(new RichCircle(p, q));
+    if (ver === 0) {
+        let q = pop();
+        let p = pop();
+        pop();
+        push(new RichCircle(p, q));
+    }
+    else if (ver === 1) {
+        let r = pop().value;
+        let p = pop();
+        pop();
+        let q = new RichPoint(p.x + r, p.y);
+        push(new RichCircle(p, q));
+    }
 }
 let rcircle = new FGCallNative("rcircle", _rcircle, new OverloadT([
     new FunctionT([richPointT, richPointT], richCircleT),
+    new FunctionT([richPointT, numberT], richCircleT),
 ]));
 function _pt(ver) {
     if (ver === 0) {

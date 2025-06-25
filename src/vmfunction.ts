@@ -223,14 +223,24 @@ let intersect = new FGCallNative("intersect", _intersect,
 );
 
 function _rcircle(ver: number): void {
-    let q = (pop() as RichPoint);
-    let p = (pop() as RichPoint);
-    pop();              // The function.
-    push(new RichCircle(p, q));
+    if (ver === 0) {
+        let q = pop() as RichPoint;
+        let p = pop() as RichPoint;
+        pop();              // The function.
+        push(new RichCircle(p, q));
+    }
+    else if (ver === 1) {
+        let r = (pop() as FGNumber).value;
+        let p = pop() as RichPoint;
+        pop();              // The function.
+        let q = new RichPoint(p.x + r, p.y);
+        push(new RichCircle(p, q));
+    }
 }
 let rcircle = new FGCallNative("rcircle", _rcircle,
     new OverloadT([
         new FunctionT([richPointT, richPointT], richCircleT),
+        new FunctionT([richPointT, numberT], richCircleT),
     ])
 );
 
