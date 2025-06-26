@@ -1,5 +1,7 @@
 # FunGeo - Fun Geometry
 
+This is just my hobby project. This is not intended to be used for serious stuff.
+
 Status: Still experimenting. WIP.
 
 - [Live](https://jonesangga.github.io/fungeo/)
