@@ -17,6 +17,7 @@ export interface Visitor<T> {
     visitIdent    (node: IdentNode):    T;
     visitIndex    (node: IndexNode):    T;
     visitList     (node: ListNode):     T;
+    visitNegative (node: NegativeNode): T;
     visitNumber   (node: NumberNode):   T;
     visitSetProp  (node: SetPropNode):  T;
     visitString   (node: StringNode):   T;
@@ -248,6 +249,22 @@ export class ListNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitList(this);
+    }
+}
+
+export class NegativeNode implements AST {
+    constructor(public line:  number,
+                public right: AST) {}
+
+    to_str(level: number): string {
+        return indent(level) + "Negative(\n"
+            + this.right.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitNegative(this);
     }
 }
 

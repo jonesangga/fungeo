@@ -7,6 +7,7 @@ import { FGType, Type, FunctionT, OverloadT, CallUserT, ListT, booleanT, numberT
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
 import { Circle, RichCircle } from "./geo/circle.js"
+import { Coord } from "./geo/coordinate.js"
 import { Point, RichPoint } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
@@ -26,6 +27,7 @@ export const enum Kind {
     Struct     = 610,
     Type       = 650,
     Circle     = 700,     // Geometry.
+    Coord      = 720,
     Ellipse    = 750,
     Picture    = 840,
     Point      = 850,
@@ -49,6 +51,7 @@ export const KindName: {
     [Kind.Circle]: "Circle",
     [Kind.Color]: "Color",
     [Kind.Complex]: "Complex",
+    [Kind.Coord]: "Coord",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
     [Kind.Nothing]: "Nothing",
@@ -298,7 +301,7 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Ellipse | Picture | Point | Rect | RichCircle | RichPoint | RichSegment | Segment;
+export type GeoObj = Circle | Coord | Ellipse | Picture | Point | Rect | RichCircle | RichPoint | RichSegment | Segment;
 export type RichGeoObj = RichPoint;
 export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;

@@ -308,6 +308,21 @@ export class RectT implements Type {
     }
 }
 
+export class CoordT implements Type {
+    field: Record<string, Type> = {
+        xl: numberT,
+        xr: numberT,
+        yl: numberT,
+        yr: numberT,
+    };
+    to_str(): string {
+        return "Coord";
+    }
+    equal(other: Type): boolean {
+        return other instanceof CoordT;
+    }
+}
+
 export class SegmentT implements Type {
     field: Record<string, Type> = {
         x1: numberT,
@@ -372,9 +387,10 @@ export const pointT = new PointT();
 export const richPointT = new RichPointT();
 export const richCircleT = new RichCircleT();
 export const rectT = new RectT();
+export const coordT = new CoordT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
-export type GeoT = CircleT | RichCircleT| PointT | RichPointT | SegmentT | RichSegmentT;
+export type GeoT = CircleT | RichCircleT| CoordT | PointT | RichPointT | SegmentT | RichSegmentT;

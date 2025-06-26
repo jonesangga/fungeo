@@ -4,6 +4,7 @@ import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import { Circle, RichCircle } from "./geo/circle.js"
+import { Coord } from "./geo/coordinate.js"
 import { Point, RichPoint } from "./geo/point.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
@@ -12,11 +13,11 @@ import { Segment, RichSegment } from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { type Type, ListT, UnionT, anyT, pictureT, FunctionT, OverloadT,
          ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT,
-         colorT, canvasT, replT, NothingT, AnyT } from "./literal/type.js"
+         colorT, canvasT, coordT, replT, NothingT, AnyT } from "./literal/type.js"
 
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
+const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 const fillableT = new UnionT([circleT, ellipseT]);
 
@@ -126,7 +127,7 @@ function draw_onScreen() {
 }
 
 function isGeo(v: Value): v is GeoObj {
-    return [Kind.Circle, Kind.RichCircle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.RichSegment, Kind.Segment].includes(v.kind);
+    return [Kind.Circle, Kind.Coord, Kind.RichCircle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.RichSegment, Kind.Segment].includes(v.kind);
 }
 
 function isRichGeo(v: Value): v is RichGeoObj {
@@ -501,6 +502,20 @@ let pic = new FGCallNative("pic", _pic,
     ])
 );
 
+function _coord(): void {
+    let yr = (pop() as FGNumber).value;
+    let yl = (pop() as FGNumber).value;
+    let xr = (pop() as FGNumber).value;
+    let xl = (pop() as FGNumber).value;
+    pop();              // The function.
+    push(new Coord(xl, xr, yl, yr));
+}
+let coord = new FGCallNative("coord", _coord,
+    new OverloadT([
+        new FunctionT([numberT, numberT, numberT, numberT], coordT),
+    ])
+);
+
 // function _R(): void {
     // let h = (pop() as FGNumber).value;
     // let w = (pop() as FGNumber).value;
@@ -683,6 +698,7 @@ export let nativeNames: Names = {
     // "E":      { type: E.sig, value: E },
     "circle":    { type: circle.sig, value: circle },
     "rcircle":   { type: rcircle.sig, value: rcircle },
+    "coord":     { type: coord.sig, value: coord },
     "intersect": { type: intersect.sig, value: intersect },
     "pt":        { type: pt.sig, value: pt },
     "rpt":       { type: rpt.sig, value: rpt },

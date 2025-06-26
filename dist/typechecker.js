@@ -21,6 +21,11 @@ class TypeChecker {
     visitNumber(node) {
         return numberT;
     }
+    visitNegative(node) {
+        let type = node.right.visit(this);
+        assertType(type, numberT, node.line);
+        return numberT;
+    }
     visitList(node) {
         let elType = node.items[0].visit(this);
         for (let i = 1; i < node.items.length; i++) {

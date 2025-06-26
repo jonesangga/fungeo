@@ -3,8 +3,9 @@
 import { Kind, Canvas } from "../value.js"
 import { FGType, canvasT } from "../literal/type.js"
 
-let w = 300;    // Canvas width.
-let h = 300;    // Canvas height.
+// TODO: Think a better way.
+export let w = 300;    // Canvas width.
+export let h = 300;    // Canvas height.
 
 const canvasElem = document.createElement("canvas");
 export const c = canvasElem.getContext("2d") as CanvasRenderingContext2D;

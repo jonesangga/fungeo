@@ -1,7 +1,7 @@
 // @jonesangga, 12-04-2025, MIT License.
 
 import { AST, AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         IndexNode, ListNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode, Visitor } from "./ast.js";
+         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
 
@@ -26,6 +26,12 @@ function resolveVar(name: string, line: number): Type {
 
 class TypeChecker implements Visitor<Type> {
     visitNumber(node: NumberNode): Type {
+        return numberT;
+    }
+
+    visitNegative(node: NegativeNode): Type {
+        let type = node.right.visit(this);
+        assertType(type, numberT, node.line);
         return numberT;
     }
 

@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -50,7 +50,7 @@ const rules = {
     [1560]: { prefix: null, infix: null, prec: 300 },
     [2460]: { prefix: null, infix: null, prec: 100 },
     [2500]: { prefix: null, infix: null, prec: 100 },
-    [600]: { prefix: null, infix: numeric_binary, prec: 300 },
+    [600]: { prefix: negate, infix: numeric_binary, prec: 300 },
     [1800]: { prefix: parse_number, infix: null, prec: 100 },
     [2600]: { prefix: null, infix: null, prec: 100 },
     [670]: { prefix: null, infix: null, prec: 100 },
@@ -174,6 +174,11 @@ function dot(obj) {
         return new SetPropNode(line, obj, name, rhs);
     }
     return new GetPropNode(line, obj, name);
+}
+function negate() {
+    let line = prevTok.line;
+    let rhs = parse_prec(500);
+    return new NegativeNode(line, rhs);
 }
 function numeric_binary(lhs) {
     let operator = prevTok.kind;

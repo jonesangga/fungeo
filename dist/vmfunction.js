@@ -3,13 +3,14 @@ import { FGCallNative, FGNumber, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
 import { Circle, RichCircle } from "./geo/circle.js";
+import { Coord } from "./geo/coordinate.js";
 import { Point, RichPoint } from "./geo/point.js";
 import Picture from "./geo/picture.js";
 import { Segment, RichSegment } from "./geo/segment.js";
-import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, replT } from "./literal/type.js";
+import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, coordT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
+const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 const fillableT = new UnionT([circleT, ellipseT]);
 function _print(ver) {
@@ -32,7 +33,7 @@ function draw_onScreen() {
     }
 }
 function isGeo(v) {
-    return [700, 905, 750, 840, 850, 900, 910, 920, 1000].includes(v.kind);
+    return [700, 720, 905, 750, 840, 850, 900, 910, 920, 1000].includes(v.kind);
 }
 function isRichGeo(v) {
     return [905, 910, 920].includes(v.kind);
@@ -192,6 +193,17 @@ function _pic() {
 let pic = new FGCallNative("pic", _pic, new OverloadT([
     new FunctionT([numberT, numberT], pictureT),
 ]));
+function _coord() {
+    let yr = pop().value;
+    let yl = pop().value;
+    let xr = pop().value;
+    let xl = pop().value;
+    pop();
+    push(new Coord(xl, xr, yl, yr));
+}
+let coord = new FGCallNative("coord", _coord, new OverloadT([
+    new FunctionT([numberT, numberT, numberT, numberT], coordT),
+]));
 function _segment(ver) {
     if (ver === 0) {
         let y2 = pop().value;
@@ -260,6 +272,7 @@ export let nativeNames = {
     "label": { type: label.sig, value: label },
     "circle": { type: circle.sig, value: circle },
     "rcircle": { type: rcircle.sig, value: rcircle },
+    "coord": { type: coord.sig, value: coord },
     "intersect": { type: intersect.sig, value: intersect },
     "pt": { type: pt.sig, value: pt },
     "rpt": { type: rpt.sig, value: rpt },

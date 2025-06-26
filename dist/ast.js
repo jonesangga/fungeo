@@ -219,6 +219,23 @@ export class ListNode {
         return v.visitList(this);
     }
 }
+export class NegativeNode {
+    line;
+    right;
+    constructor(line, right) {
+        this.line = line;
+        this.right = right;
+    }
+    to_str(level) {
+        return indent(level) + "Negative(\n"
+            + this.right.to_str(level + 2)
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitNegative(this);
+    }
+}
 export class NumberNode {
     line;
     value;

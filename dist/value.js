@@ -14,6 +14,7 @@ export var Kind;
     Kind[Kind["Struct"] = 610] = "Struct";
     Kind[Kind["Type"] = 650] = "Type";
     Kind[Kind["Circle"] = 700] = "Circle";
+    Kind[Kind["Coord"] = 720] = "Coord";
     Kind[Kind["Ellipse"] = 750] = "Ellipse";
     Kind[Kind["Picture"] = 840] = "Picture";
     Kind[Kind["Point"] = 850] = "Point";
@@ -35,6 +36,7 @@ export const KindName = {
     [700]: "Circle",
     [455]: "Color",
     [460]: "Complex",
+    [720]: "Coord",
     [750]: "Ellipse",
     [470]: "List",
     [100]: "Nothing",

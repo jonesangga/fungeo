@@ -4,7 +4,7 @@
 
 import { type Token, TokenT, scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         IndexNode, ListNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -62,7 +62,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.LR]        : {prefix: null,             infix: null,            prec: Prec.Term},
     [TokenT.Let]       : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Mut]       : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.Minus]     : {prefix: null,             infix: numeric_binary,  prec: Prec.Term},
+    [TokenT.Minus]     : {prefix: negate,           infix: numeric_binary,  prec: Prec.Term},
     [TokenT.Number]    : {prefix: parse_number,     infix: null,            prec: Prec.None},
     [TokenT.NumT]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Percent]   : {prefix: null,             infix: null,            prec: Prec.None},
@@ -224,6 +224,12 @@ function dot(obj: AST): GetPropNode | SetPropNode {
 }
 
 //--------------------------------------------------------------------
+
+function negate(): NegativeNode {
+    let line = prevTok.line;
+    let rhs = parse_prec(Prec.Unary);
+    return new NegativeNode(line, rhs);
+}
 
 // The result of these operators is of type Num.
 function numeric_binary(lhs: AST): BinaryNode {

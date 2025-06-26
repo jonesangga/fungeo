@@ -6,6 +6,10 @@ class CodeGen {
     visitNumber(node) {
         emitConstant(new FGNumber(node.value), node.line);
     }
+    visitNegative(node) {
+        node.right.visit(this);
+        emitByte(1000, node.line);
+    }
     visitString(node) {
         emitConstant(new FGString(node.value), node.line);
     }
