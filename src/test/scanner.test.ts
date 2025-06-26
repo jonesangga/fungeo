@@ -97,6 +97,7 @@ describe("scanner each token type", () => {
         [TokenT.Struct]: ["struct", { kind: TokenT.Struct, line: 1, lexeme: "struct" }],
         [TokenT.Then]: ["then", { kind: TokenT.Then, line: 1, lexeme: "then" }],
         [TokenT.True]: ["true", { kind: TokenT.True, line: 1, lexeme: "true" }],
+        [TokenT.Use]:  ["use", { kind: TokenT.Use, line: 1, lexeme: "use" }],
     };
 
     for (let [input, expected] of Object.values(tests)) {

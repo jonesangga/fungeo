@@ -1,10 +1,11 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Op, Chunk } from "./chunk.js"
-import { type Value, type Comparable, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js"
-import { Names, nativeNames, richgeoT } from "./vmfunction.js"
-import { type Type, FGType } from "./literal/type.js"
-import { Point } from "./geo/point.js"
+import { load_module } from "./module_loader.js";
+import { Op, Chunk } from "./chunk.js";
+import { type Value, type Comparable, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js";
+import { Names, nativeNames, richgeoT } from "./vmfunction.js";
+import { type Type, FGType } from "./literal/type.js";
+import { Point } from "./geo/point.js";
 
 // For quick debugging.
 let $ = console.log;
@@ -353,6 +354,14 @@ export function run(intercept: boolean = false): boolean {
                 let a = pop() as FGBoolean;
                 a.value = !a.value;
                 push(a);
+                break;
+            }
+
+            case Op.Use: {
+                let name  = read_string();
+                console.log(`about to load module ${name}`);
+                if (!load_module(name))
+                    error(`cannot load module ${ name }`);
                 break;
             }
 

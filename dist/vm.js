@@ -1,3 +1,4 @@
+import { load_module } from "./module_loader.js";
 import { FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { nativeNames, richgeoT } from "./vmfunction.js";
 let $ = console.log;
@@ -278,6 +279,13 @@ export function run(intercept = false) {
                 let a = pop();
                 a.value = !a.value;
                 push(a);
+                break;
+            }
+            case 1600: {
+                let name = read_string();
+                console.log(`about to load module ${name}`);
+                if (!load_module(name))
+                    error(`cannot load module ${name}`);
                 break;
             }
             case 1020: {

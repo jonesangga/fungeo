@@ -119,6 +119,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Struct]    : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.Then]      : {prefix: null,            infix: null,    precedence: Precedence.None},
     [TokenT.True]      : {prefix: parse_boolean,   infix: null,    precedence: Precedence.None},
+    [TokenT.Use]       : {prefix: null,            infix: null,    precedence: Precedence.None},
 }
 
 interface Local {

@@ -38,6 +38,7 @@ export var TokenT;
     TokenT[TokenT["Number"] = 1800] = "Number";
     TokenT[TokenT["String"] = 1900] = "String";
     TokenT[TokenT["True"] = 2000] = "True";
+    TokenT[TokenT["Use"] = 2050] = "Use";
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
     TokenT[TokenT["BoolT"] = 2220] = "BoolT";
@@ -115,6 +116,7 @@ export const TokenTName = {
     [2910]: "Struct",
     [3000]: "Then",
     [2000]: "True",
+    [2050]: "Use",
 };
 let source = "";
 let start = 0;
@@ -181,6 +183,7 @@ function identifier() {
         case "struct": return token_lexeme(2910);
         case "then": return token_lexeme(3000);
         case "true": return token_lexeme(2000);
+        case "use": return token_lexeme(2050);
     }
     return token_lexeme(1730);
 }

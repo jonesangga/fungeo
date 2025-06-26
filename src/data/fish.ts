@@ -4,8 +4,8 @@
 // The components are Pictures with size 16x16.
 // You need to map it to your need using `Map`. For example
 //
-//     target = Pic 600 600
-//     Map fishp target
+//     let target = pic(300, 300)
+//     mappic(fishp, target)
 //
 // TODO: Make test (visual).
 
@@ -20,7 +20,7 @@ const _fish = {
     s: [[0,16,4,14],[4,14,8,14],[8,14,16,16],[0,12,2,15],[0,10,7,12],[0,8,8,10],[0,6,7,8],[0,4,7,6],[0,2,7,3],[8,0,7,3],[7,3,7,8],[7,8,8,10],[8,10,10,12],[10,12,16,16],[10,0,11,6],[10,10,12,12],[12,12,12,9],[12,9,10,10],[13,9,15,11],[15,11,15,8],[15,8,13,9],[12,0,13,3],[13,3,15,7],[15,7,16,8],[13,3,16,2],[14,5,16,4],[15,7,16,6]]
 };
 
-const fish: {
+export const fish: {
     [key in keyof typeof _fish]: Picture
 } = {
     p: make(_fish.p),
@@ -35,5 +35,3 @@ function make(coord: number[][]): Picture {
         unit.objs.push(new Segment(a[0], a[1], a[2], a[3]));
     return unit;
 }
-
-export default fish;

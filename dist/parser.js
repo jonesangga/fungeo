@@ -1,5 +1,5 @@
 import { scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -71,6 +71,7 @@ const rules = {
     [2910]: { prefix: null, infix: null, prec: 100 },
     [3000]: { prefix: null, infix: null, prec: 100 },
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
+    [2050]: { prefix: null, infix: null, prec: 100 },
 };
 let invalidTok = { kind: 2100, line: -1, lexeme: "" };
 let currTok = invalidTok;
@@ -189,9 +190,18 @@ function declaration() {
     if (match(2460)) {
         return var_decl();
     }
+    else if (match(2050)) {
+        return parse_use();
+    }
     else {
         return stmt();
     }
+}
+function parse_use() {
+    let line = prevTok.line;
+    consume(1730, "expect variable name");
+    let name = prevTok.lexeme;
+    return new UseNode(line, name);
 }
 function var_decl() {
     let line = prevTok.line;

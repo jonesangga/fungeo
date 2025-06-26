@@ -42,6 +42,7 @@ export var Op;
     Op[Op["SetProp"] = 1430] = "SetProp";
     Op[Op["Struct"] = 1450] = "Struct";
     Op[Op["Sub"] = 1500] = "Sub";
+    Op[Op["Use"] = 1600] = "Use";
 })(Op || (Op = {}));
 ;
 export const OpName = {
@@ -87,6 +88,7 @@ export const OpName = {
     [1430]: "SetProp",
     [1450]: "Struct",
     [1500]: "Sub",
+    [1600]: "Use",
 };
 export class Chunk {
     name;
@@ -157,10 +159,11 @@ export class Chunk {
                 result += `${padr7(name)} ${padl4(index)} ver ${ver}\n`;
                 return [result, offset + 3];
             }
-            case 1020:
             case 500:
             case 520:
-            case 800: {
+            case 800:
+            case 1020:
+            case 1600: {
                 let index = this.code[offset + 1];
                 result += `${padr7(name)} ${padl4(index)} '${this.values[index].to_str()}'\n`;
                 return [result, offset + 2];

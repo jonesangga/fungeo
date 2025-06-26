@@ -58,6 +58,9 @@ class TypeChecker {
         assertType(varType, valueType, node.right.line);
         return nothingT;
     }
+    visitUse(node) {
+        return nothingT;
+    }
     visitVarDecl(node) {
         if (Object.hasOwn(tempNames, node.name) ||
             Object.hasOwn(names, node.name)) {

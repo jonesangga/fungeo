@@ -1,10 +1,10 @@
 import { pop, push, vm_output } from "./vm.js";
 import { FGCallNative, FGNumber, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
-import fish from "./data/fish.js";
 import repl from "./ui/repl.js";
 import { Circle, RichCircle } from "./geo/circle.js";
 import { Point, RichPoint } from "./geo/point.js";
+import Picture from "./geo/picture.js";
 import { Segment, RichSegment } from "./geo/segment.js";
 import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
@@ -161,6 +161,37 @@ let rpt = new FGCallNative("rpt", _rpt, new OverloadT([
     new FunctionT([numberT, numberT], richPointT),
     new FunctionT([pointT], richPointT),
 ]));
+function _quartet() {
+    let s = pop();
+    let r = pop();
+    let q = pop();
+    let p = pop();
+    pop();
+    push(Picture.quartet(p, q, r, s));
+}
+let quartet = new FGCallNative("quartet", _quartet, new OverloadT([
+    new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT),
+]));
+function _mappic() {
+    let target = pop();
+    let src = pop();
+    pop();
+    src.map_to(target);
+    draw_onScreen();
+}
+let mappic = new FGCallNative("mappic", _mappic, new OverloadT([
+    new FunctionT([pictureT, pictureT], nothingT),
+]));
+function _pic() {
+    let w = pop().value;
+    let h = pop().value;
+    pop();
+    let pic = new Picture(w, h);
+    push(pic);
+}
+let pic = new FGCallNative("pic", _pic, new OverloadT([
+    new FunctionT([numberT, numberT], pictureT),
+]));
 function _segment(ver) {
     if (ver === 0) {
         let y2 = pop().value;
@@ -224,10 +255,6 @@ let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
-    "fishp": { type: pictureT, value: fish.p },
-    "fishq": { type: pictureT, value: fish.q },
-    "fishr": { type: pictureT, value: fish.r },
-    "fishs": { type: pictureT, value: fish.s },
     "print": { type: print.sig, value: print },
     "draw": { type: draw.sig, value: draw },
     "label": { type: label.sig, value: label },
@@ -239,4 +266,7 @@ export let nativeNames = {
     "segment": { type: segment.sig, value: segment },
     "rsegment": { type: rsegment.sig, value: rsegment },
     "length": { type: length.sig, value: length },
+    "pic": { type: pic.sig, value: pic },
+    "mappic": { type: mappic.sig, value: mappic },
+    "quartet": { type: quartet.sig, value: quartet },
 };

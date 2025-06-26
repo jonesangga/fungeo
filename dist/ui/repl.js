@@ -166,7 +166,7 @@ function term_btn_cb() {
     }
     showTerminal = !showTerminal;
 }
-let showTerminal = false;
+let showTerminal = true;
 const terminal = document.createElement("div");
 document.body.appendChild(terminal);
 terminal.style.position = "absolute";

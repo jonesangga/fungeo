@@ -88,6 +88,7 @@ const rules = {
     [2910]: { prefix: null, infix: null, precedence: 100 },
     [3000]: { prefix: null, infix: null, precedence: 100 },
     [2000]: { prefix: parse_boolean, infix: null, precedence: 100 },
+    [2050]: { prefix: null, infix: null, precedence: 100 },
 };
 var FnT;
 (function (FnT) {

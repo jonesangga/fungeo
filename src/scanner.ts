@@ -41,6 +41,7 @@ export const enum TokenT {
     Number    = 1800,
     String    = 1900,
     True      = 2000,
+    Use       = 2050,
     EOF       = 2100,   // Other.
     Error     = 2200,
     BoolT     = 2220,   // Keywords.
@@ -120,6 +121,7 @@ export const TokenTName: {
     [TokenT.Struct]: "Struct",
     [TokenT.Then]: "Then",
     [TokenT.True]: "True",
+    [TokenT.Use]: "Use",
 };
 
 export type Token = {
@@ -204,6 +206,7 @@ function identifier(): Token {
         case "struct":   return token_lexeme( TokenT.Struct );
         case "then":     return token_lexeme( TokenT.Then );
         case "true":     return token_lexeme( TokenT.True );
+        case "use":      return token_lexeme( TokenT.Use );
     }
     return token_lexeme( TokenT.Ident );
 }

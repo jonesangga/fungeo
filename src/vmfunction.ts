@@ -2,7 +2,6 @@ import { pop, push, vm_output } from "./vm.js"
 import { type Value, type GeoObj, type RichGeoObj, type Fillable, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import { FGColor } from "./literal/color.js"
 import canvas from "./ui/canvas.js"
-import fish from "./data/fish.js"
 import repl from "./ui/repl.js"
 import { Circle, RichCircle } from "./geo/circle.js"
 import { Point, RichPoint } from "./geo/point.js"
@@ -453,20 +452,19 @@ let rpt = new FGCallNative("rpt", _rpt,
     // },
 // ]);
 
-// function _Quartet(): void {
-    // let s = pop() as Picture;
-    // let r = pop() as Picture;
-    // let q = pop() as Picture;
-    // let p = pop() as Picture;
-    // pop();              // The function.
-    // push(Picture.quartet(p, q, r, s));
-// }
-// let Quartet = new FGCallNative("Quartet", _Quartet,
-    // new FunctionT(
-        // [pictureT, pictureT, pictureT, pictureT],
-        // pictureT,
-    // )
-// );
+function _quartet(): void {
+    let s = pop() as Picture;
+    let r = pop() as Picture;
+    let q = pop() as Picture;
+    let p = pop() as Picture;
+    pop();              // The function.
+    push(Picture.quartet(p, q, r, s));
+}
+let quartet = new FGCallNative("quartet", _quartet,
+    new OverloadT([
+        new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT),
+    ])
+);
 
 // function _Cycle(): void {
     // let p = pop() as Picture;
@@ -477,27 +475,31 @@ let rpt = new FGCallNative("rpt", _rpt,
     // new FunctionT([pictureT], pictureT)
 // );
 
-// function _MapPic(): void {
-    // let target = pop() as Picture;
-    // let src = pop() as Picture;
-    // pop();              // The function.
-    // src.map_to(target);
-    // draw_onScreen();
-// }
-// let MapPic = new FGCallNative("MapPic", _MapPic,
-    // new FunctionT([pictureT, pictureT], nothingT)
-// );
+function _mappic(): void {
+    let target = pop() as Picture;
+    let src = pop() as Picture;
+    pop();              // The function.
+    src.map_to(target);
+    draw_onScreen();
+}
+let mappic = new FGCallNative("mappic", _mappic,
+    new OverloadT([
+        new FunctionT([pictureT, pictureT], nothingT),
+    ])
+);
 
-// function _Pic(): void {
-    // let w = (pop() as FGNumber).value;
-    // let h = (pop() as FGNumber).value;
-    // pop();              // The function.
-    // let pic = new Picture(w, h);
-    // push(pic);
-// }
-// let Pic = new FGCallNative("Pic", _Pic,
-    // new FunctionT([numberT, numberT], pictureT)
-// );
+function _pic(): void {
+    let w = (pop() as FGNumber).value;
+    let h = (pop() as FGNumber).value;
+    pop();              // The function.
+    let pic = new Picture(w, h);
+    push(pic);
+}
+let pic = new FGCallNative("pic", _pic,
+    new OverloadT([
+        new FunctionT([numberT, numberT], pictureT),
+    ])
+);
 
 // function _R(): void {
     // let h = (pop() as FGNumber).value;
@@ -662,12 +664,6 @@ export let nativeNames: Names = {
     "canvas": { type: canvasT, value: canvas },
     "repl":   { type: replT, value: repl },
 
-    // Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
-    "fishp": { type: pictureT, value: fish.p },
-    "fishq": { type: pictureT, value: fish.q },
-    "fishr": { type: pictureT, value: fish.r },
-    "fishs": { type: pictureT, value: fish.s },
-
     // "help":   { type: help.sig, value: help },
     "print":  { type: print.sig, value: print },
     // "Push":   { type: Push.sig, value: Push },
@@ -693,16 +689,16 @@ export let nativeNames: Names = {
     "segment":   { type: segment.sig, value: segment },
     "rsegment":  { type: rsegment.sig, value: rsegment },
     "length":    { type: length.sig, value: length },
-    // "Pic":    { type: Pic.sig, value: Pic },
+    "pic":       { type: pic.sig, value: pic },
+    "mappic":    { type: mappic.sig, value: mappic },
+    "quartet": { type: quartet.sig, value: quartet },
     // "Cw":     { type: Cw.sig, value: Cw },
     // "Ccw":    { type: Ccw.sig, value: Ccw },
     // "FlipH":  { type: FlipH.sig, value: FlipH },
     // "FlipV":  { type: FlipV.sig, value: FlipV },
     // "Above":  { type: functionT, value: Above },
     // "Beside": { type: functionT, value: Beside },
-    // "Quartet": { type: Quartet.sig, value: Quartet },
     // "Cycle":  { type: Cycle.sig, value: Cycle },
-    // "MapPic": { type: MapPic.sig, value: MapPic },
     // "R":      { type: R.sig, value: R, methods: {
         // "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
         // "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },

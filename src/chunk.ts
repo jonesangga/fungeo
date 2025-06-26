@@ -45,6 +45,7 @@ export const enum Op {
     SetProp = 1430,
     Struct  = 1450,
     Sub     = 1500,
+    Use     = 1600,
 };
 
 export const OpName: {
@@ -92,6 +93,7 @@ export const OpName: {
     [Op.SetProp]: "SetProp",
     [Op.Struct]: "Struct",
     [Op.Sub]: "Sub",
+    [Op.Use]: "Use",
 };
 
 export class Chunk {
@@ -171,10 +173,11 @@ export class Chunk {
                 return [result, offset + 3];
             }
 
-            case Op.New:
             case Op.GetGlob:
             case Op.GetProp:
-            case Op.Load: {
+            case Op.Load:
+            case Op.New:
+            case Op.Use: {
                 let index = this.code[offset + 1];
                 result += `${ padr7(name) } ${ padl4(index) } '${ this.values[index].to_str() }'\n`;
                 return [result, offset + 2];
