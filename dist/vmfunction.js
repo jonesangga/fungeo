@@ -205,13 +205,24 @@ let coord = new FGCallNative("coord", _coord, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], coordT),
 ]));
 function _coord_pt(ver) {
-    let o = pop();
-    let y = pop().value;
-    let x = pop().value;
-    pop();
-    push(o.add_pt(x, y));
+    if (ver === 0) {
+        let o = pop();
+        let label = pop().value;
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        push(o.add_pt(x, y, label));
+    }
+    else if (ver === 1) {
+        let o = pop();
+        let y = pop().value;
+        let x = pop().value;
+        pop();
+        push(o.add_pt(x, y));
+    }
 }
 export let coord_pt = new FGCallNative("coord_pt", _coord_pt, new OverloadT([
+    new FunctionT([numberT, numberT, stringT], coordT),
     new FunctionT([numberT, numberT], coordT),
 ]));
 coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };

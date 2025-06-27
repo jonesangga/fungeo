@@ -517,14 +517,25 @@ let coord = new FGCallNative("coord", _coord,
 );
 
 function _coord_pt(ver: number): void {
-    let o = pop() as Coord;
-    let y = (pop() as FGNumber).value;
-    let x = (pop() as FGNumber).value;
-    pop();              // The function.
-    push(o.add_pt(x, y));
+    if (ver === 0) {
+        let o = pop() as Coord;
+        let label = (pop() as FGString).value;
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(o.add_pt(x, y, label));
+    }
+    else if (ver === 1) {
+        let o = pop() as Coord;
+        let y = (pop() as FGNumber).value;
+        let x = (pop() as FGNumber).value;
+        pop();              // The function.
+        push(o.add_pt(x, y));
+    }
 }
 export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
     new OverloadT([
+        new FunctionT([numberT, numberT, stringT], coordT),
         new FunctionT([numberT, numberT], coordT),
     ])
 );

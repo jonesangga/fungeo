@@ -36,8 +36,11 @@ export class Coord {
     typeof() {
         return new FGType(coordT);
     }
-    add_pt(x, y) {
-        this.pts.push({ x, y });
+    add_pt(x, y, label) {
+        if (typeof label === "string")
+            this.pts.push({ x, y, label });
+        else
+            this.pts.push({ x, y });
         return this;
     }
     draw() {
@@ -58,7 +61,7 @@ export class Coord {
         c.stroke();
         for (let pt of this.pts)
             if (this.#in_view(pt))
-                this.#draw_pt(pt);
+                this.#draw_point(pt);
     }
     #in_view(pt) {
         return pt.x >= this.xl &&
@@ -66,7 +69,7 @@ export class Coord {
             pt.y >= this.yl &&
             pt.y <= this.yr;
     }
-    #draw_pt(pt) {
+    #draw_point(pt) {
         let dx = pt.x - this.xl;
         let dy = -(pt.y - this.yr);
         let x = dx * this.#stepX;
@@ -75,5 +78,10 @@ export class Coord {
         c.arc(x, y, 5, 0, TAU);
         c.fillStyle = color.black;
         c.fill();
+        if (pt.label) {
+            c.textBaseline = "bottom";
+            c.font = "16px monospace";
+            c.fillText(pt.label, x + 5, y - 5);
+        }
     }
 }
