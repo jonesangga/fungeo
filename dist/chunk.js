@@ -13,6 +13,7 @@ export var Op;
     Op[Op["GEq"] = 390] = "GEq";
     Op[Op["GetLoc"] = 395] = "GetLoc";
     Op[Op["GetGlob"] = 500] = "GetGlob";
+    Op[Op["GetMeth"] = 510] = "GetMeth";
     Op[Op["GetProp"] = 520] = "GetProp";
     Op[Op["GT"] = 530] = "GT";
     Op[Op["Inc"] = 595] = "Inc";
@@ -59,6 +60,7 @@ export const OpName = {
     [390]: "GEq",
     [395]: "GetLoc",
     [500]: "GetGlob",
+    [510]: "GetMeth",
     [520]: "GetProp",
     [530]: "GT",
     [595]: "Inc",
@@ -160,6 +162,7 @@ export class Chunk {
                 return [result, offset + 3];
             }
             case 500:
+            case 510:
             case 520:
             case 800:
             case 1020:

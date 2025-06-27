@@ -16,6 +16,7 @@ export const enum Op {
     GEq     = 390,
     GetLoc  = 395,
     GetGlob = 500,      // Get names.
+    GetMeth = 510,
     GetProp = 520,
     GT      = 530,
     Inc     = 595,
@@ -64,6 +65,7 @@ export const OpName: {
     [Op.GEq]: "GEq",
     [Op.GetLoc]: "GetLoc",
     [Op.GetGlob]: "GetGlob",
+    [Op.GetMeth]: "GetMeth",
     [Op.GetProp]: "GetProp",
     [Op.GT]: "GT",
     [Op.Inc]: "Inc",
@@ -174,6 +176,7 @@ export class Chunk {
             }
 
             case Op.GetGlob:
+            case Op.GetMeth:
             case Op.GetProp:
             case Op.Load:
             case Op.New:

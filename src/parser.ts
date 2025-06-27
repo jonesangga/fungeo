@@ -165,7 +165,8 @@ function parse_string(): StringNode {
 // Currently there is no namespace.
 // TODO: Support parsing the `.` in namespace, like `Seg.FromPoints()`.
 function call(lhs: AST): CallNode {
-    if (!(lhs instanceof IdentNode))
+    if (!(lhs instanceof IdentNode) &&
+            !(lhs instanceof GetPropNode))
         error("invalid syntax for function call");
     let line = prevTok.line;
     let args: AST[] = [];
@@ -217,7 +218,7 @@ function dot(obj: AST): GetPropNode | SetPropNode {
 
     // Setter.
     if (match(TokenT.Eq)) {
-        let rhs = expression();
+        let rhs = parse_prec(Prec.Assignment + 1);
         return new SetPropNode(line, obj, name, rhs);
     }
     return new GetPropNode(line, obj, name);
@@ -283,9 +284,10 @@ function stmt(): AST {
     error_at_current("forbiden expr stmt");
 }
 
-function assign_or_call_void(): AssignNode | CallVoidNode {
+function assign_or_call_void(): AssignNode | CallVoidNode | SetPropNode {
     let ast = expression();
-    if (ast instanceof AssignNode)
+    if (ast instanceof AssignNode ||
+            ast instanceof SetPropNode)
         return ast;
     if (ast instanceof CallNode)
         return new CallVoidNode(ast.line, ast);

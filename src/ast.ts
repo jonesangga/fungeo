@@ -111,7 +111,7 @@ export class BooleanNode implements AST {
 
 export class CallNode implements AST {
     constructor(public line: number,
-                public name: IdentNode,
+                public name: IdentNode | GetPropNode,
                 public args: AST[],
                 public ver:  number) {}
 
@@ -189,7 +189,8 @@ export class FileNode implements AST {
 export class GetPropNode implements AST {
     constructor(public line: number,
                 public obj:  AST,
-                public prop: string) {}
+                public prop: string,
+                public isField: boolean = true) {}
 
     to_str(level: number): string {
         return indent(level) + "GetProp(\n"

@@ -22,6 +22,7 @@ export const enum Kind {
     Color      = 455,
     Complex    = 460,
     List       = 470,
+    Method     = 480,
     Number     = 500,
     String     = 600,
     Struct     = 610,
@@ -54,6 +55,7 @@ export const KindName: {
     [Kind.Coord]: "Coord",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
+    [Kind.Method]: "Method",
     [Kind.Nothing]: "Nothing",
     [Kind.Number]: "Number",
     [Kind.Picture]: "Picture",
@@ -110,6 +112,21 @@ export class FGBoolean implements FG {
         if (this.kind !== other.kind) return false;
         if ("value" in other) return this.value === other.value;
         return false;
+    }
+}
+
+export class FGMethod implements FG {
+    kind: Kind.Method = Kind.Method;
+
+    constructor(public obj:    Value,
+                public method: FGCallNative) {}
+
+    to_str(): string {
+        return `Method ${ this.method.name }`;
+    }
+
+    typeof(): FGType {
+        return new FGType(booleanT);
     }
 }
 
@@ -299,7 +316,7 @@ export class FGStruct implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Coord | Ellipse | Picture | Point | Rect | RichCircle | RichPoint | RichSegment | Segment;
 export type RichGeoObj = RichPoint;

@@ -1,6 +1,6 @@
 import { binaryTable } from "./ast.js";
 import { names } from "./vm.js";
-import { FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
+import { Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
     let result = "type: " + line + ": " + message;
     throw new Error(result);
@@ -82,21 +82,26 @@ class TypeChecker {
     }
     visitGetProp(node) {
         let objType = node.obj.visit(this);
-        if (!("field" in objType))
-            error(node.line, "no obj");
-        let field = objType.field;
-        if (!Object.hasOwn(field, node.prop))
-            error(node.line, `no prop ${node.prop} in obj`);
-        return field[node.prop];
+        if (!(objType instanceof Class))
+            error(node.line, "cannot get property of non-class");
+        if (Object.hasOwn(objType.fields, node.prop)) {
+            node.isField = true;
+            return objType.fields[node.prop];
+        }
+        if (Object.hasOwn(objType.methods, node.prop)) {
+            node.isField = false;
+            return objType.methods[node.prop].type;
+        }
+        error(node.line, `no property ${node.prop} in obj`);
     }
     visitSetProp(node) {
         let objType = node.obj.visit(this);
-        if (!("field" in objType))
-            error(node.line, "no obj");
-        let field = objType.field;
-        if (!Object.hasOwn(field, node.prop))
-            error(node.line, `no prop ${node.prop} in obj`);
-        let fieldType = field[node.prop];
+        if (!(objType instanceof Class))
+            error(node.line, "cannot get property of non-class");
+        let fields = objType.fields;
+        if (!Object.hasOwn(fields, node.prop))
+            error(node.line, `no property ${node.prop} in obj`);
+        let fieldType = fields[node.prop];
         let valueType = node.value.visit(this);
         assertType(fieldType, valueType, node.value.line);
         return nothingT;

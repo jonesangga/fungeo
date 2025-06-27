@@ -5,6 +5,7 @@
 //       Add AliasT for type alias.
 
 import { type FG, Kind } from "../value.js";
+import { FGCallNative } from "../value.js";
 
 export class FGType implements FG {
     kind: Kind.Type = Kind.Type;
@@ -228,12 +229,18 @@ export class StringT implements Type {
     }
 }
 
-export class CircleT implements Type {
-    field: Record<string, Type> = {
+export abstract class Class {
+    abstract fields:  Record<string, Type>;
+    abstract methods: Record<string, { type: Type, value: FGCallNative }>;
+}
+
+export class CircleT extends Class implements Type {
+    fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
         r: numberT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Circle";
     }
@@ -242,11 +249,12 @@ export class CircleT implements Type {
     }
 }
 
-export class RichCircleT implements Type {
-    field: Record<string, Type> = {
+export class RichCircleT extends Class implements Type {
+    fields: Record<string, Type> = {
         p: richPointT,
         q: richPointT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichCircle";
     }
@@ -273,11 +281,12 @@ export class PictureT implements Type {
     }
 }
 
-export class PointT implements Type {
-    field: Record<string, Type> = {
+export class PointT extends Class implements Type {
+    fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Point";
     }
@@ -286,11 +295,12 @@ export class PointT implements Type {
     }
 }
 
-export class RichPointT implements Type {
-    field: Record<string, Type> = {
+export class RichPointT extends Class implements Type {
+    fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichPoint";
     }
@@ -308,13 +318,14 @@ export class RectT implements Type {
     }
 }
 
-export class CoordT implements Type {
-    field: Record<string, Type> = {
+export class CoordT extends Class implements Type {
+    fields: Record<string, Type> = {
         xl: numberT,
         xr: numberT,
         yl: numberT,
         yr: numberT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Coord";
     }
@@ -323,13 +334,14 @@ export class CoordT implements Type {
     }
 }
 
-export class SegmentT implements Type {
-    field: Record<string, Type> = {
+export class SegmentT extends Class implements Type {
+    fields: Record<string, Type> = {
         x1: numberT,
         y1: numberT,
         x2: numberT,
         y2: numberT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Segment";
     }
@@ -338,11 +350,12 @@ export class SegmentT implements Type {
     }
 }
 
-export class RichSegmentT implements Type {
-    field: Record<string, Type> = {
+export class RichSegmentT extends Class implements Type {
+    fields: Record<string, Type> = {
         p: richPointT,
         q: richPointT,
     };
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichSegment";
     }

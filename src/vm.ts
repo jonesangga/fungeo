@@ -2,7 +2,7 @@
 
 import { load_module } from "./module_loader.js";
 import { Op, Chunk } from "./chunk.js";
-import { type Value, type Comparable, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js";
+import { type Value, type Comparable, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js";
 import { Names, nativeNames, richgeoT } from "./vmfunction.js";
 import { type Type, FGType } from "./literal/type.js";
 import { Point } from "./geo/point.js";
@@ -161,6 +161,10 @@ export function run(intercept: boolean = false): boolean {
                 let fn = peek(arity);
                 if (fn instanceof FGCallNative)
                     fn.value(ver);
+                else if (fn instanceof FGMethod) {
+                    push(fn.obj);
+                    fn.method.value(ver);
+                }
                 else
                     call(fn as FGCallUser, arity);
                 break;
@@ -332,6 +336,15 @@ export function run(intercept: boolean = false): boolean {
                 let prop = read_string();
                 let value = obj.field[prop];
                 push(value);
+                break;
+            }
+
+            case Op.GetMeth: {
+                let obj = pop();
+                let prop = read_string();
+                let fn = obj.typeof().value.methods[prop].value;
+                let method = new FGMethod(obj, fn);
+                push(method);
                 break;
             }
 

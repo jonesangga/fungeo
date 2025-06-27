@@ -174,12 +174,15 @@ export class StringT {
         return other instanceof StringT;
     }
 }
-export class CircleT {
-    field = {
+export class Class {
+}
+export class CircleT extends Class {
+    fields = {
         x: numberT,
         y: numberT,
         r: numberT,
     };
+    methods = {};
     to_str() {
         return "Circle";
     }
@@ -187,11 +190,12 @@ export class CircleT {
         return other instanceof CircleT;
     }
 }
-export class RichCircleT {
-    field = {
+export class RichCircleT extends Class {
+    fields = {
         p: richPointT,
         q: richPointT,
     };
+    methods = {};
     to_str() {
         return "RichCircle";
     }
@@ -215,11 +219,12 @@ export class PictureT {
         return other instanceof PictureT;
     }
 }
-export class PointT {
-    field = {
+export class PointT extends Class {
+    fields = {
         x: numberT,
         y: numberT,
     };
+    methods = {};
     to_str() {
         return "Point";
     }
@@ -227,11 +232,12 @@ export class PointT {
         return other instanceof PointT;
     }
 }
-export class RichPointT {
-    field = {
+export class RichPointT extends Class {
+    fields = {
         x: numberT,
         y: numberT,
     };
+    methods = {};
     to_str() {
         return "RichPoint";
     }
@@ -247,13 +253,14 @@ export class RectT {
         return other instanceof RectT;
     }
 }
-export class CoordT {
-    field = {
+export class CoordT extends Class {
+    fields = {
         xl: numberT,
         xr: numberT,
         yl: numberT,
         yr: numberT,
     };
+    methods = {};
     to_str() {
         return "Coord";
     }
@@ -261,13 +268,14 @@ export class CoordT {
         return other instanceof CoordT;
     }
 }
-export class SegmentT {
-    field = {
+export class SegmentT extends Class {
+    fields = {
         x1: numberT,
         y1: numberT,
         x2: numberT,
         y2: numberT,
     };
+    methods = {};
     to_str() {
         return "Segment";
     }
@@ -275,11 +283,12 @@ export class SegmentT {
         return other instanceof SegmentT;
     }
 }
-export class RichSegmentT {
-    field = {
+export class RichSegmentT extends Class {
+    fields = {
         p: richPointT,
         q: richPointT,
     };
+    methods = {};
     to_str() {
         return "RichSegment";
     }

@@ -126,7 +126,8 @@ function parse_string() {
     return new StringNode(prevTok.line, prevTok.lexeme);
 }
 function call(lhs) {
-    if (!(lhs instanceof IdentNode))
+    if (!(lhs instanceof IdentNode) &&
+        !(lhs instanceof GetPropNode))
         error("invalid syntax for function call");
     let line = prevTok.line;
     let args = [];
@@ -170,7 +171,7 @@ function dot(obj) {
     consume(1730, "expect property name after '.'");
     let name = prevTok.lexeme;
     if (match(1500)) {
-        let rhs = expression();
+        let rhs = parse_prec(200 + 1);
         return new SetPropNode(line, obj, name, rhs);
     }
     return new GetPropNode(line, obj, name);
@@ -227,7 +228,8 @@ function stmt() {
 }
 function assign_or_call_void() {
     let ast = expression();
-    if (ast instanceof AssignNode)
+    if (ast instanceof AssignNode ||
+        ast instanceof SetPropNode)
         return ast;
     if (ast instanceof CallNode)
         return new CallVoidNode(ast.line, ast);

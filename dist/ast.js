@@ -151,10 +151,12 @@ export class GetPropNode {
     line;
     obj;
     prop;
-    constructor(line, obj, prop) {
+    isField;
+    constructor(line, obj, prop, isField = true) {
         this.line = line;
         this.obj = obj;
         this.prop = prop;
+        this.isField = isField;
     }
     to_str(level) {
         return indent(level) + "GetProp(\n"

@@ -3,7 +3,7 @@
 import { AST, AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
-import { type Type, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
+import { type Type, Class, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = "type: " + line + ": " + message;
@@ -102,22 +102,32 @@ class TypeChecker implements Visitor<Type> {
 
     visitGetProp(node: GetPropNode): Type {
         let objType = node.obj.visit(this);
-        if (!("field" in objType))
-            error(node.line, "no obj");
-        let field = (objType as GeoT).field;
-        if (!Object.hasOwn(field, node.prop))
-            error(node.line, `no prop ${ node.prop } in obj`);
-        return field[node.prop];
+        if (!(objType instanceof Class))
+            error(node.line, "cannot get property of non-class");
+
+        if (Object.hasOwn(objType.fields, node.prop)) {
+            node.isField = true;
+            return objType.fields[node.prop];
+        }
+
+        if (Object.hasOwn(objType.methods, node.prop)) {
+            node.isField = false;
+            return objType.methods[node.prop].type;
+        }
+
+        error(node.line, `no property ${ node.prop } in obj`);
     }
 
     visitSetProp(node: SetPropNode): Type {
         let objType = node.obj.visit(this);
-        if (!("field" in objType))
-            error(node.line, "no obj");
-        let field = (objType as GeoT).field;
-        if (!Object.hasOwn(field, node.prop))
-            error(node.line, `no prop ${ node.prop } in obj`);
-        let fieldType = field[node.prop];
+        if (!(objType instanceof Class))
+            error(node.line, "cannot get property of non-class");
+
+        let fields = objType.fields;
+        if (!Object.hasOwn(fields, node.prop))
+            error(node.line, `no property ${ node.prop } in obj`);
+
+        let fieldType = fields[node.prop];
         let valueType = node.value.visit(this);
         assertType(fieldType, valueType, node.value.line);
         return nothingT;

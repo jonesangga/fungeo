@@ -516,6 +516,21 @@ let coord = new FGCallNative("coord", _coord,
     ])
 );
 
+function _coord_pt(ver: number): void {
+    let o = pop() as Coord;
+    let y = (pop() as FGNumber).value;
+    let x = (pop() as FGNumber).value;
+    pop();              // The function.
+    push(o.add_pt(x, y));
+}
+export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
+    new OverloadT([
+        new FunctionT([numberT, numberT], coordT),
+    ])
+);
+
+coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
+
 // function _R(): void {
     // let h = (pop() as FGNumber).value;
     // let w = (pop() as FGNumber).value;
@@ -656,15 +671,17 @@ let rsegment = new FGCallNative("rsegment", _rsegment,
     // new FunctionT([], nothingT)
 // );
 
-// function _clear(): void {
-    // pop();              // The function.
-    // canvas.clear();
-    // on_scrn = [];
-    // label_on_scrn = [];
-// }
-// let clear = new FGCallNative("clear",  _clear,
-    // new FunctionT([], nothingT)
-// );
+function _clear(): void {
+    pop();              // The function.
+    canvas.clear();
+    on_scrn = [];
+    label_on_scrn = [];
+}
+let clear = new FGCallNative("clear",  _clear,
+    new OverloadT([
+        new FunctionT([], nothingT),
+    ])
+);
 
 export type Method = {
     [name: string]: { type: Type, value: Value },
@@ -687,27 +704,27 @@ export let nativeNames: Names = {
     // "show":   { type: show.sig, value: show },
     // "padl":   { type: padl.sig, value: padl },
     // "Type":   { type: TypeFn.sig, value: TypeFn },
-    "draw":   { type: draw.sig, value: draw },
-    "label":  { type: label.sig, value: label },
+    draw:   { type: draw.sig, value: draw },
+    label:  { type: label.sig, value: label },
     // "Fill":   { type: Fill.sig, value: Fill },
-    // "clear":  { type: clear.sig, value: clear },
+    clear:  { type: clear.sig, value: clear },
     // "Paint":  { type: Paint.sig, value: Paint },
     // "Ccurv":   { type: Ccurv.sig, value: Ccurv },
     // "Descart": { type: Descart.sig, value: Descart },
     // "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     // "E":      { type: E.sig, value: E },
-    "circle":    { type: circle.sig, value: circle },
-    "rcircle":   { type: rcircle.sig, value: rcircle },
-    "coord":     { type: coord.sig, value: coord },
-    "intersect": { type: intersect.sig, value: intersect },
-    "pt":        { type: pt.sig, value: pt },
-    "rpt":       { type: rpt.sig, value: rpt },
-    "segment":   { type: segment.sig, value: segment },
-    "rsegment":  { type: rsegment.sig, value: rsegment },
-    "length":    { type: length.sig, value: length },
-    "pic":       { type: pic.sig, value: pic },
-    "mappic":    { type: mappic.sig, value: mappic },
-    "quartet": { type: quartet.sig, value: quartet },
+    circle:    { type: circle.sig, value: circle },
+    rcircle:   { type: rcircle.sig, value: rcircle },
+    coord:     { type: coord.sig, value: coord },
+    intersect: { type: intersect.sig, value: intersect },
+    pt:        { type: pt.sig, value: pt },
+    rpt:       { type: rpt.sig, value: rpt },
+    segment:   { type: segment.sig, value: segment },
+    rsegment:  { type: rsegment.sig, value: rsegment },
+    length:    { type: length.sig, value: length },
+    pic:       { type: pic.sig, value: pic },
+    mappic:    { type: mappic.sig, value: mappic },
+    quartet: { type: quartet.sig, value: quartet },
     // "Cw":     { type: Cw.sig, value: Cw },
     // "Ccw":    { type: Ccw.sig, value: Ccw },
     // "FlipH":  { type: FlipH.sig, value: FlipH },

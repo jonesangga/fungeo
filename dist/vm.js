@@ -1,5 +1,5 @@
 import { load_module } from "./module_loader.js";
-import { FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
+import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { nativeNames, richgeoT } from "./vmfunction.js";
 let $ = console.log;
 export let stack = [];
@@ -100,6 +100,10 @@ export function run(intercept = false) {
                 let fn = peek(arity);
                 if (fn instanceof FGCallNative)
                     fn.value(ver);
+                else if (fn instanceof FGMethod) {
+                    push(fn.obj);
+                    fn.method.value(ver);
+                }
                 else
                     call(fn, arity);
                 break;
@@ -260,6 +264,14 @@ export function run(intercept = false) {
                 let prop = read_string();
                 let value = obj.field[prop];
                 push(value);
+                break;
+            }
+            case 510: {
+                let obj = pop();
+                let prop = read_string();
+                let fn = obj.typeof().value.methods[prop].value;
+                let method = new FGMethod(obj, fn);
+                push(method);
                 break;
             }
             case 1430: {

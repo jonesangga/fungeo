@@ -204,6 +204,17 @@ function _coord() {
 let coord = new FGCallNative("coord", _coord, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], coordT),
 ]));
+function _coord_pt(ver) {
+    let o = pop();
+    let y = pop().value;
+    let x = pop().value;
+    pop();
+    push(o.add_pt(x, y));
+}
+export let coord_pt = new FGCallNative("coord_pt", _coord_pt, new OverloadT([
+    new FunctionT([numberT, numberT], coordT),
+]));
+coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
 function _segment(ver) {
     if (ver === 0) {
         let y2 = pop().value;
@@ -264,22 +275,32 @@ let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
     new FunctionT([richPointT, richPointT], richSegmentT),
 ]));
+function _clear() {
+    pop();
+    canvas.clear();
+    on_scrn = [];
+    label_on_scrn = [];
+}
+let clear = new FGCallNative("clear", _clear, new OverloadT([
+    new FunctionT([], nothingT),
+]));
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
     "print": { type: print.sig, value: print },
-    "draw": { type: draw.sig, value: draw },
-    "label": { type: label.sig, value: label },
-    "circle": { type: circle.sig, value: circle },
-    "rcircle": { type: rcircle.sig, value: rcircle },
-    "coord": { type: coord.sig, value: coord },
-    "intersect": { type: intersect.sig, value: intersect },
-    "pt": { type: pt.sig, value: pt },
-    "rpt": { type: rpt.sig, value: rpt },
-    "segment": { type: segment.sig, value: segment },
-    "rsegment": { type: rsegment.sig, value: rsegment },
-    "length": { type: length.sig, value: length },
-    "pic": { type: pic.sig, value: pic },
-    "mappic": { type: mappic.sig, value: mappic },
-    "quartet": { type: quartet.sig, value: quartet },
+    draw: { type: draw.sig, value: draw },
+    label: { type: label.sig, value: label },
+    clear: { type: clear.sig, value: clear },
+    circle: { type: circle.sig, value: circle },
+    rcircle: { type: rcircle.sig, value: rcircle },
+    coord: { type: coord.sig, value: coord },
+    intersect: { type: intersect.sig, value: intersect },
+    pt: { type: pt.sig, value: pt },
+    rpt: { type: rpt.sig, value: rpt },
+    segment: { type: segment.sig, value: segment },
+    rsegment: { type: rsegment.sig, value: rsegment },
+    length: { type: length.sig, value: length },
+    pic: { type: pic.sig, value: pic },
+    mappic: { type: mappic.sig, value: mappic },
+    quartet: { type: quartet.sig, value: quartet },
 };

@@ -9,6 +9,7 @@ export var Kind;
     Kind[Kind["Color"] = 455] = "Color";
     Kind[Kind["Complex"] = 460] = "Complex";
     Kind[Kind["List"] = 470] = "List";
+    Kind[Kind["Method"] = 480] = "Method";
     Kind[Kind["Number"] = 500] = "Number";
     Kind[Kind["String"] = 600] = "String";
     Kind[Kind["Struct"] = 610] = "Struct";
@@ -39,6 +40,7 @@ export const KindName = {
     [720]: "Coord",
     [750]: "Ellipse",
     [470]: "List",
+    [480]: "Method",
     [100]: "Nothing",
     [500]: "Number",
     [840]: "Picture",
@@ -71,6 +73,21 @@ export class FGBoolean {
         if ("value" in other)
             return this.value === other.value;
         return false;
+    }
+}
+export class FGMethod {
+    obj;
+    method;
+    kind = 480;
+    constructor(obj, method) {
+        this.obj = obj;
+        this.method = method;
+    }
+    to_str() {
+        return `Method ${this.method.name}`;
+    }
+    typeof() {
+        return new FGType(booleanT);
     }
 }
 export class FGCallNative {
