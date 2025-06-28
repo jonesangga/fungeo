@@ -253,7 +253,7 @@ function terminal_push(text: string, bg?: string): void {
         div.style.background = bg;
 }
 
-// terminal_push(welcome, colorOk);
+terminal_push(welcome, colorOk);
 
 //--------------------------------------------------------------------
 // Demo.

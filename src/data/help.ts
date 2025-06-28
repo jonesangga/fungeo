@@ -1,10 +1,15 @@
-export const welcome = `FunGeo 0.1.0 Experimental
-Commands:
-  Help: print this message
+// @jonesangga, 2025, MIT License.
+//
+// TODO: Write test for this.
+
+export const welcome = `FunGeo 0.1.0
+Basic commands:
+  help():  print this message
+  help(x): explain command "x"
 
 Bindings:
-  Enter: insert newline
+  Enter:       insert newline
   Shift-Enter: execute code
-  Shift-Up: previous code in history
-  Shift-Down: next code in history
+  Shift-Up:    previous code in history
+  Shift-Down:  next code in history
 `;

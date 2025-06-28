@@ -7,6 +7,7 @@ import { Coord } from "./geo/coordinate.js";
 import { Point, RichPoint } from "./geo/point.js";
 import Picture from "./geo/picture.js";
 import { Segment, RichSegment } from "./geo/segment.js";
+import { welcome } from "./data/help.js";
 import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, coordT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
@@ -295,6 +296,24 @@ let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
     new FunctionT([richPointT, richPointT], richSegmentT),
 ]));
+function _help(ver) {
+    if (ver === 0) {
+        let arg = pop();
+        pop();
+        if (!(arg instanceof FGCallNative))
+            vm_output(`no help for ${arg.to_str()}`);
+        else
+            vm_output(arg.to_str());
+    }
+    else if (ver === 1) {
+        pop();
+        vm_output(welcome);
+    }
+}
+let help = new FGCallNative("help", _help, new OverloadT([
+    new FunctionT([anyT], nothingT),
+    new FunctionT([], nothingT),
+]));
 function _clear() {
     pop();
     canvas.clear();
@@ -307,6 +326,7 @@ let clear = new FGCallNative("clear", _clear, new OverloadT([
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
+    "help": { type: help.sig, value: help },
     "print": { type: print.sig, value: print },
     draw: { type: draw.sig, value: draw },
     label: { type: label.sig, value: label },

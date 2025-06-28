@@ -1,3 +1,4 @@
+import { welcome } from "../data/help.js";
 import { showDemoSelect, toggleDemo } from "./demo.js";
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(`
@@ -190,6 +191,7 @@ function terminal_push(text, bg) {
     if (typeof bg !== "undefined")
         div.style.background = bg;
 }
+terminal_push(welcome, colorOk);
 const demoBtn = document.createElement("button");
 buttonArea.appendChild(demoBtn);
 demoBtn.innerHTML = "demo";

@@ -685,13 +685,26 @@ let rsegment = new FGCallNative("rsegment", _rsegment,
     // new FunctionT([segmentT], pointT)
 // );
 
-// function _help(): void {
-    // pop();              // The function.
-    // vm_output( welcome );
-// }
-// let help = new FGCallNative("help",  _help,
-    // new FunctionT([], nothingT)
-// );
+function _help(ver: number): void {
+    if (ver === 0) {
+        let arg = pop();
+        pop();              // The function.
+        if (!(arg instanceof FGCallNative))
+            vm_output(`no help for ${ arg.to_str() }`);
+        else
+            vm_output(arg.to_str());
+    }
+    else if (ver === 1) {
+        pop();              // The function.
+        vm_output( welcome );
+    }
+}
+let help = new FGCallNative("help",  _help,
+    new OverloadT([
+        new FunctionT([anyT], nothingT),
+        new FunctionT([], nothingT),
+    ])
+);
 
 function _clear(): void {
     pop();              // The function.
@@ -718,7 +731,7 @@ export let nativeNames: Names = {
     "canvas": { type: canvasT, value: canvas },
     "repl":   { type: replT, value: repl },
 
-    // "help":   { type: help.sig, value: help },
+    "help":   { type: help.sig, value: help },
     "print":  { type: print.sig, value: print },
     // "Push":   { type: Push.sig, value: Push },
     // "RGB":    { type: RGB.sig, value: RGB },
