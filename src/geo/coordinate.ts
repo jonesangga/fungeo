@@ -19,6 +19,7 @@ export class Coord {
     #rangeY: number;
     #stepX: number;
     #stepY: number;
+    #showGrid: boolean = true;
 
     constructor( 
         public xl: number = -5,
@@ -53,23 +54,31 @@ export class Coord {
         return this;
     }
 
+    hide_grid(): Coord {
+        this.#showGrid = false;
+        return this;
+    }
+
     draw(): void {
         let x = 0;
         let y = 0;
-
-        c.beginPath();
-        for (let i = 0; i < (this.xr - this.xl + 1); i++) {
-            c.moveTo(x, 0);
-            c.lineTo(x, h);
-            x += this.#stepX;
-        }
-        for (let i = 0; i < (this.yr - this.yl + 1); i++) {
-            c.moveTo(0, y);
-            c.lineTo(w, y);
-            y += this.#stepY;
-        }
         c.strokeStyle = this.strokeStyle;
-        c.stroke();
+
+        // Draw grid.
+        if (this.#showGrid) {
+            c.beginPath();
+            for (let i = 0; i < (this.xr - this.xl + 1); i++) {
+                c.moveTo(x, 0);
+                c.lineTo(x, h);
+                x += this.#stepX;
+            }
+            for (let i = 0; i < (this.yr - this.yl + 1); i++) {
+                c.moveTo(0, y);
+                c.lineTo(w, y);
+                y += this.#stepY;
+            }
+            c.stroke();
+        }
 
         // Place point according to coordinate view.
         for (let pt of this.pts)

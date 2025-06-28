@@ -540,7 +540,18 @@ export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
     ])
 );
 
+function _coord_hide_grid(ver: number): void {
+    let o = pop() as Coord;
+    pop();              // The function.
+    push(o.hide_grid());
+}
+export let coord_hide_grid = new FGCallNative("coord_hide_grid", _coord_hide_grid,
+    new OverloadT([
+        new FunctionT([], coordT),
+    ])
+);
 coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
+coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_grid };
 
 // function _R(): void {
     // let h = (pop() as FGNumber).value;

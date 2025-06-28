@@ -15,6 +15,7 @@ export class Coord {
     #rangeY;
     #stepX;
     #stepY;
+    #showGrid = true;
     constructor(xl = -5, xr = 5, yl = -5, yr = 5, strokeStyle = color.black) {
         this.xl = xl;
         this.xr = xr;
@@ -43,22 +44,28 @@ export class Coord {
             this.pts.push({ x, y });
         return this;
     }
+    hide_grid() {
+        this.#showGrid = false;
+        return this;
+    }
     draw() {
         let x = 0;
         let y = 0;
-        c.beginPath();
-        for (let i = 0; i < (this.xr - this.xl + 1); i++) {
-            c.moveTo(x, 0);
-            c.lineTo(x, h);
-            x += this.#stepX;
-        }
-        for (let i = 0; i < (this.yr - this.yl + 1); i++) {
-            c.moveTo(0, y);
-            c.lineTo(w, y);
-            y += this.#stepY;
-        }
         c.strokeStyle = this.strokeStyle;
-        c.stroke();
+        if (this.#showGrid) {
+            c.beginPath();
+            for (let i = 0; i < (this.xr - this.xl + 1); i++) {
+                c.moveTo(x, 0);
+                c.lineTo(x, h);
+                x += this.#stepX;
+            }
+            for (let i = 0; i < (this.yr - this.yl + 1); i++) {
+                c.moveTo(0, y);
+                c.lineTo(w, y);
+                y += this.#stepY;
+            }
+            c.stroke();
+        }
         for (let pt of this.pts)
             if (this.#in_view(pt))
                 this.#draw_point(pt);
