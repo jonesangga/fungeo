@@ -102,6 +102,19 @@ describe("scanner error", () => {
             lexeme: "unterminated string",
         });
     });
+    it("error, when multi-line comment is not closed", () => {
+        let code = "a = 2\n/*print(b) print a";
+        scanner.init(code);
+        scanner.next();
+        scanner.next();
+        scanner.next();
+        let next = scanner.next();
+        deepEqual(next, {
+            type: 2200,
+            line: 2,
+            lexeme: "multi-line comment is not closed",
+        });
+    });
     it("error, when unexpected character", () => {
         let code = "a = @1";
         scanner.init(code);

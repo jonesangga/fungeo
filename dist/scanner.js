@@ -114,6 +114,7 @@ let source = "";
 let start = 0;
 let current = 0;
 let line = 1;
+let closedMultComment = true;
 function is_digit(c) {
     return c >= '0' && c <= '9';
 }
@@ -222,6 +223,24 @@ function skip_whitespace() {
                         advance();
                     }
                 }
+                else if (peek_next() === '*') {
+                    advance();
+                    advance();
+                    closedMultComment = false;
+                    while (!is_eof()) {
+                        let d = advance();
+                        if (d === '*') {
+                            if (peek() === '/') {
+                                advance();
+                                closedMultComment = true;
+                                break;
+                            }
+                        }
+                        else if (d === '\n') {
+                            line++;
+                        }
+                    }
+                }
                 else {
                     return;
                 }
@@ -241,8 +260,12 @@ export const scanner = {
     next() {
         skip_whitespace();
         start = current;
-        if (is_eof())
+        if (is_eof()) {
+            if (closedMultComment === false) {
+                return token_error("multi-line comment is not closed");
+            }
             return token_lexeme(2100);
+        }
         let c = advance();
         if (is_digit(c))
             return number_();

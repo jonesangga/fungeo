@@ -1,7 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
-// TODO: Support multiline comment.
-//       Add TokenT.Pipe later for pipe functionality.
+// TODO: Add TokenT.Pipe later for pipe functionality.
 //       Add TokenT.ColonColon for module import like use fish::Above.
 
 export const enum TokenT {
@@ -128,6 +127,7 @@ let source  = "";
 let start   = 0;
 let current = 0;
 let line    = 1;
+let closedMultComment = true;
 
 function is_digit(c: string): boolean {
     return c >= '0' && c <= '9';
@@ -252,11 +252,31 @@ function skip_whitespace(): void {
                 break;
 
             case '/':
-                if (peek_next() === '/') {
+                if (peek_next() === '/') {      // Single-line comment.
+                    // NOTE: We use peek() so we don't consume newline.
                     while (peek() !== '\n' && !is_eof()) {
                         advance();
                     }
-                } else {
+                } 
+                else if (peek_next() === '*') { // Multi-line comment.
+                    advance();      // Consume '/'.
+                    advance();      // Consume '*'.
+                    closedMultComment = false;
+                    while (!is_eof()) {
+                        let d = advance();
+                        if (d === '*') {
+                            if (peek() === '/') {
+                                advance();      // Consume '/'.
+                                closedMultComment = true;
+                                break;
+                            }
+                        }
+                        else if (d === '\n') {
+                            line++;
+                        }
+                    }
+                }
+                else {
                     return;
                 }
                 break;
@@ -279,7 +299,12 @@ export const scanner = {
         skip_whitespace();
         start = current;
 
-        if (is_eof()) return token_lexeme(TokenT.EOF);
+        if (is_eof()) {
+            if (closedMultComment === false) {
+                return token_error("multi-line comment is not closed");
+            }
+            return token_lexeme(TokenT.EOF);
+        }
 
         let c = advance();
         if (is_digit(c)) return number_();

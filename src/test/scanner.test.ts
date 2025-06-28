@@ -126,6 +126,22 @@ describe("scanner error", () => {
         });
     });
 
+    it("error, when multi-line comment is not closed", () => {
+        let code = "a = 2\n/*print(b) print a";
+        scanner.init(code);
+
+        scanner.next();     // a
+        scanner.next();     // =
+        scanner.next();     // 2
+        let next = scanner.next();
+
+        deepEqual(next, {
+            type: TokenT.Error,
+            line: 2,
+            lexeme: "multi-line comment is not closed",
+        });
+    });
+
     it("error, when unexpected character", () => {
         let code = "a = @1";
         scanner.init(code);
