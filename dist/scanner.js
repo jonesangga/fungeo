@@ -125,14 +125,14 @@ function is_alpha(c) {
 function advance() {
     return source[current++];
 }
-function is_eof() {
-    return current === source.length;
-}
 function peek() {
     return source[current];
 }
 function peek_next() {
     return source[current + 1];
+}
+function is_eof() {
+    return current === source.length;
 }
 function match(expected) {
     if (is_eof())
@@ -154,8 +154,9 @@ function token_error(message) {
     return { type: 2200, lexeme: message, line };
 }
 function identifier() {
-    while (is_alpha(peek()) || is_digit(peek()))
+    while (is_alpha(peek()) || is_digit(peek())) {
         advance();
+    }
     switch (source.slice(start, current)) {
         case "Bool": return token_lexeme(1600);
         case "Circle": return token_lexeme(1620);
@@ -178,23 +179,27 @@ function identifier() {
     return token_lexeme(1730);
 }
 function number_() {
-    while (is_digit(peek()))
+    while (is_digit(peek())) {
         advance();
+    }
     if (peek() === '.' && is_digit(peek_next())) {
         advance();
-        while (is_digit(peek()))
+        while (is_digit(peek())) {
             advance();
+        }
     }
     return token_lexeme(1800);
 }
 function string_() {
-    while (peek() != '"' && !is_eof()) {
-        if (peek() == '\n')
+    while (peek() !== '"' && !is_eof()) {
+        if (peek() === '\n') {
             line++;
+        }
         advance();
     }
-    if (is_eof())
+    if (is_eof()) {
         return token_error("unterminated string");
+    }
     advance();
     return token_string(1900);
 }
@@ -213,8 +218,9 @@ function skip_whitespace() {
                 break;
             case '/':
                 if (peek_next() === '/') {
-                    while (peek() !== '\n' && !is_eof())
+                    while (peek() !== '\n' && !is_eof()) {
                         advance();
+                    }
                 }
                 else {
                     return;
@@ -283,8 +289,9 @@ export const scanner = {
     },
     all() {
         let result = [];
-        while (!is_eof())
+        while (!is_eof()) {
             result.push(this.next());
+        }
         result.push(this.next());
         return result;
     },

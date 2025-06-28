@@ -143,16 +143,16 @@ function advance(): string {
     return source[current++];
 }
 
-function is_eof(): boolean {
-    return current === source.length;
-}
-
 function peek(): string {
     return source[current];
 }
 
 function peek_next(): string {
     return source[current + 1];
+}
+
+function is_eof(): boolean {
+    return current === source.length;
 }
 
 function match(expected: string): boolean {
@@ -165,66 +165,72 @@ function match(expected: string): boolean {
 // Make token other than String or Error.
 function token_lexeme(type: TokenT): Token {
     let lexeme = source.slice(start, current);
-    return { type, lexeme, line };
+    return {type, lexeme, line};
 }
 
 function token_string(type: TokenT): Token {
     let lexeme = source.slice(start + 1, current - 1);
-    return { type, lexeme, line };
+    return {type, lexeme, line};
 }
 
 function token_error(message: string): Token {
-    return { type: TokenT.Error, lexeme: message, line };
+    return {type: TokenT.Error, lexeme: message, line};
 }
 
 function identifier(): Token {
-    while (is_alpha(peek()) || is_digit(peek()))
+    while (is_alpha(peek()) || is_digit(peek())) {
         advance();
+    }
 
     switch (source.slice(start, current)) {
-        case "Bool":     return token_lexeme( TokenT.BoolT );
-        case "Circle":   return token_lexeme( TokenT.CircleT );
-        case "else":     return token_lexeme( TokenT.Else );
-        case "false":    return token_lexeme( TokenT.False );
-        case "fn":       return token_lexeme( TokenT.Fn );
-        case "if":       return token_lexeme( TokenT.If );
-        case "ifx":      return token_lexeme( TokenT.Ifx );
-        case "let":      return token_lexeme( TokenT.Let );
-        case "Num":      return token_lexeme( TokenT.NumT );
-        case "Point":    return token_lexeme( TokenT.PointT );
-        case "Rect":     return token_lexeme( TokenT.RectT );
-        case "return":   return token_lexeme( TokenT.Return );
-        case "Str":      return token_lexeme( TokenT.StrT );
-        case "struct":   return token_lexeme( TokenT.Struct );
-        case "then":     return token_lexeme( TokenT.Then );
-        case "true":     return token_lexeme( TokenT.True );
-        case "use":      return token_lexeme( TokenT.Use );
+        case "Bool":   return token_lexeme( TokenT.BoolT );
+        case "Circle": return token_lexeme( TokenT.CircleT );
+        case "else":   return token_lexeme( TokenT.Else );
+        case "false":  return token_lexeme( TokenT.False );
+        case "fn":     return token_lexeme( TokenT.Fn );
+        case "if":     return token_lexeme( TokenT.If );
+        case "ifx":    return token_lexeme( TokenT.Ifx );
+        case "let":    return token_lexeme( TokenT.Let );
+        case "Num":    return token_lexeme( TokenT.NumT );
+        case "Point":  return token_lexeme( TokenT.PointT );
+        case "Rect":   return token_lexeme( TokenT.RectT );
+        case "return": return token_lexeme( TokenT.Return );
+        case "Str":    return token_lexeme( TokenT.StrT );
+        case "struct": return token_lexeme( TokenT.Struct );
+        case "then":   return token_lexeme( TokenT.Then );
+        case "true":   return token_lexeme( TokenT.True );
+        case "use":    return token_lexeme( TokenT.Use );
     }
-    return token_lexeme( TokenT.Ident );
+    return token_lexeme(TokenT.Ident);
 }
 
 function number_(): Token {
-    while (is_digit(peek()))
+    while (is_digit(peek())) {
         advance();
+    }
 
     // Look for a fractional part.
     if (peek() === '.' && is_digit(peek_next())) {
         advance();                  // Consume the ".".
-        while (is_digit(peek()))
+        while (is_digit(peek())) {
             advance();
+        }
     }
 
     return token_lexeme(TokenT.Number);
 }
 
 function string_(): Token {
-    while (peek() != '"' && !is_eof()) {
-        if (peek() == '\n')
+    while (peek() !== '"' && !is_eof()) {
+        if (peek() === '\n') {
             line++;
+        }
         advance();
     }
 
-    if (is_eof()) return token_error("unterminated string");
+    if (is_eof()) {
+        return token_error("unterminated string");
+    }
 
     advance();          // Consume the closing quote.
     return token_string(TokenT.String);
@@ -239,18 +245,22 @@ function skip_whitespace(): void {
             case '\t':
                 advance();
                 break;
+
             case '\n':
                 line++;
                 advance();
                 break;
+
             case '/':
                 if (peek_next() === '/') {
-                    while (peek() !== '\n' && !is_eof())
+                    while (peek() !== '\n' && !is_eof()) {
                         advance();
+                    }
                 } else {
                     return;
                 }
                 break;
+
             default:
                 return;
         }
@@ -321,8 +331,9 @@ export const scanner = {
 
     all(): Token[] {
         let result = [];
-        while (!is_eof())
+        while (!is_eof()) {
             result.push(this.next());
+        }
         result.push(this.next());       // Get the EOF token.
         return result;
     },
