@@ -21,8 +21,6 @@ export var TokenT;
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
-    TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
-    TokenT[TokenT["DivBy"] = 1450] = "DivBy";
     TokenT[TokenT["Eq"] = 1500] = "Eq";
     TokenT[TokenT["EqEq"] = 1505] = "EqEq";
     TokenT[TokenT["Greater"] = 1520] = "Greater";
@@ -33,28 +31,26 @@ export var TokenT;
     TokenT[TokenT["PipePipe"] = 1580] = "PipePipe";
     TokenT[TokenT["Plus"] = 1585] = "Plus";
     TokenT[TokenT["PlusPlus"] = 1590] = "PlusPlus";
+    TokenT[TokenT["BoolT"] = 1600] = "BoolT";
+    TokenT[TokenT["CircleT"] = 1620] = "CircleT";
     TokenT[TokenT["False"] = 1700] = "False";
     TokenT[TokenT["Ident"] = 1730] = "Ident";
     TokenT[TokenT["Number"] = 1800] = "Number";
+    TokenT[TokenT["NumT"] = 1820] = "NumT";
+    TokenT[TokenT["PointT"] = 1850] = "PointT";
+    TokenT[TokenT["RectT"] = 1880] = "RectT";
     TokenT[TokenT["String"] = 1900] = "String";
+    TokenT[TokenT["StrT"] = 1910] = "StrT";
     TokenT[TokenT["True"] = 2000] = "True";
     TokenT[TokenT["Use"] = 2050] = "Use";
     TokenT[TokenT["EOF"] = 2100] = "EOF";
     TokenT[TokenT["Error"] = 2200] = "Error";
-    TokenT[TokenT["BoolT"] = 2220] = "BoolT";
-    TokenT[TokenT["CircleT"] = 2230] = "CircleT";
     TokenT[TokenT["Else"] = 2300] = "Else";
     TokenT[TokenT["Fn"] = 2320] = "Fn";
     TokenT[TokenT["If"] = 2400] = "If";
     TokenT[TokenT["Ifx"] = 2405] = "Ifx";
-    TokenT[TokenT["Global"] = 2450] = "Global";
     TokenT[TokenT["Let"] = 2460] = "Let";
-    TokenT[TokenT["Mut"] = 2500] = "Mut";
-    TokenT[TokenT["NumT"] = 2600] = "NumT";
-    TokenT[TokenT["PointT"] = 2700] = "PointT";
-    TokenT[TokenT["RectT"] = 2780] = "RectT";
     TokenT[TokenT["Return"] = 2800] = "Return";
-    TokenT[TokenT["StrT"] = 2900] = "StrT";
     TokenT[TokenT["Struct"] = 2910] = "Struct";
     TokenT[TokenT["Then"] = 3000] = "Then";
 })(TokenT || (TokenT = {}));
@@ -63,15 +59,13 @@ export const TokenTName = {
     [1180]: "Amp",
     [1190]: "AmpAmp",
     [1195]: "Arrow",
-    [2220]: "BoolT",
+    [1600]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
     [50]: "BSlash",
-    [2230]: "CircleT",
+    [1620]: "CircleT",
     [1300]: "Colon",
-    [1400]: "ColonEq",
     [100]: "Comma",
-    [1450]: "DivBy",
     [210]: "Dot",
     [2300]: "Else",
     [2100]: "EOF",
@@ -81,7 +75,6 @@ export const TokenTName = {
     [1700]: "False",
     [2320]: "Fn",
     [220]: "FSlash",
-    [2450]: "Global",
     [1520]: "Greater",
     [1525]: "GreaterEq",
     [250]: "Hash",
@@ -96,23 +89,22 @@ export const TokenTName = {
     [1560]: "LR",
     [2460]: "Let",
     [600]: "Minus",
-    [2500]: "Mut",
     [1800]: "Number",
-    [2600]: "NumT",
+    [1820]: "NumT",
     [670]: "Percent",
     [1580]: "PipePipe",
     [1585]: "Plus",
     [1590]: "PlusPlus",
-    [2700]: "PointT",
+    [1850]: "PointT",
     [695]: "RBrace",
     [700]: "RBracket",
-    [2780]: "RectT",
+    [1880]: "RectT",
     [2800]: "Return",
     [800]: "RParen",
     [900]: "Semicolon",
     [1100]: "Star",
     [1900]: "String",
-    [2900]: "StrT",
+    [1910]: "StrT",
     [2910]: "Struct",
     [3000]: "Then",
     [2000]: "True",
@@ -165,21 +157,19 @@ function identifier() {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
     switch (source.slice(start, current)) {
-        case "Bool": return token_lexeme(2220);
-        case "Circle": return token_lexeme(2230);
+        case "Bool": return token_lexeme(1600);
+        case "Circle": return token_lexeme(1620);
         case "else": return token_lexeme(2300);
         case "false": return token_lexeme(1700);
         case "fn": return token_lexeme(2320);
         case "if": return token_lexeme(2400);
         case "ifx": return token_lexeme(2405);
-        case "global": return token_lexeme(2450);
         case "let": return token_lexeme(2460);
-        case "mut": return token_lexeme(2500);
-        case "Num": return token_lexeme(2600);
-        case "Point": return token_lexeme(2700);
-        case "Rect": return token_lexeme(2780);
+        case "Num": return token_lexeme(1820);
+        case "Point": return token_lexeme(1850);
+        case "Rect": return token_lexeme(1880);
         case "return": return token_lexeme(2800);
-        case "Str": return token_lexeme(2900);
+        case "Str": return token_lexeme(1910);
         case "struct": return token_lexeme(2910);
         case "then": return token_lexeme(3000);
         case "true": return token_lexeme(2000);
@@ -266,20 +256,12 @@ export const scanner = {
             case ',': return token_lexeme(100);
             case '/': return token_lexeme(220);
             case '*': return token_lexeme(1100);
+            case ':': return token_lexeme(1300);
             case '\\': return token_lexeme(50);
+            case '||': return token_lexeme(1580);
             case '"': return string_();
             case '-': return token_lexeme(match('>') ? 1195 : 600);
-            case '|': {
-                if (match('|'))
-                    return token_lexeme(1580);
-                return token_lexeme(1450);
-            }
             case '&': return token_lexeme(match('&') ? 1190 : 1180);
-            case ':': {
-                if (match('='))
-                    return token_lexeme(1400);
-                return token_lexeme(1300);
-            }
             case '<': {
                 if (match('='))
                     return token_lexeme(1555);

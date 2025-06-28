@@ -1,6 +1,8 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
 // TODO: Support multiline comment.
+//       Add TokenT.Pipe later for pipe functionality.
+//       Add TokenT.ColonColon for module import like use fish::Above.
 
 export const enum TokenT {
     BSlash    = 50,     // Single character.
@@ -24,8 +26,6 @@ export const enum TokenT {
     Bang      = 1200,
     BangEq    = 1210,
     Colon     = 1300,
-    ColonEq   = 1400,
-    DivBy     = 1450,
     Eq        = 1500,
     EqEq      = 1505,
     Greater   = 1520,
@@ -36,28 +36,26 @@ export const enum TokenT {
     PipePipe  = 1580,
     Plus      = 1585,
     PlusPlus  = 1590,
-    False     = 1700,   // Literals.
+    BoolT     = 1600,   // Literals.
+    CircleT   = 1620,
+    False     = 1700,
     Ident     = 1730,
     Number    = 1800,
+    NumT      = 1820,
+    PointT    = 1850,
+    RectT     = 1880,
     String    = 1900,
+    StrT      = 1910,
     True      = 2000,
     Use       = 2050,
     EOF       = 2100,   // Other.
     Error     = 2200,
-    BoolT     = 2220,   // Keywords.
-    CircleT   = 2230,
-    Else      = 2300,
+    Else      = 2300,   // Keywords.
     Fn        = 2320,
     If        = 2400,
     Ifx       = 2405,
-    Global    = 2450,
     Let       = 2460,
-    Mut       = 2500,
-    NumT      = 2600,
-    PointT    = 2700,
-    RectT     = 2780,
     Return    = 2800,
-    StrT      = 2900,
     Struct    = 2910,
     Then      = 3000,
 };
@@ -74,9 +72,7 @@ export const TokenTName: {
     [TokenT.BSlash]: "BSlash",
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
-    [TokenT.ColonEq]: "ColonEq",
     [TokenT.Comma]: "Comma",
-    [TokenT.DivBy]: "DivBy",
     [TokenT.Dot]: "Dot",
     [TokenT.Else]: "Else",
     [TokenT.EOF]: "EOF",
@@ -86,7 +82,6 @@ export const TokenTName: {
     [TokenT.False]: "False",
     [TokenT.Fn]: "Fn",
     [TokenT.FSlash]: "FSlash",
-    [TokenT.Global]: "Global",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
     [TokenT.Hash]: "Hash",
@@ -101,7 +96,6 @@ export const TokenTName: {
     [TokenT.LR]: "LR",
     [TokenT.Let]: "Let",
     [TokenT.Minus]: "Minus",
-    [TokenT.Mut]: "Mut",
     [TokenT.Number]: "Number",
     [TokenT.NumT]: "NumT",
     [TokenT.Percent]: "Percent",
@@ -195,9 +189,7 @@ function identifier(): Token {
         case "fn":       return token_lexeme( TokenT.Fn );
         case "if":       return token_lexeme( TokenT.If );
         case "ifx":      return token_lexeme( TokenT.Ifx );
-        case "global":   return token_lexeme( TokenT.Global );
         case "let":      return token_lexeme( TokenT.Let );
-        case "mut":      return token_lexeme( TokenT.Mut );
         case "Num":      return token_lexeme( TokenT.NumT );
         case "Point":    return token_lexeme( TokenT.PointT );
         case "Rect":     return token_lexeme( TokenT.RectT );
@@ -297,21 +289,15 @@ export const scanner = {
             case ',':  return token_lexeme(TokenT.Comma);
             case '/':  return token_lexeme(TokenT.FSlash);
             case '*':  return token_lexeme(TokenT.Star);
+            case ':':  return token_lexeme(TokenT.Colon);
             case '\\': return token_lexeme(TokenT.BSlash);
+            case '||': return token_lexeme(TokenT.PipePipe);
             case '"':  return string_();
 
             case '-': return token_lexeme(
                 match('>') ? TokenT.Arrow : TokenT.Minus);
-            case '|': {
-                if (match('|')) return token_lexeme(TokenT.PipePipe);
-                return token_lexeme(TokenT.DivBy);
-            }
             case '&': return token_lexeme(
                 match('&') ? TokenT.AmpAmp : TokenT.Amp);
-            case ':': {
-                if (match('=')) return token_lexeme(TokenT.ColonEq);
-                return token_lexeme(TokenT.Colon);
-            }
             case '<': {
                 if (match('=')) return token_lexeme(TokenT.LessEq);
                 if (match('>')) return token_lexeme(TokenT.LR);
