@@ -22,9 +22,9 @@ export const enum TokenT {
     Arrow     = 1195,
     Bang      = 1200,
     BangEq    = 1210,
+    BSlash    = 1220,
     Colon     = 1300,
     ColonEq   = 1400,
-    ColonMin  = 1410,
     DivBy     = 1450,
     Eq        = 1500,
     EqEq      = 1505,
@@ -71,10 +71,10 @@ export const TokenTName: {
     [TokenT.BoolT]: "BoolT",
     [TokenT.Bang]: "Bang",
     [TokenT.BangEq]: "BangEq",
+    [TokenT.BSlash]: "BSlash",
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
     [TokenT.ColonEq]: "ColonEq",
-    [TokenT.ColonMin]: "ColonMin",
     [TokenT.Comma]: "Comma",
     [TokenT.DivBy]: "DivBy",
     [TokenT.Dot]: "Dot",
@@ -297,6 +297,7 @@ export const scanner = {
             case ',': return token_lexeme(TokenT.Comma);
             case '/': return token_lexeme(TokenT.Slash);
             case '*': return token_lexeme(TokenT.Star);
+            case '\\': return token_lexeme(TokenT.BSlash);
             case '"': return string_();
 
             case '-': return token_lexeme(
@@ -309,7 +310,6 @@ export const scanner = {
                 match('&') ? TokenT.AmpAmp : TokenT.Amp);
             case ':': {
                 if (match('=')) return token_lexeme(TokenT.ColonEq);
-                if (match('-')) return token_lexeme(TokenT.ColonMin);
                 return token_lexeme(TokenT.Colon);
             }
             case '<': {

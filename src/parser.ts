@@ -33,10 +33,10 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Bang]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.BangEq]    : {prefix: null,             infix: null,            prec: Prec.Equality},
     [TokenT.BoolT]     : {prefix: null,             infix: null,            prec: Prec.None},
+    [TokenT.BSlash]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.CircleT]   : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Colon]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.ColonEq]   : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.ColonMin]  : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Comma]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.DivBy]     : {prefix: null,             infix: null,            prec: Prec.Term},
     [TokenT.Dot]       : {prefix: null,             infix: dot,             prec: Prec.Call},
@@ -278,7 +278,7 @@ function stmt(): AST {
         // It is either assignment or calling function that doesn't return value.
         return assign_or_call_void();
     }
-    else if (match(TokenT.ColonMin)) {
+    else if (match(TokenT.BSlash)) {
         return expr_stmt();
     }
     error_at_current("forbiden expr stmt");

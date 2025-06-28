@@ -19,9 +19,9 @@ export var TokenT;
     TokenT[TokenT["Arrow"] = 1195] = "Arrow";
     TokenT[TokenT["Bang"] = 1200] = "Bang";
     TokenT[TokenT["BangEq"] = 1210] = "BangEq";
+    TokenT[TokenT["BSlash"] = 1220] = "BSlash";
     TokenT[TokenT["Colon"] = 1300] = "Colon";
     TokenT[TokenT["ColonEq"] = 1400] = "ColonEq";
-    TokenT[TokenT["ColonMin"] = 1410] = "ColonMin";
     TokenT[TokenT["DivBy"] = 1450] = "DivBy";
     TokenT[TokenT["Eq"] = 1500] = "Eq";
     TokenT[TokenT["EqEq"] = 1505] = "EqEq";
@@ -66,10 +66,10 @@ export const TokenTName = {
     [2220]: "BoolT",
     [1200]: "Bang",
     [1210]: "BangEq",
+    [1220]: "BSlash",
     [2230]: "CircleT",
     [1300]: "Colon",
     [1400]: "ColonEq",
-    [1410]: "ColonMin",
     [100]: "Comma",
     [1450]: "DivBy",
     [210]: "Dot",
@@ -266,6 +266,7 @@ export const scanner = {
             case ',': return token_lexeme(100);
             case '/': return token_lexeme(1000);
             case '*': return token_lexeme(1100);
+            case '\\': return token_lexeme(1220);
             case '"': return string_();
             case '-': return token_lexeme(match('>') ? 1195 : 600);
             case '|': {
@@ -277,8 +278,6 @@ export const scanner = {
             case ':': {
                 if (match('='))
                     return token_lexeme(1400);
-                if (match('-'))
-                    return token_lexeme(1410);
                 return token_lexeme(1300);
             }
             case '<': {
