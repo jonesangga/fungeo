@@ -142,16 +142,16 @@ function match(expected) {
     current++;
     return true;
 }
-function token_lexeme(kind) {
+function token_lexeme(type) {
     let lexeme = source.slice(start, current);
-    return { kind, lexeme, line };
+    return { type, lexeme, line };
 }
-function token_string(kind) {
+function token_string(type) {
     let lexeme = source.slice(start + 1, current - 1);
-    return { kind, lexeme, line };
+    return { type, lexeme, line };
 }
 function token_error(message) {
-    return { kind: 2200, lexeme: message, line };
+    return { type: 2200, lexeme: message, line };
 }
 function identifier() {
     while (is_alpha(peek()) || is_digit(peek()))
@@ -295,8 +295,8 @@ export const scanner = {
             else {
                 result += "   | ";
             }
-            result += `${pad9(TokenTName[token.kind])} '${token.lexeme}'\n`;
-            if (token.kind === 2100)
+            result += `${pad9(TokenTName[token.type])} '${token.lexeme}'\n`;
+            if (token.type === 2100)
                 break;
         }
         return result;

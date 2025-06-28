@@ -82,7 +82,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Use]       : {prefix: null,             infix: null,            prec: Prec.None},
 }
 
-let invalidTok = { kind: TokenT.EOF, line: -1, lexeme: "" };
+let invalidTok = { type: TokenT.EOF, line: -1, lexeme: "" };
 let currTok = invalidTok;
 let prevTok = invalidTok;
 
@@ -103,9 +103,9 @@ function error(message: string): never {
 function error_at(token: Token, message: string): never {
     let result = "parser: " + token.line + "";
 
-    if (token.kind === TokenT.EOF)
+    if (token.type === TokenT.EOF)
         result += ": at end";
-    else if (token.kind === TokenT.Error)
+    else if (token.type === TokenT.Error)
         result += ": scanner";
     else
         result += `: at '${ token.lexeme }'`;
@@ -119,24 +119,24 @@ function error_at(token: Token, message: string): never {
 function advance(): void {
     prevTok = currTok;
     currTok = scanner.next();
-    if (currTok.kind === TokenT.Error)
+    if (currTok.type === TokenT.Error)
         error_at_current(currTok.lexeme);
 }
 
-function check(kind: TokenT): boolean {
-    return currTok.kind === kind;
+function check(type: TokenT): boolean {
+    return currTok.type === type;
 }
 
-function match(kind: TokenT): boolean {
-    if (currTok.kind === kind) {
+function match(type: TokenT): boolean {
+    if (currTok.type === type) {
         advance();
         return true;
     }
     return false;
 }
 
-function consume(kind: TokenT, message: string): void {
-    if (currTok.kind === kind) {
+function consume(type: TokenT, message: string): void {
+    if (currTok.type === type) {
         advance();
         return;
     }
@@ -147,7 +147,7 @@ function consume(kind: TokenT, message: string): void {
 // Parsing literal.
 
 function parse_boolean(): BooleanNode {
-    return new BooleanNode(prevTok.line, prevTok.kind === TokenT.True);
+    return new BooleanNode(prevTok.line, prevTok.type === TokenT.True);
 }
 
 function parse_number(): NumberNode {
@@ -230,7 +230,7 @@ function negate(): NegativeNode {
 
 // The result of these operators is of type Num.
 function numeric_binary(lhs: AST): BinaryNode {
-    let operator = prevTok.kind;
+    let operator = prevTok.type;
     let rhs = parse_prec(rules[operator].prec + 1);
 
     switch (operator) {
@@ -302,14 +302,14 @@ function expression(): AST {
 
 function parse_prec(prec: Prec): AST {
     advance();
-    let prefixRule = rules[prevTok.kind].prefix;
+    let prefixRule = rules[prevTok.type].prefix;
     if (prefixRule === null)
         error("expect expression");
     let lhs = prefixRule();
 
-    while (prec <= rules[currTok.kind].prec) {
+    while (prec <= rules[currTok.type].prec) {
         advance();
-        let infixRule = rules[prevTok.kind].infix;
+        let infixRule = rules[prevTok.type].infix;
         if (infixRule === null)
             error("expect infix operator");
         lhs = infixRule(lhs);

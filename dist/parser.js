@@ -69,7 +69,7 @@ const rules = {
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
     [2050]: { prefix: null, infix: null, prec: 100 },
 };
-let invalidTok = { kind: 2100, line: -1, lexeme: "" };
+let invalidTok = { type: 2100, line: -1, lexeme: "" };
 let currTok = invalidTok;
 let prevTok = invalidTok;
 function error_at_current(message) {
@@ -80,9 +80,9 @@ function error(message) {
 }
 function error_at(token, message) {
     let result = "parser: " + token.line + "";
-    if (token.kind === 2100)
+    if (token.type === 2100)
         result += ": at end";
-    else if (token.kind === 2200)
+    else if (token.type === 2200)
         result += ": scanner";
     else
         result += `: at '${token.lexeme}'`;
@@ -92,28 +92,28 @@ function error_at(token, message) {
 function advance() {
     prevTok = currTok;
     currTok = scanner.next();
-    if (currTok.kind === 2200)
+    if (currTok.type === 2200)
         error_at_current(currTok.lexeme);
 }
-function check(kind) {
-    return currTok.kind === kind;
+function check(type) {
+    return currTok.type === type;
 }
-function match(kind) {
-    if (currTok.kind === kind) {
+function match(type) {
+    if (currTok.type === type) {
         advance();
         return true;
     }
     return false;
 }
-function consume(kind, message) {
-    if (currTok.kind === kind) {
+function consume(type, message) {
+    if (currTok.type === type) {
         advance();
         return;
     }
     error_at_current(message);
 }
 function parse_boolean() {
-    return new BooleanNode(prevTok.line, prevTok.kind === 2000);
+    return new BooleanNode(prevTok.line, prevTok.type === 2000);
 }
 function parse_number() {
     return new NumberNode(prevTok.line, Number(prevTok.lexeme));
@@ -178,7 +178,7 @@ function negate() {
     return new NegativeNode(line, rhs);
 }
 function numeric_binary(lhs) {
-    let operator = prevTok.kind;
+    let operator = prevTok.type;
     let rhs = parse_prec(rules[operator].prec + 1);
     switch (operator) {
         case 220: return new BinaryNode(prevTok.line, lhs, 1, rhs);
@@ -241,13 +241,13 @@ function expression() {
 }
 function parse_prec(prec) {
     advance();
-    let prefixRule = rules[prevTok.kind].prefix;
+    let prefixRule = rules[prevTok.type].prefix;
     if (prefixRule === null)
         error("expect expression");
     let lhs = prefixRule();
-    while (prec <= rules[currTok.kind].prec) {
+    while (prec <= rules[currTok.type].prec) {
         advance();
-        let infixRule = rules[prevTok.kind].infix;
+        let infixRule = rules[prevTok.type].infix;
         if (infixRule === null)
             error("expect infix operator");
         lhs = infixRule(lhs);

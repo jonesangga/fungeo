@@ -119,7 +119,7 @@ export const TokenTName: {
 };
 
 export type Token = {
-    kind:   TokenT,
+    type:   TokenT,
     lexeme: string,
     line:   number,
 };
@@ -163,18 +163,18 @@ function match(expected: string): boolean {
 }
 
 // Make token other than String or Error.
-function token_lexeme(kind: TokenT): Token {
+function token_lexeme(type: TokenT): Token {
     let lexeme = source.slice(start, current);
-    return { kind, lexeme, line };
+    return { type, lexeme, line };
 }
 
-function token_string(kind: TokenT): Token {
+function token_string(type: TokenT): Token {
     let lexeme = source.slice(start + 1, current - 1);
-    return { kind, lexeme, line };
+    return { type, lexeme, line };
 }
 
 function token_error(message: string): Token {
-    return { kind: TokenT.Error, lexeme: message, line };
+    return { type: TokenT.Error, lexeme: message, line };
 }
 
 function identifier(): Token {
@@ -336,9 +336,9 @@ export const scanner = {
             } else {
                 result += "   | ";
             }
-            result += `${ pad9(TokenTName[token.kind]) } '${ token.lexeme }'\n`;
+            result += `${ pad9(TokenTName[token.type]) } '${ token.lexeme }'\n`;
 
-            if (token.kind === TokenT.EOF) break;
+            if (token.type === TokenT.EOF) break;
         }
         return result;
     }
