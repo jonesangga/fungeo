@@ -47,6 +47,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Error]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.False]     : {prefix: parse_boolean,    infix: null,            prec: Prec.None},
     [TokenT.Fn]        : {prefix: null,             infix: null,            prec: Prec.None},
+    [TokenT.FSlash]    : {prefix: null,             infix: numeric_binary,  prec: Prec.Factor},
     [TokenT.Global]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Greater]   : {prefix: null,             infix: null,            prec: Prec.Comparison},
     [TokenT.GreaterEq] : {prefix: null,             infix: null,            prec: Prec.Comparison},
@@ -76,7 +77,6 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Return]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.RParen]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Semicolon] : {prefix: null,             infix: null,            prec: Prec.None},
-    [TokenT.Slash]     : {prefix: null,             infix: numeric_binary,  prec: Prec.Factor},
     [TokenT.Star]      : {prefix: null,             infix: numeric_binary,  prec: Prec.Factor},
     [TokenT.String]    : {prefix: parse_string,     infix: null,            prec: Prec.None},
     [TokenT.StrT]      : {prefix: null,             infix: null,            prec: Prec.None},
@@ -238,11 +238,11 @@ function numeric_binary(lhs: AST): BinaryNode {
     let rhs = parse_prec(rules[operator].prec + 1);
 
     switch (operator) {
-        case TokenT.Minus: return new BinaryNode(prevTok.line, lhs, BinaryOp.Subtract, rhs);
-        case TokenT.Plus:  return new BinaryNode(prevTok.line, lhs, BinaryOp.Add, rhs);
-        case TokenT.Slash: return new BinaryNode(prevTok.line, lhs, BinaryOp.Divide, rhs);
-        case TokenT.Star:  return new BinaryNode(prevTok.line, lhs, BinaryOp.Multiply, rhs);
-        default:           error("unhandled numeric binary operator");
+        case TokenT.FSlash: return new BinaryNode(prevTok.line, lhs, BinaryOp.Divide, rhs);
+        case TokenT.Minus:  return new BinaryNode(prevTok.line, lhs, BinaryOp.Subtract, rhs);
+        case TokenT.Plus:   return new BinaryNode(prevTok.line, lhs, BinaryOp.Add, rhs);
+        case TokenT.Star:   return new BinaryNode(prevTok.line, lhs, BinaryOp.Multiply, rhs);
+        default:            error("unhandled numeric binary operator");
     }
 }
 

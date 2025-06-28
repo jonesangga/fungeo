@@ -2,6 +2,7 @@ export var TokenT;
 (function (TokenT) {
     TokenT[TokenT["Comma"] = 100] = "Comma";
     TokenT[TokenT["Dot"] = 210] = "Dot";
+    TokenT[TokenT["FSlash"] = 220] = "FSlash";
     TokenT[TokenT["Hash"] = 250] = "Hash";
     TokenT[TokenT["LBrace"] = 300] = "LBrace";
     TokenT[TokenT["LBracket"] = 400] = "LBracket";
@@ -12,7 +13,6 @@ export var TokenT;
     TokenT[TokenT["RBracket"] = 700] = "RBracket";
     TokenT[TokenT["RParen"] = 800] = "RParen";
     TokenT[TokenT["Semicolon"] = 900] = "Semicolon";
-    TokenT[TokenT["Slash"] = 1000] = "Slash";
     TokenT[TokenT["Star"] = 1100] = "Star";
     TokenT[TokenT["Amp"] = 1180] = "Amp";
     TokenT[TokenT["AmpAmp"] = 1190] = "AmpAmp";
@@ -80,6 +80,7 @@ export const TokenTName = {
     [2200]: "Error",
     [1700]: "False",
     [2320]: "Fn",
+    [220]: "FSlash",
     [2450]: "Global",
     [1520]: "Greater",
     [1525]: "GreaterEq",
@@ -109,7 +110,6 @@ export const TokenTName = {
     [2800]: "Return",
     [800]: "RParen",
     [900]: "Semicolon",
-    [1000]: "Slash",
     [1100]: "Star",
     [1900]: "String",
     [2900]: "StrT",
@@ -264,7 +264,7 @@ export const scanner = {
             case '#': return token_lexeme(250);
             case ';': return token_lexeme(900);
             case ',': return token_lexeme(100);
-            case '/': return token_lexeme(1000);
+            case '/': return token_lexeme(220);
             case '*': return token_lexeme(1100);
             case '\\': return token_lexeme(1220);
             case '"': return string_();

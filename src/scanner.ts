@@ -5,6 +5,7 @@
 export const enum TokenT {
     Comma     = 100,    // Single character.
     Dot       = 210,
+    FSlash    = 220,
     Hash      = 250,
     LBrace    = 300,
     LBracket  = 400,
@@ -15,7 +16,6 @@ export const enum TokenT {
     RBracket  = 700,
     RParen    = 800,
     Semicolon = 900,
-    Slash     = 1000,
     Star      = 1100,
     Amp       = 1180,   // One or more characters.
     AmpAmp    = 1190,
@@ -85,6 +85,7 @@ export const TokenTName: {
     [TokenT.Error]: "Error",
     [TokenT.False]: "False",
     [TokenT.Fn]: "Fn",
+    [TokenT.FSlash]: "FSlash",
     [TokenT.Global]: "Global",
     [TokenT.Greater]: "Greater",
     [TokenT.GreaterEq]: "GreaterEq",
@@ -114,7 +115,6 @@ export const TokenTName: {
     [TokenT.Return]: "Return",
     [TokenT.RParen]: "RParen",
     [TokenT.Semicolon]: "Semicolon",
-    [TokenT.Slash]: "Slash",
     [TokenT.Star]: "Star",
     [TokenT.String]: "String",
     [TokenT.StrT]: "StrT",
@@ -284,21 +284,21 @@ export const scanner = {
         if (is_alpha(c)) return identifier();
         
         switch (c) {
-            case '.': return token_lexeme(TokenT.Dot);
-            case '%': return token_lexeme(TokenT.Percent);
-            case '(': return token_lexeme(TokenT.LParen);
-            case ')': return token_lexeme(TokenT.RParen);
-            case '[': return token_lexeme(TokenT.LBracket);
-            case ']': return token_lexeme(TokenT.RBracket);
-            case '{': return token_lexeme(TokenT.LBrace);
-            case '}': return token_lexeme(TokenT.RBrace);
-            case '#': return token_lexeme(TokenT.Hash);
-            case ';': return token_lexeme(TokenT.Semicolon);
-            case ',': return token_lexeme(TokenT.Comma);
-            case '/': return token_lexeme(TokenT.Slash);
-            case '*': return token_lexeme(TokenT.Star);
+            case '.':  return token_lexeme(TokenT.Dot);
+            case '%':  return token_lexeme(TokenT.Percent);
+            case '(':  return token_lexeme(TokenT.LParen);
+            case ')':  return token_lexeme(TokenT.RParen);
+            case '[':  return token_lexeme(TokenT.LBracket);
+            case ']':  return token_lexeme(TokenT.RBracket);
+            case '{':  return token_lexeme(TokenT.LBrace);
+            case '}':  return token_lexeme(TokenT.RBrace);
+            case '#':  return token_lexeme(TokenT.Hash);
+            case ';':  return token_lexeme(TokenT.Semicolon);
+            case ',':  return token_lexeme(TokenT.Comma);
+            case '/':  return token_lexeme(TokenT.FSlash);
+            case '*':  return token_lexeme(TokenT.Star);
             case '\\': return token_lexeme(TokenT.BSlash);
-            case '"': return string_();
+            case '"':  return string_();
 
             case '-': return token_lexeme(
                 match('>') ? TokenT.Arrow : TokenT.Minus);

@@ -35,6 +35,7 @@ const rules = {
     [2200]: { prefix: null, infix: null, prec: 100 },
     [1700]: { prefix: parse_boolean, infix: null, prec: 100 },
     [2320]: { prefix: null, infix: null, prec: 100 },
+    [220]: { prefix: null, infix: numeric_binary, prec: 400 },
     [2450]: { prefix: null, infix: null, prec: 100 },
     [1520]: { prefix: null, infix: null, prec: 250 },
     [1525]: { prefix: null, infix: null, prec: 250 },
@@ -64,7 +65,6 @@ const rules = {
     [2800]: { prefix: null, infix: null, prec: 100 },
     [800]: { prefix: null, infix: null, prec: 100 },
     [900]: { prefix: null, infix: null, prec: 100 },
-    [1000]: { prefix: null, infix: numeric_binary, prec: 400 },
     [1100]: { prefix: null, infix: numeric_binary, prec: 400 },
     [1900]: { prefix: parse_string, infix: null, prec: 100 },
     [2900]: { prefix: null, infix: null, prec: 100 },
@@ -185,9 +185,9 @@ function numeric_binary(lhs) {
     let operator = prevTok.kind;
     let rhs = parse_prec(rules[operator].prec + 1);
     switch (operator) {
+        case 220: return new BinaryNode(prevTok.line, lhs, 1, rhs);
         case 600: return new BinaryNode(prevTok.line, lhs, 3, rhs);
         case 1585: return new BinaryNode(prevTok.line, lhs, 0, rhs);
-        case 1000: return new BinaryNode(prevTok.line, lhs, 1, rhs);
         case 1100: return new BinaryNode(prevTok.line, lhs, 2, rhs);
         default: error("unhandled numeric binary operator");
     }
