@@ -33,7 +33,7 @@ describe("scanner each token type", () => {
         [1200]: ["!", { kind: 1200, line: 1, lexeme: "!" }],
         [1210]: ["!=", { kind: 1210, line: 1, lexeme: "!=" }],
         [2220]: ["Bool", { kind: 2220, line: 1, lexeme: "Bool" }],
-        [1220]: ["\\", { kind: 1220, line: 1, lexeme: "\\" }],
+        [50]: ["\\", { kind: 50, line: 1, lexeme: "\\" }],
         [1300]: [":", { kind: 1300, line: 1, lexeme: ":" }],
         [1400]: [":=", { kind: 1400, line: 1, lexeme: ":=" }],
         [100]: [",", { kind: 100, line: 1, lexeme: "," }],

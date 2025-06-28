@@ -3,7 +3,8 @@
 // TODO: Support multiline comment.
 
 export const enum TokenT {
-    Comma     = 100,    // Single character.
+    BSlash    = 50,     // Single character.
+    Comma     = 100,
     Dot       = 210,
     FSlash    = 220,
     Hash      = 250,
@@ -22,7 +23,6 @@ export const enum TokenT {
     Arrow     = 1195,
     Bang      = 1200,
     BangEq    = 1210,
-    BSlash    = 1220,
     Colon     = 1300,
     ColonEq   = 1400,
     DivBy     = 1450,

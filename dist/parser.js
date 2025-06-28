@@ -21,7 +21,7 @@ const rules = {
     [1200]: { prefix: null, infix: null, prec: 100 },
     [1210]: { prefix: null, infix: null, prec: 230 },
     [2220]: { prefix: null, infix: null, prec: 100 },
-    [1220]: { prefix: null, infix: null, prec: 100 },
+    [50]: { prefix: null, infix: null, prec: 100 },
     [2230]: { prefix: null, infix: null, prec: 100 },
     [1300]: { prefix: null, infix: null, prec: 100 },
     [1400]: { prefix: null, infix: null, prec: 100 },
@@ -221,7 +221,7 @@ function stmt() {
     if (check(1730)) {
         return assign_or_call_void();
     }
-    else if (match(1220)) {
+    else if (match(50)) {
         return expr_stmt();
     }
     error_at_current("forbiden expr stmt");
