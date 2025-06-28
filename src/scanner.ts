@@ -291,9 +291,12 @@ export const scanner = {
             case '*':  return token_lexeme(TokenT.Star);
             case ':':  return token_lexeme(TokenT.Colon);
             case '\\': return token_lexeme(TokenT.BSlash);
-            case '||': return token_lexeme(TokenT.PipePipe);
             case '"':  return string_();
 
+            case '|': {
+                if (match('|')) return token_lexeme(TokenT.PipePipe);
+                else break; // TODO: Update this when we implement pipe.
+            }
             case '-': return token_lexeme(
                 match('>') ? TokenT.Arrow : TokenT.Minus);
             case '&': return token_lexeme(

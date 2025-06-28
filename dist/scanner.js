@@ -258,8 +258,13 @@ export const scanner = {
             case '*': return token_lexeme(1100);
             case ':': return token_lexeme(1300);
             case '\\': return token_lexeme(50);
-            case '||': return token_lexeme(1580);
             case '"': return string_();
+            case '|': {
+                if (match('|'))
+                    return token_lexeme(1580);
+                else
+                    break;
+            }
             case '-': return token_lexeme(match('>') ? 1195 : 600);
             case '&': return token_lexeme(match('&') ? 1190 : 1180);
             case '<': {
