@@ -7,8 +7,7 @@ import 'global-jsdom/register'
 import { describe, it } from "node:test";
 import { equal, deepEqual } from "node:assert/strict";
 import { Op, OpName, Chunk } from "../chunk.js"
-import { Kind, FGNumber, FGString, FGCallNative, FGCallUser } from "../value.js"
-import { nativeNames } from "../vmfunction.js"
+import { FGNumber, FGString } from "../value.js"
 
 describe("chunk", () => {
     it("constructor()", () => {

@@ -4,8 +4,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Value, Kind, FGNumber, FGString } from "../value.js"
-import { type Type, FGType, pointT, richPointT, numberT, stringT } from "../literal/type.js"
+import { Value, Kind, FGNumber } from "../value.js"
+import { FGType, pointT, richPointT } from "../literal/type.js"
 
 export class Point {
     kind: Kind.Point = Kind.Point;

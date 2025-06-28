@@ -2,8 +2,8 @@
 
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import { AssignNode, BinaryNode, BinaryOp, binaryTable, BooleanNode, CallNode, CallVoidNode,
-         ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NumberNode, SetPropNode,
+import { AssignNode, BinaryNode, BinaryOp, BooleanNode, CallNode, CallVoidNode,
+         ExprStmtNode, FileNode, IdentNode, NumberNode,
          StringNode, VarDeclNode } from "../ast.js";
 
 // From https://adamcoster.com/blog/prettify-your-javascript-strings

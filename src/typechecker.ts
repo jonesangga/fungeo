@@ -1,9 +1,9 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { AST, AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
-import { type Type, Class, FunctionT, OverloadT, numberT, PointT, ListT, stringT, booleanT, nothingT, GeoT } from "./literal/type.js"
+import { type Type, Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = "type: " + line + ": " + message;

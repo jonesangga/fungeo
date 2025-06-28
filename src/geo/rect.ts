@@ -2,8 +2,8 @@
 
 import { c } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Value, Kind, FGNumber, FGString } from "../value.js"
-import { FGType, rectT, numberT } from "../literal/type.js"
+import { Kind } from "../value.js"
+import { FGType, rectT } from "../literal/type.js"
 
 export default class Rect {
     kind: Kind.Rect = Kind.Rect;

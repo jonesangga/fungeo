@@ -3,7 +3,7 @@
 // TODO: Think again about FG interface.
 
 import { Chunk } from "./chunk.js"
-import { FGType, Type, FunctionT, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
+import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
 import { Circle, RichCircle } from "./geo/circle.js"

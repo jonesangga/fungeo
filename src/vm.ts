@@ -210,15 +210,15 @@ export function run(intercept: boolean = false): boolean {
 
             // TODO: implement these ASAP.
             case Op.Eq: {
-                let b = pop();
-                let a = pop();
+                // let b = pop();
+                // let a = pop();
                 // push(new FGBoolean( a.equal(b) ));
                 push(new FGBoolean(false));
                 break;
             }
             case Op.NEq: {
-                let b = pop();
-                let a = pop();
+                // let b = pop();
+                // let a = pop();
                 // push(new FGBoolean( !a.equal(b) ));
                 push(new FGBoolean(false));
                 break;
@@ -435,7 +435,7 @@ export function run(intercept: boolean = false): boolean {
             // TODO: it is redundant to assign type again. The type is same.
             case Op.SetLocG: {
                 let name  = read_string();
-                let type  = (pop() as FGType).value;
+                // let type  = (pop() as FGType).value;
                 let value = pop();
 
                 // names[name] = { type, value };

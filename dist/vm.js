@@ -142,14 +142,10 @@ export function run(intercept = false) {
                 break;
             }
             case 380: {
-                let b = pop();
-                let a = pop();
                 push(new FGBoolean(false));
                 break;
             }
             case 1010: {
-                let b = pop();
-                let a = pop();
                 push(new FGBoolean(false));
                 break;
             }
@@ -346,7 +342,6 @@ export function run(intercept = false) {
             }
             case 1415: {
                 let name = read_string();
-                let type = pop().value;
                 let value = pop();
                 names[name].value = value;
                 break;

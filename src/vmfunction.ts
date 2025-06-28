@@ -1,25 +1,22 @@
 import { pop, push, vm_output } from "./vm.js"
-import { type Value, type GeoObj, type RichGeoObj, type Fillable, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
-import { FGColor } from "./literal/color.js"
+import { type Value, type GeoObj, type RichGeoObj, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import { Circle, RichCircle } from "./geo/circle.js"
 import { Coord } from "./geo/coordinate.js"
 import { Point, RichPoint } from "./geo/point.js"
-import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
-import Rect from "./geo/rect.js"
 import { Segment, RichSegment } from "./geo/segment.js"
 import { welcome } from "./data/help.js"
 import { type Type, ListT, UnionT, anyT, pictureT, FunctionT, OverloadT,
          ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT,
-         colorT, canvasT, coordT, replT, NothingT, AnyT } from "./literal/type.js"
+         canvasT, coordT, replT } from "./literal/type.js"
 
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
-const fillableT = new UnionT([circleT, ellipseT]);
+// const fillableT = new UnionT([circleT, ellipseT]);
 
 function _print(ver: number): void {
     let value = pop();

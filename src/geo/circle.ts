@@ -3,7 +3,7 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Value, Kind, FGNumber, FGComplex } from "../value.js"
-import { FGType, circleT, numberT } from "../literal/type.js"
+import { FGType, circleT } from "../literal/type.js"
 import { Point, RichPoint } from "./point.js"
 
 export class Circle {

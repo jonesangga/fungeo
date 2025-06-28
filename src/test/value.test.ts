@@ -4,8 +4,8 @@
 //       test version in FGCallNative and FGCallUser
 
 import { describe, it } from "node:test";
-import { equal, deepEqual } from "node:assert/strict";
-import { Kind, FGBoolean, FGCallNative, FGCallUser, FGNumber, FGString } from "../value.js"
+import { equal } from "node:assert/strict";
+import { Kind, FGBoolean, FGCallUser, FGNumber, FGString } from "../value.js"
 import { Chunk } from "../chunk.js"
 import { numberT } from "../literal/type.js"
 

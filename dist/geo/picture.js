@@ -295,8 +295,6 @@ export default class Picture {
         let d = this.h / 2;
         let x1 = -r.y + c + d;
         let y1 = r.x + c - d;
-        let x2 = -(r.y + r.h) + c + d;
-        let y2 = (r.x + r.w) + c - d;
         let w = -r.h;
         let h = r.w;
         return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
@@ -306,8 +304,6 @@ export default class Picture {
         let d = this.h / 2;
         let x1 = r.y + c - d;
         let y1 = -r.x + c + d;
-        let x2 = (r.y + r.h) + c - d;
-        let y2 = -(r.x + r.w) + c + d;
         let w = r.h;
         let h = -r.w;
         return new Rect(x1, y1, w, h, r.strokeStyle, r.fillStyle);
@@ -315,14 +311,12 @@ export default class Picture {
     #rect_fliph(r) {
         let c = this.w / 2;
         let x1 = -r.x + 2 * c;
-        let x2 = -(r.x + r.w) + 2 * c;
         let w = -r.w;
         return new Rect(x1, r.y, w, r.h, r.strokeStyle, r.fillStyle);
     }
     #rect_flipv(r) {
         let d = this.h / 2;
         let y1 = -r.y + 2 * d;
-        let y2 = -(r.y + r.h) + 2 * d;
         let h = -r.h;
         return new Rect(r.x, y1, r.w, h, r.strokeStyle, r.fillStyle);
     }

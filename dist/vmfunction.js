@@ -13,7 +13,6 @@ const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, r
 const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
-const fillableT = new UnionT([circleT, ellipseT]);
 function _print(ver) {
     let value = pop();
     pop();
