@@ -193,3 +193,69 @@ describe("scanner error", () => {
         });
     });
 });
+
+describe.only("scanner all() method", () => {
+    it("all() empty code", () => {
+        let code = "";
+        let scanner = new Scanner(code);
+        let expected = [
+            scanner.next()  // EOF
+        ];
+
+        let result = scanner.all();
+
+        deepEqual(result, expected);
+    });
+
+    it("all() non-empty code", () => {
+        let code = "let a = 2\n // real\n print(a)";
+        let scanner = new Scanner(code);
+        let expected = [
+            scanner.next(),     // let
+            scanner.next(),     // a
+            scanner.next(),     // =
+            scanner.next(),     // 2
+            scanner.next(),     // print
+            scanner.next(),     // (
+            scanner.next(),     // a
+            scanner.next(),     // )
+            scanner.next(),     // EOF
+        ];
+
+        let result = scanner.all();
+
+        deepEqual(result, expected);
+    });
+});
+
+describe.only("scanner all_pretty() method", () => {
+    it("all_pretty() empty code", () => {
+        let code = "";
+        let scanner = new Scanner(code);
+
+        let result = scanner.all_pretty();
+
+        deepEqual(result,
+            "   1 EOF       ''\n"
+        );
+    });
+
+    it("all_pretty() non-empty code", () => {
+        let code = "let a = 2\n // real\n print(a)";
+        let scanner = new Scanner(code);
+
+        let result = scanner.all_pretty();
+
+        deepEqual(result,
+            "   1 Let       'let'\n" +
+            "   | Ident     'a'\n" +
+            "   | Eq        '='\n" +
+            "   | Number    '2'\n" +
+            "   3 Ident     'print'\n" +
+            "   | LParen    '('\n" +
+            "   | Ident     'a'\n" +
+            "   | RParen    ')'\n" +
+            "   | EOF       ''\n"
+        );
+    });
+});

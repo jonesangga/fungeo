@@ -338,4 +338,38 @@ export class Scanner {
             }
         }
     }
+    all() {
+        let fresh = new Scanner(this.source);
+        let result = [];
+        while (!fresh.is_eof()) {
+            result.push(fresh.next());
+        }
+        result.push(fresh.next());
+        return result;
+    }
+    all_pretty() {
+        let fresh = new Scanner(this.source);
+        let result = "";
+        let lastLine = -1;
+        for (;;) {
+            let token = fresh.next();
+            if (token.line !== lastLine) {
+                result += `${pad4(token.line)} `;
+                lastLine = token.line;
+            }
+            else {
+                result += "   | ";
+            }
+            result += `${pad9(TokenTName[token.type])} '${token.lexeme}'\n`;
+            if (token.type === 2100)
+                break;
+        }
+        return result;
+    }
+}
+function pad9(str) {
+    return (str + '         ').slice(0, 9);
+}
+function pad4(n) {
+    return ('   ' + n).slice(-4);
 }

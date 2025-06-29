@@ -3,6 +3,7 @@
 // TODO: Add TokenT.Pipe later for pipe functionality.
 //       Add TokenT.ColonColon for module import like use fish::Above.
 
+// NOTE: Make sure only add item with length <= 9.
 export const enum TokenT {
     BSlash    = 50,     // Single character.
     Comma     = 100,
@@ -378,14 +379,53 @@ export class Scanner {
             }
         }
     }
+
+    // This method works with a new Scanner instance with the same source.
+    // This is so that it can maintain its current state.
+    all(): Token[] {
+        let fresh  = new Scanner(this.source);
+        let result = [];
+
+        // NOTE: Don't change this to do-while loop because that doesn't handle EOF well.
+        while (!fresh.is_eof()) {
+            result.push(fresh.next());
+        }
+        result.push(fresh.next());       // This is to get the EOF token.
+        return result;
+    }
+
+    // This method works with a new Scanner instance with the same source.
+    // This is so that it can maintain its current state.
+    all_pretty(): string {
+        let fresh    = new Scanner(this.source);
+        let result   = "";
+        let lastLine = -1;
+
+        for (;;) {
+            let token = fresh.next();
+            if (token.line !== lastLine) {
+                result += `${ pad4(token.line) } `;
+                lastLine = token.line;
+            } else {
+                result += "   | ";
+            }
+            result += `${ pad9(TokenTName[token.type]) } '${ token.lexeme }'\n`;
+
+            if (token.type === TokenT.EOF) break;
+        }
+        return result;
+    }
 }
 
+//--------------------------------------------------------------------
 // Helpers for formating.
 
-// function pad9(str: string): string {
-    // return (str+'         ').slice(0, 9);
-// }
+// NOTE: It is 9 place because the longest TokenT item's name is 9.
+function pad9(str: string): string {
+    return (str+'         ').slice(0, 9);
+}
 
-// function pad4(n: number): string {
-    // return ('   '+n).slice(-4);
-// }
+// NOTE: The choice of 4 place is arbitrary.
+function pad4(n: number): string {
+    return ('   '+n).slice(-4);
+}
