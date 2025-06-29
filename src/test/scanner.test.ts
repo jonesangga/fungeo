@@ -37,6 +37,42 @@ describe("scanner handling EOF", () => {
     });
 });
 
+describe("scanner handling comment", () => {
+    it("single-line comment", () => {
+        let code = "let a = 2\n // print(b)\n print(a)";
+        scanner.init(code);
+
+        scanner.next();     // let
+        scanner.next();     // a
+        scanner.next();     // =
+        scanner.next();     // 2
+        let next = scanner.next();  // print
+
+        deepEqual(next, {
+            type: TokenT.Ident,
+            line: 3,
+            lexeme: "print",
+        });
+    });
+
+    it("multi-line comment", () => {
+        let code = "let a = 2\n /* let b = 2\n print(b)\n*/ print(a)";
+        scanner.init(code);
+
+        scanner.next();     // let
+        scanner.next();     // a
+        scanner.next();     // =
+        scanner.next();     // 2
+        let next = scanner.next();  // print
+
+        deepEqual(next, {
+            type: TokenT.Ident,
+            line: 4,
+            lexeme: "print",
+        });
+    });
+});
+
 describe("scanner each token type", () => {
     // NOTE: Don't change this type to Record<TokenT, [string, Token]>
     // because we want to make sure the expected type is the same as the key.

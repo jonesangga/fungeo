@@ -25,6 +25,36 @@ describe("scanner handling EOF", () => {
         });
     });
 });
+describe("scanner handling comment", () => {
+    it("single-line comment", () => {
+        let code = "let a = 2\n // print(b)\n print(a)";
+        scanner.init(code);
+        scanner.next();
+        scanner.next();
+        scanner.next();
+        scanner.next();
+        let next = scanner.next();
+        deepEqual(next, {
+            type: 1730,
+            line: 3,
+            lexeme: "print",
+        });
+    });
+    it("multi-line comment", () => {
+        let code = "let a = 2\n /* let b = 2\n print(b)\n*/ print(a)";
+        scanner.init(code);
+        scanner.next();
+        scanner.next();
+        scanner.next();
+        scanner.next();
+        let next = scanner.next();
+        deepEqual(next, {
+            type: 1730,
+            line: 4,
+            lexeme: "print",
+        });
+    });
+});
 describe("scanner each token type", () => {
     const tests = {
         [1180]: ["&", { type: 1180, line: 1, lexeme: "&" }],
