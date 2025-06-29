@@ -1,7 +1,4 @@
 // @jonesangga, 04-05-2025, MIT License.
-//
-// TODO: Test scanner.all().
-//       Test scanner.all_string().
 
 import { describe, it } from "node:test";
 import { deepEqual } from "node:assert/strict";

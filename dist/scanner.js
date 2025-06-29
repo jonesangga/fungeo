@@ -280,11 +280,13 @@ export class Scanner {
         return this.token_lexeme(1800);
     }
     string_() {
-        while (this.peek() !== '"' && !this.is_eof()) {
-            if (this.peek() === '\n') {
+        let c = this.peek();
+        while (c !== '"' && !this.is_eof()) {
+            if (c === '\n') {
                 this.line++;
             }
             this.advance();
+            c = this.peek();
         }
         if (this.is_eof()) {
             return this.token_error("unterminated string");

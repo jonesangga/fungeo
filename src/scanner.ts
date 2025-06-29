@@ -314,11 +314,13 @@ export class Scanner {
     }
 
     string_(): Token {
-        while (this.peek() !== '"' && !this.is_eof()) {
-            if (this.peek() === '\n') {
+        let c = this.peek();
+        while (c !== '"' && !this.is_eof()) {
+            if (c === '\n') {
                 this.line++;
             }
             this.advance();
+            c = this.peek();
         }
 
         if (this.is_eof()) {
@@ -370,6 +372,7 @@ export class Scanner {
                         }
                     }
                     else {
+                        // We got non whitespace '/' so we return.
                         return;
                     }
                     break;
