@@ -158,25 +158,56 @@ export class Scanner {
             case ':': return this.token_lexeme(1300);
             case '\\': return this.token_lexeme(50);
             case '"': return this.string_();
+            case '>': {
+                if (this.match('='))
+                    return this.token_lexeme(1525);
+                else
+                    return this.token_lexeme(1520);
+            }
+            case '-': {
+                if (this.match('>'))
+                    return this.token_lexeme(1195);
+                else
+                    return this.token_lexeme(600);
+            }
+            case '=': {
+                if (this.match('='))
+                    return this.token_lexeme(1505);
+                else
+                    return this.token_lexeme(1500);
+            }
+            case '!': {
+                if (this.match('='))
+                    return this.token_lexeme(1210);
+                else
+                    return this.token_lexeme(1200);
+            }
+            case '+': {
+                if (this.match('+'))
+                    return this.token_lexeme(1590);
+                else
+                    return this.token_lexeme(1585);
+            }
+            case '&': {
+                if (this.match('&'))
+                    return this.token_lexeme(1190);
+                else
+                    return this.token_lexeme(1180);
+            }
+            case '<': {
+                if (this.match('='))
+                    return this.token_lexeme(1555);
+                if (this.match('>'))
+                    return this.token_lexeme(1560);
+                else
+                    return this.token_lexeme(1550);
+            }
             case '|': {
                 if (this.match('|'))
                     return this.token_lexeme(1580);
                 else
                     break;
             }
-            case '-': return this.token_lexeme(this.match('>') ? 1195 : 600);
-            case '&': return this.token_lexeme(this.match('&') ? 1190 : 1180);
-            case '<': {
-                if (this.match('='))
-                    return this.token_lexeme(1555);
-                if (this.match('>'))
-                    return this.token_lexeme(1560);
-                return this.token_lexeme(1550);
-            }
-            case '>': return this.token_lexeme(this.match('=') ? 1525 : 1520);
-            case '=': return this.token_lexeme(this.match('=') ? 1505 : 1500);
-            case '!': return this.token_lexeme(this.match('=') ? 1210 : 1200);
-            case '+': return this.token_lexeme(this.match('+') ? 1590 : 1585);
         }
         return this.token_error(`unexpected character ${c}`);
     }

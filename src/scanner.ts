@@ -177,27 +177,56 @@ export class Scanner {
             case '\\': return this.token_lexeme( TokenT.BSlash );
             case '"':  return this.string_();
 
-            case '|': {
-                if (this.match('|')) return this.token_lexeme(TokenT.PipePipe);
-                else break; // TODO: Update this when we implement pipe.
+            case '>': {
+                if (this.match('='))
+                    return this.token_lexeme( TokenT.GreaterEq )
+                else
+                    return this.token_lexeme( TokenT.Greater );
             }
-            case '-': return this.token_lexeme(
-                this.match('>') ? TokenT.Arrow : TokenT.Minus);
-            case '&': return this.token_lexeme(
-                this.match('&') ? TokenT.AmpAmp : TokenT.Amp);
+            case '-': {
+                if (this.match('>'))
+                    return this.token_lexeme( TokenT.Arrow )
+                else
+                    return this.token_lexeme( TokenT.Minus );
+            }
+            case '=': {
+                if (this.match('='))
+                    return this.token_lexeme( TokenT.EqEq )
+                else
+                    return this.token_lexeme( TokenT.Eq );
+            }
+            case '!': {
+                if (this.match('='))
+                    return this.token_lexeme( TokenT.BangEq )
+                else
+                    return this.token_lexeme( TokenT.Bang );
+            }
+            case '+': {
+                if (this.match('+'))
+                    return this.token_lexeme( TokenT.PlusPlus )
+                else
+                    return this.token_lexeme( TokenT.Plus );
+            }
+            case '&': {
+                if (this.match('&'))
+                    return this.token_lexeme( TokenT.AmpAmp )
+                else
+                    return this.token_lexeme( TokenT.Amp );
+            }
             case '<': {
-                if (this.match('=')) return this.token_lexeme(TokenT.LessEq);
-                if (this.match('>')) return this.token_lexeme(TokenT.LR);
-                return this.token_lexeme(TokenT.Less);
+                if (this.match('='))
+                    return this.token_lexeme( TokenT.LessEq )
+                if (this.match('>'))
+                    return this.token_lexeme( TokenT.LR )
+                else
+                    return this.token_lexeme( TokenT.Less );
             }
-            case '>': return this.token_lexeme(
-                this.match('=') ? TokenT.GreaterEq : TokenT.Greater);
-            case '=': return this.token_lexeme(
-                this.match('=') ? TokenT.EqEq : TokenT.Eq);
-            case '!': return this.token_lexeme(
-                this.match('=') ? TokenT.BangEq : TokenT.Bang);
-            case '+': return this.token_lexeme(
-                this.match('+') ? TokenT.PlusPlus : TokenT.Plus);
+            case '|': {
+                if (this.match('|'))
+                    return this.token_lexeme( TokenT.PipePipe )
+                else
+                    break; // TODO: Update this when we implement pipe.
+            }
         }
         return this.token_error(`unexpected character ${c}`);
     }
