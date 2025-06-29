@@ -51,7 +51,7 @@ export class Coord {
     draw() {
         let x = 0;
         let y = 0;
-        c.strokeStyle = this.strokeStyle;
+        c.strokeStyle = "#222222";
         if (this.#showGrid) {
             c.beginPath();
             for (let i = 0; i < (this.xr - this.xl + 1); i++) {
@@ -66,6 +66,7 @@ export class Coord {
             }
             c.stroke();
         }
+        c.strokeStyle = this.strokeStyle;
         for (let pt of this.pts)
             if (this.#in_view(pt))
                 this.#draw_point(pt);

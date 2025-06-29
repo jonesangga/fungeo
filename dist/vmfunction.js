@@ -199,7 +199,7 @@ function _coord() {
     let xr = pop().value;
     let xl = pop().value;
     pop();
-    push(new Coord(xl, xr, yl, yr));
+    push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
 }
 let coord = new FGCallNative("coord", _coord, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], coordT),

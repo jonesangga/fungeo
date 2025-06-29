@@ -505,7 +505,7 @@ function _coord(): void {
     let xr = (pop() as FGNumber).value;
     let xl = (pop() as FGNumber).value;
     pop();              // The function.
-    push(new Coord(xl, xr, yl, yr));
+    push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
 }
 let coord = new FGCallNative("coord", _coord,
     new OverloadT([

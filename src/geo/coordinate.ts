@@ -62,7 +62,7 @@ export class Coord {
     draw(): void {
         let x = 0;
         let y = 0;
-        c.strokeStyle = this.strokeStyle;
+        c.strokeStyle = "#222222";
 
         // Draw grid.
         if (this.#showGrid) {
@@ -81,6 +81,7 @@ export class Coord {
         }
 
         // Place point according to coordinate view.
+        c.strokeStyle = this.strokeStyle;
         for (let pt of this.pts)
             if (this.#in_view(pt))
                 this.#draw_point(pt);
