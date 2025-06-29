@@ -111,6 +111,6 @@
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   }
   // "exclude": [
-      // "src/test/vm.test.ts"
+      // "src/test/scanner.test.ts"
   // ]
 }

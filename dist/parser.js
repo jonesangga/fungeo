@@ -1,4 +1,4 @@
-import { scanner } from "./scanner.js";
+import { Scanner } from "./scanner.js";
 import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
@@ -69,6 +69,7 @@ const rules = {
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
     [2050]: { prefix: null, infix: null, prec: 100 },
 };
+let scanner = new Scanner("dummy, delete later");
 let invalidTok = { type: 2100, line: -1, lexeme: "" };
 let currTok = invalidTok;
 let prevTok = invalidTok;
@@ -255,7 +256,7 @@ function parse_prec(prec) {
     return lhs;
 }
 export function parse(source) {
-    scanner.init(source);
+    scanner = new Scanner(source);
     prevTok = invalidTok;
     currTok = invalidTok;
     let stmts = [];

@@ -123,12 +123,6 @@ export type Token = {
     line:   number,
 };
 
-let source  = "";
-let start   = 0;
-let current = 0;
-let line    = 1;
-let closedMultComment = true;
-
 function is_digit(c: string): boolean {
     return c >= '0' && c <= '9';
 }
@@ -139,256 +133,230 @@ function is_alpha(c: string): boolean {
            c === '_';
 }
 
-function advance(): string {
-    return source[current++];
-}
+export class Scanner {
+    source: string;
+    start   = 0;
+    current = 0;
+    line    = 1;
+    closedMultiComment = true;
 
-function peek(): string {
-    return source[current];
-}
-
-function peek_next(): string {
-    return source[current + 1];
-}
-
-function is_eof(): boolean {
-    return current === source.length;
-}
-
-function match(expected: string): boolean {
-    if (is_eof()) return false;
-    if (source[current] !== expected) return false;
-    current++;
-    return true;
-}
-
-// Make token other than String or Error.
-function token_lexeme(type: TokenT): Token {
-    let lexeme = source.slice(start, current);
-    return {type, lexeme, line};
-}
-
-function token_string(type: TokenT): Token {
-    let lexeme = source.slice(start + 1, current - 1);
-    return {type, lexeme, line};
-}
-
-function token_error(message: string): Token {
-    return {type: TokenT.Error, lexeme: message, line};
-}
-
-function identifier(): Token {
-    while (is_alpha(peek()) || is_digit(peek())) {
-        advance();
+    constructor(source: string) {
+        this.source = source;
     }
-
-    switch (source.slice(start, current)) {
-        case "Bool":   return token_lexeme( TokenT.BoolT );
-        case "Circle": return token_lexeme( TokenT.CircleT );
-        case "else":   return token_lexeme( TokenT.Else );
-        case "false":  return token_lexeme( TokenT.False );
-        case "fn":     return token_lexeme( TokenT.Fn );
-        case "if":     return token_lexeme( TokenT.If );
-        case "ifx":    return token_lexeme( TokenT.Ifx );
-        case "let":    return token_lexeme( TokenT.Let );
-        case "Num":    return token_lexeme( TokenT.NumT );
-        case "Point":  return token_lexeme( TokenT.PointT );
-        case "Rect":   return token_lexeme( TokenT.RectT );
-        case "return": return token_lexeme( TokenT.Return );
-        case "Str":    return token_lexeme( TokenT.StrT );
-        case "struct": return token_lexeme( TokenT.Struct );
-        case "then":   return token_lexeme( TokenT.Then );
-        case "true":   return token_lexeme( TokenT.True );
-        case "use":    return token_lexeme( TokenT.Use );
-    }
-    return token_lexeme(TokenT.Ident);
-}
-
-function number_(): Token {
-    while (is_digit(peek())) {
-        advance();
-    }
-
-    // Look for a fractional part.
-    if (peek() === '.' && is_digit(peek_next())) {
-        advance();                  // Consume the ".".
-        while (is_digit(peek())) {
-            advance();
-        }
-    }
-
-    return token_lexeme(TokenT.Number);
-}
-
-function string_(): Token {
-    while (peek() !== '"' && !is_eof()) {
-        if (peek() === '\n') {
-            line++;
-        }
-        advance();
-    }
-
-    if (is_eof()) {
-        return token_error("unterminated string");
-    }
-
-    advance();          // Consume the closing quote.
-    return token_string(TokenT.String);
-}
-
-function skip_whitespace(): void {
-    for (;;) {
-        let c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-
-            case '\n':
-                line++;
-                advance();
-                break;
-
-            case '/':
-                if (peek_next() === '/') {      // Single-line comment.
-                    // NOTE: We use peek() so we don't consume newline.
-                    while (peek() !== '\n' && !is_eof()) {
-                        advance();
-                    }
-                } 
-                else if (peek_next() === '*') { // Multi-line comment.
-                    advance();      // Consume '/'.
-                    advance();      // Consume '*'.
-                    closedMultComment = false;
-                    while (!is_eof()) {
-                        let d = advance();
-                        if (d === '*') {
-                            if (peek() === '/') {
-                                advance();      // Consume '/'.
-                                closedMultComment = true;
-                                break;
-                            }
-                        }
-                        else if (d === '\n') {
-                            line++;
-                        }
-                    }
-                }
-                else {
-                    return;
-                }
-                break;
-
-            default:
-                return;
-        }
-    }
-}
-
-export const scanner = {
-    init(source_: string): void {
-        source  = source_;
-        start   = 0;
-        current = 0;
-        line    = 1;
-    },
 
     next(): Token {
-        skip_whitespace();
-        start = current;
+        this.skip_whitespace();
+        this.start = this.current;
 
-        if (is_eof()) {
-            if (closedMultComment === false) {
-                return token_error("multi-line comment is not closed");
+        if (this.is_eof()) {
+            if (this.closedMultiComment === false) {
+                return this.token_error("multi-line comment is not closed");
             }
-            return token_lexeme(TokenT.EOF);
+            return this.token_lexeme(TokenT.EOF);
         }
 
-        let c = advance();
-        if (is_digit(c)) return number_();
-        if (is_alpha(c)) return identifier();
-        
+        let c = this.advance();
+        if (is_digit(c)) return this.number_();
+        if (is_alpha(c)) return this.identifier();
+
         switch (c) {
-            case '.':  return token_lexeme(TokenT.Dot);
-            case '%':  return token_lexeme(TokenT.Percent);
-            case '(':  return token_lexeme(TokenT.LParen);
-            case ')':  return token_lexeme(TokenT.RParen);
-            case '[':  return token_lexeme(TokenT.LBracket);
-            case ']':  return token_lexeme(TokenT.RBracket);
-            case '{':  return token_lexeme(TokenT.LBrace);
-            case '}':  return token_lexeme(TokenT.RBrace);
-            case '#':  return token_lexeme(TokenT.Hash);
-            case ';':  return token_lexeme(TokenT.Semicolon);
-            case ',':  return token_lexeme(TokenT.Comma);
-            case '/':  return token_lexeme(TokenT.FSlash);
-            case '*':  return token_lexeme(TokenT.Star);
-            case ':':  return token_lexeme(TokenT.Colon);
-            case '\\': return token_lexeme(TokenT.BSlash);
-            case '"':  return string_();
+            case '.':  return this.token_lexeme( TokenT.Dot );
+            case '%':  return this.token_lexeme( TokenT.Percent );
+            case '(':  return this.token_lexeme( TokenT.LParen );
+            case ')':  return this.token_lexeme( TokenT.RParen );
+            case '[':  return this.token_lexeme( TokenT.LBracket );
+            case ']':  return this.token_lexeme( TokenT.RBracket );
+            case '{':  return this.token_lexeme( TokenT.LBrace );
+            case '}':  return this.token_lexeme( TokenT.RBrace );
+            case '#':  return this.token_lexeme( TokenT.Hash );
+            case ';':  return this.token_lexeme( TokenT.Semicolon );
+            case ',':  return this.token_lexeme( TokenT.Comma );
+            case '/':  return this.token_lexeme( TokenT.FSlash );
+            case '*':  return this.token_lexeme( TokenT.Star );
+            case ':':  return this.token_lexeme( TokenT.Colon );
+            case '\\': return this.token_lexeme( TokenT.BSlash );
+            case '"':  return this.string_();
 
             case '|': {
-                if (match('|')) return token_lexeme(TokenT.PipePipe);
+                if (this.match('|')) return this.token_lexeme(TokenT.PipePipe);
                 else break; // TODO: Update this when we implement pipe.
             }
-            case '-': return token_lexeme(
-                match('>') ? TokenT.Arrow : TokenT.Minus);
-            case '&': return token_lexeme(
-                match('&') ? TokenT.AmpAmp : TokenT.Amp);
+            case '-': return this.token_lexeme(
+                this.match('>') ? TokenT.Arrow : TokenT.Minus);
+            case '&': return this.token_lexeme(
+                this.match('&') ? TokenT.AmpAmp : TokenT.Amp);
             case '<': {
-                if (match('=')) return token_lexeme(TokenT.LessEq);
-                if (match('>')) return token_lexeme(TokenT.LR);
-                return token_lexeme(TokenT.Less);
+                if (this.match('=')) return this.token_lexeme(TokenT.LessEq);
+                if (this.match('>')) return this.token_lexeme(TokenT.LR);
+                return this.token_lexeme(TokenT.Less);
             }
-            case '>': return token_lexeme(
-                match('=') ? TokenT.GreaterEq : TokenT.Greater);
-            case '=': return token_lexeme(
-                match('=') ? TokenT.EqEq : TokenT.Eq);
-            case '!': return token_lexeme(
-                match('=') ? TokenT.BangEq : TokenT.Bang);
-            case '+': return token_lexeme(
-                match('+') ? TokenT.PlusPlus : TokenT.Plus);
+            case '>': return this.token_lexeme(
+                this.match('=') ? TokenT.GreaterEq : TokenT.Greater);
+            case '=': return this.token_lexeme(
+                this.match('=') ? TokenT.EqEq : TokenT.Eq);
+            case '!': return this.token_lexeme(
+                this.match('=') ? TokenT.BangEq : TokenT.Bang);
+            case '+': return this.token_lexeme(
+                this.match('+') ? TokenT.PlusPlus : TokenT.Plus);
         }
-     
-        return token_error(`unexpected character ${c}`);
-    },
+        return this.token_error(`unexpected character ${c}`);
+    }
 
-    all(): Token[] {
-        let result = [];
-        while (!is_eof()) {
-            result.push(this.next());
+    advance(): string {
+        return this.source[this.current++];
+    }
+
+    peek(): string {
+        return this.source[this.current];
+    }
+
+    peek_next(): string {
+        return this.source[this.current + 1];
+    }
+
+    is_eof(): boolean {
+        return this.current === this.source.length;
+    }
+
+    // Make token other than String or Error.
+    token_lexeme(type: TokenT): Token {
+        let lexeme = this.source.slice(this.start, this.current);
+        return {type, lexeme, line: this.line};
+    }
+
+    token_string(type: TokenT): Token {
+        let lexeme = this.source.slice(this.start + 1, this.current - 1);
+        return {type, lexeme, line: this.line};
+    }
+
+    token_error(message: string): Token {
+        return {type: TokenT.Error, lexeme: message, line: this.line};
+    }
+
+    match(expected: string): boolean {
+        if (this.is_eof()) return false;
+        if (this.source[this.current] !== expected) return false;
+        this.current++;
+        return true;
+    }
+
+    identifier(): Token {
+        while (is_alpha(this.peek()) || is_digit(this.peek())) {
+            this.advance();
         }
-        result.push(this.next());       // Get the EOF token.
-        return result;
-    },
 
-    all_string(): string {
-        let result = "";
-        let line = -1;
+        switch (this.source.slice(this.start, this.current)) {
+            case "Bool":   return this.token_lexeme( TokenT.BoolT );
+            case "Circle": return this.token_lexeme( TokenT.CircleT );
+            case "else":   return this.token_lexeme( TokenT.Else );
+            case "false":  return this.token_lexeme( TokenT.False );
+            case "fn":     return this.token_lexeme( TokenT.Fn );
+            case "if":     return this.token_lexeme( TokenT.If );
+            case "ifx":    return this.token_lexeme( TokenT.Ifx );
+            case "let":    return this.token_lexeme( TokenT.Let );
+            case "Num":    return this.token_lexeme( TokenT.NumT );
+            case "Point":  return this.token_lexeme( TokenT.PointT );
+            case "Rect":   return this.token_lexeme( TokenT.RectT );
+            case "return": return this.token_lexeme( TokenT.Return );
+            case "Str":    return this.token_lexeme( TokenT.StrT );
+            case "struct": return this.token_lexeme( TokenT.Struct );
+            case "then":   return this.token_lexeme( TokenT.Then );
+            case "true":   return this.token_lexeme( TokenT.True );
+            case "use":    return this.token_lexeme( TokenT.Use );
+        }
+        return this.token_lexeme(TokenT.Ident);
+    }
 
+    number_(): Token {
+        while (is_digit(this.peek())) {
+            this.advance();
+        }
+
+        // Look for a fractional part.
+        if (this.peek() === '.' && is_digit(this.peek_next())) {
+            this.advance();                  // Consume the ".".
+            while (is_digit(this.peek())) {
+                this.advance();
+            }
+        }
+
+        return this.token_lexeme(TokenT.Number);
+    }
+
+    string_(): Token {
+        while (this.peek() !== '"' && !this.is_eof()) {
+            if (this.peek() === '\n') {
+                this.line++;
+            }
+            this.advance();
+        }
+
+        if (this.is_eof()) {
+            return this.token_error("unterminated string");
+        }
+
+        this.advance();          // Consume the closing quote.
+        return this.token_string(TokenT.String);
+    }
+
+    skip_whitespace(): void {
         for (;;) {
-            let token = this.next();
-            if (token.line !== line) {
-                result += `${ pad4(token.line) } `;
-                line = token.line;
-            } else {
-                result += "   | ";
-            }
-            result += `${ pad9(TokenTName[token.type]) } '${ token.lexeme }'\n`;
+            let c = this.peek();
+            switch (c) {
+                case ' ':
+                case '\r':
+                case '\t':
+                    this.advance();
+                    break;
 
-            if (token.type === TokenT.EOF) break;
+                case '\n':
+                    this.line++;
+                    this.advance();
+                    break;
+
+                case '/':
+                    if (this.peek_next() === '/') {      // Single-line comment.
+                        // NOTE: We use peek() so we don't consume newline.
+                        while (this.peek() !== '\n' && !this.is_eof()) {
+                            this.advance();
+                        }
+                    }
+                    else if (this.peek_next() === '*') { // Multi-line comment.
+                        this.advance();      // Consume '/'.
+                        this.advance();      // Consume '*'.
+                        this.closedMultiComment = false;
+                        while (!this.is_eof()) {
+                            let d = this.advance();
+                            if (d === '*') {
+                                if (this.peek() === '/') {
+                                    this.advance();      // Consume '/'.
+                                    this.closedMultiComment = true;
+                                    break;
+                                }
+                            }
+                            else if (d === '\n') {
+                                this.line++;
+                            }
+                        }
+                    }
+                    else {
+                        return;
+                    }
+                    break;
+
+                default:
+                    return;
+            }
         }
-        return result;
     }
 }
 
 // Helpers for formating.
 
-function pad9(str: string): string {
-    return (str+'         ').slice(0, 9);
-}
+// function pad9(str: string): string {
+    // return (str+'         ').slice(0, 9);
+// }
 
-function pad4(n: number): string {
-    return ('   '+n).slice(-4);
-}
+// function pad4(n: number): string {
+    // return ('   '+n).slice(-4);
+// }

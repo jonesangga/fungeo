@@ -5,12 +5,12 @@
 
 import { describe, it } from "node:test";
 import { deepEqual } from "node:assert/strict";
-import { TokenT, scanner } from "../scanner.js"
+import { TokenT, Scanner } from "../scanner.js"
 
 describe("scanner handling EOF", () => {
     it("success, on empty code", () => {
         let code = "";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         let next = scanner.next();
 
@@ -23,7 +23,7 @@ describe("scanner handling EOF", () => {
 
     it("not error, when calling next() after EOF", () => {
         let code = "1";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // 1
         scanner.next();     // EOF
@@ -40,7 +40,7 @@ describe("scanner handling EOF", () => {
 describe("scanner handling comment", () => {
     it("single-line comment", () => {
         let code = "let a = 2\n // print(b)\n print(a)";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // let
         scanner.next();     // a
@@ -57,7 +57,7 @@ describe("scanner handling comment", () => {
 
     it("multi-line comment", () => {
         let code = "let a = 2\n /* let b = 2\n print(b)\n*/ print(a)";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // let
         scanner.next();     // a
@@ -137,7 +137,7 @@ describe("scanner each token type", () => {
 
     for (let [input, expected] of Object.values(tests)) {
         it(`scan ${input}`, () => {
-            scanner.init(input);
+            let scanner = new Scanner(input);
 
             let next = scanner.next();
 
@@ -149,7 +149,7 @@ describe("scanner each token type", () => {
 describe("scanner error", () => {
     it("error, when unterminated string", () => {
         let code = "a = \"so real\nprint a";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // a
         scanner.next();     // =
@@ -164,7 +164,7 @@ describe("scanner error", () => {
 
     it("error, when multi-line comment is not closed", () => {
         let code = "a = 2\n/*print(b) print a";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // a
         scanner.next();     // =
@@ -180,7 +180,7 @@ describe("scanner error", () => {
 
     it("error, when unexpected character", () => {
         let code = "a = @1";
-        scanner.init(code);
+        let scanner = new Scanner(code);
 
         scanner.next();     // a
         scanner.next();     // =

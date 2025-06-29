@@ -1,8 +1,10 @@
 // @jonesangga, 08-06-2025, MIT License.
 //
 // TODO: Test error messages in file.
+//       Refactor to pass Parser object to every fn or use Parser class
+//       and delete scanner global variable.
 
-import { type Token, TokenT, scanner } from "./scanner.js"
+import { type Token, TokenT, Scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 
@@ -81,6 +83,8 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.True]      : {prefix: parse_boolean,    infix: null,            prec: Prec.None},
     [TokenT.Use]       : {prefix: null,             infix: null,            prec: Prec.None},
 }
+
+let scanner: Scanner = new Scanner("dummy, delete later");
 
 let invalidTok = { type: TokenT.EOF, line: -1, lexeme: "" };
 let currTok = invalidTok;
@@ -322,7 +326,7 @@ type Result<T> =
     | { ok: false, error: Error };
 
 export function parse(source: string): Result<FileNode> {
-    scanner.init(source);
+    scanner = new Scanner(source);
     prevTok = invalidTok;
     currTok = invalidTok;
 

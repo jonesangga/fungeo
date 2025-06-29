@@ -110,11 +110,6 @@ export const TokenTName = {
     [2000]: "True",
     [2050]: "Use",
 };
-let source = "";
-let start = 0;
-let current = 0;
-let line = 1;
-let closedMultComment = true;
 function is_digit(c) {
     return c >= '0' && c <= '9';
 }
@@ -123,223 +118,193 @@ function is_alpha(c) {
         (c >= 'A' && c <= 'Z') ||
         c === '_';
 }
-function advance() {
-    return source[current++];
-}
-function peek() {
-    return source[current];
-}
-function peek_next() {
-    return source[current + 1];
-}
-function is_eof() {
-    return current === source.length;
-}
-function match(expected) {
-    if (is_eof())
-        return false;
-    if (source[current] !== expected)
-        return false;
-    current++;
-    return true;
-}
-function token_lexeme(type) {
-    let lexeme = source.slice(start, current);
-    return { type, lexeme, line };
-}
-function token_string(type) {
-    let lexeme = source.slice(start + 1, current - 1);
-    return { type, lexeme, line };
-}
-function token_error(message) {
-    return { type: 2200, lexeme: message, line };
-}
-function identifier() {
-    while (is_alpha(peek()) || is_digit(peek())) {
-        advance();
+export class Scanner {
+    source;
+    start = 0;
+    current = 0;
+    line = 1;
+    closedMultiComment = true;
+    constructor(source) {
+        this.source = source;
     }
-    switch (source.slice(start, current)) {
-        case "Bool": return token_lexeme(1600);
-        case "Circle": return token_lexeme(1620);
-        case "else": return token_lexeme(2300);
-        case "false": return token_lexeme(1700);
-        case "fn": return token_lexeme(2320);
-        case "if": return token_lexeme(2400);
-        case "ifx": return token_lexeme(2405);
-        case "let": return token_lexeme(2460);
-        case "Num": return token_lexeme(1820);
-        case "Point": return token_lexeme(1850);
-        case "Rect": return token_lexeme(1880);
-        case "return": return token_lexeme(2800);
-        case "Str": return token_lexeme(1910);
-        case "struct": return token_lexeme(2910);
-        case "then": return token_lexeme(3000);
-        case "true": return token_lexeme(2000);
-        case "use": return token_lexeme(2050);
-    }
-    return token_lexeme(1730);
-}
-function number_() {
-    while (is_digit(peek())) {
-        advance();
-    }
-    if (peek() === '.' && is_digit(peek_next())) {
-        advance();
-        while (is_digit(peek())) {
-            advance();
-        }
-    }
-    return token_lexeme(1800);
-}
-function string_() {
-    while (peek() !== '"' && !is_eof()) {
-        if (peek() === '\n') {
-            line++;
-        }
-        advance();
-    }
-    if (is_eof()) {
-        return token_error("unterminated string");
-    }
-    advance();
-    return token_string(1900);
-}
-function skip_whitespace() {
-    for (;;) {
-        let c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-            case '\n':
-                line++;
-                advance();
-                break;
-            case '/':
-                if (peek_next() === '/') {
-                    while (peek() !== '\n' && !is_eof()) {
-                        advance();
-                    }
-                }
-                else if (peek_next() === '*') {
-                    advance();
-                    advance();
-                    closedMultComment = false;
-                    while (!is_eof()) {
-                        let d = advance();
-                        if (d === '*') {
-                            if (peek() === '/') {
-                                advance();
-                                closedMultComment = true;
-                                break;
-                            }
-                        }
-                        else if (d === '\n') {
-                            line++;
-                        }
-                    }
-                }
-                else {
-                    return;
-                }
-                break;
-            default:
-                return;
-        }
-    }
-}
-export const scanner = {
-    init(source_) {
-        source = source_;
-        start = 0;
-        current = 0;
-        line = 1;
-    },
     next() {
-        skip_whitespace();
-        start = current;
-        if (is_eof()) {
-            if (closedMultComment === false) {
-                return token_error("multi-line comment is not closed");
+        this.skip_whitespace();
+        this.start = this.current;
+        if (this.is_eof()) {
+            if (this.closedMultiComment === false) {
+                return this.token_error("multi-line comment is not closed");
             }
-            return token_lexeme(2100);
+            return this.token_lexeme(2100);
         }
-        let c = advance();
+        let c = this.advance();
         if (is_digit(c))
-            return number_();
+            return this.number_();
         if (is_alpha(c))
-            return identifier();
+            return this.identifier();
         switch (c) {
-            case '.': return token_lexeme(210);
-            case '%': return token_lexeme(670);
-            case '(': return token_lexeme(500);
-            case ')': return token_lexeme(800);
-            case '[': return token_lexeme(400);
-            case ']': return token_lexeme(700);
-            case '{': return token_lexeme(300);
-            case '}': return token_lexeme(695);
-            case '#': return token_lexeme(250);
-            case ';': return token_lexeme(900);
-            case ',': return token_lexeme(100);
-            case '/': return token_lexeme(220);
-            case '*': return token_lexeme(1100);
-            case ':': return token_lexeme(1300);
-            case '\\': return token_lexeme(50);
-            case '"': return string_();
+            case '.': return this.token_lexeme(210);
+            case '%': return this.token_lexeme(670);
+            case '(': return this.token_lexeme(500);
+            case ')': return this.token_lexeme(800);
+            case '[': return this.token_lexeme(400);
+            case ']': return this.token_lexeme(700);
+            case '{': return this.token_lexeme(300);
+            case '}': return this.token_lexeme(695);
+            case '#': return this.token_lexeme(250);
+            case ';': return this.token_lexeme(900);
+            case ',': return this.token_lexeme(100);
+            case '/': return this.token_lexeme(220);
+            case '*': return this.token_lexeme(1100);
+            case ':': return this.token_lexeme(1300);
+            case '\\': return this.token_lexeme(50);
+            case '"': return this.string_();
             case '|': {
-                if (match('|'))
-                    return token_lexeme(1580);
+                if (this.match('|'))
+                    return this.token_lexeme(1580);
                 else
                     break;
             }
-            case '-': return token_lexeme(match('>') ? 1195 : 600);
-            case '&': return token_lexeme(match('&') ? 1190 : 1180);
+            case '-': return this.token_lexeme(this.match('>') ? 1195 : 600);
+            case '&': return this.token_lexeme(this.match('&') ? 1190 : 1180);
             case '<': {
-                if (match('='))
-                    return token_lexeme(1555);
-                if (match('>'))
-                    return token_lexeme(1560);
-                return token_lexeme(1550);
+                if (this.match('='))
+                    return this.token_lexeme(1555);
+                if (this.match('>'))
+                    return this.token_lexeme(1560);
+                return this.token_lexeme(1550);
             }
-            case '>': return token_lexeme(match('=') ? 1525 : 1520);
-            case '=': return token_lexeme(match('=') ? 1505 : 1500);
-            case '!': return token_lexeme(match('=') ? 1210 : 1200);
-            case '+': return token_lexeme(match('+') ? 1590 : 1585);
+            case '>': return this.token_lexeme(this.match('=') ? 1525 : 1520);
+            case '=': return this.token_lexeme(this.match('=') ? 1505 : 1500);
+            case '!': return this.token_lexeme(this.match('=') ? 1210 : 1200);
+            case '+': return this.token_lexeme(this.match('+') ? 1590 : 1585);
         }
-        return token_error(`unexpected character ${c}`);
-    },
-    all() {
-        let result = [];
-        while (!is_eof()) {
-            result.push(this.next());
-        }
-        result.push(this.next());
-        return result;
-    },
-    all_string() {
-        let result = "";
-        let line = -1;
-        for (;;) {
-            let token = this.next();
-            if (token.line !== line) {
-                result += `${pad4(token.line)} `;
-                line = token.line;
-            }
-            else {
-                result += "   | ";
-            }
-            result += `${pad9(TokenTName[token.type])} '${token.lexeme}'\n`;
-            if (token.type === 2100)
-                break;
-        }
-        return result;
+        return this.token_error(`unexpected character ${c}`);
     }
-};
-function pad9(str) {
-    return (str + '         ').slice(0, 9);
-}
-function pad4(n) {
-    return ('   ' + n).slice(-4);
+    advance() {
+        return this.source[this.current++];
+    }
+    peek() {
+        return this.source[this.current];
+    }
+    peek_next() {
+        return this.source[this.current + 1];
+    }
+    is_eof() {
+        return this.current === this.source.length;
+    }
+    token_lexeme(type) {
+        let lexeme = this.source.slice(this.start, this.current);
+        return { type, lexeme, line: this.line };
+    }
+    token_string(type) {
+        let lexeme = this.source.slice(this.start + 1, this.current - 1);
+        return { type, lexeme, line: this.line };
+    }
+    token_error(message) {
+        return { type: 2200, lexeme: message, line: this.line };
+    }
+    match(expected) {
+        if (this.is_eof())
+            return false;
+        if (this.source[this.current] !== expected)
+            return false;
+        this.current++;
+        return true;
+    }
+    identifier() {
+        while (is_alpha(this.peek()) || is_digit(this.peek())) {
+            this.advance();
+        }
+        switch (this.source.slice(this.start, this.current)) {
+            case "Bool": return this.token_lexeme(1600);
+            case "Circle": return this.token_lexeme(1620);
+            case "else": return this.token_lexeme(2300);
+            case "false": return this.token_lexeme(1700);
+            case "fn": return this.token_lexeme(2320);
+            case "if": return this.token_lexeme(2400);
+            case "ifx": return this.token_lexeme(2405);
+            case "let": return this.token_lexeme(2460);
+            case "Num": return this.token_lexeme(1820);
+            case "Point": return this.token_lexeme(1850);
+            case "Rect": return this.token_lexeme(1880);
+            case "return": return this.token_lexeme(2800);
+            case "Str": return this.token_lexeme(1910);
+            case "struct": return this.token_lexeme(2910);
+            case "then": return this.token_lexeme(3000);
+            case "true": return this.token_lexeme(2000);
+            case "use": return this.token_lexeme(2050);
+        }
+        return this.token_lexeme(1730);
+    }
+    number_() {
+        while (is_digit(this.peek())) {
+            this.advance();
+        }
+        if (this.peek() === '.' && is_digit(this.peek_next())) {
+            this.advance();
+            while (is_digit(this.peek())) {
+                this.advance();
+            }
+        }
+        return this.token_lexeme(1800);
+    }
+    string_() {
+        while (this.peek() !== '"' && !this.is_eof()) {
+            if (this.peek() === '\n') {
+                this.line++;
+            }
+            this.advance();
+        }
+        if (this.is_eof()) {
+            return this.token_error("unterminated string");
+        }
+        this.advance();
+        return this.token_string(1900);
+    }
+    skip_whitespace() {
+        for (;;) {
+            let c = this.peek();
+            switch (c) {
+                case ' ':
+                case '\r':
+                case '\t':
+                    this.advance();
+                    break;
+                case '\n':
+                    this.line++;
+                    this.advance();
+                    break;
+                case '/':
+                    if (this.peek_next() === '/') {
+                        while (this.peek() !== '\n' && !this.is_eof()) {
+                            this.advance();
+                        }
+                    }
+                    else if (this.peek_next() === '*') {
+                        this.advance();
+                        this.advance();
+                        this.closedMultiComment = false;
+                        while (!this.is_eof()) {
+                            let d = this.advance();
+                            if (d === '*') {
+                                if (this.peek() === '/') {
+                                    this.advance();
+                                    this.closedMultiComment = true;
+                                    break;
+                                }
+                            }
+                            else if (d === '\n') {
+                                this.line++;
+                            }
+                        }
+                    }
+                    else {
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
 }
