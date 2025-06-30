@@ -5,6 +5,7 @@ let $ = console.log;
 class Session {
     stack = [];
     stackTop = 0;
+    output = "";
     push(value) {
         this.stack[this.stackTop++] = value;
     }
@@ -17,6 +18,9 @@ class Session {
     reset() {
         this.stackTop = 0;
     }
+    write(str) {
+        this.output += str;
+    }
 }
 export let session = new Session();
 $(session);
@@ -24,16 +28,12 @@ let frames = [];
 let currFrame;
 let currChunk;
 export let names = {};
-let output = "";
-export function vm_output(str) {
-    output += str;
-}
 function error(msg) {
     let line = currChunk.lines[currFrame.ip - 1];
     let name = currFrame.fn.name;
-    output += `${line}: in ${name}: ${msg}\n`;
+    session.output += `${line}: in ${name}: ${msg}\n`;
     session.reset();
-    throw new RuntimeError(output);
+    throw new RuntimeError(session.output);
 }
 function read_byte() {
     return currChunk.code[currFrame.ip++];
@@ -319,13 +319,13 @@ export const vm = {
     },
     interpret(fn) {
         TESTING = false;
-        output = "";
+        session.output = "";
         session.push(fn);
         call(fn, 0);
         try {
             run();
             $(session);
-            return { ok: true, value: output };
+            return { ok: true, value: session.output };
         }
         catch (error) {
             if (error instanceof Error)
@@ -335,14 +335,14 @@ export const vm = {
     },
     set(fn) {
         TESTING = true;
-        output = "";
+        session.output = "";
         session.push(fn);
         call(fn, 0);
     },
     step() {
         try {
             run();
-            return { ok: true, value: output };
+            return { ok: true, value: session.output };
         }
         catch (error) {
             if (error instanceof Error)

@@ -1,4 +1,4 @@
-import { session, vm_output } from "./vm.js"
+import { session } from "./vm.js"
 import { type Value, type GeoObj, type RichGeoObj, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
@@ -21,7 +21,7 @@ export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 function _print(ver: number): void {
     let value = session.pop();
     session.pop();              // The function.
-    vm_output( value.to_str() + "\n" );
+    session.write( value.to_str() + "\n" );
 }
 let print = new FGCallNative("print", _print,
     new OverloadT([
@@ -32,7 +32,7 @@ let print = new FGCallNative("print", _print,
 // function _printf(): void {
     // let value = session.pop();
     // session.pop();              // The function.
-    // vm_output( value.to_str() );
+    // session.write( value.to_str() );
 // }
 // let printf = new FGCallNative("printf", _printf,
     // new FunctionT([anyT], nothingT)
@@ -687,13 +687,13 @@ function _help(ver: number): void {
         let arg = session.pop();
         session.pop();              // The function.
         if (!(arg instanceof FGCallNative))
-            vm_output(`no help for ${ arg.to_str() }`);
+            session.write(`no help for ${ arg.to_str() }`);
         else
-            vm_output(arg.to_str());
+            session.write(arg.to_str());
     }
     else if (ver === 1) {
         session.pop();              // The function.
-        vm_output( welcome );
+        session.write( welcome );
     }
 }
 let help = new FGCallNative("help",  _help,

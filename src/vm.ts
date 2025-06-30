@@ -14,6 +14,7 @@ let $ = console.log;
 class Session {
     stack: Value[] = [];
     stackTop: number = 0;
+    output = "";
 
     push(value: Value): void {
         this.stack[this.stackTop++] = value;
@@ -30,6 +31,10 @@ class Session {
     reset(): void {
         this.stackTop = 0;
     }
+
+    write(str: string): void {
+        this.output += str;
+    }
 }
 
 export let session = new Session();
@@ -41,20 +46,15 @@ let currChunk: Chunk;
 
 export let names: Names = {};
 
-let output = "";
-export function vm_output(str: string): void {
-    output += str;
-}
-
 // Throw error and stop the executing bytecode.
 // TODO: display call stack.
 function error(msg: string): never {
     let line = currChunk.lines[currFrame.ip - 1];
     let name = currFrame.fn.name;
-    output += `${ line }: in ${ name }: ${ msg }\n`;
+    session.output += `${ line }: in ${ name }: ${ msg }\n`;
     session.reset();
 
-    throw new RuntimeError(output);
+    throw new RuntimeError(session.output);
 }
 
 function read_byte(): number {
@@ -499,7 +499,7 @@ export const vm = {
 
     interpret(fn: FGCallUser): Result<string> {
         TESTING = false;
-        output = "";
+        session.output = "";
 
         session.push(fn);
         call(fn, 0);
@@ -507,7 +507,7 @@ export const vm = {
         try {
             run();
             $(session);
-            return { ok: true, value: output };
+            return { ok: true, value: session.output };
         }
         catch (error: unknown) {
             if (error instanceof Error) return { ok: false, error };
@@ -517,7 +517,7 @@ export const vm = {
 
     set(fn: FGCallUser): void {
         TESTING = true;
-        output = "";
+        session.output = "";
         session.push(fn);
         call(fn, 0);
     },
@@ -525,7 +525,7 @@ export const vm = {
     step(): Result<string> {
         try {
             run();
-            return { ok: true, value: output };
+            return { ok: true, value: session.output };
         }
         catch (error: unknown) {
             if (error instanceof Error) return { ok: false, error };
