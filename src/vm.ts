@@ -2,8 +2,9 @@
 
 import { load_module } from "./module_loader.js";
 import { Op, Chunk } from "./chunk.js";
-import { type Value, type Comparable, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList, RichGeoObj } from "./value.js";
-import { Names, nativeNames, richgeoT } from "./vmfunction.js";
+import { type Value, type Comparable, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
+import { Names } from "./vmfunction.js";
+import { coreNames } from "./core.js";
 import { type Type, FGType } from "./literal/type.js";
 import { Point } from "./geo/point.js";
 
@@ -377,15 +378,15 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.New: {
-                let name  = read_string();
-                let type  = (session.pop() as FGType).value;
-                let value = session.pop();
-                if (richgeoT.equal(type))
-                    (value as RichGeoObj).label = name;
-                names[name] = { type, value };
-                break;
-            }
+            // case Op.New: {
+                // let name  = read_string();
+                // let type  = (session.pop() as FGType).value;
+                // let value = session.pop();
+                // if (richgeoT.equal(type))
+                    // (value as RichGeoObj).label = name;
+                // names[name] = { type, value };
+                // break;
+            // }
 
             case Op.Set: {
                 let name  = read_string();
@@ -494,7 +495,7 @@ type Result<T> =
 export const vm = {
     init(): void {
         session.reset();
-        names = {...nativeNames};
+        names = {...coreNames};
     },
 
     interpret(fn: FGCallUser): Result<string> {

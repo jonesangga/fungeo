@@ -112,7 +112,6 @@ class TypeChecker {
     }
     visitCall(node) {
         let fnType = node.name.visit(this);
-        console.log(fnType);
         if (!(fnType instanceof OverloadT))
             error(node.name.line, `${node.name} is not a function`);
         let input = [];

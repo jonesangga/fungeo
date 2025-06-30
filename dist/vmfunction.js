@@ -1,25 +1,16 @@
 import { FGCallNative, FGNumber, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
-import { Circle, RichCircle } from "./geo/circle.js";
+import { RichCircle } from "./geo/circle.js";
 import { Coord } from "./geo/coordinate.js";
-import { Point, RichPoint } from "./geo/point.js";
+import { RichPoint } from "./geo/point.js";
 import Picture from "./geo/picture.js";
-import { Segment, RichSegment } from "./geo/segment.js";
-import { welcome } from "./data/help.js";
-import { ListT, UnionT, anyT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, coordT, replT } from "./literal/type.js";
+import { RichSegment } from "./geo/segment.js";
+import { ListT, UnionT, pictureT, FunctionT, OverloadT, ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT, canvasT, coordT, replT } from "./literal/type.js";
 const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
 const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
-function _print(session, ver) {
-    let value = session.pop();
-    session.pop();
-    session.write(value.to_str() + "\n");
-}
-let print = new FGCallNative("print", _print, new OverloadT([
-    new FunctionT([anyT], nothingT),
-]));
 let on_scrn = [];
 let label_on_scrn = [];
 function draw_onScreen() {
@@ -69,33 +60,6 @@ function _label(session, ver) {
 let label = new FGCallNative("label", _label, new OverloadT([
     new FunctionT([richgeoT, stringT], nothingT),
 ]));
-function _circle(session, ver) {
-    if (ver === 0) {
-        let r = session.pop().value;
-        let y = session.pop().value;
-        let x = session.pop().value;
-        session.pop();
-        session.push(new Circle(x, y, r));
-    }
-    else if (ver === 1) {
-        let q = session.pop();
-        let p = session.pop();
-        session.pop();
-        let r = Math.sqrt((q.x - p.x) ** 2 + (q.y - p.y) ** 2);
-        session.push(new Circle(p.x, p.y, r));
-    }
-    else if (ver === 2) {
-        let r = session.pop().value;
-        let p = session.pop();
-        session.pop();
-        session.push(new Circle(p.x, p.y, r));
-    }
-}
-let circle = new FGCallNative("circle", _circle, new OverloadT([
-    new FunctionT([numberT, numberT, numberT], circleT),
-    new FunctionT([pointT, pointT], circleT),
-    new FunctionT([pointT, numberT], circleT),
-]));
 function _intersect(session, ver) {
     let q = session.pop();
     let p = session.pop();
@@ -126,40 +90,6 @@ function _rcircle(session, ver) {
 let rcircle = new FGCallNative("rcircle", _rcircle, new OverloadT([
     new FunctionT([richPointT, richPointT], richCircleT),
     new FunctionT([richPointT, numberT], richCircleT),
-]));
-function _pt(session, ver) {
-    if (ver === 0) {
-        let y = session.pop().value;
-        let x = session.pop().value;
-        session.pop();
-        session.push(new Point(x, y));
-    }
-    else if (ver === 1) {
-        let rp = session.pop();
-        session.pop();
-        session.push(new Point(rp.x, rp.y));
-    }
-}
-let pt = new FGCallNative("pt", _pt, new OverloadT([
-    new FunctionT([numberT, numberT], pointT),
-    new FunctionT([richPointT], pointT),
-]));
-function _rpt(session, ver) {
-    if (ver === 0) {
-        let y = session.pop().value;
-        let x = session.pop().value;
-        session.pop();
-        session.push(new RichPoint(x, y));
-    }
-    else {
-        let p = session.pop();
-        session.pop();
-        session.push(new RichPoint(p.x, p.y));
-    }
-}
-let rpt = new FGCallNative("rpt", _rpt, new OverloadT([
-    new FunctionT([numberT, numberT], richPointT),
-    new FunctionT([pointT], richPointT),
 ]));
 function _quartet(session) {
     let s = session.pop();
@@ -234,26 +164,6 @@ export let coord_hide_grid = new FGCallNative("coord_hide_grid", _coord_hide_gri
 ]));
 coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
 coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_grid };
-function _segment(session, ver) {
-    if (ver === 0) {
-        let y2 = session.pop().value;
-        let x2 = session.pop().value;
-        let y1 = session.pop().value;
-        let x1 = session.pop().value;
-        session.pop();
-        session.push(new Segment(x1, y1, x2, y2));
-    }
-    else if (ver === 1) {
-        let q = session.pop();
-        let p = session.pop();
-        session.pop();
-        session.push(new Segment(p.x, p.y, q.x, q.y));
-    }
-}
-let segment = new FGCallNative("segment", _segment, new OverloadT([
-    new FunctionT([numberT, numberT, numberT, numberT], segmentT),
-    new FunctionT([pointT, pointT], segmentT),
-]));
 function _length(session, ver) {
     if (ver === 0) {
         let s = session.pop();
@@ -294,24 +204,6 @@ let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
     new FunctionT([richPointT, richPointT], richSegmentT),
 ]));
-function _help(session, ver) {
-    if (ver === 0) {
-        let arg = session.pop();
-        session.pop();
-        if (!(arg instanceof FGCallNative))
-            session.write(`no help for ${arg.to_str()}`);
-        else
-            session.write(arg.to_str());
-    }
-    else if (ver === 1) {
-        session.pop();
-        session.write(welcome);
-    }
-}
-let help = new FGCallNative("help", _help, new OverloadT([
-    new FunctionT([anyT], nothingT),
-    new FunctionT([], nothingT),
-]));
 function _clear(session) {
     session.pop();
     canvas.clear();
@@ -324,18 +216,12 @@ let clear = new FGCallNative("clear", _clear, new OverloadT([
 export let nativeNames = {
     "canvas": { type: canvasT, value: canvas },
     "repl": { type: replT, value: repl },
-    "help": { type: help.sig, value: help },
-    "print": { type: print.sig, value: print },
     draw: { type: draw.sig, value: draw },
     label: { type: label.sig, value: label },
     clear: { type: clear.sig, value: clear },
-    circle: { type: circle.sig, value: circle },
     rcircle: { type: rcircle.sig, value: rcircle },
     coord: { type: coord.sig, value: coord },
     intersect: { type: intersect.sig, value: intersect },
-    pt: { type: pt.sig, value: pt },
-    rpt: { type: rpt.sig, value: rpt },
-    segment: { type: segment.sig, value: segment },
     rsegment: { type: rsegment.sig, value: rsegment },
     length: { type: length.sig, value: length },
     pic: { type: pic.sig, value: pic },

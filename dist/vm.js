@@ -1,6 +1,6 @@
 import { load_module } from "./module_loader.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
-import { nativeNames, richgeoT } from "./vmfunction.js";
+import { coreNames } from "./core.js";
 let $ = console.log;
 export class Session {
     stack = [];
@@ -229,15 +229,6 @@ export function run(intercept = false) {
                     error(`cannot load module ${name}`);
                 break;
             }
-            case 1020: {
-                let name = read_string();
-                let type = session.pop().value;
-                let value = session.pop();
-                if (richgeoT.equal(type))
-                    value.label = name;
-                names[name] = { type, value };
-                break;
-            }
             case 1400: {
                 let name = read_string();
                 let value = session.pop();
@@ -315,7 +306,7 @@ class RuntimeError extends Error {
 export const vm = {
     init() {
         session.reset();
-        names = { ...nativeNames };
+        names = { ...coreNames };
     },
     interpret(fn) {
         TESTING = false;

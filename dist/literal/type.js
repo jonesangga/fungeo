@@ -108,7 +108,8 @@ export class FunctionT {
     }
     equal(other) {
         return other instanceof FunctionT
-            && this.input.every((inp, i) => inp.equal(other.input[i]))
+            && this.input.length === other.input.length
+            && this.input.every((param, i) => param.equal(other.input[i]))
             && this.output.equal(other.output);
     }
 }

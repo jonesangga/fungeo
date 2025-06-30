@@ -4,11 +4,10 @@ import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
 import { Circle, RichCircle } from "./geo/circle.js"
 import { Coord } from "./geo/coordinate.js"
-import { Point, RichPoint } from "./geo/point.js"
+import { RichPoint } from "./geo/point.js"
 import Picture from "./geo/picture.js"
 import { Segment, RichSegment } from "./geo/segment.js"
-import { welcome } from "./data/help.js"
-import { type Type, ListT, UnionT, anyT, pictureT, FunctionT, OverloadT,
+import { type Type, ListT, UnionT, pictureT, FunctionT, OverloadT,
          ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT,
          canvasT, coordT, replT } from "./literal/type.js"
 
@@ -17,17 +16,6 @@ const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 // const fillableT = new UnionT([circleT, ellipseT]);
-
-function _print(session: Session, ver: number): void {
-    let value = session.pop();
-    session.pop();              // The function.
-    session.write( value.to_str() + "\n" );
-}
-let print = new FGCallNative("print", _print,
-    new OverloadT([
-        new FunctionT([anyT], nothingT),
-    ])
-);
 
 // function _printf(): void {
     // let value = session.pop();
@@ -181,36 +169,6 @@ let label = new FGCallNative("label", _label,
     // new FunctionT([colorT, fillableT], nothingT)
 // );
 
-function _circle(session: Session, ver: number): void {
-    if (ver === 0) {
-        let r = (session.pop() as FGNumber).value;
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(new Circle(x, y, r));
-    }
-    else if (ver === 1) {
-        let q = session.pop() as Point;
-        let p = session.pop() as Point;
-        session.pop();              // The function.
-        let r = Math.sqrt((q.x - p.x)**2 + (q.y - p.y)**2);
-        session.push(new Circle(p.x, p.y, r));
-    }
-    else if (ver === 2) {
-        let r = (session.pop() as FGNumber).value;
-        let p = session.pop() as Point;
-        session.pop();              // The function.
-        session.push(new Circle(p.x, p.y, r));
-    }
-}
-let circle = new FGCallNative("circle", _circle,
-    new OverloadT([
-        new FunctionT([numberT, numberT, numberT], circleT),
-        new FunctionT([pointT, pointT], circleT),
-        new FunctionT([pointT, numberT], circleT),
-    ])
-);
-
 function _intersect(session: Session, ver: number): void {
     let q = session.pop() as Circle;
     let p = session.pop() as Circle;
@@ -309,45 +267,25 @@ let rcircle = new FGCallNative("rcircle", _rcircle,
     // )
 // );
 
-function _pt(session: Session, ver: number): void {
-    if (ver === 0) {
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(new Point(x, y));
-    }
-    else if (ver === 1) {
-        let rp = session.pop() as RichPoint;
-        session.pop();              // The function.
-        session.push(new Point(rp.x, rp.y));
-    }
-}
-let pt = new FGCallNative("pt", _pt,
-    new OverloadT([
-        new FunctionT([numberT, numberT], pointT),
-        new FunctionT([richPointT], pointT),
-    ])
-);
-
-function _rpt(session: Session, ver: number): void {
-    if (ver === 0) {
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(new RichPoint(x, y));
-    }
-    else {
-        let p = session.pop() as Point;
-        session.pop();              // The function.
-        session.push(new RichPoint(p.x, p.y));
-    }
-}
-let rpt = new FGCallNative("rpt", _rpt,
-    new OverloadT([
-        new FunctionT([numberT, numberT], richPointT),
-        new FunctionT([pointT], richPointT),
-    ])
-);
+// function _rpt(session: Session, ver: number): void {
+    // if (ver === 0) {
+        // let y = (session.pop() as FGNumber).value;
+        // let x = (session.pop() as FGNumber).value;
+        // session.pop();              // The function.
+        // session.push(new RichPoint(x, y));
+    // }
+    // else {
+        // let p = session.pop() as Point;
+        // session.pop();              // The function.
+        // session.push(new RichPoint(p.x, p.y));
+    // }
+// }
+// let rpt = new FGCallNative("rpt", _rpt,
+    // new OverloadT([
+        // new FunctionT([numberT, numberT], richPointT),
+        // new FunctionT([pointT], richPointT),
+    // ])
+// );
 
 // function _Paint(): void {
     // let geo = session.pop() as GeoObj;
@@ -603,29 +541,6 @@ coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_gri
     // )
 // );
 
-function _segment(session: Session, ver: number): void {
-    if (ver === 0) {
-        let y2 = (session.pop() as FGNumber).value;
-        let x2 = (session.pop() as FGNumber).value;
-        let y1 = (session.pop() as FGNumber).value;
-        let x1 = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(new Segment(x1, y1, x2, y2));
-    }
-    else if (ver === 1) {
-        let q = session.pop() as Point;
-        let p = session.pop() as Point;
-        session.pop();              // The function.
-        session.push(new Segment(p.x, p.y, q.x, q.y));
-    }
-}
-let segment = new FGCallNative("segment", _segment,
-    new OverloadT([
-        new FunctionT([numberT, numberT, numberT, numberT], segmentT),
-        new FunctionT([pointT, pointT], segmentT),
-    ])
-);
-
 function _length(session: Session, ver: number): void {
     if (ver === 0) {
         let s = session.pop() as Segment;
@@ -682,27 +597,6 @@ let rsegment = new FGCallNative("rsegment", _rsegment,
     // new FunctionT([segmentT], pointT)
 // );
 
-function _help(session: Session, ver: number): void {
-    if (ver === 0) {
-        let arg = session.pop();
-        session.pop();              // The function.
-        if (!(arg instanceof FGCallNative))
-            session.write(`no help for ${ arg.to_str() }`);
-        else
-            session.write(arg.to_str());
-    }
-    else if (ver === 1) {
-        session.pop();              // The function.
-        session.write( welcome );
-    }
-}
-let help = new FGCallNative("help",  _help,
-    new OverloadT([
-        new FunctionT([anyT], nothingT),
-        new FunctionT([], nothingT),
-    ])
-);
-
 function _clear(session: Session): void {
     session.pop();              // The function.
     canvas.clear();
@@ -715,12 +609,8 @@ let clear = new FGCallNative("clear",  _clear,
     ])
 );
 
-export type Method = {
-    [name: string]: { type: Type, value: Value },
-}
-
 export type Names = {
-    [name: string]: { type: Type, value: Value, mut?: boolean, methods?: Method },
+    [name: string]: { type: Type, value: Value, mut?: boolean },
 };
 
 export let nativeNames: Names = {
@@ -728,8 +618,6 @@ export let nativeNames: Names = {
     "canvas": { type: canvasT, value: canvas },
     "repl":   { type: replT, value: repl },
 
-    "help":   { type: help.sig, value: help },
-    "print":  { type: print.sig, value: print },
     // "Push":   { type: Push.sig, value: Push },
     // "RGB":    { type: RGB.sig, value: RGB },
     // "printf": { type: printf.sig, value: printf },
@@ -745,13 +633,10 @@ export let nativeNames: Names = {
     // "Descart": { type: Descart.sig, value: Descart },
     // "ComplexDescart": { type: ComplexDescart.sig, value: ComplexDescart },
     // "E":      { type: E.sig, value: E },
-    circle:    { type: circle.sig, value: circle },
     rcircle:   { type: rcircle.sig, value: rcircle },
     coord:     { type: coord.sig, value: coord },
     intersect: { type: intersect.sig, value: intersect },
-    pt:        { type: pt.sig, value: pt },
-    rpt:       { type: rpt.sig, value: rpt },
-    segment:   { type: segment.sig, value: segment },
+    // rpt:       { type: rpt.sig, value: rpt },
     rsegment:  { type: rsegment.sig, value: rsegment },
     length:    { type: length.sig, value: length },
     pic:       { type: pic.sig, value: pic },
