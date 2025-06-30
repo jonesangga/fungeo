@@ -103,6 +103,9 @@ export class FGCallNative {
     to_str() {
         return `{fn ${this.name}}`;
     }
+    help() {
+        return this.sig.help();
+    }
     typeof() {
         return new FGType(this.sig);
     }

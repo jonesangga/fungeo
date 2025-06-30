@@ -98,13 +98,21 @@ export class UnionT {
 export class FunctionT {
     input;
     output;
-    constructor(input, output) {
+    names;
+    constructor(input, output, names) {
         this.input = input;
         this.output = output;
+        this.names = names;
     }
     to_str() {
         let input = this.input.map(v => v.to_str()).join(" -> ");
         return input + " -> " + this.output.to_str();
+    }
+    help() {
+        let str = this.names.map((name, i) => name + ": " + this.input[i].to_str()).join(", ");
+        str = "(" + str + "): ";
+        str = str + this.output.to_str() + "\n";
+        return str;
     }
     equal(other) {
         return other instanceof FunctionT
@@ -120,6 +128,9 @@ export class OverloadT {
     }
     to_str() {
         return "OverloadT, not implemented";
+    }
+    help() {
+        return this.sigs.reduce((acc, curr, i) => acc + i + "> " + curr.help(), "");
     }
     equal(other) {
         return false;
@@ -320,7 +331,6 @@ export const booleanT = new BooleanT();
 export const colorT = new ColorT();
 export const colorTVal = new FGType(colorT);
 export const complexT = new ComplexT();
-export const functionT = new FunctionT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();

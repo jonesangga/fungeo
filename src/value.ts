@@ -142,6 +142,10 @@ export class FGCallNative implements FG {
         return `{fn ${ this.name }}`;
     }
 
+    help(): string {
+        return this.sig.help();
+    }
+
     typeof(): FGType {
         return new FGType(this.sig);
     }

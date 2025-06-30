@@ -10,7 +10,7 @@ function _print(session, ver) {
     session.write(value.to_str() + "\n");
 }
 const print = new FGCallNative("print", _print, new OverloadT([
-    new FunctionT([anyT], nothingT),
+    new FunctionT([anyT], nothingT, ["object"]),
 ]));
 function _pt(session, ver) {
     let y = session.pop().value;
@@ -19,7 +19,7 @@ function _pt(session, ver) {
     session.push(new Point(x, y));
 }
 let pt = new FGCallNative("pt", _pt, new OverloadT([
-    new FunctionT([numberT, numberT], pointT),
+    new FunctionT([numberT, numberT], pointT, ["x", "y"]),
 ]));
 function _circle(session, ver) {
     if (ver === 0) {
@@ -44,9 +44,9 @@ function _circle(session, ver) {
     }
 }
 let circle = new FGCallNative("circle", _circle, new OverloadT([
-    new FunctionT([numberT, numberT, numberT], circleT),
-    new FunctionT([pointT, pointT], circleT),
-    new FunctionT([pointT, numberT], circleT),
+    new FunctionT([numberT, numberT, numberT], circleT, ["x", "y", "r"]),
+    new FunctionT([pointT, pointT], circleT, ["center", "other"]),
+    new FunctionT([pointT, numberT], circleT, ["center", "r"]),
 ]));
 function _segment(session, ver) {
     if (ver === 0) {
@@ -65,18 +65,18 @@ function _segment(session, ver) {
     }
 }
 let segment = new FGCallNative("segment", _segment, new OverloadT([
-    new FunctionT([numberT, numberT, numberT, numberT], segmentT),
-    new FunctionT([pointT, pointT], segmentT),
+    new FunctionT([numberT, numberT, numberT, numberT], segmentT, ["x1", "y1", "x2", "y2"]),
+    new FunctionT([pointT, pointT], segmentT, ["p", "q"]),
 ]));
 function _help(session, ver) {
     if (ver === 0) {
-        let arg = session.pop();
+        let value = session.pop();
         session.pop();
-        if (arg instanceof FGCallNative) {
-            session.write(arg.to_str());
+        if (value instanceof FGCallNative) {
+            session.write(value.help());
         }
         else {
-            session.write(`no help for ${arg.to_str()}, not implemented yet`);
+            session.write(`no help for ${value.to_str()}, not implemented yet`);
         }
     }
     else if (ver === 1) {
@@ -85,8 +85,8 @@ function _help(session, ver) {
     }
 }
 let help = new FGCallNative("help", _help, new OverloadT([
-    new FunctionT([anyT], nothingT),
-    new FunctionT([], nothingT),
+    new FunctionT([anyT], nothingT, ["command"]),
+    new FunctionT([], nothingT, []),
 ]));
 export let coreNames = {
     circle: { type: circle.sig, value: circle },

@@ -131,7 +131,7 @@ function overload(input, fn, line) {
     for (let i = 0; i < fn.sigs.length; i++) {
         let sig = fn.sigs[i];
         let output = sig.output;
-        let got = new FunctionT(input, output);
+        let got = new FunctionT(input, output, []);
         if (sig.equal(got))
             return [i, output];
     }

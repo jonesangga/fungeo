@@ -145,11 +145,24 @@ export class UnionT implements Type {
 
 export class FunctionT implements Type {
     constructor(public input:  Type[],
-                public output: Type) {}
+                public output: Type,
+                public names:  string[])
+    {
+        // if (input.length !== names.length) {
+            // throw new Error("input.length !== names.length");
+        // }
+    }
 
     to_str(): string {
         let input = this.input.map(v => v.to_str()).join(" -> ");
         return input + " -> " + this.output.to_str();
+    }
+
+    help(): string {
+        let str = this.names.map((name, i) => name + ": " + this.input[i].to_str()).join(", ");
+        str = "(" + str + "): "
+        str = str + this.output.to_str() + "\n";
+        return str;
     }
 
     equal(other: Type): boolean {
@@ -168,6 +181,10 @@ export class OverloadT implements Type {
         // let input = this.input.map(v => v.to_str()).join(" -> ");
         // return input + " -> " + this.output.to_str();
         return "OverloadT, not implemented";
+    }
+
+    help(): string {
+        return this.sigs.reduce((acc, curr, i) => acc + i + "> " + curr.help(), "");
     }
 
     // TODO: fix this.
@@ -390,7 +407,6 @@ export const booleanT = new BooleanT();
 export const colorT = new ColorT();
 export const colorTVal = new FGType(colorT);
 export const complexT = new ComplexT();
-export const functionT = new FunctionT([new AnyT()], new AnyT());
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();
