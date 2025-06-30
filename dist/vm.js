@@ -14,7 +14,7 @@ class Session {
     peek(distance) {
         return this.stack[this.stackTop - 1 - distance];
     }
-    stack_reset() {
+    reset() {
         this.stackTop = 0;
     }
 }
@@ -32,7 +32,7 @@ function error(msg) {
     let line = currChunk.lines[currFrame.ip - 1];
     let name = currFrame.fn.name;
     output += `${line}: in ${name}: ${msg}\n`;
-    session.stack_reset();
+    session.reset();
     throw new RuntimeError(output);
 }
 function read_byte() {
@@ -314,7 +314,7 @@ class RuntimeError extends Error {
 }
 export const vm = {
     init() {
-        session.stack_reset();
+        session.reset();
         names = { ...nativeNames };
     },
     interpret(fn) {

@@ -27,7 +27,7 @@ class Session {
         return this.stack[this.stackTop - 1 - distance];
     }
 
-    stack_reset(): void {
+    reset(): void {
         this.stackTop = 0;
     }
 }
@@ -52,7 +52,7 @@ function error(msg: string): never {
     let line = currChunk.lines[currFrame.ip - 1];
     let name = currFrame.fn.name;
     output += `${ line }: in ${ name }: ${ msg }\n`;
-    session.stack_reset();
+    session.reset();
 
     throw new RuntimeError(output);
 }
@@ -493,7 +493,7 @@ type Result<T> =
 
 export const vm = {
     init(): void {
-        session.stack_reset();
+        session.reset();
         names = {...nativeNames};
     },
 
