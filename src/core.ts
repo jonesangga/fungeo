@@ -1,12 +1,13 @@
 import { Session } from "./vm.js"
+import canvas from "./ui/canvas.js"
 import { type Names } from "./vmfunction.js"
-import { FGCallNative, FGNumber } from "./value.js"
+import { type GeoObj, FGCallNative, FGNumber } from "./value.js"
 import { Point } from "./geo/point.js"
 import { Segment } from "./geo/segment.js"
 import { Circle } from "./geo/circle.js"
 import { welcome } from "./data/help.js"
 import { FunctionT, OverloadT,
-         anyT, circleT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
+         anyT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
 
 function _print(session: Session, ver: number): void {
     let value = session.pop();
@@ -16,6 +17,37 @@ function _print(session: Session, ver: number): void {
 const print = new FGCallNative("print", _print,
     new OverloadT([
         new FunctionT([anyT], nothingT, ["object"]),
+    ])
+);
+
+// NOTE: This is a helper, not exposed to user.
+function draw_oncanvas(objs: GeoObj[]) {
+    canvas.clear();
+    for (let obj of objs) {
+        obj.draw();
+    }
+}
+
+function _draw(session: Session, ver: number): void {
+    let v = session.pop() as GeoObj;
+    session.pop(); // The function.
+    session.oncanvas.push(v);
+    draw_oncanvas(session.oncanvas);
+}
+let draw = new FGCallNative("draw", _draw,
+    new OverloadT([
+        new FunctionT([geoT], nothingT, ["obj"]),
+    ])
+);
+
+function _clear(session: Session): void {
+    session.pop(); // The function.
+    canvas.clear();
+    session.oncanvas = [];
+}
+let clear = new FGCallNative("clear",  _clear,
+    new OverloadT([
+        new FunctionT([], nothingT, []),
     ])
 );
 
@@ -109,6 +141,8 @@ let help = new FGCallNative("help",  _help,
 
 export let coreNames: Names = {
     circle:  { type: circle.sig, value: circle },
+    clear:   { type: clear.sig, value: clear },
+    draw:    { type: draw.sig, value: draw },
     help:    { type: help.sig, value: help },
     print:   { type: print.sig, value: print },
     pt:      { type: pt.sig, value: pt },

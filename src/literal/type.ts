@@ -423,4 +423,4 @@ export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
-export type GeoT = CircleT | RichCircleT| CoordT | PointT | RichPointT | SegmentT | RichSegmentT;
+export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, segmentT]);

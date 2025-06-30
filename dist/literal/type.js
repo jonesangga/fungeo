@@ -346,3 +346,4 @@ export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
+export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, segmentT]);

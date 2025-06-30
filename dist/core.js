@@ -1,9 +1,10 @@
+import canvas from "./ui/canvas.js";
 import { FGCallNative } from "./value.js";
 import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
 import { welcome } from "./data/help.js";
-import { FunctionT, OverloadT, anyT, circleT, nothingT, numberT, pointT, segmentT } from "./literal/type.js";
+import { FunctionT, OverloadT, anyT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js";
 function _print(session, ver) {
     let value = session.pop();
     session.pop();
@@ -11,6 +12,29 @@ function _print(session, ver) {
 }
 const print = new FGCallNative("print", _print, new OverloadT([
     new FunctionT([anyT], nothingT, ["object"]),
+]));
+function draw_oncanvas(objs) {
+    canvas.clear();
+    for (let obj of objs) {
+        obj.draw();
+    }
+}
+function _draw(session, ver) {
+    let v = session.pop();
+    session.pop();
+    session.oncanvas.push(v);
+    draw_oncanvas(session.oncanvas);
+}
+let draw = new FGCallNative("draw", _draw, new OverloadT([
+    new FunctionT([geoT], nothingT, ["obj"]),
+]));
+function _clear(session) {
+    session.pop();
+    canvas.clear();
+    session.oncanvas = [];
+}
+let clear = new FGCallNative("clear", _clear, new OverloadT([
+    new FunctionT([], nothingT, []),
 ]));
 function _pt(session, ver) {
     let y = session.pop().value;
@@ -90,6 +114,8 @@ let help = new FGCallNative("help", _help, new OverloadT([
 ]));
 export let coreNames = {
     circle: { type: circle.sig, value: circle },
+    clear: { type: clear.sig, value: clear },
+    draw: { type: draw.sig, value: draw },
     help: { type: help.sig, value: help },
     print: { type: print.sig, value: print },
     pt: { type: pt.sig, value: pt },

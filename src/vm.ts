@@ -2,7 +2,7 @@
 
 import { load_module } from "./module_loader.js";
 import { Op, Chunk } from "./chunk.js";
-import { type Value, type Comparable, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
+import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
 import { Names } from "./vmfunction.js";
 import { coreNames } from "./core.js";
 import { type Type, FGType } from "./literal/type.js";
@@ -16,6 +16,7 @@ export class Session {
     stack: Value[] = [];
     stackTop: number = 0;
     output = "";
+    oncanvas: GeoObj[] = [];
 
     push(value: Value): void {
         this.stack[this.stackTop++] = value;
@@ -378,15 +379,13 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            // case Op.New: {
-                // let name  = read_string();
-                // let type  = (session.pop() as FGType).value;
-                // let value = session.pop();
-                // if (richgeoT.equal(type))
-                    // (value as RichGeoObj).label = name;
-                // names[name] = { type, value };
-                // break;
-            // }
+            case Op.New: {
+                let name  = read_string();
+                let type  = (session.pop() as FGType).value;
+                let value = session.pop();
+                names[name] = { type, value };
+                break;
+            }
 
             case Op.Set: {
                 let name  = read_string();

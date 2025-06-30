@@ -5,7 +5,7 @@
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Value, Kind, FGNumber } from "../value.js"
-import { FGType, pointT, richPointT } from "../literal/type.js"
+import { FGType, pointT } from "../literal/type.js"
 
 export class Point {
     kind: Kind.Point = Kind.Point;
@@ -54,58 +54,58 @@ export class Point {
     }
 }
 
-export class RichPoint {
-    kind: Kind.RichPoint = Kind.RichPoint;
-    field: Record<string, Value> = {};
+// export class RichPoint {
+    // kind: Kind.RichPoint = Kind.RichPoint;
+    // field: Record<string, Value> = {};
 
-    constructor(
-        public x: number,
-        public y: number,
-        public lineWidth: number = 8,
-        public strokeStyle: string = color.blue,
-        public label: string = ""
-    ) {
-        this.field["x"] = new FGNumber(this.x);
-        this.field["y"] = new FGNumber(this.y);
-    }
+    // constructor(
+        // public x: number,
+        // public y: number,
+        // public lineWidth: number = 8,
+        // public strokeStyle: string = color.blue,
+        // public label: string = ""
+    // ) {
+        // this.field["x"] = new FGNumber(this.x);
+        // this.field["y"] = new FGNumber(this.y);
+    // }
 
-    set(key: keyof typeof this.field, v: Value): void {
-        if (!(v instanceof FGNumber))
-            throw new Error("setter error");
-        switch (key) {
-            case "x": {
-                this.field.x = v;
-                this.x = v.value;
-                break;
-            }
-            case "y": {
-                this.field.y = v;
-                this.y = v.value;
-                break;
-            }
-        }
-    }
+    // set(key: keyof typeof this.field, v: Value): void {
+        // if (!(v instanceof FGNumber))
+            // throw new Error("setter error");
+        // switch (key) {
+            // case "x": {
+                // this.field.x = v;
+                // this.x = v.value;
+                // break;
+            // }
+            // case "y": {
+                // this.field.y = v;
+                // this.y = v.value;
+                // break;
+            // }
+        // }
+    // }
 
-    to_str(): string {
-        return `RPt ${this.x} ${this.y}`;
-    }
+    // to_str(): string {
+        // return `RPt ${this.x} ${this.y}`;
+    // }
 
-    typeof(): FGType {
-        return new FGType(richPointT);
-    }
+    // typeof(): FGType {
+        // return new FGType(richPointT);
+    // }
 
-    draw(): void {
-        c.beginPath();
-        c.arc(this.x, this.y, this.lineWidth/2, 0, TAU);
-        c.fillStyle = this.strokeStyle;
-        c.fill();
-        c.strokeStyle = "#000";
-        c.stroke();
-    }
+    // draw(): void {
+        // c.beginPath();
+        // c.arc(this.x, this.y, this.lineWidth/2, 0, TAU);
+        // c.fillStyle = this.strokeStyle;
+        // c.fill();
+        // c.strokeStyle = "#000";
+        // c.stroke();
+    // }
 
-    draw_label(): void {
-        c.textBaseline = "bottom";
-        c.font = "16px monospace"
-        c.fillText(this.label, this.x + 5, this.y - 5);
-    }
-}
+    // draw_label(): void {
+        // c.textBaseline = "bottom";
+        // c.font = "16px monospace"
+        // c.fillText(this.label, this.x + 5, this.y - 5);
+    // }
+// }

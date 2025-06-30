@@ -7,12 +7,12 @@ import { Session } from "./vm.js"
 import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
-import { Circle, RichCircle } from "./geo/circle.js"
+import { Circle } from "./geo/circle.js"
 import { Coord } from "./geo/coordinate.js"
-import { Point, RichPoint } from "./geo/point.js"
+import { Point } from "./geo/point.js"
 import Rect from "./geo/rect.js"
 import { FGColor } from "./literal/color.js"
-import { Segment, RichSegment } from "./geo/segment.js"
+import { Segment } from "./geo/segment.js"
 
 export const enum Kind {
     Nothing    = 100,
@@ -34,9 +34,6 @@ export const enum Kind {
     Picture    = 840,
     Point      = 850,
     Rect       = 900,
-    RichCircle = 905,
-    RichPoint  = 910,
-    RichSegment = 920,
     Segment    = 1000,
     Canvas     = 2000,    // UI.
     Repl       = 2500,
@@ -63,9 +60,6 @@ export const KindName: {
     [Kind.Point]: "Point",
     [Kind.Rect]: "Rect",
     [Kind.Repl]: "Repl",
-    [Kind.RichCircle]: "RichCircle",
-    [Kind.RichPoint]: "RichPoint",
-    [Kind.RichSegment]: "RichSegment",
     [Kind.Segment]: "Segment",
     [Kind.String]: "String",
     [Kind.Struct]: "Struct",
@@ -323,8 +317,7 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Coord | Ellipse | Picture | Point | Rect | RichCircle | RichPoint | RichSegment | Segment;
-export type RichGeoObj = RichPoint;
+export type GeoObj = Circle | Coord | Ellipse | Picture | Point | Rect | Segment;
 export type Fillable = Circle | Ellipse | Rect;
 export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;

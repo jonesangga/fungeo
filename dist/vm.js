@@ -6,6 +6,7 @@ export class Session {
     stack = [];
     stackTop = 0;
     output = "";
+    oncanvas = [];
     push(value) {
         this.stack[this.stackTop++] = value;
     }
@@ -227,6 +228,13 @@ export function run(intercept = false) {
                 console.log(`about to load module ${name}`);
                 if (!load_module(name))
                     error(`cannot load module ${name}`);
+                break;
+            }
+            case 1020: {
+                let name = read_string();
+                let type = session.pop().value;
+                let value = session.pop();
+                names[name] = { type, value };
                 break;
             }
             case 1400: {

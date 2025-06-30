@@ -1,20 +1,6 @@
-import { Session } from "./vm.js"
-import { type Value, type GeoObj, type RichGeoObj, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
-import canvas from "./ui/canvas.js"
-import repl from "./ui/repl.js"
-import { Circle, RichCircle } from "./geo/circle.js"
-import { Coord } from "./geo/coordinate.js"
-import { RichPoint } from "./geo/point.js"
-import Picture from "./geo/picture.js"
-import { Segment, RichSegment } from "./geo/segment.js"
-import { type Type, ListT, UnionT, pictureT, FunctionT, OverloadT,
-         ellipseT, segmentT, richSegmentT, nothingT, pointT, richPointT, circleT, richCircleT, stringT, numberT,
-         canvasT, coordT, replT } from "./literal/type.js"
+import { type Value } from "./value.js"
+import { type Type } from "./literal/type.js"
 
-const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT]);
-const geoList = new ListT(geoUnion);
-const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
-export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 // const fillableT = new UnionT([circleT, ellipseT]);
 
 // function _printf(): void {
@@ -98,59 +84,13 @@ export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
     // new FunctionT([new ListT(anyT), anyT], nothingT)
 // );
 
-let on_scrn: GeoObj[] = [];
-let label_on_scrn: RichGeoObj[] = [];
-
-function draw_onScreen() {
-    canvas.clear();
-    for (let obj of on_scrn) {
-        obj.draw();
-    }
-    for (let obj of label_on_scrn) {
-        obj.draw_label();
-    }
-}
-
-function isGeo(v: Value): v is GeoObj {
-    return [Kind.Circle, Kind.Coord, Kind.RichCircle, Kind.Ellipse, Kind.Picture, Kind.Point, Kind.Rect, Kind.RichPoint, Kind.RichSegment, Kind.Segment].includes(v.kind);
-}
-
-function isRichGeo(v: Value): v is RichGeoObj {
-    return [Kind.RichCircle, Kind.RichPoint, Kind.RichSegment].includes(v.kind);
-}
-
-function _draw(session: Session, ver: number): void {
-    let v = session.pop();
-    session.pop();              // The function.
-    if (v instanceof FGList) {
-        for (let i of v.value) {
-            if (isGeo(i))
-                on_scrn.push(i);
-            if (isRichGeo(i))
-                label_on_scrn.push(i);
-        }
-    }
-    else {
-        if (isGeo(v))
-            on_scrn.push(v);
-        if (isRichGeo(v))
-            label_on_scrn.push(v);
-    }
-    draw_onScreen();
-}
-// let draw = new FGCallNative("draw", _draw,
-    // new OverloadT([
-        // new FunctionT([geoT], nothingT),
-    // ])
-// );
-
-function _label(session: Session, ver: number): void {
-    let label = (session.pop() as FGString).value;
-    let v = session.pop() as RichGeoObj;
-    session.pop();              // The function.
-    v.label = label;
-    draw_onScreen();
-}
+// function _label(session: Session, ver: number): void {
+    // let label = (session.pop() as FGString).value;
+    // let v = session.pop() as RichGeoObj;
+    // session.pop();              // The function.
+    // v.label = label;
+    // draw_onScreen();
+// }
 // let label = new FGCallNative("label", _label,
     // new OverloadT([
         // new FunctionT([richgeoT, stringT], nothingT),
@@ -169,14 +109,14 @@ function _label(session: Session, ver: number): void {
     // new FunctionT([colorT, fillableT], nothingT)
 // );
 
-function _intersect(session: Session, ver: number): void {
-    let q = session.pop() as Circle;
-    let p = session.pop() as Circle;
-    session.pop();              // The function.
-    let points = p.intersect(q);
-    let res = new FGList(points, pointT);
-    session.push(res);
-}
+// function _intersect(session: Session, ver: number): void {
+    // let q = session.pop() as Circle;
+    // let p = session.pop() as Circle;
+    // session.pop();              // The function.
+    // let points = p.intersect(q);
+    // let res = new FGList(points, pointT);
+    // session.push(res);
+// }
 // let intersect = new FGCallNative("intersect", _intersect,
     // new OverloadT([
         // new FunctionT([circleT, circleT], new ListT(pointT)),
@@ -184,21 +124,21 @@ function _intersect(session: Session, ver: number): void {
     // ])
 // );
 
-function _rcircle(session: Session, ver: number): void {
-    if (ver === 0) {
-        let q = session.pop() as RichPoint;
-        let p = session.pop() as RichPoint;
-        session.pop();              // The function.
-        session.push(new RichCircle(p, q));
-    }
-    else if (ver === 1) {
-        let r = (session.pop() as FGNumber).value;
-        let p = session.pop() as RichPoint;
-        session.pop();              // The function.
-        let q = new RichPoint(p.x + r, p.y);
-        session.push(new RichCircle(p, q));
-    }
-}
+// function _rcircle(session: Session, ver: number): void {
+    // if (ver === 0) {
+        // let q = session.pop() as RichPoint;
+        // let p = session.pop() as RichPoint;
+        // session.pop();              // The function.
+        // session.push(new RichCircle(p, q));
+    // }
+    // else if (ver === 1) {
+        // let r = (session.pop() as FGNumber).value;
+        // let p = session.pop() as RichPoint;
+        // session.pop();              // The function.
+        // let q = new RichPoint(p.x + r, p.y);
+        // session.push(new RichCircle(p, q));
+    // }
+// }
 // let rcircle = new FGCallNative("rcircle", _rcircle,
     // new OverloadT([
         // new FunctionT([richPointT, richPointT], richCircleT),
@@ -388,14 +328,14 @@ function _rcircle(session: Session, ver: number): void {
     // },
 // ]);
 
-function _quartet(session: Session): void {
-    let s = session.pop() as Picture;
-    let r = session.pop() as Picture;
-    let q = session.pop() as Picture;
-    let p = session.pop() as Picture;
-    session.pop();              // The function.
-    session.push(Picture.quartet(p, q, r, s));
-}
+// function _quartet(session: Session): void {
+    // let s = session.pop() as Picture;
+    // let r = session.pop() as Picture;
+    // let q = session.pop() as Picture;
+    // let p = session.pop() as Picture;
+    // session.pop();              // The function.
+    // session.push(Picture.quartet(p, q, r, s));
+// }
 // let quartet = new FGCallNative("quartet", _quartet,
     // new OverloadT([
         // new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT),
@@ -411,63 +351,63 @@ function _quartet(session: Session): void {
     // new FunctionT([pictureT], pictureT)
 // );
 
-function _mappic(session: Session): void {
-    let target = session.pop() as Picture;
-    let src = session.pop() as Picture;
-    session.pop();              // The function.
-    src.map_to(target);
-    draw_onScreen();
-}
+// function _mappic(session: Session): void {
+    // let target = session.pop() as Picture;
+    // let src = session.pop() as Picture;
+    // session.pop();              // The function.
+    // src.map_to(target);
+    // // draw_onScreen();
+// }
 // let mappic = new FGCallNative("mappic", _mappic,
     // new OverloadT([
         // new FunctionT([pictureT, pictureT], nothingT),
     // ])
 // );
 
-function _pic(session: Session): void {
-    let w = (session.pop() as FGNumber).value;
-    let h = (session.pop() as FGNumber).value;
-    session.pop();              // The function.
-    let pic = new Picture(w, h);
-    session.push(pic);
-}
+// function _pic(session: Session): void {
+    // let w = (session.pop() as FGNumber).value;
+    // let h = (session.pop() as FGNumber).value;
+    // session.pop();              // The function.
+    // let pic = new Picture(w, h);
+    // session.push(pic);
+// }
 // let pic = new FGCallNative("pic", _pic,
     // new OverloadT([
         // new FunctionT([numberT, numberT], pictureT),
     // ])
 // );
 
-function _coord(session: Session): void {
-    let yr = (session.pop() as FGNumber).value;
-    let yl = (session.pop() as FGNumber).value;
-    let xr = (session.pop() as FGNumber).value;
-    let xl = (session.pop() as FGNumber).value;
-    session.pop();              // The function.
-    session.push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
-}
+// function _coord(session: Session): void {
+    // let yr = (session.pop() as FGNumber).value;
+    // let yl = (session.pop() as FGNumber).value;
+    // let xr = (session.pop() as FGNumber).value;
+    // let xl = (session.pop() as FGNumber).value;
+    // session.pop();              // The function.
+    // session.push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
+// }
 // let coord = new FGCallNative("coord", _coord,
     // new OverloadT([
         // new FunctionT([numberT, numberT, numberT, numberT], coordT),
     // ])
 // );
 
-function _coord_pt(session: Session, ver: number): void {
-    if (ver === 0) {
-        let o = session.pop() as Coord;
-        let label = (session.pop() as FGString).value;
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(o.add_pt(x, y, label));
-    }
-    else if (ver === 1) {
-        let o = session.pop() as Coord;
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        session.push(o.add_pt(x, y));
-    }
-}
+// function _coord_pt(session: Session, ver: number): void {
+    // if (ver === 0) {
+        // let o = session.pop() as Coord;
+        // let label = (session.pop() as FGString).value;
+        // let y = (session.pop() as FGNumber).value;
+        // let x = (session.pop() as FGNumber).value;
+        // session.pop();              // The function.
+        // session.push(o.add_pt(x, y, label));
+    // }
+    // else if (ver === 1) {
+        // let o = session.pop() as Coord;
+        // let y = (session.pop() as FGNumber).value;
+        // let x = (session.pop() as FGNumber).value;
+        // session.pop();              // The function.
+        // session.push(o.add_pt(x, y));
+    // }
+// }
 // export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
     // new OverloadT([
         // new FunctionT([numberT, numberT, stringT], coordT),
@@ -475,11 +415,11 @@ function _coord_pt(session: Session, ver: number): void {
     // ])
 // );
 
-function _coord_hide_grid(session: Session, ver: number): void {
-    let o = session.pop() as Coord;
-    session.pop();              // The function.
-    session.push(o.hide_grid());
-}
+// function _coord_hide_grid(session: Session, ver: number): void {
+    // let o = session.pop() as Coord;
+    // session.pop();              // The function.
+    // session.push(o.hide_grid());
+// }
 // export let coord_hide_grid = new FGCallNative("coord_hide_grid", _coord_hide_grid,
     // new OverloadT([
         // new FunctionT([], coordT),
@@ -541,18 +481,18 @@ function _coord_hide_grid(session: Session, ver: number): void {
     // )
 // );
 
-function _length(session: Session, ver: number): void {
-    if (ver === 0) {
-        let s = session.pop() as Segment;
-        session.pop();              // The function.
-        session.push(new FGNumber(s.length()));
-    }
-    else if (ver === 1) {
-        let s = session.pop() as RichSegment;
-        session.pop();              // The function.
-        session.push(new FGNumber(s.length()));
-    }
-}
+// function _length(session: Session, ver: number): void {
+    // if (ver === 0) {
+        // let s = session.pop() as Segment;
+        // session.pop();              // The function.
+        // session.push(new FGNumber(s.length()));
+    // }
+    // else if (ver === 1) {
+        // let s = session.pop() as RichSegment;
+        // session.pop();              // The function.
+        // session.push(new FGNumber(s.length()));
+    // }
+// }
 // let length = new FGCallNative("length", _length,
     // new OverloadT([
         // new FunctionT([segmentT], numberT),
@@ -560,26 +500,26 @@ function _length(session: Session, ver: number): void {
     // ])
 // );
 
-function _rsegment(session: Session, ver: number): void {
-    if (ver === 0) {
-        let y2 = (session.pop() as FGNumber).value;
-        let x2 = (session.pop() as FGNumber).value;
-        let y1 = (session.pop() as FGNumber).value;
-        let x1 = (session.pop() as FGNumber).value;
-        session.pop();              // The function.
-        let p = new RichPoint(x1, y1);
-        p.label = "P";
-        let q = new RichPoint(x2, y2);
-        q.label = "Q";
-        session.push(new RichSegment(p, q));
-    }
-    else if (ver === 1) {
-        let q = session.pop() as RichPoint;
-        let p = session.pop() as RichPoint;
-        session.pop();              // The function.
-        session.push(new RichSegment(p, q));
-    }
-}
+// function _rsegment(session: Session, ver: number): void {
+    // if (ver === 0) {
+        // let y2 = (session.pop() as FGNumber).value;
+        // let x2 = (session.pop() as FGNumber).value;
+        // let y1 = (session.pop() as FGNumber).value;
+        // let x1 = (session.pop() as FGNumber).value;
+        // session.pop();              // The function.
+        // let p = new RichPoint(x1, y1);
+        // p.label = "P";
+        // let q = new RichPoint(x2, y2);
+        // q.label = "Q";
+        // session.push(new RichSegment(p, q));
+    // }
+    // else if (ver === 1) {
+        // let q = session.pop() as RichPoint;
+        // let p = session.pop() as RichPoint;
+        // session.pop();              // The function.
+        // session.push(new RichSegment(p, q));
+    // }
+// }
 // let rsegment = new FGCallNative("rsegment", _rsegment,
     // new OverloadT([
         // new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
@@ -597,18 +537,6 @@ function _rsegment(session: Session, ver: number): void {
     // new FunctionT([segmentT], pointT)
 // );
 
-function _clear(session: Session): void {
-    session.pop();              // The function.
-    canvas.clear();
-    on_scrn = [];
-    label_on_scrn = [];
-}
-// let clear = new FGCallNative("clear",  _clear,
-    // new OverloadT([
-        // new FunctionT([], nothingT),
-    // ])
-// );
-
 export type Names = {
     [name: string]: { type: Type, value: Value, mut?: boolean },
 };
@@ -624,10 +552,8 @@ export type Names = {
     // // "show":   { type: show.sig, value: show },
     // // "padl":   { type: padl.sig, value: padl },
     // // "Type":   { type: TypeFn.sig, value: TypeFn },
-    // draw:   { type: draw.sig, value: draw },
     // label:  { type: label.sig, value: label },
     // // "Fill":   { type: Fill.sig, value: Fill },
-    // clear:  { type: clear.sig, value: clear },
     // // "Paint":  { type: Paint.sig, value: Paint },
     // // "Ccurv":   { type: Ccurv.sig, value: Ccurv },
     // // "Descart": { type: Descart.sig, value: Descart },
