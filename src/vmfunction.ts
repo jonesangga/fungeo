@@ -1,4 +1,4 @@
-import { session } from "./vm.js"
+import { Session } from "./vm.js"
 import { type Value, type GeoObj, type RichGeoObj, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
@@ -18,7 +18,7 @@ const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segment
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 // const fillableT = new UnionT([circleT, ellipseT]);
 
-function _print(ver: number): void {
+function _print(session: Session, ver: number): void {
     let value = session.pop();
     session.pop();              // The function.
     session.write( value.to_str() + "\n" );
@@ -131,7 +131,7 @@ function isRichGeo(v: Value): v is RichGeoObj {
     return [Kind.RichCircle, Kind.RichPoint, Kind.RichSegment].includes(v.kind);
 }
 
-function _draw(ver: number): void {
+function _draw(session: Session, ver: number): void {
     let v = session.pop();
     session.pop();              // The function.
     if (v instanceof FGList) {
@@ -156,7 +156,7 @@ let draw = new FGCallNative("draw", _draw,
     ])
 );
 
-function _label(ver: number): void {
+function _label(session: Session, ver: number): void {
     let label = (session.pop() as FGString).value;
     let v = session.pop() as RichGeoObj;
     session.pop();              // The function.
@@ -181,7 +181,7 @@ let label = new FGCallNative("label", _label,
     // new FunctionT([colorT, fillableT], nothingT)
 // );
 
-function _circle(ver: number): void {
+function _circle(session: Session, ver: number): void {
     if (ver === 0) {
         let r = (session.pop() as FGNumber).value;
         let y = (session.pop() as FGNumber).value;
@@ -211,7 +211,7 @@ let circle = new FGCallNative("circle", _circle,
     ])
 );
 
-function _intersect(ver: number): void {
+function _intersect(session: Session, ver: number): void {
     let q = session.pop() as Circle;
     let p = session.pop() as Circle;
     session.pop();              // The function.
@@ -226,7 +226,7 @@ let intersect = new FGCallNative("intersect", _intersect,
     ])
 );
 
-function _rcircle(ver: number): void {
+function _rcircle(session: Session, ver: number): void {
     if (ver === 0) {
         let q = session.pop() as RichPoint;
         let p = session.pop() as RichPoint;
@@ -309,7 +309,7 @@ let rcircle = new FGCallNative("rcircle", _rcircle,
     // )
 // );
 
-function _pt(ver: number): void {
+function _pt(session: Session, ver: number): void {
     if (ver === 0) {
         let y = (session.pop() as FGNumber).value;
         let x = (session.pop() as FGNumber).value;
@@ -329,7 +329,7 @@ let pt = new FGCallNative("pt", _pt,
     ])
 );
 
-function _rpt(ver: number): void {
+function _rpt(session: Session, ver: number): void {
     if (ver === 0) {
         let y = (session.pop() as FGNumber).value;
         let x = (session.pop() as FGNumber).value;
@@ -450,7 +450,7 @@ let rpt = new FGCallNative("rpt", _rpt,
     // },
 // ]);
 
-function _quartet(): void {
+function _quartet(session: Session): void {
     let s = session.pop() as Picture;
     let r = session.pop() as Picture;
     let q = session.pop() as Picture;
@@ -473,7 +473,7 @@ let quartet = new FGCallNative("quartet", _quartet,
     // new FunctionT([pictureT], pictureT)
 // );
 
-function _mappic(): void {
+function _mappic(session: Session): void {
     let target = session.pop() as Picture;
     let src = session.pop() as Picture;
     session.pop();              // The function.
@@ -486,7 +486,7 @@ let mappic = new FGCallNative("mappic", _mappic,
     ])
 );
 
-function _pic(): void {
+function _pic(session: Session): void {
     let w = (session.pop() as FGNumber).value;
     let h = (session.pop() as FGNumber).value;
     session.pop();              // The function.
@@ -499,7 +499,7 @@ let pic = new FGCallNative("pic", _pic,
     ])
 );
 
-function _coord(): void {
+function _coord(session: Session): void {
     let yr = (session.pop() as FGNumber).value;
     let yl = (session.pop() as FGNumber).value;
     let xr = (session.pop() as FGNumber).value;
@@ -513,7 +513,7 @@ let coord = new FGCallNative("coord", _coord,
     ])
 );
 
-function _coord_pt(ver: number): void {
+function _coord_pt(session: Session, ver: number): void {
     if (ver === 0) {
         let o = session.pop() as Coord;
         let label = (session.pop() as FGString).value;
@@ -537,7 +537,7 @@ export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
     ])
 );
 
-function _coord_hide_grid(ver: number): void {
+function _coord_hide_grid(session: Session, ver: number): void {
     let o = session.pop() as Coord;
     session.pop();              // The function.
     session.push(o.hide_grid());
@@ -603,7 +603,7 @@ coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_gri
     // )
 // );
 
-function _segment(ver: number): void {
+function _segment(session: Session, ver: number): void {
     if (ver === 0) {
         let y2 = (session.pop() as FGNumber).value;
         let x2 = (session.pop() as FGNumber).value;
@@ -626,7 +626,7 @@ let segment = new FGCallNative("segment", _segment,
     ])
 );
 
-function _length(ver: number): void {
+function _length(session: Session, ver: number): void {
     if (ver === 0) {
         let s = session.pop() as Segment;
         session.pop();              // The function.
@@ -645,7 +645,7 @@ let length = new FGCallNative("length", _length,
     ])
 );
 
-function _rsegment(ver: number): void {
+function _rsegment(session: Session, ver: number): void {
     if (ver === 0) {
         let y2 = (session.pop() as FGNumber).value;
         let x2 = (session.pop() as FGNumber).value;
@@ -682,7 +682,7 @@ let rsegment = new FGCallNative("rsegment", _rsegment,
     // new FunctionT([segmentT], pointT)
 // );
 
-function _help(ver: number): void {
+function _help(session: Session, ver: number): void {
     if (ver === 0) {
         let arg = session.pop();
         session.pop();              // The function.
@@ -703,7 +703,7 @@ let help = new FGCallNative("help",  _help,
     ])
 );
 
-function _clear(): void {
+function _clear(session: Session): void {
     session.pop();              // The function.
     canvas.clear();
     on_scrn = [];

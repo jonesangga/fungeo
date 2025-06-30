@@ -11,7 +11,7 @@ import { Point } from "./geo/point.js";
 let $ = console.log;
 // $ = () => {};
 
-class Session {
+export class Session {
     stack: Value[] = [];
     stackTop: number = 0;
     output = "";
@@ -159,10 +159,10 @@ export function run(intercept: boolean = false): boolean {
                 let ver = read_byte();
                 let fn = session.peek(arity);
                 if (fn instanceof FGCallNative)
-                    fn.value(ver);
+                    fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
                     session.push(fn.obj);
-                    fn.method.value(ver);
+                    fn.method.value(session, ver);
                 }
                 else
                     call(fn as FGCallUser, arity);

@@ -1,4 +1,3 @@
-import { session } from "./vm.js";
 import { FGCallNative, FGNumber, FGList } from "./value.js";
 import canvas from "./ui/canvas.js";
 import repl from "./ui/repl.js";
@@ -13,7 +12,7 @@ const geoUnion = new UnionT([ellipseT, pictureT, pointT, richPointT, segmentT, r
 const geoList = new ListT(geoUnion);
 const geoT = new UnionT([ellipseT, coordT, pictureT, pointT, richPointT, segmentT, richSegmentT, circleT, richCircleT, geoList]);
 export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
-function _print(ver) {
+function _print(session, ver) {
     let value = session.pop();
     session.pop();
     session.write(value.to_str() + "\n");
@@ -38,7 +37,7 @@ function isGeo(v) {
 function isRichGeo(v) {
     return [905, 910, 920].includes(v.kind);
 }
-function _draw(ver) {
+function _draw(session, ver) {
     let v = session.pop();
     session.pop();
     if (v instanceof FGList) {
@@ -60,7 +59,7 @@ function _draw(ver) {
 let draw = new FGCallNative("draw", _draw, new OverloadT([
     new FunctionT([geoT], nothingT),
 ]));
-function _label(ver) {
+function _label(session, ver) {
     let label = session.pop().value;
     let v = session.pop();
     session.pop();
@@ -70,7 +69,7 @@ function _label(ver) {
 let label = new FGCallNative("label", _label, new OverloadT([
     new FunctionT([richgeoT, stringT], nothingT),
 ]));
-function _circle(ver) {
+function _circle(session, ver) {
     if (ver === 0) {
         let r = session.pop().value;
         let y = session.pop().value;
@@ -97,7 +96,7 @@ let circle = new FGCallNative("circle", _circle, new OverloadT([
     new FunctionT([pointT, pointT], circleT),
     new FunctionT([pointT, numberT], circleT),
 ]));
-function _intersect(ver) {
+function _intersect(session, ver) {
     let q = session.pop();
     let p = session.pop();
     session.pop();
@@ -109,7 +108,7 @@ let intersect = new FGCallNative("intersect", _intersect, new OverloadT([
     new FunctionT([circleT, circleT], new ListT(pointT)),
     new FunctionT([richCircleT, richCircleT], new ListT(richPointT)),
 ]));
-function _rcircle(ver) {
+function _rcircle(session, ver) {
     if (ver === 0) {
         let q = session.pop();
         let p = session.pop();
@@ -128,7 +127,7 @@ let rcircle = new FGCallNative("rcircle", _rcircle, new OverloadT([
     new FunctionT([richPointT, richPointT], richCircleT),
     new FunctionT([richPointT, numberT], richCircleT),
 ]));
-function _pt(ver) {
+function _pt(session, ver) {
     if (ver === 0) {
         let y = session.pop().value;
         let x = session.pop().value;
@@ -145,7 +144,7 @@ let pt = new FGCallNative("pt", _pt, new OverloadT([
     new FunctionT([numberT, numberT], pointT),
     new FunctionT([richPointT], pointT),
 ]));
-function _rpt(ver) {
+function _rpt(session, ver) {
     if (ver === 0) {
         let y = session.pop().value;
         let x = session.pop().value;
@@ -162,7 +161,7 @@ let rpt = new FGCallNative("rpt", _rpt, new OverloadT([
     new FunctionT([numberT, numberT], richPointT),
     new FunctionT([pointT], richPointT),
 ]));
-function _quartet() {
+function _quartet(session) {
     let s = session.pop();
     let r = session.pop();
     let q = session.pop();
@@ -173,7 +172,7 @@ function _quartet() {
 let quartet = new FGCallNative("quartet", _quartet, new OverloadT([
     new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT),
 ]));
-function _mappic() {
+function _mappic(session) {
     let target = session.pop();
     let src = session.pop();
     session.pop();
@@ -183,7 +182,7 @@ function _mappic() {
 let mappic = new FGCallNative("mappic", _mappic, new OverloadT([
     new FunctionT([pictureT, pictureT], nothingT),
 ]));
-function _pic() {
+function _pic(session) {
     let w = session.pop().value;
     let h = session.pop().value;
     session.pop();
@@ -193,7 +192,7 @@ function _pic() {
 let pic = new FGCallNative("pic", _pic, new OverloadT([
     new FunctionT([numberT, numberT], pictureT),
 ]));
-function _coord() {
+function _coord(session) {
     let yr = session.pop().value;
     let yl = session.pop().value;
     let xr = session.pop().value;
@@ -204,7 +203,7 @@ function _coord() {
 let coord = new FGCallNative("coord", _coord, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], coordT),
 ]));
-function _coord_pt(ver) {
+function _coord_pt(session, ver) {
     if (ver === 0) {
         let o = session.pop();
         let label = session.pop().value;
@@ -225,7 +224,7 @@ export let coord_pt = new FGCallNative("coord_pt", _coord_pt, new OverloadT([
     new FunctionT([numberT, numberT, stringT], coordT),
     new FunctionT([numberT, numberT], coordT),
 ]));
-function _coord_hide_grid(ver) {
+function _coord_hide_grid(session, ver) {
     let o = session.pop();
     session.pop();
     session.push(o.hide_grid());
@@ -235,7 +234,7 @@ export let coord_hide_grid = new FGCallNative("coord_hide_grid", _coord_hide_gri
 ]));
 coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
 coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_grid };
-function _segment(ver) {
+function _segment(session, ver) {
     if (ver === 0) {
         let y2 = session.pop().value;
         let x2 = session.pop().value;
@@ -255,7 +254,7 @@ let segment = new FGCallNative("segment", _segment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], segmentT),
     new FunctionT([pointT, pointT], segmentT),
 ]));
-function _length(ver) {
+function _length(session, ver) {
     if (ver === 0) {
         let s = session.pop();
         session.pop();
@@ -271,7 +270,7 @@ let length = new FGCallNative("length", _length, new OverloadT([
     new FunctionT([segmentT], numberT),
     new FunctionT([richSegmentT], numberT),
 ]));
-function _rsegment(ver) {
+function _rsegment(session, ver) {
     if (ver === 0) {
         let y2 = session.pop().value;
         let x2 = session.pop().value;
@@ -295,7 +294,7 @@ let rsegment = new FGCallNative("rsegment", _rsegment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], richSegmentT),
     new FunctionT([richPointT, richPointT], richSegmentT),
 ]));
-function _help(ver) {
+function _help(session, ver) {
     if (ver === 0) {
         let arg = session.pop();
         session.pop();
@@ -313,7 +312,7 @@ let help = new FGCallNative("help", _help, new OverloadT([
     new FunctionT([anyT], nothingT),
     new FunctionT([], nothingT),
 ]));
-function _clear() {
+function _clear(session) {
     session.pop();
     canvas.clear();
     on_scrn = [];

@@ -2,7 +2,7 @@ import { load_module } from "./module_loader.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { nativeNames, richgeoT } from "./vmfunction.js";
 let $ = console.log;
-class Session {
+export class Session {
     stack = [];
     stackTop = 0;
     output = "";
@@ -103,10 +103,10 @@ export function run(intercept = false) {
                 let ver = read_byte();
                 let fn = session.peek(arity);
                 if (fn instanceof FGCallNative)
-                    fn.value(ver);
+                    fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
                     session.push(fn.obj);
-                    fn.method.value(ver);
+                    fn.method.value(session, ver);
                 }
                 else
                     call(fn, arity);
