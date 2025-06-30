@@ -1,21 +1,22 @@
 // @jonesangga, 2025, MIT License.
 //
 // A Point is a filled circle.
+//
+// TODO: This is broken.
 
 import { c } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Value, Kind, FGNumber } from "../value.js"
-import { FGType, pointT } from "../literal/type.js"
+import { Value, FGNumber } from "../value.js"
 
-export class Point {
-    kind: Kind.Point = Kind.Point;
-    field: Record<string, Value> = {};
+export class RichPoint {
+    field: Record<string, any> = {};
 
-    constructor( 
+    constructor(
         public x: number,
         public y: number,
         public lineWidth: number = 8,
-        public strokeStyle: string = color.black
+        public strokeStyle: string = color.blue,
+        public label: string = ""
     ) {
         this.field["x"] = new FGNumber(this.x);
         this.field["y"] = new FGNumber(this.y);
@@ -39,17 +40,25 @@ export class Point {
     }
 
     to_str(): string {
-        return `Pt ${this.x} ${this.y}`;
+        return `RPt ${this.x} ${this.y}`;
     }
 
-    typeof(): FGType {
-        return new FGType(pointT);
-    }
+    // typeof(): FGType {
+        // return new FGType(richPointT);
+    // }
 
     draw(): void {
         c.beginPath();
         c.arc(this.x, this.y, this.lineWidth/2, 0, TAU);
         c.fillStyle = this.strokeStyle;
         c.fill();
+        c.strokeStyle = "#000";
+        c.stroke();
+    }
+
+    draw_label(): void {
+        c.textBaseline = "bottom";
+        c.font = "16px monospace"
+        c.fillText(this.label, this.x + 5, this.y - 5);
     }
 }
