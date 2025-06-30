@@ -11,36 +11,35 @@ import { Point } from "./geo/point.js";
 let $ = console.log;
 // $ = () => {};
 
-// These are exported only for vm.test.
-export let stack: Value[] = [];
-export let stackTop = 0;
+class Session {
+    stack: Value[] = [];
+    stackTop: number = 0;
+
+    push(value: Value): void {
+        this.stack[this.stackTop++] = value;
+    }
+
+    pop(): Value {
+        return this.stack[--this.stackTop];
+    }
+
+    peek(distance: number): Value {
+        return this.stack[this.stackTop - 1 - distance];
+    }
+
+    stack_reset(): void {
+        this.stackTop = 0;
+    }
+}
+
+export let session = new Session();
+$(session);
 
 let frames: CallFrame[] = [];
 let currFrame: CallFrame;
 let currChunk: Chunk;
 
 export let names: Names = {};
-
-//--------------------------------------------------------------------
-// Stack functions.
-
-export function push(value: Value): void {
-    stack[stackTop++] = value;
-}
-
-export function pop(): Value {
-    return stack[--stackTop];
-}
-
-function peek(distance: number): Value {
-    return stack[stackTop - 1 - distance];
-}
-
-function stack_reset(): void {
-    stackTop = 0;
-}
-
-//--------------------------------------------------------------------
 
 let output = "";
 export function vm_output(str: string): void {
@@ -53,7 +52,7 @@ function error(msg: string): never {
     let line = currChunk.lines[currFrame.ip - 1];
     let name = currFrame.fn.name;
     output += `${ line }: in ${ name }: ${ msg }\n`;
-    stack_reset();
+    session.stack_reset();
 
     throw new RuntimeError(output);
 }
@@ -71,7 +70,7 @@ function read_string(): string {
 }
 
 export function call(fn: FGCallUser, argCount: number) {
-    currFrame = { fn, ip: 0, slots: stackTop - argCount };
+    currFrame = { fn, ip: 0, slots: session.stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
 }
@@ -79,8 +78,8 @@ export function call(fn: FGCallUser, argCount: number) {
 function create_list(length: number, eltype: Type): void {
     let el = [];
     for (let i = 0; i < length; i++)
-        el[length-i-1] = pop();
-    push(new FGList(el, eltype));
+        el[length-i-1] = session.pop();
+    session.push(new FGList(el, eltype));
 }
 
 type NumStr = number | string;
@@ -88,9 +87,9 @@ type NumStr = number | string;
 function compare(
     f: (a: NumStr, b: NumStr) => boolean
 ): void {
-    let b = pop() as Comparable;
-    let a = pop() as Comparable;
-    push(new FGBoolean( f(a.value, b.value) ));
+    let b = session.pop() as Comparable;
+    let a = session.pop() as Comparable;
+    session.push(new FGBoolean( f(a.value, b.value) ));
 }
 
 const lt = (a: NumStr, b: NumStr): boolean => a < b;
@@ -104,9 +103,9 @@ export function run(intercept: boolean = false): boolean {
     for (;;) {
         if (debug) {
             let str = "      ";
-            for (let slot = 0; slot < stackTop; slot++) {
+            for (let slot = 0; slot < session.stackTop; slot++) {
                 str += "[ ";
-                str += stack[slot].to_str();
+                str += session.stack[slot].to_str();
                 str += " ]";
             }
             str += "\n";
@@ -116,24 +115,24 @@ export function run(intercept: boolean = false): boolean {
 
         switch (read_byte()) {
             case Op.Add: {
-                let b = pop() as FGNumber;
-                let a = pop() as FGNumber;
-                push(a.add(b));
+                let b = session.pop() as FGNumber;
+                let a = session.pop() as FGNumber;
+                session.push(a.add(b));
                 break;
             }
 
             case Op.AddList: {
-                let elType = (pop() as FGType).value;
-                let b = pop() as FGList;
-                let a = pop() as FGList;
-                push(new FGList([...a.value, ...b.value], elType));
+                let elType = (session.pop() as FGType).value;
+                let b = session.pop() as FGList;
+                let a = session.pop() as FGList;
+                session.push(new FGList([...a.value, ...b.value], elType));
                 break;
             }
 
             case Op.AddStr: {
-                let b = pop() as FGString;
-                let a = pop() as FGString;
-                push(a.add(b));
+                let b = session.pop() as FGString;
+                let a = session.pop() as FGString;
+                session.push(a.add(b));
                 break;
             }
 
@@ -141,9 +140,9 @@ export function run(intercept: boolean = false): boolean {
                 // let arity = read_byte();
                 // let got: Value[] = [];
                 // for (let i = 0; i < arity; i++)
-                    // got[arity-i-1] = pop();
+                    // got[arity-i-1] = session.pop();
 
-                // let struct = pop() as FGType;
+                // let struct = session.pop() as FGType;
                 // let members = (struct.value as StructT).members;
                 // let keys = Object.keys(members);
                 // let ms: {[key: string]: Value} = {};
@@ -151,18 +150,18 @@ export function run(intercept: boolean = false): boolean {
                     // ms[keys[i]] = got[i];
                 // }
                 // let newStruct = new FGStruct(ms);
-                // push(newStruct);
+                // session.push(newStruct);
                 // break;
             // }
 
             case Op.Call: {
                 let arity = read_byte();
                 let ver = read_byte();
-                let fn = peek(arity);
+                let fn = session.peek(arity);
                 if (fn instanceof FGCallNative)
                     fn.value(ver);
                 else if (fn instanceof FGMethod) {
-                    push(fn.obj);
+                    session.push(fn.obj);
                     fn.method.value(ver);
                 }
                 else
@@ -171,56 +170,56 @@ export function run(intercept: boolean = false): boolean {
             }
 
             case Op.Div: {
-                let b = pop() as FGNumber;
-                let a = pop() as FGNumber;
+                let b = session.pop() as FGNumber;
+                let a = session.pop() as FGNumber;
                 if (b.value === 0) {
                     error("division by zero");
                 }
-                push(a.div(b));
+                session.push(a.div(b));
                 break;
             }
 
             // TODO: think again about division by zero.
             case Op.IsDiv: {
-                let b = pop() as FGNumber;
-                let a = pop() as FGNumber;
+                let b = session.pop() as FGNumber;
+                let a = session.pop() as FGNumber;
                 if (a.value === 0) {
                     error("division by zero");
                 }
                 if (b.value % a.value === 0)
-                    push(new FGBoolean(true));
+                    session.push(new FGBoolean(true));
                 else
-                    push(new FGBoolean(false));
+                    session.push(new FGBoolean(false));
                 break;
             }
 
             case Op.Mul: {
-                let b = pop() as FGNumber;
-                let a = pop() as FGNumber;
-                push(a.mul(b));
+                let b = session.pop() as FGNumber;
+                let a = session.pop() as FGNumber;
+                session.push(a.mul(b));
                 break;
             }
 
             case Op.Sub: {
-                let b = pop() as FGNumber;
-                let a = pop() as FGNumber;
-                push(a.sub(b));
+                let b = session.pop() as FGNumber;
+                let a = session.pop() as FGNumber;
+                session.push(a.sub(b));
                 break;
             }
 
             // TODO: implement these ASAP.
             case Op.Eq: {
-                // let b = pop();
-                // let a = pop();
-                // push(new FGBoolean( a.equal(b) ));
-                push(new FGBoolean(false));
+                // let b = session.pop();
+                // let a = session.pop();
+                // session.push(new FGBoolean( a.equal(b) ));
+                session.push(new FGBoolean(false));
                 break;
             }
             case Op.NEq: {
-                // let b = pop();
-                // let a = pop();
-                // push(new FGBoolean( !a.equal(b) ));
-                push(new FGBoolean(false));
+                // let b = session.pop();
+                // let a = session.pop();
+                // session.push(new FGBoolean( !a.equal(b) ));
+                session.push(new FGBoolean(false));
                 break;
             }
             case Op.LT: compare(lt); break;
@@ -228,80 +227,80 @@ export function run(intercept: boolean = false): boolean {
             case Op.GT: compare(gt); break;
             case Op.GEq: compare(geq); break;
 
-            // Check for infinite loop. Change the loop checking instruction if the range decreasing.
-            case Op.Loop: {
-                let start = (peek(2) as FGNumber).value;
-                let end = (peek(1) as FGNumber).value;
-                let step = (peek(0) as FGNumber).value;
-                $(start, end, step);
-                if (start <= end) {
-                    $("increasing");
-                    if (step <= 0) {
-                        error("infinite loop");
-                    }
-                } else {
-                    $("decreasing");
-                    if (step >= 0) {
-                        error("infinite loop");
-                    }
-                    let nextOp = currChunk.code[currFrame.ip];
-                    if (nextOp === Op.CkInc)
-                        currChunk.code[currFrame.ip] = Op.CkIncD;
-                    else
-                        currChunk.code[currFrame.ip + 2] = Op.CkExcD;  // Remember there is Jmp after this.
-                }
-                break;
-            }
+            // // Check for infinite loop. Change the loop checking instruction if the range decreasing.
+            // case Op.Loop: {
+                // let start = (session.peek(2) as FGNumber).value;
+                // let end = (session.peek(1) as FGNumber).value;
+                // let step = (session.peek(0) as FGNumber).value;
+                // $(start, end, step);
+                // if (start <= end) {
+                    // $("increasing");
+                    // if (step <= 0) {
+                        // error("infinite loop");
+                    // }
+                // } else {
+                    // $("decreasing");
+                    // if (step >= 0) {
+                        // error("infinite loop");
+                    // }
+                    // let nextOp = currChunk.code[currFrame.ip];
+                    // if (nextOp === Op.CkInc)
+                        // currChunk.code[currFrame.ip] = Op.CkIncD;
+                    // else
+                        // currChunk.code[currFrame.ip + 2] = Op.CkExcD;  // Remember there is Jmp after this.
+                // }
+                // break;
+            // }
 
-            // TODO: Clean up these 4 cases.
-            case Op.CkExcD: {
-                let pos = read_byte();
-                let a = stack[currFrame.slots + pos] as FGNumber;
-                let b = stack[currFrame.slots + pos + 1] as FGNumber;
-                if (a.value > b.value)
-                    push(new FGBoolean(true));
-                else
-                    push(new FGBoolean(false));
-                break;
-            }
-            case Op.CkIncD: {
-                let pos = read_byte();
-                let a = stack[currFrame.slots + pos] as FGNumber;
-                let b = stack[currFrame.slots + pos + 1] as FGNumber;
-                if (a.value >= b.value)
-                    push(new FGBoolean(true));
-                else
-                    push(new FGBoolean(false));
-                break;
-            }
-            case Op.CkExc: {
-                let pos = read_byte();
-                let a = stack[currFrame.slots + pos] as FGNumber;
-                let b = stack[currFrame.slots + pos + 1] as FGNumber;
-                if (a.value < b.value)
-                    push(new FGBoolean(true));
-                else
-                    push(new FGBoolean(false));
-                break;
-            }
-            case Op.CkInc: {
-                let pos = read_byte();
-                let a = stack[currFrame.slots + pos] as FGNumber;
-                let b = stack[currFrame.slots + pos + 1] as FGNumber;
-                if (a.value <= b.value)
-                    push(new FGBoolean(true));
-                else
-                    push(new FGBoolean(false));
-                break;
-            }
+            // // TODO: Clean up these 4 cases.
+            // case Op.CkExcD: {
+                // let pos = read_byte();
+                // let a = session.stack[currFrame.slots + pos] as FGNumber;
+                // let b = session.stack[currFrame.slots + pos + 1] as FGNumber;
+                // if (a.value > b.value)
+                    // session.push(new FGBoolean(true));
+                // else
+                    // session.push(new FGBoolean(false));
+                // break;
+            // }
+            // case Op.CkIncD: {
+                // let pos = read_byte();
+                // let a = session.stack[currFrame.slots + pos] as FGNumber;
+                // let b = session.stack[currFrame.slots + pos + 1] as FGNumber;
+                // if (a.value >= b.value)
+                    // session.push(new FGBoolean(true));
+                // else
+                    // session.push(new FGBoolean(false));
+                // break;
+            // }
+            // case Op.CkExc: {
+                // let pos = read_byte();
+                // let a = session.stack[currFrame.slots + pos] as FGNumber;
+                // let b = session.stack[currFrame.slots + pos + 1] as FGNumber;
+                // if (a.value < b.value)
+                    // session.push(new FGBoolean(true));
+                // else
+                    // session.push(new FGBoolean(false));
+                // break;
+            // }
+            // case Op.CkInc: {
+                // let pos = read_byte();
+                // let a = session.stack[currFrame.slots + pos] as FGNumber;
+                // let b = session.stack[currFrame.slots + pos + 1] as FGNumber;
+                // if (a.value <= b.value)
+                    // session.push(new FGBoolean(true));
+                // else
+                    // session.push(new FGBoolean(false));
+                // break;
+            // }
 
-            case Op.Inc: {
-                let pos = read_byte();
-                let a = stack[currFrame.slots + pos] as FGNumber;
-                let step = stack[currFrame.slots + pos+2] as FGNumber;
-                stack[currFrame.slots + pos] = new FGNumber(a.value + step.value);
-                break;
-            }
+            // case Op.Inc: {
+                // let pos = read_byte();
+                // let a = session.stack[currFrame.slots + pos] as FGNumber;
+                // let step = session.stack[currFrame.slots + pos+2] as FGNumber;
+                // session.stack[currFrame.slots + pos] = new FGNumber(a.value + step.value);
+                // break;
+            // }
 
             case Op.JmpBack:
             case Op.Jmp: {
@@ -312,61 +311,61 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.JmpF: {
                 let offset = read_byte();
-                let cond = peek(0) as FGBoolean;
+                let cond = session.peek(0) as FGBoolean;
                 if (!cond.value)
                     currFrame.ip += offset;
                 break;
             }
 
             case Op.Load: {
-                push(read_constant());
+                session.push(read_constant());
                 break;
             }
 
             case Op.GetGlob: {
                 let name = read_string();
                 let value = names[name].value as Value;
-                push(value);
+                session.push(value);
                 break;
             }
 
             // TODO: as Point is a hack because not all GeoObj have 'field' property.
             case Op.GetProp: {
-                let obj = pop() as Point;
+                let obj = session.pop() as Point;
                 let prop = read_string();
                 let value = obj.field[prop];
-                push(value);
+                session.push(value);
                 break;
             }
 
             case Op.GetMeth: {
-                let obj = pop();
+                let obj = session.pop();
                 let prop = read_string();
                 let fn = obj.typeof().value.methods[prop].value;
                 let method = new FGMethod(obj, fn);
-                push(method);
+                session.push(method);
                 break;
             }
 
             case Op.SetProp: {
-                let value = pop();
-                let obj = pop() as Point;
+                let value = session.pop();
+                let obj = session.pop() as Point;
                 let prop = read_string();
                 obj.set(prop, value);
                 break;
             }
 
             case Op.Neg: {
-                let a = pop() as FGNumber;
+                let a = session.pop() as FGNumber;
                 a.value *= -1;
-                push(a);
+                session.push(a);
                 break;
             }
 
             case Op.Not: {
-                let a = pop() as FGBoolean;
+                let a = session.pop() as FGBoolean;
                 a.value = !a.value;
-                push(a);
+                session.push(a);
                 break;
             }
 
@@ -380,8 +379,8 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.New: {
                 let name  = read_string();
-                let type  = (pop() as FGType).value;
-                let value = pop();
+                let type  = (session.pop() as FGType).value;
+                let value = session.pop();
                 if (richgeoT.equal(type))
                     (value as RichGeoObj).label = name;
                 names[name] = { type, value };
@@ -390,53 +389,53 @@ export function run(intercept: boolean = false): boolean {
 
             case Op.Set: {
                 let name  = read_string();
-                let value = pop();
+                let value = session.pop();
                 names[name].value = value;
                 break;
             }
 
             case Op.List: {
                 let length = read_byte();
-                let elType = (pop() as FGType).value;
+                let elType = (session.pop() as FGType).value;
                 create_list(length, elType);
                 break;
             }
 
             case Op.Len: {
-                let list = pop() as FGList;
-                push(new FGNumber(list.value.length));
+                let list = session.pop() as FGList;
+                session.push(new FGNumber(list.value.length));
                 break;
             }
 
             case Op.Index: {
-                let id = (pop() as FGNumber).value;
-                let list = pop() as FGList;
+                let id = (session.pop() as FGNumber).value;
+                let list = session.pop() as FGList;
 
                 if (id >= list.value.length)
                     error("Out of bound access");
                 let value = list.value[id];
-                push(value);
+                session.push(value);
                 break;
             }
 
             case Op.GetLoc: {
-                push(stack[currFrame.slots + read_byte() ]);
+                session.push(session.stack[currFrame.slots + read_byte() ]);
                 break;
             }
 
             // Nothing to do for now. Because all name is immutable.
             // TODO: Should we add the type?? It is not used
             case Op.SetLoc: {
-                pop();      // Its type
-                stack[currFrame.slots + read_byte()] = peek(0);
+                session.pop();      // Its type
+                session.stack[currFrame.slots + read_byte()] = session.peek(0);
                 break;
             }
 
             // TODO: it is redundant to assign type again. The type is same.
             case Op.SetLocG: {
                 let name  = read_string();
-                // let type  = (pop() as FGType).value;
-                let value = pop();
+                // let type  = (session.pop() as FGType).value;
+                let value = session.pop();
 
                 // names[name] = { type, value };
                 names[name].value = value;
@@ -444,7 +443,7 @@ export function run(intercept: boolean = false): boolean {
             }
 
             case Op.Pop: {
-                pop();
+                session.pop();
                 break;
             }
 
@@ -453,12 +452,12 @@ export function run(intercept: boolean = false): boolean {
                 let arg = read_byte();
                 let returns: Value[] = [];
                 for (let i = 0; i < arg; i++) {
-                    returns.push(pop());
+                    returns.push(session.pop());
                 }
                 // TODO: think how about function that doesn't return value?
-                stackTop = currFrame.slots - 1;
+                session.stackTop = currFrame.slots - 1;
                 for (let i = 0; i < arg; i++) {
-                    push(returns.pop() as Value);
+                    session.push(returns.pop() as Value);
                 }
                 frames.pop();
                 currFrame = frames[frames.length - 1];
@@ -468,7 +467,7 @@ export function run(intercept: boolean = false): boolean {
             }
 
             case Op.Ok: {
-                pop();
+                session.pop();
                 return true;
             }
         }
@@ -494,7 +493,7 @@ type Result<T> =
 
 export const vm = {
     init(): void {
-        stack_reset();
+        session.stack_reset();
         names = {...nativeNames};
     },
 
@@ -502,11 +501,12 @@ export const vm = {
         TESTING = false;
         output = "";
 
-        push(fn);
+        session.push(fn);
         call(fn, 0);
 
         try {
             run();
+            $(session);
             return { ok: true, value: output };
         }
         catch (error: unknown) {
@@ -518,7 +518,7 @@ export const vm = {
     set(fn: FGCallUser): void {
         TESTING = true;
         output = "";
-        push(fn);
+        session.push(fn);
         call(fn, 0);
     },
 

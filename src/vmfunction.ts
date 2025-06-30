@@ -1,4 +1,4 @@
-import { pop, push, vm_output } from "./vm.js"
+import { session, vm_output } from "./vm.js"
 import { type Value, type GeoObj, type RichGeoObj, Kind, FGCallNative, FGNumber, FGString, FGList } from "./value.js"
 import canvas from "./ui/canvas.js"
 import repl from "./ui/repl.js"
@@ -19,8 +19,8 @@ export const richgeoT = new UnionT([richPointT, richSegmentT, richCircleT]);
 // const fillableT = new UnionT([circleT, ellipseT]);
 
 function _print(ver: number): void {
-    let value = pop();
-    pop();              // The function.
+    let value = session.pop();
+    session.pop();              // The function.
     vm_output( value.to_str() + "\n" );
 }
 let print = new FGCallNative("print", _print,
@@ -30,8 +30,8 @@ let print = new FGCallNative("print", _print,
 );
 
 // function _printf(): void {
-    // let value = pop();
-    // pop();              // The function.
+    // let value = session.pop();
+    // session.pop();              // The function.
     // vm_output( value.to_str() );
 // }
 // let printf = new FGCallNative("printf", _printf,
@@ -39,8 +39,8 @@ let print = new FGCallNative("print", _print,
 // );
 
 // function _sqrt(): void {
-    // let value = pop() as FGNumber;
-    // pop();              // The function.
+    // let value = session.pop() as FGNumber;
+    // session.pop();              // The function.
     // push(new FGNumber( Math.sqrt(value.value) ));
 // }
 // let sqrt = new FGCallNative("sqrt", _sqrt,
@@ -48,8 +48,8 @@ let print = new FGCallNative("print", _print,
 // );
 
 // function _abs(): void {
-    // let value = pop() as FGNumber;
-    // pop();              // The function.
+    // let value = session.pop() as FGNumber;
+    // session.pop();              // The function.
     // push(new FGNumber( Math.abs(value.value) ));
 // }
 // let abs = new FGCallNative("abs", _abs,
@@ -57,8 +57,8 @@ let print = new FGCallNative("print", _print,
 // );
 
 // function _show(): void {
-    // let value = pop();
-    // pop();              // The function.
+    // let value = session.pop();
+    // session.pop();              // The function.
     // push(new FGString( value.to_str() ));
 // }
 // let show = new FGCallNative("show", _show,
@@ -132,8 +132,8 @@ function isRichGeo(v: Value): v is RichGeoObj {
 }
 
 function _draw(ver: number): void {
-    let v = pop();
-    pop();              // The function.
+    let v = session.pop();
+    session.pop();              // The function.
     if (v instanceof FGList) {
         for (let i of v.value) {
             if (isGeo(i))
@@ -157,9 +157,9 @@ let draw = new FGCallNative("draw", _draw,
 );
 
 function _label(ver: number): void {
-    let label = (pop() as FGString).value;
-    let v = pop() as RichGeoObj;
-    pop();              // The function.
+    let label = (session.pop() as FGString).value;
+    let v = session.pop() as RichGeoObj;
+    session.pop();              // The function.
     v.label = label;
     draw_onScreen();
 }
@@ -183,24 +183,24 @@ let label = new FGCallNative("label", _label,
 
 function _circle(ver: number): void {
     if (ver === 0) {
-        let r = (pop() as FGNumber).value;
-        let y = (pop() as FGNumber).value;
-        let x = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(new Circle(x, y, r));
+        let r = (session.pop() as FGNumber).value;
+        let y = (session.pop() as FGNumber).value;
+        let x = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(new Circle(x, y, r));
     }
     else if (ver === 1) {
-        let q = pop() as Point;
-        let p = pop() as Point;
-        pop();              // The function.
+        let q = session.pop() as Point;
+        let p = session.pop() as Point;
+        session.pop();              // The function.
         let r = Math.sqrt((q.x - p.x)**2 + (q.y - p.y)**2);
-        push(new Circle(p.x, p.y, r));
+        session.push(new Circle(p.x, p.y, r));
     }
     else if (ver === 2) {
-        let r = (pop() as FGNumber).value;
-        let p = pop() as Point;
-        pop();              // The function.
-        push(new Circle(p.x, p.y, r));
+        let r = (session.pop() as FGNumber).value;
+        let p = session.pop() as Point;
+        session.pop();              // The function.
+        session.push(new Circle(p.x, p.y, r));
     }
 }
 let circle = new FGCallNative("circle", _circle,
@@ -212,12 +212,12 @@ let circle = new FGCallNative("circle", _circle,
 );
 
 function _intersect(ver: number): void {
-    let q = pop() as Circle;
-    let p = pop() as Circle;
-    pop();              // The function.
+    let q = session.pop() as Circle;
+    let p = session.pop() as Circle;
+    session.pop();              // The function.
     let points = p.intersect(q);
     let res = new FGList(points, pointT);
-    push(res);
+    session.push(res);
 }
 let intersect = new FGCallNative("intersect", _intersect,
     new OverloadT([
@@ -228,17 +228,17 @@ let intersect = new FGCallNative("intersect", _intersect,
 
 function _rcircle(ver: number): void {
     if (ver === 0) {
-        let q = pop() as RichPoint;
-        let p = pop() as RichPoint;
-        pop();              // The function.
-        push(new RichCircle(p, q));
+        let q = session.pop() as RichPoint;
+        let p = session.pop() as RichPoint;
+        session.pop();              // The function.
+        session.push(new RichCircle(p, q));
     }
     else if (ver === 1) {
-        let r = (pop() as FGNumber).value;
-        let p = pop() as RichPoint;
-        pop();              // The function.
+        let r = (session.pop() as FGNumber).value;
+        let p = session.pop() as RichPoint;
+        session.pop();              // The function.
         let q = new RichPoint(p.x + r, p.y);
-        push(new RichCircle(p, q));
+        session.push(new RichCircle(p, q));
     }
 }
 let rcircle = new FGCallNative("rcircle", _rcircle,
@@ -311,15 +311,15 @@ let rcircle = new FGCallNative("rcircle", _rcircle,
 
 function _pt(ver: number): void {
     if (ver === 0) {
-        let y = (pop() as FGNumber).value;
-        let x = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(new Point(x, y));
+        let y = (session.pop() as FGNumber).value;
+        let x = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(new Point(x, y));
     }
     else if (ver === 1) {
-        let rp = pop() as RichPoint;
-        pop();              // The function.
-        push(new Point(rp.x, rp.y));
+        let rp = session.pop() as RichPoint;
+        session.pop();              // The function.
+        session.push(new Point(rp.x, rp.y));
     }
 }
 let pt = new FGCallNative("pt", _pt,
@@ -331,15 +331,15 @@ let pt = new FGCallNative("pt", _pt,
 
 function _rpt(ver: number): void {
     if (ver === 0) {
-        let y = (pop() as FGNumber).value;
-        let x = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(new RichPoint(x, y));
+        let y = (session.pop() as FGNumber).value;
+        let x = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(new RichPoint(x, y));
     }
     else {
-        let p = pop() as Point;
-        pop();              // The function.
-        push(new RichPoint(p.x, p.y));
+        let p = session.pop() as Point;
+        session.pop();              // The function.
+        session.push(new RichPoint(p.x, p.y));
     }
 }
 let rpt = new FGCallNative("rpt", _rpt,
@@ -350,9 +350,9 @@ let rpt = new FGCallNative("rpt", _rpt,
 );
 
 // function _Paint(): void {
-    // let geo = pop() as GeoObj;
-    // let pic = pop() as Picture;
-    // pop();              // The function.
+    // let geo = session.pop() as GeoObj;
+    // let pic = session.pop() as Picture;
+    // session.pop();              // The function.
     // pic.objs.push(geo);
     // draw_onScreen();
 // }
@@ -361,8 +361,8 @@ let rpt = new FGCallNative("rpt", _rpt,
 // );
 
 // function _Cw(): void {
-    // let pic = pop() as Picture;
-    // pop();              // The function.
+    // let pic = session.pop() as Picture;
+    // session.pop();              // The function.
     // push(pic.cw());
 // }
 // let Cw = new FGCallNative("Cw", _Cw,
@@ -370,8 +370,8 @@ let rpt = new FGCallNative("rpt", _rpt,
 // );
 
 // function _Ccw(): void {
-    // let pic = pop() as Picture;
-    // pop();              // The function.
+    // let pic = session.pop() as Picture;
+    // session.pop();              // The function.
     // push(pic.ccw());
 // }
 // let Ccw = new FGCallNative("Ccw", _Ccw,
@@ -451,12 +451,12 @@ let rpt = new FGCallNative("rpt", _rpt,
 // ]);
 
 function _quartet(): void {
-    let s = pop() as Picture;
-    let r = pop() as Picture;
-    let q = pop() as Picture;
-    let p = pop() as Picture;
-    pop();              // The function.
-    push(Picture.quartet(p, q, r, s));
+    let s = session.pop() as Picture;
+    let r = session.pop() as Picture;
+    let q = session.pop() as Picture;
+    let p = session.pop() as Picture;
+    session.pop();              // The function.
+    session.push(Picture.quartet(p, q, r, s));
 }
 let quartet = new FGCallNative("quartet", _quartet,
     new OverloadT([
@@ -465,8 +465,8 @@ let quartet = new FGCallNative("quartet", _quartet,
 );
 
 // function _Cycle(): void {
-    // let p = pop() as Picture;
-    // pop();              // The function.
+    // let p = session.pop() as Picture;
+    // session.pop();              // The function.
     // push(Picture.cycle(p));
 // }
 // let Cycle = new FGCallNative("Cycle", _Cycle,
@@ -474,9 +474,9 @@ let quartet = new FGCallNative("quartet", _quartet,
 // );
 
 function _mappic(): void {
-    let target = pop() as Picture;
-    let src = pop() as Picture;
-    pop();              // The function.
+    let target = session.pop() as Picture;
+    let src = session.pop() as Picture;
+    session.pop();              // The function.
     src.map_to(target);
     draw_onScreen();
 }
@@ -487,11 +487,11 @@ let mappic = new FGCallNative("mappic", _mappic,
 );
 
 function _pic(): void {
-    let w = (pop() as FGNumber).value;
-    let h = (pop() as FGNumber).value;
-    pop();              // The function.
+    let w = (session.pop() as FGNumber).value;
+    let h = (session.pop() as FGNumber).value;
+    session.pop();              // The function.
     let pic = new Picture(w, h);
-    push(pic);
+    session.push(pic);
 }
 let pic = new FGCallNative("pic", _pic,
     new OverloadT([
@@ -500,12 +500,12 @@ let pic = new FGCallNative("pic", _pic,
 );
 
 function _coord(): void {
-    let yr = (pop() as FGNumber).value;
-    let yl = (pop() as FGNumber).value;
-    let xr = (pop() as FGNumber).value;
-    let xl = (pop() as FGNumber).value;
-    pop();              // The function.
-    push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
+    let yr = (session.pop() as FGNumber).value;
+    let yl = (session.pop() as FGNumber).value;
+    let xr = (session.pop() as FGNumber).value;
+    let xl = (session.pop() as FGNumber).value;
+    session.pop();              // The function.
+    session.push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
 }
 let coord = new FGCallNative("coord", _coord,
     new OverloadT([
@@ -515,19 +515,19 @@ let coord = new FGCallNative("coord", _coord,
 
 function _coord_pt(ver: number): void {
     if (ver === 0) {
-        let o = pop() as Coord;
-        let label = (pop() as FGString).value;
-        let y = (pop() as FGNumber).value;
-        let x = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(o.add_pt(x, y, label));
+        let o = session.pop() as Coord;
+        let label = (session.pop() as FGString).value;
+        let y = (session.pop() as FGNumber).value;
+        let x = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(o.add_pt(x, y, label));
     }
     else if (ver === 1) {
-        let o = pop() as Coord;
-        let y = (pop() as FGNumber).value;
-        let x = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(o.add_pt(x, y));
+        let o = session.pop() as Coord;
+        let y = (session.pop() as FGNumber).value;
+        let x = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(o.add_pt(x, y));
     }
 }
 export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
@@ -538,9 +538,9 @@ export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
 );
 
 function _coord_hide_grid(ver: number): void {
-    let o = pop() as Coord;
-    pop();              // The function.
-    push(o.hide_grid());
+    let o = session.pop() as Coord;
+    session.pop();              // The function.
+    session.push(o.hide_grid());
 }
 export let coord_hide_grid = new FGCallNative("coord_hide_grid", _coord_hide_grid,
     new OverloadT([
@@ -551,11 +551,11 @@ coordT.methods["pt"] = { type: coord_pt.sig, value: coord_pt };
 coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_grid };
 
 // function _R(): void {
-    // let h = (pop() as FGNumber).value;
-    // let w = (pop() as FGNumber).value;
-    // let y = (pop() as FGNumber).value;
-    // let x = (pop() as FGNumber).value;
-    // pop();              // The function.
+    // let h = (session.pop() as FGNumber).value;
+    // let w = (session.pop() as FGNumber).value;
+    // let y = (session.pop() as FGNumber).value;
+    // let x = (session.pop() as FGNumber).value;
+    // session.pop();              // The function.
     // let rect = new Rect(x, y, w, h);
     // push(rect);
 // }
@@ -568,10 +568,10 @@ coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_gri
 // );
 
 // function _R_WithCenter(): void {
-    // let h = (pop() as FGNumber).value;
-    // let w = (pop() as FGNumber).value;
-    // let y = (pop() as FGNumber).value;
-    // let x = (pop() as FGNumber).value;
+    // let h = (session.pop() as FGNumber).value;
+    // let w = (session.pop() as FGNumber).value;
+    // let y = (session.pop() as FGNumber).value;
+    // let x = (session.pop() as FGNumber).value;
     // pop();              // The function.
     // let rect = new Rect(x-w/2, y-h/2, w, h);
     // push(rect);
@@ -605,18 +605,18 @@ coordT.methods["hide_grid"] = { type: coord_hide_grid.sig, value: coord_hide_gri
 
 function _segment(ver: number): void {
     if (ver === 0) {
-        let y2 = (pop() as FGNumber).value;
-        let x2 = (pop() as FGNumber).value;
-        let y1 = (pop() as FGNumber).value;
-        let x1 = (pop() as FGNumber).value;
-        pop();              // The function.
-        push(new Segment(x1, y1, x2, y2));
+        let y2 = (session.pop() as FGNumber).value;
+        let x2 = (session.pop() as FGNumber).value;
+        let y1 = (session.pop() as FGNumber).value;
+        let x1 = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
+        session.push(new Segment(x1, y1, x2, y2));
     }
     else if (ver === 1) {
-        let q = pop() as Point;
-        let p = pop() as Point;
-        pop();              // The function.
-        push(new Segment(p.x, p.y, q.x, q.y));
+        let q = session.pop() as Point;
+        let p = session.pop() as Point;
+        session.pop();              // The function.
+        session.push(new Segment(p.x, p.y, q.x, q.y));
     }
 }
 let segment = new FGCallNative("segment", _segment,
@@ -628,14 +628,14 @@ let segment = new FGCallNative("segment", _segment,
 
 function _length(ver: number): void {
     if (ver === 0) {
-        let s = pop() as Segment;
-        pop();              // The function.
-        push(new FGNumber(s.length()));
+        let s = session.pop() as Segment;
+        session.pop();              // The function.
+        session.push(new FGNumber(s.length()));
     }
     else if (ver === 1) {
-        let s = pop() as RichSegment;
-        pop();              // The function.
-        push(new FGNumber(s.length()));
+        let s = session.pop() as RichSegment;
+        session.pop();              // The function.
+        session.push(new FGNumber(s.length()));
     }
 }
 let length = new FGCallNative("length", _length,
@@ -647,22 +647,22 @@ let length = new FGCallNative("length", _length,
 
 function _rsegment(ver: number): void {
     if (ver === 0) {
-        let y2 = (pop() as FGNumber).value;
-        let x2 = (pop() as FGNumber).value;
-        let y1 = (pop() as FGNumber).value;
-        let x1 = (pop() as FGNumber).value;
-        pop();              // The function.
+        let y2 = (session.pop() as FGNumber).value;
+        let x2 = (session.pop() as FGNumber).value;
+        let y1 = (session.pop() as FGNumber).value;
+        let x1 = (session.pop() as FGNumber).value;
+        session.pop();              // The function.
         let p = new RichPoint(x1, y1);
         p.label = "P";
         let q = new RichPoint(x2, y2);
         q.label = "Q";
-        push(new RichSegment(p, q));
+        session.push(new RichSegment(p, q));
     }
     else if (ver === 1) {
-        let q = pop() as RichPoint;
-        let p = pop() as RichPoint;
-        pop();              // The function.
-        push(new RichSegment(p, q));
+        let q = session.pop() as RichPoint;
+        let p = session.pop() as RichPoint;
+        session.pop();              // The function.
+        session.push(new RichSegment(p, q));
     }
 }
 let rsegment = new FGCallNative("rsegment", _rsegment,
@@ -684,15 +684,15 @@ let rsegment = new FGCallNative("rsegment", _rsegment,
 
 function _help(ver: number): void {
     if (ver === 0) {
-        let arg = pop();
-        pop();              // The function.
+        let arg = session.pop();
+        session.pop();              // The function.
         if (!(arg instanceof FGCallNative))
             vm_output(`no help for ${ arg.to_str() }`);
         else
             vm_output(arg.to_str());
     }
     else if (ver === 1) {
-        pop();              // The function.
+        session.pop();              // The function.
         vm_output( welcome );
     }
 }
@@ -704,7 +704,7 @@ let help = new FGCallNative("help",  _help,
 );
 
 function _clear(): void {
-    pop();              // The function.
+    session.pop();              // The function.
     canvas.clear();
     on_scrn = [];
     label_on_scrn = [];
