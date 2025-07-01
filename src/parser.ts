@@ -1,8 +1,6 @@
 // @jonesangga, 08-06-2025, MIT License.
 //
 // TODO: Test error messages in file.
-//       Refactor to pass Parser object to every fn or use Parser class
-//       and delete scanner global variable.
 
 import { type Token, TokenT, Scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
