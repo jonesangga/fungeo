@@ -69,15 +69,11 @@ const rules = {
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
     [2050]: { prefix: null, infix: null, prec: 100 },
 };
-let scanner = new Scanner("dummy, delete later");
-let invalidTok = { type: 2100, line: -1, lexeme: "" };
-let currTok = invalidTok;
-let prevTok = invalidTok;
-function error_at_current(message) {
-    error_at(currTok, message);
+function error_at_current(parser, message) {
+    error_at(parser.currTok, message);
 }
-function error(message) {
-    error_at(prevTok, message);
+function error(parser, message) {
+    error_at(parser.prevTok, message);
 }
 function error_at(token, message) {
     let result = "parser: " + token.line + "";
@@ -90,180 +86,180 @@ function error_at(token, message) {
     result += `: ${message}\n`;
     throw new Error(result);
 }
-function advance() {
-    prevTok = currTok;
-    currTok = scanner.next();
-    if (currTok.type === 2200)
-        error_at_current(currTok.lexeme);
+function advance(parser) {
+    parser.prevTok = parser.currTok;
+    parser.currTok = parser.scanner.next();
+    if (parser.currTok.type === 2200)
+        error_at_current(parser, parser.currTok.lexeme);
 }
-function check(type) {
-    return currTok.type === type;
+function check(parser, type) {
+    return parser.currTok.type === type;
 }
-function match(type) {
-    if (currTok.type === type) {
-        advance();
+function match(parser, type) {
+    if (parser.currTok.type === type) {
+        advance(parser);
         return true;
     }
     return false;
 }
-function consume(type, message) {
-    if (currTok.type === type) {
-        advance();
+function consume(parser, type, message) {
+    if (parser.currTok.type === type) {
+        advance(parser);
         return;
     }
-    error_at_current(message);
+    error_at_current(parser, message);
 }
-function parse_boolean() {
-    return new BooleanNode(prevTok.line, prevTok.type === 2000);
+function parse_boolean(parser) {
+    return new BooleanNode(parser.prevTok.line, parser.prevTok.type === 2000);
 }
-function parse_number() {
-    return new NumberNode(prevTok.line, Number(prevTok.lexeme));
+function parse_number(parser) {
+    return new NumberNode(parser.prevTok.line, Number(parser.prevTok.lexeme));
 }
-function parse_string() {
-    return new StringNode(prevTok.line, prevTok.lexeme);
+function parse_string(parser) {
+    return new StringNode(parser.prevTok.line, parser.prevTok.lexeme);
 }
-function call(lhs) {
+function call(parser, lhs) {
     if (!(lhs instanceof IdentNode) &&
         !(lhs instanceof GetPropNode))
-        error("invalid syntax for function call");
-    let line = prevTok.line;
+        error(parser, "invalid syntax for function call");
+    let line = parser.prevTok.line;
     let args = [];
-    if (!check(800)) {
+    if (!check(parser, 800)) {
         do {
-            args.push(expression());
-        } while (match(100));
+            args.push(expression(parser));
+        } while (match(parser, 100));
     }
-    consume(800, "expect ')' after argument list");
+    consume(parser, 800, "expect ')' after argument list");
     return new CallNode(line, lhs, args, -1);
 }
-function parse_ident() {
-    return new IdentNode(prevTok.line, prevTok.lexeme);
+function parse_ident(parser) {
+    return new IdentNode(parser.prevTok.line, parser.prevTok.lexeme);
 }
-function parse_list() {
-    let line = prevTok.line;
+function parse_list(parser) {
+    let line = parser.prevTok.line;
     let items = [];
-    if (!check(700)) {
+    if (!check(parser, 700)) {
         do {
-            items.push(expression());
-        } while (match(100));
+            items.push(expression(parser));
+        } while (match(parser, 100));
     }
-    consume(700, "expect ']' after list items");
+    consume(parser, 700, "expect ']' after list items");
     return new ListNode(line, items);
 }
-function index_list(lhs) {
-    let line = prevTok.line;
-    let rhs = expression();
-    consume(700, "expect ']' after list indexing");
+function index_list(parser, lhs) {
+    let line = parser.prevTok.line;
+    let rhs = expression(parser);
+    consume(parser, 700, "expect ']' after list indexing");
     return new IndexNode(line, lhs, rhs);
 }
-function assign_var(lhs) {
+function assign_var(parser, lhs) {
     if (!(lhs instanceof IdentNode))
-        error("invalid assignment target");
-    let line = prevTok.line;
-    let rhs = parse_prec(200 + 1);
+        error(parser, "invalid assignment target");
+    let line = parser.prevTok.line;
+    let rhs = parse_prec(parser, 200 + 1);
     return new AssignNode(line, lhs, rhs);
 }
-function dot(obj) {
-    let line = prevTok.line;
-    consume(1730, "expect property name after '.'");
-    let name = prevTok.lexeme;
-    if (match(1500)) {
-        let rhs = parse_prec(200 + 1);
+function dot(parser, obj) {
+    let line = parser.prevTok.line;
+    consume(parser, 1730, "expect property name after '.'");
+    let name = parser.prevTok.lexeme;
+    if (match(parser, 1500)) {
+        let rhs = parse_prec(parser, 200 + 1);
         return new SetPropNode(line, obj, name, rhs);
     }
     return new GetPropNode(line, obj, name);
 }
-function negate() {
-    let line = prevTok.line;
-    let rhs = parse_prec(500);
+function negate(parser) {
+    let line = parser.prevTok.line;
+    let rhs = parse_prec(parser, 500);
     return new NegativeNode(line, rhs);
 }
-function numeric_binary(lhs) {
-    let operator = prevTok.type;
-    let rhs = parse_prec(rules[operator].prec + 1);
+function numeric_binary(parser, lhs) {
+    let operator = parser.prevTok.type;
+    let rhs = parse_prec(parser, rules[operator].prec + 1);
     switch (operator) {
-        case 220: return new BinaryNode(prevTok.line, lhs, 1, rhs);
-        case 600: return new BinaryNode(prevTok.line, lhs, 3, rhs);
-        case 1585: return new BinaryNode(prevTok.line, lhs, 0, rhs);
-        case 1100: return new BinaryNode(prevTok.line, lhs, 2, rhs);
-        default: error("unhandled numeric binary operator");
+        case 220: return new BinaryNode(parser.prevTok.line, lhs, 1, rhs);
+        case 600: return new BinaryNode(parser.prevTok.line, lhs, 3, rhs);
+        case 1585: return new BinaryNode(parser.prevTok.line, lhs, 0, rhs);
+        case 1100: return new BinaryNode(parser.prevTok.line, lhs, 2, rhs);
+        default: error(parser, "unhandled numeric binary operator");
     }
 }
-function declaration() {
-    if (match(2460)) {
-        return var_decl();
+function declaration(parser) {
+    if (match(parser, 2460)) {
+        return var_decl(parser);
     }
-    else if (match(2050)) {
-        return parse_use();
+    else if (match(parser, 2050)) {
+        return parse_use(parser);
     }
     else {
-        return stmt();
+        return stmt(parser);
     }
 }
-function parse_use() {
-    let line = prevTok.line;
-    consume(1730, "expect variable name");
-    let name = prevTok.lexeme;
+function parse_use(parser) {
+    let line = parser.prevTok.line;
+    consume(parser, 1730, "expect variable name");
+    let name = parser.prevTok.lexeme;
     return new UseNode(line, name);
 }
-function var_decl() {
-    let line = prevTok.line;
-    consume(1730, "expect variable name");
-    let name = prevTok.lexeme;
-    consume(1500, "expect '=' in variable declaration");
-    let init = expression();
+function var_decl(parser) {
+    let line = parser.prevTok.line;
+    consume(parser, 1730, "expect variable name");
+    let name = parser.prevTok.lexeme;
+    consume(parser, 1500, "expect '=' in variable declaration");
+    let init = expression(parser);
     return new VarDeclNode(line, name, init);
 }
-function stmt() {
-    if (check(1730)) {
-        return assign_or_call_void();
+function stmt(parser) {
+    if (check(parser, 1730)) {
+        return assign_or_call_void(parser);
     }
-    else if (match(50)) {
-        return expr_stmt();
+    else if (match(parser, 50)) {
+        return expr_stmt(parser);
     }
-    error_at_current("forbiden expr stmt");
+    error_at_current(parser, "forbiden expr stmt");
 }
-function assign_or_call_void() {
-    let ast = expression();
+function assign_or_call_void(parser) {
+    let ast = expression(parser);
     if (ast instanceof AssignNode ||
         ast instanceof SetPropNode)
         return ast;
     if (ast instanceof CallNode)
         return new CallVoidNode(ast.line, ast);
-    error("use :- for expression statement");
+    error(parser, "use :- for expression statement");
 }
-function expr_stmt() {
-    let line = prevTok.line;
-    let expr = expression();
+function expr_stmt(parser) {
+    let line = parser.prevTok.line;
+    let expr = expression(parser);
     return new ExprStmtNode(line, expr);
 }
-function expression() {
-    return parse_prec(200);
+function expression(parser) {
+    return parse_prec(parser, 200);
 }
-function parse_prec(prec) {
-    advance();
-    let prefixRule = rules[prevTok.type].prefix;
+function parse_prec(parser, prec) {
+    advance(parser);
+    let prefixRule = rules[parser.prevTok.type].prefix;
     if (prefixRule === null)
-        error("expect expression");
-    let lhs = prefixRule();
-    while (prec <= rules[currTok.type].prec) {
-        advance();
-        let infixRule = rules[prevTok.type].infix;
+        error(parser, "expect expression");
+    let lhs = prefixRule(parser);
+    while (prec <= rules[parser.currTok.type].prec) {
+        advance(parser);
+        let infixRule = rules[parser.prevTok.type].infix;
         if (infixRule === null)
-            error("expect infix operator");
-        lhs = infixRule(lhs);
+            error(parser, "expect infix operator");
+        lhs = infixRule(parser, lhs);
     }
     return lhs;
 }
 export function parse(source) {
-    scanner = new Scanner(source);
-    prevTok = invalidTok;
-    currTok = invalidTok;
+    let scanner = new Scanner(source);
+    let invalidTok = { type: 2100, line: -1, lexeme: "" };
+    let parser = { scanner, prevTok: invalidTok, currTok: invalidTok };
     let stmts = [];
     try {
-        advance();
-        while (!match(2100))
-            stmts.push(declaration());
+        advance(parser);
+        while (!match(parser, 2100))
+            stmts.push(declaration(parser));
         return {
             ok: true,
             value: new FileNode(0, stmts),

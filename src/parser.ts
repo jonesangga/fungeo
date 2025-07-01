@@ -23,8 +23,8 @@ const enum Prec {
 }
 
 interface ParseRule {
-    prefix: (() => AST) | null;
-    infix:  ((lhs: AST) => AST) | null;
+    prefix: ((parser: Parser) => AST) | null;
+    infix:  ((parser: Parser, lhs: AST) => AST) | null;
     prec:   Prec;
 }
 
@@ -84,23 +84,17 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Use]       : {prefix: null,             infix: null,            prec: Prec.None},
 }
 
-let scanner: Scanner = new Scanner("dummy, delete later");
-
-let invalidTok = { type: TokenT.EOF, line: -1, lexeme: "" };
-let currTok = invalidTok;
-let prevTok = invalidTok;
-
 //--------------------------------------------------------------------
 // Error functions.
 
 // Error when dealing with current token.
-function error_at_current(message: string): never {
-    error_at(currTok, message);
+function error_at_current(parser: Parser, message: string): never {
+    error_at(parser.currTok, message);
 }
 
 // Error when dealing with previous token.
-function error(message: string): never {
-    error_at(prevTok, message);
+function error(parser: Parser, message: string): never {
+    error_at(parser.prevTok, message);
 }
 
 // The actual error handling function. It will throw error and stop the parser.
@@ -120,105 +114,105 @@ function error_at(token: Token, message: string): never {
 
 //--------------------------------------------------------------------
 
-function advance(): void {
-    prevTok = currTok;
-    currTok = scanner.next();
-    if (currTok.type === TokenT.Error)
-        error_at_current(currTok.lexeme);
+function advance(parser: Parser): void {
+    parser.prevTok = parser.currTok;
+    parser.currTok = parser.scanner.next();
+    if (parser.currTok.type === TokenT.Error)
+        error_at_current(parser, parser.currTok.lexeme);
 }
 
-function check(type: TokenT): boolean {
-    return currTok.type === type;
+function check(parser: Parser, type: TokenT): boolean {
+    return parser.currTok.type === type;
 }
 
-function match(type: TokenT): boolean {
-    if (currTok.type === type) {
-        advance();
+function match(parser: Parser, type: TokenT): boolean {
+    if (parser.currTok.type === type) {
+        advance(parser);
         return true;
     }
     return false;
 }
 
-function consume(type: TokenT, message: string): void {
-    if (currTok.type === type) {
-        advance();
+function consume(parser: Parser, type: TokenT, message: string): void {
+    if (parser.currTok.type === type) {
+        advance(parser);
         return;
     }
-    error_at_current(message);
+    error_at_current(parser, message);
 }
 
 //--------------------------------------------------------------------
 // Parsing literal.
 
-function parse_boolean(): BooleanNode {
-    return new BooleanNode(prevTok.line, prevTok.type === TokenT.True);
+function parse_boolean(parser: Parser): BooleanNode {
+    return new BooleanNode(parser.prevTok.line, parser.prevTok.type === TokenT.True);
 }
 
-function parse_number(): NumberNode {
-    return new NumberNode(prevTok.line, Number(prevTok.lexeme));
+function parse_number(parser: Parser): NumberNode {
+    return new NumberNode(parser.prevTok.line, Number(parser.prevTok.lexeme));
 }
 
-function parse_string(): StringNode {
-    return new StringNode(prevTok.line, prevTok.lexeme);
+function parse_string(parser: Parser): StringNode {
+    return new StringNode(parser.prevTok.line, parser.prevTok.lexeme);
 }
 
 // Currently there is no namespace.
 // TODO: Support parsing the `.` in namespace, like `Seg.FromPoints()`.
-function call(lhs: AST): CallNode {
+function call(parser: Parser, lhs: AST): CallNode {
     if (!(lhs instanceof IdentNode) &&
             !(lhs instanceof GetPropNode))
-        error("invalid syntax for function call");
-    let line = prevTok.line;
+        error(parser, "invalid syntax for function call");
+    let line = parser.prevTok.line;
     let args: AST[] = [];
-    if (!check(TokenT.RParen)) {
+    if (!check(parser, TokenT.RParen)) {
         do {
-            args.push(expression());
-        } while (match(TokenT.Comma));
+            args.push(expression(parser));
+        } while (match(parser, TokenT.Comma));
     }
-    consume(TokenT.RParen, "expect ')' after argument list");
+    consume(parser, TokenT.RParen, "expect ')' after argument list");
     return new CallNode(line, lhs, args, -1);   // The version -1 is dummy. It is completed in typechecker.
 }
 
-function parse_ident(): IdentNode {
-    return new IdentNode(prevTok.line, prevTok.lexeme);
+function parse_ident(parser: Parser): IdentNode {
+    return new IdentNode(parser.prevTok.line, parser.prevTok.lexeme);
 }
 
-function parse_list(): ListNode {
-    let line = prevTok.line;
+function parse_list(parser: Parser): ListNode {
+    let line = parser.prevTok.line;
     let items: AST[] = [];
-    if (!check(TokenT.RBracket)) {
+    if (!check(parser, TokenT.RBracket)) {
         do {
-            items.push(expression());
-        } while (match(TokenT.Comma));
+            items.push(expression(parser));
+        } while (match(parser, TokenT.Comma));
     }
-    consume(TokenT.RBracket, "expect ']' after list items");
+    consume(parser, TokenT.RBracket, "expect ']' after list items");
     return new ListNode(line, items);
 }
 
 // TODO: how about list[i][j]?
-function index_list(lhs: AST): IndexNode {
-    let line = prevTok.line;
-    let rhs = expression();
-    consume(TokenT.RBracket, "expect ']' after list indexing");
+function index_list(parser: Parser, lhs: AST): IndexNode {
+    let line = parser.prevTok.line;
+    let rhs = expression(parser);
+    consume(parser, TokenT.RBracket, "expect ']' after list indexing");
     return new IndexNode(line, lhs, rhs);
 }
 
-function assign_var(lhs: AST): AssignNode {
+function assign_var(parser: Parser, lhs: AST): AssignNode {
     if (!(lhs instanceof IdentNode))
-        error("invalid assignment target");
-    let line = prevTok.line;
-    let rhs = parse_prec(Prec.Assignment + 1);
+        error(parser, "invalid assignment target");
+    let line = parser.prevTok.line;
+    let rhs = parse_prec(parser, Prec.Assignment + 1);
     return new AssignNode(line, lhs, rhs);
 }
 
-function dot(obj: AST): GetPropNode | SetPropNode {
-    let line = prevTok.line;
-    consume(TokenT.Ident, "expect property name after '.'");
-    let name = prevTok.lexeme;
+function dot(parser: Parser, obj: AST): GetPropNode | SetPropNode {
+    let line = parser.prevTok.line;
+    consume(parser, TokenT.Ident, "expect property name after '.'");
+    let name = parser.prevTok.lexeme;
 
     // Setter.
-    if (match(TokenT.Eq)) {
-        let rhs = parse_prec(Prec.Assignment + 1);
+    if (match(parser, TokenT.Eq)) {
+        let rhs = parse_prec(parser, Prec.Assignment + 1);
         return new SetPropNode(line, obj, name, rhs);
     }
     return new GetPropNode(line, obj, name);
@@ -226,97 +220,97 @@ function dot(obj: AST): GetPropNode | SetPropNode {
 
 //--------------------------------------------------------------------
 
-function negate(): NegativeNode {
-    let line = prevTok.line;
-    let rhs = parse_prec(Prec.Unary);
+function negate(parser: Parser): NegativeNode {
+    let line = parser.prevTok.line;
+    let rhs = parse_prec(parser, Prec.Unary);
     return new NegativeNode(line, rhs);
 }
 
 // The result of these operators is of type Num.
-function numeric_binary(lhs: AST): BinaryNode {
-    let operator = prevTok.type;
-    let rhs = parse_prec(rules[operator].prec + 1);
+function numeric_binary(parser: Parser, lhs: AST): BinaryNode {
+    let operator = parser.prevTok.type;
+    let rhs = parse_prec(parser, rules[operator].prec + 1);
 
     switch (operator) {
-        case TokenT.FSlash: return new BinaryNode(prevTok.line, lhs, BinaryOp.Divide, rhs);
-        case TokenT.Minus:  return new BinaryNode(prevTok.line, lhs, BinaryOp.Subtract, rhs);
-        case TokenT.Plus:   return new BinaryNode(prevTok.line, lhs, BinaryOp.Add, rhs);
-        case TokenT.Star:   return new BinaryNode(prevTok.line, lhs, BinaryOp.Multiply, rhs);
-        default:            error("unhandled numeric binary operator");
+        case TokenT.FSlash: return new BinaryNode(parser.prevTok.line, lhs, BinaryOp.Divide, rhs);
+        case TokenT.Minus:  return new BinaryNode(parser.prevTok.line, lhs, BinaryOp.Subtract, rhs);
+        case TokenT.Plus:   return new BinaryNode(parser.prevTok.line, lhs, BinaryOp.Add, rhs);
+        case TokenT.Star:   return new BinaryNode(parser.prevTok.line, lhs, BinaryOp.Multiply, rhs);
+        default:            error(parser, "unhandled numeric binary operator");
     }
 }
 
-function declaration(): AST {
-    if (match(TokenT.Let)) {
-        return var_decl();
-    } else if (match(TokenT.Use)) {
-        return parse_use();
+function declaration(parser: Parser): AST {
+    if (match(parser, TokenT.Let)) {
+        return var_decl(parser);
+    } else if (match(parser, TokenT.Use)) {
+        return parse_use(parser);
     } else {
-        return stmt();
+        return stmt(parser);
     }
 }
 
-function parse_use(): UseNode {
-    let line = prevTok.line;
-    consume(TokenT.Ident, "expect variable name");
-    let name = prevTok.lexeme;
+function parse_use(parser: Parser): UseNode {
+    let line = parser.prevTok.line;
+    consume(parser, TokenT.Ident, "expect variable name");
+    let name = parser.prevTok.lexeme;
     return new UseNode(line, name);
 }
 
 // Declaration must be followed by initialization.
-function var_decl(): VarDeclNode {
-    let line = prevTok.line;
-    consume(TokenT.Ident, "expect variable name");
-    let name = prevTok.lexeme;
-    consume(TokenT.Eq, "expect '=' in variable declaration");
-    let init = expression();
+function var_decl(parser: Parser): VarDeclNode {
+    let line = parser.prevTok.line;
+    consume(parser, TokenT.Ident, "expect variable name");
+    let name = parser.prevTok.lexeme;
+    consume(parser, TokenT.Eq, "expect '=' in variable declaration");
+    let init = expression(parser);
     return new VarDeclNode(line, name, init);
 }
 
-function stmt(): AST {
-    if (check(TokenT.Ident)) {
+function stmt(parser: Parser): AST {
+    if (check(parser, TokenT.Ident)) {
         // It is either assignment or calling function that doesn't return value.
-        return assign_or_call_void();
+        return assign_or_call_void(parser);
     }
-    else if (match(TokenT.BSlash)) {
-        return expr_stmt();
+    else if (match(parser, TokenT.BSlash)) {
+        return expr_stmt(parser);
     }
-    error_at_current("forbiden expr stmt");
+    error_at_current(parser, "forbiden expr stmt");
 }
 
-function assign_or_call_void(): AssignNode | CallVoidNode | SetPropNode {
-    let ast = expression();
+function assign_or_call_void(parser: Parser): AssignNode | CallVoidNode | SetPropNode {
+    let ast = expression(parser);
     if (ast instanceof AssignNode ||
             ast instanceof SetPropNode)
         return ast;
     if (ast instanceof CallNode)
         return new CallVoidNode(ast.line, ast);
-    error("use :- for expression statement");
+    error(parser, "use :- for expression statement");
 }
 
-function expr_stmt(): ExprStmtNode {
-    let line = prevTok.line;
-    let expr = expression();
+function expr_stmt(parser: Parser): ExprStmtNode {
+    let line = parser.prevTok.line;
+    let expr = expression(parser);
     return new ExprStmtNode(line, expr);
 }
 
-function expression(): AST {
-    return parse_prec(Prec.Assignment);
+function expression(parser: Parser): AST {
+    return parse_prec(parser, Prec.Assignment);
 }
 
-function parse_prec(prec: Prec): AST {
-    advance();
-    let prefixRule = rules[prevTok.type].prefix;
+function parse_prec(parser: Parser, prec: Prec): AST {
+    advance(parser);
+    let prefixRule = rules[parser.prevTok.type].prefix;
     if (prefixRule === null)
-        error("expect expression");
-    let lhs = prefixRule();
+        error(parser, "expect expression");
+    let lhs = prefixRule(parser);
 
-    while (prec <= rules[currTok.type].prec) {
-        advance();
-        let infixRule = rules[prevTok.type].infix;
+    while (prec <= rules[parser.currTok.type].prec) {
+        advance(parser);
+        let infixRule = rules[parser.prevTok.type].infix;
         if (infixRule === null)
-            error("expect infix operator");
-        lhs = infixRule(lhs);
+            error(parser, "expect infix operator");
+        lhs = infixRule(parser, lhs);
     }
     return lhs;
 }
@@ -325,17 +319,23 @@ type Result<T> =
     | { ok: true,  value: T }
     | { ok: false, error: Error };
 
+type Parser = {
+    scanner: Scanner,
+    prevTok: Token,
+    currTok: Token,
+};
+
 export function parse(source: string): Result<FileNode> {
-    scanner = new Scanner(source);
-    prevTok = invalidTok;
-    currTok = invalidTok;
+    let scanner = new Scanner(source);
+    let invalidTok = { type: TokenT.EOF, line: -1, lexeme: "" };
+    let parser = {scanner, prevTok: invalidTok, currTok: invalidTok};
 
     let stmts: AST[] = [];
 
     try {
-        advance();
-        while (!match(TokenT.EOF))
-            stmts.push(declaration());
+        advance(parser);
+        while (!match(parser, TokenT.EOF))
+            stmts.push(declaration(parser));
         return {
             ok: true,
             value: new FileNode(0, stmts),
