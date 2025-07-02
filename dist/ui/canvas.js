@@ -57,6 +57,7 @@ export class Canvas {
         this.canvas.style.width = this.w + "px";
         this.canvas.style.height = this.h + "px";
         this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        return this;
     }
 }
 export let defaultCanvas = new Canvas(300, 300);

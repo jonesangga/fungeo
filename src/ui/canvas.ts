@@ -61,7 +61,7 @@ export class Canvas {
         return this;
     }
 
-    resize(w: number, h: number): void {
+    resize(w: number, h: number): Canvas {
         this.w = w;
         this.h = h;
         this.canvas.width  = this.w * this.pixelRatio;
@@ -69,6 +69,7 @@ export class Canvas {
         this.canvas.style.width  = this.w + "px";
         this.canvas.style.height = this.h + "px";
         this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        return this;
     }
 }
 

@@ -45,7 +45,21 @@ export let canvas_place = new FGCallNative("canvas_place", _canvas_place,
     ])
 );
 
+function _canvas_resize(session: Session, ver: number): void {
+    let canvas = session.pop() as Canvas;
+    let w = (session.pop() as FGNumber).value;
+    let h = (session.pop() as FGNumber).value;
+    session.pop(); // The function.
+    session.push(canvas.resize(w, h));
+}
+export let canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
+    new OverloadT([
+        new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
+    ])
+);
+
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
+canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
 
 // NOTE: This is a helper, not exposed to user.
 // TODO: Pass canvas obj and remove defaultCanvas.
