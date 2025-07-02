@@ -22,6 +22,17 @@ function _canvas(session, ver) {
 let canvas = new FGCallNative("canvas", _canvas, new OverloadT([
     new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
 ]));
+function _canvas_place(session, ver) {
+    let canvas = session.pop();
+    let y = session.pop().value;
+    let x = session.pop().value;
+    session.pop();
+    session.push(canvas.place(x, y));
+}
+export let canvas_place = new FGCallNative("canvas_place", _canvas_place, new OverloadT([
+    new FunctionT([numberT, numberT], canvasT, ["x", "y"]),
+]));
+canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 function draw_oncanvas(objs) {
     defaultCanvas.clear();
     for (let obj of objs) {

@@ -48,15 +48,17 @@ export class Canvas {
         this.ctx.clearRect(0, 0, this.w, this.h);
     }
 
-    place(x: number, y: number): void {
+    // TODO: Think how to return error message.
+    place(x: number, y: number): Canvas {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
-            return;
+            return this;
         }
         this.canvas.style.left = x + "px";
         this.canvas.style.top  = y + "px";
         this.x = x;
         this.y = y;
+        return this;
     }
 
     resize(w: number, h: number): void {

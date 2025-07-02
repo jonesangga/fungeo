@@ -32,6 +32,21 @@ let canvas = new FGCallNative("canvas", _canvas,
     ])
 );
 
+function _canvas_place(session: Session, ver: number): void {
+    let canvas = session.pop() as Canvas;
+    let y = (session.pop() as FGNumber).value;
+    let x = (session.pop() as FGNumber).value;
+    session.pop(); // The function.
+    session.push(canvas.place(x, y));
+}
+export let canvas_place = new FGCallNative("canvas_place", _canvas_place,
+    new OverloadT([
+        new FunctionT([numberT, numberT], canvasT, ["x", "y"]),
+    ])
+);
+
+canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
+
 // NOTE: This is a helper, not exposed to user.
 // TODO: Pass canvas obj and remove defaultCanvas.
 function draw_oncanvas(objs: GeoObj[]) {

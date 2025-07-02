@@ -308,7 +308,9 @@ export class RichSegmentT extends Class {
         return other instanceof RichSegmentT;
     }
 }
-export class CanvasT {
+export class CanvasT extends Class {
+    fields = {};
+    methods = {};
     to_str() {
         return "Canvas";
     }

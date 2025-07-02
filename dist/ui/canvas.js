@@ -41,12 +41,13 @@ export class Canvas {
     place(x, y) {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
-            return;
+            return this;
         }
         this.canvas.style.left = x + "px";
         this.canvas.style.top = y + "px";
         this.x = x;
         this.y = y;
+        return this;
     }
     resize(w, h) {
         this.w = w;

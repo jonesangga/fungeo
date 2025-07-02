@@ -382,7 +382,9 @@ export class RichSegmentT extends Class implements Type {
     }
 }
 
-export class CanvasT implements Type {
+export class CanvasT extends Class implements Type {
+    fields: Record<string, Type> = {};
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Canvas";
     }
