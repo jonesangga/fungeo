@@ -183,6 +183,7 @@ let help = new FGCallNative("help",  _help,
 );
 
 export let coreNames: Names = {
+    canvas0: { type: canvasT, value: defaultCanvas },
     canvas:  { type: canvas.sig, value: canvas },
     circle:  { type: circle.sig, value: circle },
     clear:   { type: clear.sig, value: clear },

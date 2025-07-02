@@ -144,6 +144,7 @@ let help = new FGCallNative("help", _help, new OverloadT([
     new FunctionT([], nothingT, []),
 ]));
 export let coreNames = {
+    canvas0: { type: canvasT, value: defaultCanvas },
     canvas: { type: canvas.sig, value: canvas },
     circle: { type: circle.sig, value: circle },
     clear: { type: clear.sig, value: clear },
