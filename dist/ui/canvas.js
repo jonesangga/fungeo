@@ -24,6 +24,7 @@ export class Canvas {
         canvasElem.style.top = "0px";
         canvasElem.style.left = "0px";
         canvasElem.style.border = "1px solid black";
+        canvasElem.style.background = "#fff";
         this.canvas = canvasElem;
         this.pixelRatio = pixelRatio;
     }
@@ -35,7 +36,7 @@ export class Canvas {
     }
     clear() {
         this.ctx.fillStyle = "#fff";
-        this.ctx.fillRect(0, 0, this.w, this.h);
+        this.ctx.clearRect(0, 0, this.w, this.h);
     }
     place(x, y) {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {

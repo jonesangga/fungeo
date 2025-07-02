@@ -1,5 +1,5 @@
 import { Session } from "./vm.js"
-import { defaultCanvas } from "./ui/canvas.js"
+import { Canvas, defaultCanvas } from "./ui/canvas.js"
 import { type Names } from "./vmfunction.js"
 import { type GeoObj, FGCallNative, FGNumber } from "./value.js"
 import { Point } from "./geo/point.js"
@@ -7,7 +7,7 @@ import { Segment } from "./geo/segment.js"
 import { Circle } from "./geo/circle.js"
 import { welcome } from "./data/help.js"
 import { FunctionT, OverloadT,
-         anyT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
+         anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
 
 function _print(session: Session, ver: number): void {
     let value = session.pop();
@@ -17,6 +17,18 @@ function _print(session: Session, ver: number): void {
 const print = new FGCallNative("print", _print,
     new OverloadT([
         new FunctionT([anyT], nothingT, ["object"]),
+    ])
+);
+
+function _canvas(session: Session, ver: number): void {
+    let h = (session.pop() as FGNumber).value;
+    let w = (session.pop() as FGNumber).value;
+    session.pop(); // The function.
+    session.push(new Canvas(w, h));
+}
+let canvas = new FGCallNative("canvas", _canvas,
+    new OverloadT([
+        new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
     ])
 );
 
@@ -142,6 +154,7 @@ let help = new FGCallNative("help",  _help,
 );
 
 export let coreNames: Names = {
+    canvas:  { type: canvas.sig, value: canvas },
     circle:  { type: circle.sig, value: circle },
     clear:   { type: clear.sig, value: clear },
     draw:    { type: draw.sig, value: draw },

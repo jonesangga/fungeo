@@ -29,6 +29,7 @@ export class Canvas {
         canvasElem.style.top      = "0px";
         canvasElem.style.left     = "0px";
         canvasElem.style.border   = "1px solid black";
+        canvasElem.style.background = "#fff";
         this.canvas = canvasElem;
         this.pixelRatio = pixelRatio;
     }
@@ -41,9 +42,10 @@ export class Canvas {
         return "canvas";
     }
 
+    // NOTE: Make sure there is no transformation.
     clear(): void {
         this.ctx.fillStyle = "#fff";
-        this.ctx.fillRect(0, 0, this.w, this.h);
+        this.ctx.clearRect(0, 0, this.w, this.h);
     }
 
     place(x: number, y: number): void {
