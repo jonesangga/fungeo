@@ -1,10 +1,12 @@
 // @jonesangga, 2025, MIT License.
 
-import { c } from "../ui/canvas.js"
+import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Value, Kind, FGNumber, FGComplex } from "../value.js"
 import { FGType, circleT } from "../literal/type.js"
 import { Point } from "./point.js"
+
+const c = canvas.ctx;
 
 export class Circle {
     kind: Kind.Circle = Kind.Circle;

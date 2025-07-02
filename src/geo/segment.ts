@@ -4,11 +4,13 @@
 //       Think about equal() implementation.
 //       Test draw() visually.
 
-import { c } from "../ui/canvas.js"
+import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
 import { Value, Kind, FGNumber } from "../value.js"
 import { Point } from "./point.js"
 import { FGType, segmentT } from "../literal/type.js"
+
+const c = canvas.ctx;
 
 export class Segment {
     kind: Kind.Segment = Kind.Segment;

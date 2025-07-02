@@ -1,6 +1,7 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { FGNumber } from "../value.js";
+const c = canvas.ctx;
 export class RichPoint {
     x;
     y;

@@ -1,12 +1,12 @@
 import "./ui/demo.js";
 import repl from "./ui/repl.js";
-import canvas from "./ui/canvas.js";
+import { defaultCanvas } from "./ui/canvas.js";
 import { parse } from "./parser.js";
 import { compile } from "./compile.js";
 import { typecheck } from "./typechecker.js";
 import { vm } from "./vm.js";
 repl.place(50, 260);
-canvas.place(650, 0);
+defaultCanvas.place(650, 0);
 vm.init();
 function main(source) {
     let parseR = parse(source);

@@ -1,6 +1,7 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import { Point } from "../geo/point.js";
+const c = canvas.ctx;
 export class RichSegment {
     p;
     q;

@@ -1,6 +1,7 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { FGType, ellipseT } from "../literal/type.js";
+const c = canvas.ctx;
 export default class Ellipse {
     x;
     y;

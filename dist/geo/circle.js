@@ -1,8 +1,9 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { FGNumber, FGComplex } from "../value.js";
 import { FGType, circleT } from "../literal/type.js";
 import { Point } from "./point.js";
+const c = canvas.ctx;
 export class Circle {
     x;
     y;

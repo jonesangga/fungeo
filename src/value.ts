@@ -7,6 +7,7 @@ import { Session } from "./vm.js"
 import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Ellipse from "./geo/ellipse.js"
 import Picture from "./geo/picture.js"
+import { Canvas } from "./ui/canvas.js"
 import { Circle } from "./geo/circle.js"
 import { Coord } from "./geo/coordinate.js"
 import { Point } from "./geo/point.js"
@@ -64,15 +65,6 @@ export const KindName: {
     [Kind.String]: "String",
     [Kind.Struct]: "Struct",
     [Kind.Type]: "Type",
-};
-
-export type Canvas = {
-    kind:   Kind.Canvas,
-    to_str: () => string,
-    resize: (w: number, h: number) => void,
-    place:  (x: number, y: number) => void,
-    clear:  () => void,
-    typeof: () => FGType;
 };
 
 export type Repl = {

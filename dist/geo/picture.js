@@ -1,10 +1,11 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import { Circle } from "../geo/circle.js";
 import Ellipse from "../geo/ellipse.js";
 import Rect from "../geo/rect.js";
 import { Segment } from "../geo/segment.js";
 import { FGType, pictureT } from "../literal/type.js";
+const c = canvas.ctx;
 export default class Picture {
     w;
     h;

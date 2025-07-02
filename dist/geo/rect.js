@@ -1,6 +1,7 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import { FGType, rectT } from "../literal/type.js";
+const c = canvas.ctx;
 export default class Rect {
     x;
     y;

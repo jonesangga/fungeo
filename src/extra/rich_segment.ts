@@ -6,10 +6,12 @@
 //
 // TODO: This is broken.
 
-import { c } from "../ui/canvas.js"
+import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
 import { RichPoint } from "./rich_point.js"
 import { Point } from "../geo/point.js"
+
+const c = canvas.ctx;
 
 export class RichSegment {
     field: Record<string, any> = {};

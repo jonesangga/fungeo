@@ -1,6 +1,7 @@
-import { c } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { RichPoint } from "./rich_point.js";
+const c = canvas.ctx;
 let cos_ = Math.cos(Math.PI * 5 / 4);
 let sin_ = Math.sin(Math.PI * 5 / 4);
 export class RichCircle {

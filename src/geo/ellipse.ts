@@ -2,10 +2,12 @@
 //
 // TODO: Think about how to set the rotation.
 
-import { c } from "../ui/canvas.js"
+import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
 import { Kind } from "../value.js"
 import { FGType, ellipseT } from "../literal/type.js"
+
+const c = canvas.ctx;
 
 export default class Ellipse {
     kind: Kind.Ellipse = Kind.Ellipse;

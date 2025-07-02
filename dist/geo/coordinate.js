@@ -1,7 +1,10 @@
-import { c, w, h } from "../ui/canvas.js";
+import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
 import { FGNumber } from "../value.js";
 import { FGType, coordT } from "../literal/type.js";
+const c = canvas.ctx;
+const w = canvas.w;
+const h = canvas.h;
 export class Coord {
     xl;
     xr;

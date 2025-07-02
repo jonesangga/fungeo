@@ -1,60 +1,71 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind, Canvas } from "../value.js"
+import { Kind } from "../value.js"
 import { FGType, canvasT } from "../literal/type.js"
 
-// TODO: Think a better way.
-export let w = 300;    // Canvas width.
-export let h = 300;    // Canvas height.
+export class Canvas {
+    kind: Kind.Canvas = Kind.Canvas;
+    x = 0;
+    y = 0;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    pixelRatio: number;
 
-const canvasElem = document.createElement("canvas");
-export const c = canvasElem.getContext("2d") as CanvasRenderingContext2D;
-const pixelRatio = window.devicePixelRatio || 1;
+    constructor(public w: number = 100,
+                public h: number = 100)
+    {
+        let canvasElem = document.createElement("canvas");
+        this.ctx = canvasElem.getContext("2d") as CanvasRenderingContext2D;
+        let pixelRatio = window.devicePixelRatio || 1;
 
-document.body.appendChild(canvasElem);
-canvasElem.style.width  = w + "px";
-canvasElem.style.height = h + "px";
-canvasElem.width  = w * pixelRatio;
-canvasElem.height = h * pixelRatio;
-c.scale(pixelRatio, pixelRatio);
+        document.body.appendChild(canvasElem);
+        canvasElem.style.width  = w + "px";
+        canvasElem.style.height = h + "px";
+        canvasElem.width  = w * pixelRatio;
+        canvasElem.height = h * pixelRatio;
+        this.ctx.scale(pixelRatio, pixelRatio);
 
-canvasElem.style.position   = "absolute";
-canvasElem.style.top        = "0px";
-canvasElem.style.left       = "0px";
-canvasElem.style.border     = "1px solid black";
-
-const canvas: Canvas = {
-    kind: Kind.Canvas,
-
-    clear(): void {
-        c.fillStyle = "#fff";
-        c.fillRect(0, 0, w, h);
-    },
-
-    to_str(): string { return "canvas"; },
+        canvasElem.style.position = "absolute";
+        canvasElem.style.top      = "0px";
+        canvasElem.style.left     = "0px";
+        canvasElem.style.border   = "1px solid black";
+        this.canvas = canvasElem;
+        this.pixelRatio = pixelRatio;
+    }
 
     typeof(): FGType {
         return new FGType(canvasT);
-    },
+    }
 
-    resize(w_: number, h_: number): void {
-        w = w_;
-        h = h_;
-        canvasElem.width  = w * pixelRatio;
-        canvasElem.height = h * pixelRatio;
-        canvasElem.style.width  = w + "px";
-        canvasElem.style.height = h + "px";
-        c.scale(pixelRatio, pixelRatio);
-    },
+    to_str(): string {
+        return "canvas";
+    }
+
+    clear(): void {
+        this.ctx.fillStyle = "#fff";
+        this.ctx.fillRect(0, 0, this.w, this.h);
+    }
 
     place(x: number, y: number): void {
         if (x < 0 || y < 0 || x > 1000 || y > 1000) {
             console.log("invalid place");
             return;
         }
-        canvasElem.style.left = x + "px";
-        canvasElem.style.top  = y + "px";
+        this.canvas.style.left = x + "px";
+        this.canvas.style.top  = y + "px";
+        this.x = x;
+        this.y = y;
     }
-};
 
-export default canvas;
+    resize(w: number, h: number): void {
+        this.w = w;
+        this.h = h;
+        this.canvas.width  = this.w * this.pixelRatio;
+        this.canvas.height = this.h * this.pixelRatio;
+        this.canvas.style.width  = this.w + "px";
+        this.canvas.style.height = this.h + "px";
+        this.ctx.scale(this.pixelRatio, this.pixelRatio);
+    }
+}
+
+export let defaultCanvas = new Canvas(300, 300);

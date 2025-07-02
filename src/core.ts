@@ -1,5 +1,5 @@
 import { Session } from "./vm.js"
-import canvas from "./ui/canvas.js"
+import { defaultCanvas } from "./ui/canvas.js"
 import { type Names } from "./vmfunction.js"
 import { type GeoObj, FGCallNative, FGNumber } from "./value.js"
 import { Point } from "./geo/point.js"
@@ -21,8 +21,9 @@ const print = new FGCallNative("print", _print,
 );
 
 // NOTE: This is a helper, not exposed to user.
+// TODO: Pass canvas obj and remove defaultCanvas.
 function draw_oncanvas(objs: GeoObj[]) {
-    canvas.clear();
+    defaultCanvas.clear();
     for (let obj of objs) {
         obj.draw();
     }
@@ -40,9 +41,10 @@ let draw = new FGCallNative("draw", _draw,
     ])
 );
 
+// TODO: Pass canvas obj and remove defaultCanvas.
 function _clear(session: Session): void {
     session.pop(); // The function.
-    canvas.clear();
+    defaultCanvas.clear();
     session.oncanvas = [];
 }
 let clear = new FGCallNative("clear",  _clear,

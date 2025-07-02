@@ -1,4 +1,4 @@
-import canvas from "./ui/canvas.js";
+import { defaultCanvas } from "./ui/canvas.js";
 import { FGCallNative } from "./value.js";
 import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
@@ -14,7 +14,7 @@ const print = new FGCallNative("print", _print, new OverloadT([
     new FunctionT([anyT], nothingT, ["object"]),
 ]));
 function draw_oncanvas(objs) {
-    canvas.clear();
+    defaultCanvas.clear();
     for (let obj of objs) {
         obj.draw();
     }
@@ -30,7 +30,7 @@ let draw = new FGCallNative("draw", _draw, new OverloadT([
 ]));
 function _clear(session) {
     session.pop();
-    canvas.clear();
+    defaultCanvas.clear();
     session.oncanvas = [];
 }
 let clear = new FGCallNative("clear", _clear, new OverloadT([
