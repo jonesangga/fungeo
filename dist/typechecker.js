@@ -77,6 +77,9 @@ class TypeChecker {
         tempNames[node.name] = { type };
         return nothingT;
     }
+    visitEmptyStmt(node) {
+        return nothingT;
+    }
     visitExprStmt(node) {
         return node.expr.visit(this);
     }

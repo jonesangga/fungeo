@@ -3,8 +3,9 @@
 // TODO: Test error messages in file.
 
 import { type Token, TokenT, Scanner } from "./scanner.js"
-import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode,
+         EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode,
+         NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -272,6 +273,10 @@ function stmt(parser: Parser): AST {
     }
     else if (match(parser, TokenT.BSlash)) {
         return expr_stmt(parser);
+    }
+    else if (match(parser, TokenT.Semicolon)) {
+        // Nothing to do. This is optional statement delimiter.
+        return new EmptyStmtNode(parser.prevTok.line);
     }
     error_at_current(parser, "forbiden expr stmt");
 }

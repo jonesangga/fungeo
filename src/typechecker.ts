@@ -1,6 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
+import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
 import { type Type, Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
@@ -93,6 +93,10 @@ class TypeChecker implements Visitor<Type> {
         if (type.equal(nothingT))
             error(node.init.line, `cannot assign to nothingT`);
         tempNames[node.name] = { type };
+        return nothingT;
+    }
+
+    visitEmptyStmt(node: EmptyStmtNode): Type {
         return nothingT;
     }
 

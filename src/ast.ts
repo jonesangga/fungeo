@@ -6,23 +6,24 @@ import { Op } from "./chunk.js"
 import { type Type, numberT, anyT } from "./literal/type.js"
 
 export interface Visitor<T> {
-    visitAssign   (node: AssignNode):   T;
-    visitBinary   (node: BinaryNode):   T;
-    visitBoolean  (node: BooleanNode):  T;
-    visitCall     (node: CallNode):     T;
-    visitCallVoid (node: CallVoidNode): T;
-    visitExprStmt (node: ExprStmtNode): T;
-    visitFile     (node: FileNode):     T;
-    visitGetProp  (node: GetPropNode):  T;
-    visitIdent    (node: IdentNode):    T;
-    visitIndex    (node: IndexNode):    T;
-    visitList     (node: ListNode):     T;
-    visitNegative (node: NegativeNode): T;
-    visitNumber   (node: NumberNode):   T;
-    visitSetProp  (node: SetPropNode):  T;
-    visitString   (node: StringNode):   T;
-    visitUse      (node: UseNode):      T;
-    visitVarDecl  (node: VarDeclNode):  T;
+    visitAssign    (node: AssignNode):    T;
+    visitBinary    (node: BinaryNode):    T;
+    visitBoolean   (node: BooleanNode):   T;
+    visitCall      (node: CallNode):      T;
+    visitCallVoid  (node: CallVoidNode):  T;
+    visitEmptyStmt (node: EmptyStmtNode): T;
+    visitExprStmt  (node: ExprStmtNode):  T;
+    visitFile      (node: FileNode):      T;
+    visitGetProp   (node: GetPropNode):   T;
+    visitIdent     (node: IdentNode):     T;
+    visitIndex     (node: IndexNode):     T;
+    visitList      (node: ListNode):      T;
+    visitNegative  (node: NegativeNode):  T;
+    visitNumber    (node: NumberNode):    T;
+    visitSetProp   (node: SetPropNode):   T;
+    visitString    (node: StringNode):    T;
+    visitUse       (node: UseNode):       T;
+    visitVarDecl   (node: VarDeclNode):   T;
 }
 
 export interface AST {
@@ -152,6 +153,19 @@ export class CallVoidNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitCallVoid(this);
+    }
+}
+
+// NOTE: This purpose is only to support optional ';' as statement delimiter.
+export class EmptyStmtNode implements AST {
+    constructor(public line: number) {}
+
+    to_str(level: number): string {
+        return indent(level) + "EmptyStmt()";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitEmptyStmt(this);
     }
 }
 

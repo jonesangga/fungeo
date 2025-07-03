@@ -114,6 +114,18 @@ export class CallVoidNode {
         return v.visitCallVoid(this);
     }
 }
+export class EmptyStmtNode {
+    line;
+    constructor(line) {
+        this.line = line;
+    }
+    to_str(level) {
+        return indent(level) + "EmptyStmt()";
+    }
+    visit(v) {
+        return v.visitEmptyStmt(this);
+    }
+}
 export class ExprStmtNode {
     line;
     expr;

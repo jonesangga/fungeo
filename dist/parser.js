@@ -1,5 +1,5 @@
 import { Scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
 var Prec;
 (function (Prec) {
     Prec[Prec["None"] = 100] = "None";
@@ -216,6 +216,9 @@ function stmt(parser) {
     }
     else if (match(parser, 50)) {
         return expr_stmt(parser);
+    }
+    else if (match(parser, 900)) {
+        return new EmptyStmtNode(parser.prevTok.line);
     }
     error_at_current(parser, "forbiden expr stmt");
 }

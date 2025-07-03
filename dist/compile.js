@@ -67,6 +67,8 @@ class CodeGen {
         emitConstant(new FGType(type), node.line);
         emitBytes(1020, index, node.line);
     }
+    visitEmptyStmt(node) {
+    }
     visitExprStmt(node) {
         node.expr.visit(this);
         emitByte(1200, node.line);
