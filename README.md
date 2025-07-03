@@ -22,6 +22,15 @@ npm install
 npm start
 ```
 
+## Test
+
+The directory `test_output` contains test files containing FunGeo source code and the associated
+output files containing the expected output for each test.
+
+```
+npm run testout
+```
+
 ## Documentation
 
 ## License

@@ -1,0 +1,3 @@
+print("before comment")
+// This is a comment
+print("after comment")

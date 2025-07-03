@@ -1,0 +1,5 @@
+print("before multi-line comment")
+/* This is a
+multiline comment
+*/
+print("after multi-line comment")
