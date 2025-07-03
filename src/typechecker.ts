@@ -6,7 +6,7 @@ import { names } from "./vm.js"
 import { type Type, Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
-    let result = "type: " + line + ": " + message;
+    let result = `type: ${ line }: ${ message }\n`;
     throw new Error(result);
 }
 

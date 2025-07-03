@@ -1,0 +1,4 @@
+print("before multi-line comment")
+/* This is an
+unclosed
+multiline comment

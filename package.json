@@ -10,6 +10,7 @@
     "start": "http-server -c-1 -p 9999",
     "test": "node --test ./dist/test/ast.test.js ./dist/test/scanner.test.js",
     "testout": "node --test ./dist/test/output.test.js",
+    "testfail": "node --test ./dist/test/fail.test.js",
     "ex": "node --test ./dist/test/example.test.js"
   },
   "devDependencies": {
