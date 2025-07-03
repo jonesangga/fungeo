@@ -241,7 +241,7 @@ function numeric_binary(parser: Parser, lhs: AST): BinaryNode {
 
 function declaration(parser: Parser): AST {
     if (match(parser, TokenT.Let)) {
-        return var_decl(parser);
+        return var_definition(parser);
     } else if (match(parser, TokenT.Use)) {
         return parse_use(parser);
     } else {
@@ -256,12 +256,12 @@ function parse_use(parser: Parser): UseNode {
     return new UseNode(line, name);
 }
 
-// Declaration must be followed by initialization.
-function var_decl(parser: Parser): VarDeclNode {
+// Definition must be followed by initialization.
+function var_definition(parser: Parser): VarDeclNode {
     let line = parser.prevTok.line;
     consume(parser, TokenT.Ident, "expect variable name");
     let name = parser.prevTok.lexeme;
-    consume(parser, TokenT.Eq, "expect '=' in variable declaration");
+    consume(parser, TokenT.Eq, "expect '=' in definition");
     let init = expression(parser);
     return new VarDeclNode(line, name, init);
 }

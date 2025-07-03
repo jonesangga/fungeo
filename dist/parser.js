@@ -187,7 +187,7 @@ function numeric_binary(parser, lhs) {
 }
 function declaration(parser) {
     if (match(parser, 2460)) {
-        return var_decl(parser);
+        return var_definition(parser);
     }
     else if (match(parser, 2050)) {
         return parse_use(parser);
@@ -202,11 +202,11 @@ function parse_use(parser) {
     let name = parser.prevTok.lexeme;
     return new UseNode(line, name);
 }
-function var_decl(parser) {
+function var_definition(parser) {
     let line = parser.prevTok.line;
     consume(parser, 1730, "expect variable name");
     let name = parser.prevTok.lexeme;
-    consume(parser, 1500, "expect '=' in variable declaration");
+    consume(parser, 1500, "expect '=' in definition");
     let init = expression(parser);
     return new VarDeclNode(line, name, init);
 }
