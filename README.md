@@ -33,6 +33,27 @@ npm run testout
 
 ## Documentation
 
+### Definition
+
+```
+let a = 10
+let b = "a string"
+let c = false
+let d = true
+let e = [1,2,3]
+```
+
+### Comment
+
+```
+// Single line comment
+let a = 2  // Another comment
+
+/*
+    Multiline comment.
+*/
+```
+
 ## License
 
 MIT.
