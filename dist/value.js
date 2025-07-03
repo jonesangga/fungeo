@@ -1,29 +1,4 @@
 import { FGType, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js";
-export var Kind;
-(function (Kind) {
-    Kind[Kind["Nothing"] = 100] = "Nothing";
-    Kind[Kind["Any"] = 200] = "Any";
-    Kind[Kind["Boolean"] = 300] = "Boolean";
-    Kind[Kind["CallNative"] = 400] = "CallNative";
-    Kind[Kind["CallUser"] = 450] = "CallUser";
-    Kind[Kind["Color"] = 455] = "Color";
-    Kind[Kind["Complex"] = 460] = "Complex";
-    Kind[Kind["List"] = 470] = "List";
-    Kind[Kind["Method"] = 480] = "Method";
-    Kind[Kind["Number"] = 500] = "Number";
-    Kind[Kind["String"] = 600] = "String";
-    Kind[Kind["Struct"] = 610] = "Struct";
-    Kind[Kind["Type"] = 650] = "Type";
-    Kind[Kind["Circle"] = 700] = "Circle";
-    Kind[Kind["Coord"] = 720] = "Coord";
-    Kind[Kind["Ellipse"] = 750] = "Ellipse";
-    Kind[Kind["Picture"] = 840] = "Picture";
-    Kind[Kind["Point"] = 850] = "Point";
-    Kind[Kind["Rect"] = 900] = "Rect";
-    Kind[Kind["Segment"] = 1000] = "Segment";
-    Kind[Kind["Canvas"] = 2000] = "Canvas";
-    Kind[Kind["Repl"] = 2500] = "Repl";
-})(Kind || (Kind = {}));
 ;
 export const KindName = {
     [200]: "Any",

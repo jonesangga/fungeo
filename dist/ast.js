@@ -20,13 +20,6 @@ export class AssignNode {
         return v.visitAssign(this);
     }
 }
-export var BinaryOp;
-(function (BinaryOp) {
-    BinaryOp[BinaryOp["Add"] = 0] = "Add";
-    BinaryOp[BinaryOp["Divide"] = 1] = "Divide";
-    BinaryOp[BinaryOp["Multiply"] = 2] = "Multiply";
-    BinaryOp[BinaryOp["Subtract"] = 3] = "Subtract";
-})(BinaryOp || (BinaryOp = {}));
 export const binaryTable = {
     [0]: { name: "Add", op: 100, result: numberT },
     [1]: { name: "Divide", op: 300, result: numberT },

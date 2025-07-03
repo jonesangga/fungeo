@@ -1,19 +1,5 @@
 import { Scanner } from "./scanner.js";
 import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
-var Prec;
-(function (Prec) {
-    Prec[Prec["None"] = 100] = "None";
-    Prec[Prec["Assignment"] = 200] = "Assignment";
-    Prec[Prec["Or"] = 210] = "Or";
-    Prec[Prec["And"] = 220] = "And";
-    Prec[Prec["Equality"] = 230] = "Equality";
-    Prec[Prec["Comparison"] = 250] = "Comparison";
-    Prec[Prec["Term"] = 300] = "Term";
-    Prec[Prec["Factor"] = 400] = "Factor";
-    Prec[Prec["Unary"] = 500] = "Unary";
-    Prec[Prec["Call"] = 600] = "Call";
-    Prec[Prec["Primary"] = 700] = "Primary";
-})(Prec || (Prec = {}));
 const rules = {
     [1180]: { prefix: null, infix: null, prec: 100 },
     [1190]: { prefix: null, infix: null, prec: 220 },
