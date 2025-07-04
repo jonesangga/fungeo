@@ -31,6 +31,11 @@ export class Picture {
     typeof() {
         return new FGType(pictureT);
     }
+    place(x, y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
     add_segment(x1, y1, x2, y2) {
         this.segments.push({ x1, y1, x2, y2 });
         return this;

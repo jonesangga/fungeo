@@ -53,6 +53,12 @@ export class Picture {
         return new FGType(pictureT);
     }
 
+    place(x: number, y: number): Picture {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
     add_segment(x1: number, y1: number, x2: number, y2: number): Picture {
         this.segments.push({x1, y1, x2, y2});
         return this;

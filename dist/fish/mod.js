@@ -26,6 +26,19 @@ function _Pic_add_segment(session) {
 let Pic_add_segment = new FGCallNative("Pic_add_segment", _Pic_add_segment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], pictureT, ["x1", "y1", "x2", "y2"]),
 ]));
+function _Pic_place(session) {
+    let pic = session.pop();
+    let y = session.pop().value;
+    let x = session.pop().value;
+    session.pop();
+    session.push(pic.place(x, y));
+    if (pic.drawn) {
+        session.render();
+    }
+}
+let Pic_place = new FGCallNative("Pic_place", _Pic_place, new OverloadT([
+    new FunctionT([numberT, numberT], pictureT, ["x", "y"]),
+]));
 function _Pic_draw(session) {
     let pic = session.pop();
     session.pop();
@@ -57,6 +70,7 @@ function _Pic_quartet(session) {
 let Pic_quartet = new FGCallNative("Pic_quartet", _Pic_quartet, new OverloadT([
     new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT, ["p", "q", "r", "s"]),
 ]));
+pictureT.methods["place"] = { type: Pic_place.sig, value: Pic_place };
 pictureT.methods["add_segment"] = { type: Pic_add_segment.sig, value: Pic_add_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
