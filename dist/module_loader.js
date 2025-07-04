@@ -1,5 +1,4 @@
 import { names } from "./vm.js";
-import { pictureT } from "./literal/type.js";
 console.log("in module loader");
 const stds = ["fish"];
 export function load_module(name) {
@@ -11,13 +10,12 @@ function load(name) {
     let success = true;
     switch (name) {
         case "fish": {
-            import(`./data/fish.js`)
+            import(`./fish/mod.js`)
                 .then((module) => {
                 console.log(module);
-                names["fishp"] = { type: pictureT, value: module.fish.p };
-                names["fishq"] = { type: pictureT, value: module.fish.q };
-                names["fishr"] = { type: pictureT, value: module.fish.r };
-                names["fishs"] = { type: pictureT, value: module.fish.s };
+                console.log(module.modNames);
+                Object.assign(names, module.modNames);
+                console.log(names);
             })
                 .catch((error) => {
                 console.log(error);

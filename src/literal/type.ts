@@ -290,14 +290,14 @@ export class EllipseT implements Type {
     }
 }
 
-export class PictureT implements Type {
-    to_str(): string {
-        return "Picture";
-    }
-    equal(other: Type): boolean {
-        return other instanceof PictureT;
-    }
-}
+// export class PictureT implements Type {
+    // to_str(): string {
+        // return "Picture";
+    // }
+    // equal(other: Type): boolean {
+        // return other instanceof PictureT;
+    // }
+// }
 
 export class PointT extends Class implements Type {
     fields: Record<string, Type> = {
@@ -414,7 +414,7 @@ export const numberT = new NumberT();
 export const stringT = new StringT();
 export const circleT = new CircleT();
 export const ellipseT = new EllipseT();
-export const pictureT = new PictureT();
+// export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const richPointT = new RichPointT();
 export const richCircleT = new RichCircleT();
@@ -425,4 +425,4 @@ export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
 
-export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, segmentT]);
+export const geoT = new UnionT([circleT, ellipseT, pointT, segmentT]);

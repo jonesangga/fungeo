@@ -565,7 +565,6 @@ export type Names = {
     // // rpt:       { type: rpt.sig, value: rpt },
     // rsegment:  { type: rsegment.sig, value: rsegment },
     // length:    { type: length.sig, value: length },
-    // pic:       { type: pic.sig, value: pic },
     // mappic:    { type: mappic.sig, value: mappic },
     // quartet: { type: quartet.sig, value: quartet },
     // // "Cw":     { type: Cw.sig, value: Cw },

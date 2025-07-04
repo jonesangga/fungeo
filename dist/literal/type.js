@@ -223,14 +223,6 @@ export class EllipseT {
         return other instanceof EllipseT;
     }
 }
-export class PictureT {
-    to_str() {
-        return "Picture";
-    }
-    equal(other) {
-        return other instanceof PictureT;
-    }
-}
 export class PointT extends Class {
     fields = {
         x: numberT,
@@ -338,7 +330,6 @@ export const numberT = new NumberT();
 export const stringT = new StringT();
 export const circleT = new CircleT();
 export const ellipseT = new EllipseT();
-export const pictureT = new PictureT();
 export const pointT = new PointT();
 export const richPointT = new RichPointT();
 export const richCircleT = new RichCircleT();
@@ -348,4 +339,4 @@ export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();
 export const replT = new ReplT();
-export const geoT = new UnionT([circleT, ellipseT, pictureT, pointT, segmentT]);
+export const geoT = new UnionT([circleT, ellipseT, pointT, segmentT]);

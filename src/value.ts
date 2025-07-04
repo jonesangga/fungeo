@@ -6,7 +6,7 @@ import { Chunk } from "./chunk.js"
 import { Session } from "./vm.js"
 import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
 import Ellipse from "./geo/ellipse.js"
-import Picture from "./geo/picture.js"
+// import Picture from "./geo/picture.js"
 import { Canvas } from "./ui/canvas.js"
 import { Circle } from "./geo/circle.js"
 import { Coord } from "./geo/coordinate.js"
@@ -73,6 +73,11 @@ export type Repl = {
     place:  (x: number, y: number) => void,
     [name: string]: any,
 };
+
+export interface GeoType {
+    to_str: () => string;
+    typeof: () => FGType;
+}
 
 export interface FG {
     kind:   Kind;
@@ -309,7 +314,6 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Coord | Ellipse | Picture | Point | Rect | Segment;
-export type Fillable = Circle | Ellipse | Rect;
-export type Value  = GeoObj | LitObj | UIObj;
+export type GeoObj = Circle | Coord | Ellipse | Point | Rect | Segment;
+export type Value  = GeoObj | GeoType | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
