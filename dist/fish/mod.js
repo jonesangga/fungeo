@@ -1,4 +1,5 @@
 import { FGCallNative } from "../value.js";
+import { fishp, fishq, fishr, fishs } from "./fish.js";
 import { pictureT, Picture } from "./picture.js";
 import { FunctionT, OverloadT, nothingT, numberT } from "../literal/type.js";
 function _Pic(session) {
@@ -38,5 +39,9 @@ let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw, new OverloadT([
 pictureT.methods["segment"] = { type: Pic_segment.sig, value: Pic_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 export let modNames = {
+    fishp: { type: pictureT, value: fishp },
+    fishq: { type: pictureT, value: fishq },
+    fishr: { type: pictureT, value: fishr },
+    fishs: { type: pictureT, value: fishs },
     Pic: { type: Pic.sig, value: Pic },
 };

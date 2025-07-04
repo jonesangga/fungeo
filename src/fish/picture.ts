@@ -60,6 +60,11 @@ export class Picture {
         return this;
     }
 
+    segments(segments: Segment[]): Picture {
+        this.objs.push(...segments);
+        return this;
+    }
+
     draw(): void {
         c.strokeStyle = this.strokeStyle;
         c.save();

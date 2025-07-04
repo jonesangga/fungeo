@@ -36,6 +36,10 @@ export class Picture {
         this.objs.push({ x1, y1, x2, y2 });
         return this;
     }
+    segments(segments) {
+        this.objs.push(...segments);
+        return this;
+    }
     draw() {
         c.strokeStyle = this.strokeStyle;
         c.save();
