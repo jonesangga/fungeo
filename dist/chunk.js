@@ -15,6 +15,7 @@ export const OpName = {
     [500]: "GetGlob",
     [510]: "GetMeth",
     [520]: "GetProp",
+    [525]: "GetStat",
     [530]: "GT",
     [595]: "Inc",
     [600]: "Index",
@@ -117,6 +118,7 @@ export class Chunk {
             case 500:
             case 510:
             case 520:
+            case 525:
             case 800:
             case 1020:
             case 1600: {

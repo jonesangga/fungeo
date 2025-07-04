@@ -63,10 +63,12 @@ class CodeGen implements Visitor<void> {
     visitGetProp(node: GetPropNode): void {
         node.obj.visit(this);
         let index = makeConstant(new FGString(node.prop));
-        if (node.isField)
+        if (node.kind === "field")
             emitBytes(Op.GetProp, index, node.line);
-        else
+        else if (node.kind === "method")
             emitBytes(Op.GetMeth, index, node.line);
+        else
+            emitBytes(Op.GetStat, index, node.line);
     }
 
     visitSetProp(node: SetPropNode): void {

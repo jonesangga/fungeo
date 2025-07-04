@@ -40,6 +40,21 @@ export class Picture {
         this.objs.push(...segments);
         return this;
     }
+    static resize(pic, w, h) {
+        let scaleX = w / pic.w;
+        let scaleY = h / pic.h;
+        let objs = [];
+        for (let obj of pic.objs) {
+            let t = {
+                x1: obj.x1 * scaleX,
+                y1: obj.y1 * scaleY,
+                x2: obj.x2 * scaleX,
+                y2: obj.y2 * scaleY,
+            };
+            objs.push(t);
+        }
+        return new Picture(w, h).segments(objs);
+    }
     draw() {
         c.strokeStyle = this.strokeStyle;
         c.save();

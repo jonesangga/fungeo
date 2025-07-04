@@ -36,8 +36,19 @@ function _Pic_draw(session) {
 let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw, new OverloadT([
     new FunctionT([], nothingT, []),
 ]));
+function _Pic_resize(session) {
+    let h = session.pop().value;
+    let w = session.pop().value;
+    let pic = session.pop();
+    session.pop();
+    session.push(Picture.resize(pic, w, h));
+}
+let Pic_resize = new FGCallNative("Pic_resize", _Pic_resize, new OverloadT([
+    new FunctionT([pictureT, numberT, numberT], pictureT, ["from", "w", "h"]),
+]));
 pictureT.methods["segment"] = { type: Pic_segment.sig, value: Pic_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
+pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 export let modNames = {
     fishp: { type: pictureT, value: fishp },
     fishq: { type: pictureT, value: fishq },

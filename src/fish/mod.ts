@@ -50,8 +50,24 @@ let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw,
     ])
 );
 
+function _Pic_resize(session: Session): void {
+    let h = (session.pop() as FGNumber).value;
+    let w = (session.pop() as FGNumber).value;
+    let pic = session.pop() as Picture;
+    session.pop(); // The function.
+    session.push(Picture.resize(pic, w, h));
+}
+let Pic_resize = new FGCallNative("Pic_resize", _Pic_resize,
+    new OverloadT([
+        new FunctionT([pictureT, numberT, numberT], pictureT, ["from", "w", "h"]),
+    ])
+);
+
 pictureT.methods["segment"] = { type: Pic_segment.sig, value: Pic_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
+
+// TODO: This should be in static field.
+pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 
 export let modNames: Names = {
     fishp: { type: pictureT, value: fishp },

@@ -5,7 +5,7 @@ import { Op, Chunk } from "./chunk.js";
 import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
 import { Names } from "./vmfunction.js";
 import { coreNames } from "./core.js";
-import { type Type, FGType } from "./literal/type.js";
+import { type Type, FGType, Class } from "./literal/type.js";
 import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
 
@@ -176,7 +176,8 @@ export function run(intercept: boolean = false): boolean {
                 if (fn instanceof FGCallNative)
                     fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
-                    session.push(fn.obj);
+                    if (!fn.isStatic)
+                        session.push(fn.obj);
                     fn.method.value(session, ver);
                 }
                 else
@@ -356,8 +357,19 @@ export function run(intercept: boolean = false): boolean {
             case Op.GetMeth: {
                 let obj = session.pop();
                 let prop = read_string();
+                console.log(obj);
                 let fn = obj.typeof().value.methods[prop].value;
                 let method = new FGMethod(obj, fn);
+                session.push(method);
+                break;
+            }
+
+            // TODO: Refactor this!!!
+            case Op.GetStat: {
+                let obj = session.pop() as FGCallNative;
+                let prop = read_string();
+                let fn = (obj.sig.sigs[0].output as unknown as Class).methods[prop].value;
+                let method = new FGMethod(obj, fn, true);
                 session.push(method);
                 break;
             }

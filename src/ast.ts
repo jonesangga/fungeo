@@ -200,11 +200,13 @@ export class FileNode implements AST {
     }
 }
 
+// TODO: Think about `kind` later.
 export class GetPropNode implements AST {
     constructor(public line: number,
                 public obj:  AST,
                 public prop: string,
-                public isField: boolean = true) {}
+                // public isField: boolean = true) {}
+                public kind: "field" | "method" | "static" = "field") {}
 
     to_str(level: number): string {
         return indent(level) + "GetProp(\n"

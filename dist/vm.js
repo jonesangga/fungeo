@@ -117,7 +117,8 @@ export function run(intercept = false) {
                 if (fn instanceof FGCallNative)
                     fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
-                    session.push(fn.obj);
+                    if (!fn.isStatic)
+                        session.push(fn.obj);
                     fn.method.value(session, ver);
                 }
                 else
@@ -210,8 +211,17 @@ export function run(intercept = false) {
             case 510: {
                 let obj = session.pop();
                 let prop = read_string();
+                console.log(obj);
                 let fn = obj.typeof().value.methods[prop].value;
                 let method = new FGMethod(obj, fn);
+                session.push(method);
+                break;
+            }
+            case 525: {
+                let obj = session.pop();
+                let prop = read_string();
+                let fn = obj.sig.sigs[0].output.methods[prop].value;
+                let method = new FGMethod(obj, fn, true);
                 session.push(method);
                 break;
             }

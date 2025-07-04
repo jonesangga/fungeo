@@ -49,10 +49,12 @@ class CodeGen {
     visitGetProp(node) {
         node.obj.visit(this);
         let index = makeConstant(new FGString(node.prop));
-        if (node.isField)
+        if (node.kind === "field")
             emitBytes(520, index, node.line);
-        else
+        else if (node.kind === "method")
             emitBytes(510, index, node.line);
+        else
+            emitBytes(525, index, node.line);
     }
     visitSetProp(node) {
         node.obj.visit(this);

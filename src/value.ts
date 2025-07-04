@@ -112,7 +112,8 @@ export class FGMethod implements FG {
     kind: Kind.Method = Kind.Method;
 
     constructor(public obj:    Value,
-                public method: FGCallNative) {}
+                public method: FGCallNative,
+                public isStatic: boolean = false) {}
 
     to_str(): string {
         return `Method ${ this.method.name }`;

@@ -85,17 +85,31 @@ class TypeChecker {
     }
     visitGetProp(node) {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
-            error(node.line, "cannot get property of non-class");
-        if (Object.hasOwn(objType.fields, node.prop)) {
-            node.isField = true;
-            return objType.fields[node.prop];
+        console.log(objType);
+        if ((objType instanceof Class)) {
+            if (Object.hasOwn(objType.fields, node.prop)) {
+                node.kind = "field";
+                return objType.fields[node.prop];
+            }
+            if (Object.hasOwn(objType.methods, node.prop)) {
+                node.kind = "method";
+                return objType.methods[node.prop].type;
+            }
+            error(node.line, `no property ${node.prop} in object`);
         }
-        if (Object.hasOwn(objType.methods, node.prop)) {
-            node.isField = false;
-            return objType.methods[node.prop].type;
+        else if ((objType instanceof OverloadT)) {
+            let sigs = objType.sigs;
+            let ver1 = sigs[0];
+            let output = ver1.output;
+            if (!(output instanceof Class))
+                error(node.line, "trying to use static method for non class");
+            if (Object.hasOwn(output.methods, node.prop)) {
+                node.kind = "static";
+                return output.methods[node.prop].type;
+            }
+            error(node.line, `no property ${node.prop} in obj`);
         }
-        error(node.line, `no property ${node.prop} in obj`);
+        error(node.line, "argument must be either object propery or static method");
     }
     visitSetProp(node) {
         let objType = node.obj.visit(this);

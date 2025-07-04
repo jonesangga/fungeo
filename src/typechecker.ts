@@ -104,23 +104,68 @@ class TypeChecker implements Visitor<Type> {
         return node.expr.visit(this);
     }
 
+    // TODO: Clean up later.
     visitGetProp(node: GetPropNode): Type {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
-            error(node.line, "cannot get property of non-class");
+        console.log(objType);
+        if ((objType instanceof Class)) {
+            if (Object.hasOwn(objType.fields, node.prop)) {
+                node.kind = "field";
+                return objType.fields[node.prop];
+            }
 
-        if (Object.hasOwn(objType.fields, node.prop)) {
-            node.isField = true;
-            return objType.fields[node.prop];
+            if (Object.hasOwn(objType.methods, node.prop)) {
+                node.kind = "method";
+                return objType.methods[node.prop].type;
+            }
+
+            error(node.line, `no property ${ node.prop } in object`);
+        }
+        else if ((objType instanceof OverloadT)) {
+            // Finding static method.
+            let sigs = objType.sigs;
+            let ver1 = sigs[0];
+            let output = ver1.output;
+
+            if (!(output instanceof Class))
+                error(node.line, "trying to use static method for non class");
+
+            // TODO: Support static field??
+            // if (Object.hasOwn(output.fields, node.prop)) {
+                // node.kind = true;
+                // return output.fields[node.prop];
+            // }
+
+            if (Object.hasOwn(output.methods, node.prop)) {
+                node.kind = "static";
+                return output.methods[node.prop].type;
+            }
+
+            error(node.line, `no property ${ node.prop } in obj`);
         }
 
-        if (Object.hasOwn(objType.methods, node.prop)) {
-            node.isField = false;
-            return objType.methods[node.prop].type;
-        }
-
-        error(node.line, `no property ${ node.prop } in obj`);
+        error(node.line, "argument must be either object propery or static method");
     }
+
+
+    // visitGetProp(node: GetPropNode): Type {
+        // let objType = node.obj.visit(this);
+        // console.log(objType);
+        // if (!(objType instanceof Class))
+            // error(node.line, "cannot get property of non-class");
+
+        // if (Object.hasOwn(objType.fields, node.prop)) {
+            // node.isField = true;
+            // return objType.fields[node.prop];
+        // }
+
+        // if (Object.hasOwn(objType.methods, node.prop)) {
+            // node.isField = false;
+            // return objType.methods[node.prop].type;
+        // }
+
+        // error(node.line, `no property ${ node.prop } in obj`);
+    // }
 
     visitSetProp(node: SetPropNode): Type {
         let objType = node.obj.visit(this);
