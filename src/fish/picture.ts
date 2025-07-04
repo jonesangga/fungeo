@@ -41,6 +41,7 @@ export class Picture {
     segments: Segment[] = [];
     strokeStyle: string = color.black;
     drawn = false;
+    showFrame = true;
 
     constructor(public w: number,
                 public h: number) {}
@@ -59,6 +60,16 @@ export class Picture {
         return this;
     }
 
+    with_frame(): Picture {
+        this.showFrame = true;
+        return this;
+    }
+
+    no_frame(): Picture {
+        this.showFrame = false;
+        return this;
+    }
+
     add_segment(x1: number, y1: number, x2: number, y2: number): Picture {
         this.segments.push({x1, y1, x2, y2});
         return this;
@@ -70,12 +81,13 @@ export class Picture {
         return this;
     }
 
-    // TODO: Think should we draw the bounding rect?
     draw(): void {
         c.strokeStyle = this.strokeStyle;
         c.save();
         c.translate(this.x, this.y);
-        // c.strokeRect(0, 0, this.w, this.h);
+        if (this.showFrame) {
+            c.strokeRect(0, 0, this.w, this.h);
+        }
         c.beginPath();
         for (let s of this.segments) {
             c.moveTo(s.x1, s.y1);

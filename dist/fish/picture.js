@@ -21,6 +21,7 @@ export class Picture {
     segments = [];
     strokeStyle = color.black;
     drawn = false;
+    showFrame = true;
     constructor(w, h) {
         this.w = w;
         this.h = h;
@@ -36,6 +37,14 @@ export class Picture {
         this.y = y;
         return this;
     }
+    with_frame() {
+        this.showFrame = true;
+        return this;
+    }
+    no_frame() {
+        this.showFrame = false;
+        return this;
+    }
     add_segment(x1, y1, x2, y2) {
         this.segments.push({ x1, y1, x2, y2 });
         return this;
@@ -48,6 +57,9 @@ export class Picture {
         c.strokeStyle = this.strokeStyle;
         c.save();
         c.translate(this.x, this.y);
+        if (this.showFrame) {
+            c.strokeRect(0, 0, this.w, this.h);
+        }
         c.beginPath();
         for (let s of this.segments) {
             c.moveTo(s.x1, s.y1);

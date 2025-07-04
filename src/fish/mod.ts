@@ -54,6 +54,36 @@ let Pic_place = new FGCallNative("Pic_place", _Pic_place,
     ])
 );
 
+function _Pic_with_frame(session: Session): void {
+    let pic = session.pop() as Picture;
+    session.pop(); // The function.
+    session.push(pic.with_frame());
+
+    if (pic.drawn) {
+        session.render();
+    }
+}
+let Pic_with_frame = new FGCallNative("Pic_with_frame", _Pic_with_frame,
+    new OverloadT([
+        new FunctionT([], pictureT, []),
+    ])
+);
+
+function _Pic_no_frame(session: Session): void {
+    let pic = session.pop() as Picture;
+    session.pop(); // The function.
+    session.push(pic.no_frame());
+
+    if (pic.drawn) {
+        session.render();
+    }
+}
+let Pic_no_frame = new FGCallNative("Pic_no_frame", _Pic_no_frame,
+    new OverloadT([
+        new FunctionT([], pictureT, []),
+    ])
+);
+
 function _Pic_draw(session: Session): void {
     let pic = session.pop() as Picture;
     session.pop(); // The function.
@@ -120,6 +150,8 @@ let Pic_cycle = new FGCallNative("Pic_cycle", _Pic_cycle,
 pictureT.methods["place"] = { type: Pic_place.sig, value: Pic_place };
 pictureT.methods["add_segment"] = { type: Pic_add_segment.sig, value: Pic_add_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
+pictureT.methods["no_frame"] = { type: Pic_no_frame.sig, value: Pic_no_frame };
+pictureT.methods["with_frame"] = { type: Pic_with_frame.sig, value: Pic_with_frame };
 
 // TODO: This should be in static field.
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
