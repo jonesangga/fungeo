@@ -18,20 +18,20 @@ let Pic = new FGCallNative("Pic", _Pic,
     ])
 );
 
-function _Pic_segment(session: Session): void {
+function _Pic_add_segment(session: Session): void {
     let pic = session.pop() as Picture;
     let y2 = (session.pop() as FGNumber).value;
     let x2 = (session.pop() as FGNumber).value;
     let y1 = (session.pop() as FGNumber).value;
     let x1 = (session.pop() as FGNumber).value;
     session.pop(); // The function.
-    session.push(pic.segment(x1, y1, x2, y2));
+    session.push(pic.add_segment(x1, y1, x2, y2));
 
     if (pic.drawn) {
         session.render();
     }
 }
-let Pic_segment = new FGCallNative("Pic_segment", _Pic_segment,
+let Pic_add_segment = new FGCallNative("Pic_add_segment", _Pic_add_segment,
     new OverloadT([
         new FunctionT([numberT, numberT, numberT, numberT], pictureT, ["x1", "y1", "x2", "y2"]),
     ])
@@ -63,7 +63,7 @@ let Pic_resize = new FGCallNative("Pic_resize", _Pic_resize,
     ])
 );
 
-pictureT.methods["segment"] = { type: Pic_segment.sig, value: Pic_segment };
+pictureT.methods["add_segment"] = { type: Pic_add_segment.sig, value: Pic_add_segment };
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 
 // TODO: This should be in static field.

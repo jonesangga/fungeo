@@ -8,7 +8,7 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind, FGCallNative } from "../value.js"
+import { FGCallNative } from "../value.js"
 import { type Type, Class, FGType } from "../literal/type.js"
 
 const c = canvas.ctx;
@@ -34,18 +34,16 @@ type Segment = {
     y2: number,
 }
 
+// TODO: Think how to reset 'drawn' after clear().
 export class Picture {
-    kind: Kind.Picture = Kind.Picture;
     x: number = 0;
     y: number = 0;
-    objs: Segment[] = [];
+    segments: Segment[] = [];
     strokeStyle: string = color.black;
     drawn = false;
 
-    constructor( 
-        public w: number,
-        public h: number,
-    ) {}
+    constructor(public w: number,
+                public h: number) {}
 
     to_str(): string {
         return `Picture ${this.w} ${this.h}`;
@@ -55,30 +53,14 @@ export class Picture {
         return new FGType(pictureT);
     }
 
-    segment(x1: number, y1: number, x2: number, y2: number): Picture {
-        this.objs.push({x1, y1, x2, y2});
+    add_segment(x1: number, y1: number, x2: number, y2: number): Picture {
+        this.segments.push({x1, y1, x2, y2});
         return this;
     }
 
-    segments(segments: Segment[]): Picture {
-        this.objs.push(...segments);
+    add_segments(segments: Segment[]): Picture {
+        this.segments.push(...segments);
         return this;
-    }
-
-    static resize(pic: Picture, w: number, h: number): Picture {
-        let scaleX = w / pic.w;
-        let scaleY = h / pic.h;
-        let objs = [];
-        for (let obj of pic.objs) {
-            let t = {
-                x1: obj.x1 * scaleX,
-                y1: obj.y1 * scaleY,
-                x2: obj.x2 * scaleX,
-                y2: obj.y2 * scaleY,
-            }
-            objs.push(t);
-        }
-        return new Picture(w, h).segments(objs);
     }
 
     draw(): void {
@@ -87,23 +69,25 @@ export class Picture {
         c.translate(this.x, this.y);
         c.strokeRect(0, 0, this.w, this.h);
         c.beginPath();
-        for (let s of this.objs) {
+        for (let s of this.segments) {
             c.moveTo(s.x1, s.y1);
             c.lineTo(s.x2, s.y2);
         }
-        c.strokeStyle = this.strokeStyle;
         c.stroke();
         c.restore();
     }
 
-    // map_to(target: Picture): void {
-        // let scaleX = target.w / this.w;
-        // let scaleY = target.h / this.h;
-        // for (let obj of this.objs) {
-            // let t = this.#segment_scale(obj, scaleX, scaleY);
-            // target.objs.push(t);
-        // }
-    // }
+    static resize(pic: Picture, w: number, h: number): Picture {
+        let scaleX = w / pic.w;
+        let scaleY = h / pic.h;
+        let segments = pic.segments.map(s => ({
+            x1: s.x1 * scaleX,
+            y1: s.y1 * scaleY,
+            x2: s.x2 * scaleX,
+            y2: s.y2 * scaleY,
+        }));
+        return new Picture(w, h).add_segments(segments);
+    }
 
     // cw(): Picture {
         // let pic = new Picture(this.w, this.h);
@@ -176,10 +160,6 @@ export class Picture {
 
     // static cycle(p: Picture): Picture {
         // return Picture.quartet(p, p.cw(), p.ccw(), p.cw().cw());
-    // }
-
-    // #segment_scale(s: Segment, scaleX: number, scaleY: number): Segment {
-        // return new Segment(s.x1 * scaleX, s.y1 * scaleY, s.x2 *scaleX, s.y2 * scaleY, s.strokeStyle);
     // }
 
     // #segment_cw(s: Segment): Segment {

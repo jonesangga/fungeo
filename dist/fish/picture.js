@@ -16,10 +16,9 @@ export const pictureT = new PictureT();
 export class Picture {
     w;
     h;
-    kind = 840;
     x = 0;
     y = 0;
-    objs = [];
+    segments = [];
     strokeStyle = color.black;
     drawn = false;
     constructor(w, h) {
@@ -32,28 +31,13 @@ export class Picture {
     typeof() {
         return new FGType(pictureT);
     }
-    segment(x1, y1, x2, y2) {
-        this.objs.push({ x1, y1, x2, y2 });
+    add_segment(x1, y1, x2, y2) {
+        this.segments.push({ x1, y1, x2, y2 });
         return this;
     }
-    segments(segments) {
-        this.objs.push(...segments);
+    add_segments(segments) {
+        this.segments.push(...segments);
         return this;
-    }
-    static resize(pic, w, h) {
-        let scaleX = w / pic.w;
-        let scaleY = h / pic.h;
-        let objs = [];
-        for (let obj of pic.objs) {
-            let t = {
-                x1: obj.x1 * scaleX,
-                y1: obj.y1 * scaleY,
-                x2: obj.x2 * scaleX,
-                y2: obj.y2 * scaleY,
-            };
-            objs.push(t);
-        }
-        return new Picture(w, h).segments(objs);
     }
     draw() {
         c.strokeStyle = this.strokeStyle;
@@ -61,12 +45,22 @@ export class Picture {
         c.translate(this.x, this.y);
         c.strokeRect(0, 0, this.w, this.h);
         c.beginPath();
-        for (let s of this.objs) {
+        for (let s of this.segments) {
             c.moveTo(s.x1, s.y1);
             c.lineTo(s.x2, s.y2);
         }
-        c.strokeStyle = this.strokeStyle;
         c.stroke();
         c.restore();
+    }
+    static resize(pic, w, h) {
+        let scaleX = w / pic.w;
+        let scaleY = h / pic.h;
+        let segments = pic.segments.map(s => ({
+            x1: s.x1 * scaleX,
+            y1: s.y1 * scaleY,
+            x2: s.x2 * scaleX,
+            y2: s.y2 * scaleY,
+        }));
+        return new Picture(w, h).add_segments(segments);
     }
 }

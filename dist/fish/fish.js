@@ -7,15 +7,13 @@ const fish = {
 };
 function create(coords) {
     let unit = new Picture(16, 16);
-    let t = coords.map(c => {
-        return {
-            x1: c[0],
-            y1: c[1],
-            x2: c[2],
-            y2: c[3],
-        };
-    });
-    return unit.segments(t);
+    let segments = coords.map(c => ({
+        x1: c[0],
+        y1: c[1],
+        x2: c[2],
+        y2: c[3],
+    }));
+    return unit.add_segments(segments);
 }
 export let fishp = create(fish.p);
 export let fishq = create(fish.q);
