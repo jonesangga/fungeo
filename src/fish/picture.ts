@@ -67,7 +67,7 @@ export class Picture {
         c.strokeStyle = this.strokeStyle;
         c.save();
         c.translate(this.x, this.y);
-        c.strokeRect(0, 0, this.w, this.h);
+        // c.strokeRect(0, 0, this.w, this.h);
         c.beginPath();
         for (let s of this.segments) {
             c.moveTo(s.x1, s.y1);
@@ -87,6 +87,79 @@ export class Picture {
             y2: s.y2 * scaleY,
         }));
         return new Picture(w, h).add_segments(segments);
+    }
+
+    static quartet(p: Picture, q: Picture, r: Picture, s: Picture): Picture {
+        return Picture.above(1,
+                             1,
+                             Picture.beside(1, 1, p, q),
+                             Picture.beside(1, 1, r, s));
+    }
+
+    static above(rtop: number, rbottom: number, top: Picture, bottom: Picture): Picture {
+        let pic = new Picture(top.w, top.h);
+        let scale = rtop / (rtop + rbottom);
+
+        for (let obj of top.segments) {
+            pic.segments.push( Picture.segment_top(scale, obj) );
+        }
+
+        for (let obj of bottom.segments) {
+            pic.segments.push( Picture.segment_bottom(scale, bottom, obj) );
+        }
+        return pic;
+    }
+
+    static beside(rleft: number, rright: number, left: Picture, right: Picture): Picture {
+        let pic = new Picture(left.w, left.h);
+        let scale = rleft / (rleft + rright);
+
+        for (let obj of left.segments) {
+            pic.segments.push( Picture.segment_left(scale, obj) );
+        }
+
+        for (let obj of right.segments) {
+            pic.segments.push( Picture.segment_right(scale, right, obj) );
+        }
+        return pic;
+    }
+
+    static segment_top(scale: number, s: Segment): Segment {
+        return {
+            x1: s.x1,
+            y1: s.y1 * scale,
+            x2: s.x2,
+            y2: s.y2 * scale
+        };
+    }
+
+    static segment_bottom(scale: number, p: Picture, s: Segment): Segment {
+        let t = 1 - scale;
+        return {
+            x1: s.x1,
+            y1: p.h * scale + s.y1 * t,
+            x2: s.x2,
+            y2: p.h * scale + s.y2 * t
+        };
+    }
+
+    static segment_left(scale: number, s: Segment): Segment {
+        return {
+            x1: s.x1 * scale,
+            y1: s.y1,
+            x2: s.x2 * scale,
+            y2: s.y2,
+        };
+    }
+
+    static segment_right(scale: number, p: Picture, s: Segment): Segment {
+        let t = 1 - scale;
+        return {
+            x1: p.w * scale + s.x1 * t,
+            y1: s.y1,
+            x2: p.w * scale + s.x2 * t,
+            y2: s.y2,
+        };
     }
 
     // cw(): Picture {
