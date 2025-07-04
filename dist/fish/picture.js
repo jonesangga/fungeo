@@ -21,6 +21,7 @@ export class Picture {
     y = 0;
     objs = [];
     strokeStyle = color.black;
+    drawn = false;
     constructor(w, h) {
         this.w = w;
         this.h = h;

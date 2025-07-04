@@ -25,6 +25,10 @@ function _Pic_segment(session: Session): void {
     let x1 = (session.pop() as FGNumber).value;
     session.pop(); // The function.
     session.push(pic.segment(x1, y1, x2, y2));
+
+    if (pic.drawn) {
+        session.render();
+    }
 }
 let Pic_segment = new FGCallNative("Pic_segment", _Pic_segment,
     new OverloadT([
@@ -35,7 +39,9 @@ let Pic_segment = new FGCallNative("Pic_segment", _Pic_segment,
 function _Pic_draw(session: Session): void {
     let pic = session.pop() as Picture;
     session.pop(); // The function.
-    pic.draw();
+    session.oncanvas.push(pic);
+    session.render();
+    pic.drawn = true;
 }
 let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw,
     new OverloadT([

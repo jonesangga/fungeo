@@ -40,6 +40,7 @@ export class Picture {
     y: number = 0;
     objs: Segment[] = [];
     strokeStyle: string = color.black;
+    drawn = false;
 
     constructor( 
         public w: number,

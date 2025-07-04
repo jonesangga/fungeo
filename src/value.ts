@@ -75,6 +75,7 @@ export type Repl = {
 };
 
 export interface GeoType {
+    draw: () => void;
     to_str: () => string;
     typeof: () => FGType;
 }
@@ -314,6 +315,6 @@ export class FGStruct implements FG {
 
 type LitObj = FGBoolean | FGCallNative | FGCallUser | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
-export type GeoObj = Circle | Coord | Ellipse | Point | Rect | Segment;
-export type Value  = GeoObj | GeoType | LitObj | UIObj;
+export type GeoObj = Circle | Coord | Ellipse | Point | Rect | Segment | GeoType;
+export type Value  = GeoObj | LitObj | UIObj;
 export type Comparable = FGNumber | FGString;
