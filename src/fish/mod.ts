@@ -80,6 +80,18 @@ let Pic_resize = new FGCallNative("Pic_resize", _Pic_resize,
     ])
 );
 
+// NOTE: This is called as static method but implemented as instance method.
+function _Pic_rot(session: Session): void {
+    let pic = session.pop() as Picture;
+    session.pop(); // The function.
+    session.push(pic.rot());
+}
+let Pic_rot = new FGCallNative("Pic_rot", _Pic_rot,
+    new OverloadT([
+        new FunctionT([pictureT], pictureT, ["pic"]),
+    ])
+);
+
 function _Pic_quartet(session: Session): void {
     let s = session.pop() as Picture;
     let r = session.pop() as Picture;
@@ -101,6 +113,7 @@ pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 // TODO: This should be in static field.
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
+pictureT.methods["rot"] = { type: Pic_rot.sig, value: Pic_rot };
 
 export let modNames: Names = {
     fishp: { type: pictureT, value: fishp },

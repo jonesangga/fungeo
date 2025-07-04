@@ -67,6 +67,22 @@ export class Picture {
         }));
         return new Picture(w, h).add_segments(segments);
     }
+    rot() {
+        let result = new Picture(this.w, this.h);
+        for (let obj of this.segments) {
+            result.segments.push(this.#segment_ccw(obj));
+        }
+        return result;
+    }
+    #segment_ccw(s) {
+        let c = this.w / 2;
+        let d = this.h / 2;
+        let x1 = s.y1 + c - d;
+        let y1 = -s.x1 + c + d;
+        let x2 = s.y2 + c - d;
+        let y2 = -s.x2 + c + d;
+        return { x1, y1, x2, y2 };
+    }
     static quartet(p, q, r, s) {
         return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
     }

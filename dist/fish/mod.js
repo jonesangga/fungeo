@@ -59,6 +59,14 @@ function _Pic_resize(session) {
 let Pic_resize = new FGCallNative("Pic_resize", _Pic_resize, new OverloadT([
     new FunctionT([pictureT, numberT, numberT], pictureT, ["from", "w", "h"]),
 ]));
+function _Pic_rot(session) {
+    let pic = session.pop();
+    session.pop();
+    session.push(pic.rot());
+}
+let Pic_rot = new FGCallNative("Pic_rot", _Pic_rot, new OverloadT([
+    new FunctionT([pictureT], pictureT, ["pic"]),
+]));
 function _Pic_quartet(session) {
     let s = session.pop();
     let r = session.pop();
@@ -75,6 +83,7 @@ pictureT.methods["add_segment"] = { type: Pic_add_segment.sig, value: Pic_add_se
 pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
+pictureT.methods["rot"] = { type: Pic_rot.sig, value: Pic_rot };
 export let modNames = {
     fishp: { type: pictureT, value: fishp },
     fishq: { type: pictureT, value: fishq },
