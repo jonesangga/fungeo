@@ -1,6 +1,6 @@
 import { FGCallNative } from "../value.js";
 import { pictureT, Picture } from "./picture.js";
-import { FunctionT, OverloadT, numberT } from "../literal/type.js";
+import { FunctionT, OverloadT, nothingT, numberT } from "../literal/type.js";
 function _Pic(session) {
     let w = session.pop().value;
     let h = session.pop().value;
@@ -22,7 +22,16 @@ function _Pic_segment(session) {
 let Pic_segment = new FGCallNative("Pic_segment", _Pic_segment, new OverloadT([
     new FunctionT([numberT, numberT, numberT, numberT], pictureT, ["x1", "y1", "x2", "y2"]),
 ]));
+function _Pic_draw(session) {
+    let pic = session.pop();
+    session.pop();
+    pic.draw();
+}
+let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw, new OverloadT([
+    new FunctionT([], nothingT, []),
+]));
 pictureT.methods["segment"] = { type: Pic_segment.sig, value: Pic_segment };
+pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 export let modNames = {
     Pic: { type: Pic.sig, value: Pic },
 };
