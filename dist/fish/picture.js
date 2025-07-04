@@ -20,8 +20,8 @@ export class Picture {
     y = 0;
     segments = [];
     strokeStyle = color.black;
-    drawn = false;
-    showFrame = true;
+    currentlyDrawn = false;
+    frameIncluded = true;
     constructor(w, h) {
         this.w = w;
         this.h = h;
@@ -38,11 +38,11 @@ export class Picture {
         return this;
     }
     with_frame() {
-        this.showFrame = true;
+        this.frameIncluded = true;
         return this;
     }
     no_frame() {
-        this.showFrame = false;
+        this.frameIncluded = false;
         return this;
     }
     add_segment(x1, y1, x2, y2) {
@@ -57,7 +57,7 @@ export class Picture {
         c.strokeStyle = this.strokeStyle;
         c.save();
         c.translate(this.x, this.y);
-        if (this.showFrame) {
+        if (this.frameIncluded) {
             c.strokeRect(0, 0, this.w, this.h);
         }
         c.beginPath();

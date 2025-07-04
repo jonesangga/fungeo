@@ -19,7 +19,7 @@ function _Pic_add_segment(session) {
     let x1 = session.pop().value;
     session.pop();
     session.push(pic.add_segment(x1, y1, x2, y2));
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -32,7 +32,7 @@ function _Pic_place(session) {
     let x = session.pop().value;
     session.pop();
     session.push(pic.place(x, y));
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -43,7 +43,7 @@ function _Pic_with_frame(session) {
     let pic = session.pop();
     session.pop();
     session.push(pic.with_frame());
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -54,7 +54,7 @@ function _Pic_no_frame(session) {
     let pic = session.pop();
     session.pop();
     session.push(pic.no_frame());
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -66,7 +66,7 @@ function _Pic_draw(session) {
     session.pop();
     session.oncanvas.push(pic);
     session.render();
-    pic.drawn = true;
+    pic.currentlyDrawn = true;
 }
 let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw, new OverloadT([
     new FunctionT([], nothingT, []),

@@ -328,55 +328,6 @@ import { type Type } from "./literal/type.js"
     // },
 // ]);
 
-// function _quartet(session: Session): void {
-    // let s = session.pop() as Picture;
-    // let r = session.pop() as Picture;
-    // let q = session.pop() as Picture;
-    // let p = session.pop() as Picture;
-    // session.pop();              // The function.
-    // session.push(Picture.quartet(p, q, r, s));
-// }
-// let quartet = new FGCallNative("quartet", _quartet,
-    // new OverloadT([
-        // new FunctionT([pictureT, pictureT, pictureT, pictureT], pictureT),
-    // ])
-// );
-
-// function _Cycle(): void {
-    // let p = session.pop() as Picture;
-    // session.pop();              // The function.
-    // push(Picture.cycle(p));
-// }
-// let Cycle = new FGCallNative("Cycle", _Cycle,
-    // new FunctionT([pictureT], pictureT)
-// );
-
-// function _mappic(session: Session): void {
-    // let target = session.pop() as Picture;
-    // let src = session.pop() as Picture;
-    // session.pop();              // The function.
-    // src.map_to(target);
-    // // draw_onScreen();
-// }
-// let mappic = new FGCallNative("mappic", _mappic,
-    // new OverloadT([
-        // new FunctionT([pictureT, pictureT], nothingT),
-    // ])
-// );
-
-// function _pic(session: Session): void {
-    // let w = (session.pop() as FGNumber).value;
-    // let h = (session.pop() as FGNumber).value;
-    // session.pop();              // The function.
-    // let pic = new Picture(w, h);
-    // session.push(pic);
-// }
-// let pic = new FGCallNative("pic", _pic,
-    // new OverloadT([
-        // new FunctionT([numberT, numberT], pictureT),
-    // ])
-// );
-
 // function _coord(session: Session): void {
     // let yr = (session.pop() as FGNumber).value;
     // let yl = (session.pop() as FGNumber).value;
@@ -571,8 +522,6 @@ export type Names = {
     // // "Ccw":    { type: Ccw.sig, value: Ccw },
     // // "FlipH":  { type: FlipH.sig, value: FlipH },
     // // "FlipV":  { type: FlipV.sig, value: FlipV },
-    // // "Above":  { type: functionT, value: Above },
-    // // "Beside": { type: functionT, value: Beside },
     // // "Cycle":  { type: Cycle.sig, value: Cycle },
     // // "R":      { type: R.sig, value: R, methods: {
         // // "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },

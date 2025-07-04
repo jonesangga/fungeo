@@ -34,14 +34,14 @@ type Segment = {
     y2: number,
 }
 
-// TODO: Think how to reset 'drawn' after clear().
+// TODO: Think how to reset 'currentlyDrawn' after clear().
 export class Picture {
     x: number = 0;
     y: number = 0;
     segments: Segment[] = [];
     strokeStyle: string = color.black;
-    drawn = false;
-    showFrame = true;
+    currentlyDrawn = false;
+    frameIncluded = true;
 
     constructor(public w: number,
                 public h: number) {}
@@ -61,12 +61,12 @@ export class Picture {
     }
 
     with_frame(): Picture {
-        this.showFrame = true;
+        this.frameIncluded = true;
         return this;
     }
 
     no_frame(): Picture {
-        this.showFrame = false;
+        this.frameIncluded = false;
         return this;
     }
 
@@ -85,7 +85,7 @@ export class Picture {
         c.strokeStyle = this.strokeStyle;
         c.save();
         c.translate(this.x, this.y);
-        if (this.showFrame) {
+        if (this.frameIncluded) {
             c.strokeRect(0, 0, this.w, this.h);
         }
         c.beginPath();
@@ -109,6 +109,7 @@ export class Picture {
         return new Picture(w, h).add_segments(segments);
     }
 
+    // TODO: Make the mutable equivalent.
     rot(): Picture {
         let segments = this.segments.map(s => this.#segment_rot(s));
         return new Picture(this.w, this.h)
@@ -200,15 +201,6 @@ export class Picture {
         // return pic;
     // }
 
-    // ccw(): Picture {
-        // let pic = new Picture(this.w, this.h);
-
-        // for (let obj of this.objs) {
-            // pic.objs.push( this.#segment_ccw(obj) );
-        // }
-        // return pic;
-    // }
-
     // fliph(): Picture {
         // let pic = new Picture(this.w, this.h);
 
@@ -234,16 +226,6 @@ export class Picture {
         // let y1 =  s.x1 + c - d;
         // let x2 = -s.y2 + c + d;
         // let y2 =  s.x2 + c - d;
-        // return new Segment(x1, y1, x2, y2, s.strokeStyle);
-    // }
-
-    // #segment_ccw(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 =  s.y1 + c - d;
-        // let y1 = -s.x1 + c + d;
-        // let x2 =  s.y2 + c - d;
-        // let y2 = -s.x2 + c + d;
         // return new Segment(x1, y1, x2, y2, s.strokeStyle);
     // }
 

@@ -27,7 +27,7 @@ function _Pic_add_segment(session: Session): void {
     session.pop(); // The function.
     session.push(pic.add_segment(x1, y1, x2, y2));
 
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -44,7 +44,7 @@ function _Pic_place(session: Session): void {
     session.pop(); // The function.
     session.push(pic.place(x, y));
 
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -59,7 +59,7 @@ function _Pic_with_frame(session: Session): void {
     session.pop(); // The function.
     session.push(pic.with_frame());
 
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -74,7 +74,7 @@ function _Pic_no_frame(session: Session): void {
     session.pop(); // The function.
     session.push(pic.no_frame());
 
-    if (pic.drawn) {
+    if (pic.currentlyDrawn) {
         session.render();
     }
 }
@@ -89,7 +89,7 @@ function _Pic_draw(session: Session): void {
     session.pop(); // The function.
     session.oncanvas.push(pic);
     session.render();
-    pic.drawn = true;
+    pic.currentlyDrawn = true;
 }
 let Pic_draw = new FGCallNative("Pic_draw", _Pic_draw,
     new OverloadT([
