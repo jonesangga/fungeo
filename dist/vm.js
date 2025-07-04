@@ -1,6 +1,7 @@
 import { load_module } from "./module_loader.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { coreNames } from "./core.js";
+import { defaultCanvas } from "./ui/canvas.js";
 let $ = console.log;
 export class Session {
     stack = [];
@@ -21,6 +22,16 @@ export class Session {
     }
     write(str) {
         this.output += str;
+    }
+    render() {
+        defaultCanvas.clear();
+        for (let obj of this.oncanvas) {
+            obj.draw();
+        }
+    }
+    clear() {
+        defaultCanvas.clear();
+        this.oncanvas = [];
     }
 }
 export let session = new Session();

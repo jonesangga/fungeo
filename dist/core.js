@@ -44,25 +44,18 @@ export let canvas_resize = new FGCallNative("canvas_resize", _canvas_resize, new
 ]));
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
-function draw_oncanvas(objs) {
-    defaultCanvas.clear();
-    for (let obj of objs) {
-        obj.draw();
-    }
-}
 function _draw(session, ver) {
     let v = session.pop();
     session.pop();
     session.oncanvas.push(v);
-    draw_oncanvas(session.oncanvas);
+    session.render();
 }
 let draw = new FGCallNative("draw", _draw, new OverloadT([
     new FunctionT([geoT], nothingT, ["obj"]),
 ]));
 function _clear(session) {
     session.pop();
-    defaultCanvas.clear();
-    session.oncanvas = [];
+    session.clear();
 }
 let clear = new FGCallNative("clear", _clear, new OverloadT([
     new FunctionT([], nothingT, []),

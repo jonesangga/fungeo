@@ -61,20 +61,11 @@ export let canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
 
-// NOTE: This is a helper, not exposed to user.
-// TODO: Pass canvas obj and remove defaultCanvas.
-function draw_oncanvas(objs: GeoObj[]) {
-    defaultCanvas.clear();
-    for (let obj of objs) {
-        obj.draw();
-    }
-}
-
 function _draw(session: Session, ver: number): void {
     let v = session.pop() as GeoObj;
     session.pop(); // The function.
     session.oncanvas.push(v);
-    draw_oncanvas(session.oncanvas);
+    session.render();
 }
 let draw = new FGCallNative("draw", _draw,
     new OverloadT([
@@ -85,8 +76,7 @@ let draw = new FGCallNative("draw", _draw,
 // TODO: Pass canvas obj and remove defaultCanvas.
 function _clear(session: Session): void {
     session.pop(); // The function.
-    defaultCanvas.clear();
-    session.oncanvas = [];
+    session.clear();
 }
 let clear = new FGCallNative("clear",  _clear,
     new OverloadT([

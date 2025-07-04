@@ -7,6 +7,7 @@ import { Names } from "./vmfunction.js";
 import { coreNames } from "./core.js";
 import { type Type, FGType } from "./literal/type.js";
 import { Point } from "./geo/point.js";
+import { defaultCanvas } from "./ui/canvas.js"
 
 // For quick debugging.
 let $ = console.log;
@@ -36,6 +37,18 @@ export class Session {
 
     write(str: string): void {
         this.output += str;
+    }
+
+    render(): void {
+        defaultCanvas.clear();
+        for (let obj of this.oncanvas) {
+            obj.draw();
+        }
+    }
+
+    clear(): void {
+        defaultCanvas.clear();
+        this.oncanvas = [];
     }
 }
 
