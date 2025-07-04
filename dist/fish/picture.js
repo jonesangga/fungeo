@@ -1,9 +1,11 @@
 import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import { Segment } from "../geo/segment.js";
-import { FGType } from "../literal/type.js";
+import { Class, FGType } from "../literal/type.js";
 const c = canvas.ctx;
-export class PictureT {
+export class PictureT extends Class {
+    fields = {};
+    methods = {};
     to_str() {
         return "Picture";
     }
@@ -29,6 +31,9 @@ export class Picture {
     }
     typeof() {
         return new FGType(pictureT);
+    }
+    segment(x1, y1, x2, y2) {
+        return this;
     }
     draw() {
         c.strokeStyle = this.strokeStyle;

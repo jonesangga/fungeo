@@ -8,13 +8,16 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind } from "../value.js"
+import { Kind, FGCallNative } from "../value.js"
 import { Segment } from "../geo/segment.js"
-import { type Type, FGType } from "../literal/type.js"
+import { type Type, Class, FGType } from "../literal/type.js"
 
 const c = canvas.ctx;
 
-export class PictureT implements Type {
+export class PictureT extends Class implements Type {
+    fields: Record<string, Type> = {};
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
+
     to_str(): string {
         return "Picture";
     }
@@ -43,6 +46,10 @@ export class Picture {
 
     typeof(): FGType {
         return new FGType(pictureT);
+    }
+
+    segment(x1: number, y1: number, x2: number, y2: number): Picture {
+        return this;
     }
 
     draw(): void {
