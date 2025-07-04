@@ -12,7 +12,6 @@ function load(name) {
         case "fish": {
             import(`./fish/mod.js`)
                 .then((module) => {
-                console.log(module);
                 console.log(module.modNames);
                 Object.assign(names, module.modNames);
                 console.log(names);
