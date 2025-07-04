@@ -64,11 +64,13 @@ export class Picture {
         return this;
     }
 
+    // TODO: Think if this is necessary. Why not push directly?
     add_segments(segments: Segment[]): Picture {
         this.segments.push(...segments);
         return this;
     }
 
+    // TODO: Think should we draw the bounding rect?
     draw(): void {
         c.strokeStyle = this.strokeStyle;
         c.save();
@@ -96,15 +98,14 @@ export class Picture {
     }
 
     rot(): Picture {
-        let result = new Picture(this.w, this.h);
-
-        for (let obj of this.segments) {
-            result.segments.push( this.#segment_ccw(obj) );
-        }
-        return result;
+        let segments = this.segments.map(s => this.#segment_rot(s));
+        return new Picture(this.w, this.h)
+                   .add_segments(segments);
     }
 
-    #segment_ccw(s: Segment): Segment {
+    // NOTE: This is only correct for square picture, because this will rotate the whole picture
+    // instead of rotating elements inside it.
+    #segment_rot(s: Segment): Segment {
         let c = this.w / 2;
         let d = this.h / 2;
         let x1 =  s.y1 + c - d;
@@ -114,6 +115,7 @@ export class Picture {
         return {x1, y1, x2, y2};
     }
 
+    // Assuming all pictures have same width and height.
     static quartet(p: Picture, q: Picture, r: Picture, s: Picture): Picture {
         return Picture.above(1,
                              1,
@@ -122,73 +124,58 @@ export class Picture {
     }
 
     static cycle(p: Picture): Picture {
-        return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
+        return Picture.quartet(p,
+                               p.rot().rot().rot(),
+                               p.rot(),
+                               p.rot().rot());
     }
 
+    // This is under assumption that top and bottom pictures have the same width and height.
+    // TODO: Think again.
     static above(rtop: number, rbottom: number, top: Picture, bottom: Picture): Picture {
-        let pic = new Picture(top.w, top.h);
         let scale = rtop / (rtop + rbottom);
 
-        for (let obj of top.segments) {
-            pic.segments.push( Picture.segment_top(scale, obj) );
-        }
-
-        for (let obj of bottom.segments) {
-            pic.segments.push( Picture.segment_bottom(scale, bottom, obj) );
-        }
-        return pic;
-    }
-
-    static beside(rleft: number, rright: number, left: Picture, right: Picture): Picture {
-        let pic = new Picture(left.w, left.h);
-        let scale = rleft / (rleft + rright);
-
-        for (let obj of left.segments) {
-            pic.segments.push( Picture.segment_left(scale, obj) );
-        }
-
-        for (let obj of right.segments) {
-            pic.segments.push( Picture.segment_right(scale, right, obj) );
-        }
-        return pic;
-    }
-
-    static segment_top(scale: number, s: Segment): Segment {
-        return {
+        let topSegments = top.segments.map(s => ({
             x1: s.x1,
             y1: s.y1 * scale,
             x2: s.x2,
             y2: s.y2 * scale
-        };
-    }
+        }));
 
-    static segment_bottom(scale: number, p: Picture, s: Segment): Segment {
-        let t = 1 - scale;
-        return {
+        let bottomSegments = bottom.segments.map(s => ({
             x1: s.x1,
-            y1: p.h * scale + s.y1 * t,
+            y1: bottom.h * scale + s.y1 * (1-scale),
             x2: s.x2,
-            y2: p.h * scale + s.y2 * t
-        };
+            y2: bottom.h * scale + s.y2 * (1-scale)
+        }));
+
+        return new Picture(top.w, top.h)
+                   .add_segments(topSegments)
+                   .add_segments(bottomSegments);
     }
 
-    static segment_left(scale: number, s: Segment): Segment {
-        return {
+    // This is under assumption that left and right pictures have the same width and height.
+    // TODO: Think again.
+    static beside(rleft: number, rright: number, left: Picture, right: Picture): Picture {
+        let scale = rleft / (rleft + rright);
+
+        let leftSegments = left.segments.map(s => ({
             x1: s.x1 * scale,
             y1: s.y1,
             x2: s.x2 * scale,
             y2: s.y2,
-        };
-    }
+        }));
 
-    static segment_right(scale: number, p: Picture, s: Segment): Segment {
-        let t = 1 - scale;
-        return {
-            x1: p.w * scale + s.x1 * t,
+        let rightSegments = right.segments.map(s => ({
+            x1: left.w * scale + s.x1 * (1-scale),
             y1: s.y1,
-            x2: p.w * scale + s.x2 * t,
+            x2: left.w * scale + s.x2 * (1-scale),
             y2: s.y2,
-        };
+        }));
+
+        return new Picture(left.w, right.h)
+                   .add_segments(leftSegments)
+                   .add_segments(rightSegments);
     }
 
     // cw(): Picture {
@@ -228,42 +215,6 @@ export class Picture {
         // return pic;
     // }
 
-    // static above(rtop: number, rbottom: number, top: Picture, bottom: Picture): Picture {
-        // let pic = new Picture(top.w, top.h);
-        // let scale = rtop / (rtop + rbottom);
-
-        // for (let obj of top.objs) {
-            // pic.objs.push( Picture.segment_top(scale, obj) );
-        // }
-
-        // for (let obj of bottom.objs) {
-            // pic.objs.push( Picture.segment_bottom(scale, bottom, obj) );
-        // }
-        // return pic;
-    // }
-
-    // static beside(rleft: number, rright: number, left: Picture, right: Picture): Picture {
-        // let pic = new Picture(left.w, left.h);
-        // let scale = rleft / (rleft + rright);
-
-        // for (let obj of left.objs) {
-            // pic.objs.push( Picture.segment_left(scale, obj) );
-        // }
-
-        // for (let obj of right.objs) {
-            // pic.objs.push( Picture.segment_right(scale, right, obj) );
-        // }
-        // return pic;
-    // }
-
-    // static quartet(p: Picture, q: Picture, r: Picture, s: Picture): Picture {
-        // return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
-    // }
-
-    // static cycle(p: Picture): Picture {
-        // return Picture.quartet(p, p.cw(), p.ccw(), p.cw().cw());
-    // }
-
     // #segment_cw(s: Segment): Segment {
         // let c = this.w / 2;
         // let d = this.h / 2;
@@ -296,23 +247,5 @@ export class Picture {
         // let y1 = -s.y1 + 2*d;
         // let y2 = -s.y2 + 2*d;
         // return new Segment(s.x1, y1, s.x2, y2, s.strokeStyle);
-    // }
-
-    // static segment_top(scale: number, s: Segment): Segment {
-        // return new Segment(s.x1, s.y1 * scale, s.x2, s.y2 * scale, s.strokeStyle);
-    // }
-
-    // static segment_bottom(scale: number, p: Picture, s: Segment): Segment {
-        // let t = 1 - scale;
-        // return new Segment(s.x1, p.h * scale + s.y1 * t, s.x2, p.h * scale + s.y2 * t, s.strokeStyle);
-    // }
-
-    // static segment_left(scale: number, s: Segment): Segment {
-        // return new Segment(s.x1 * scale, s.y1, s.x2 * scale, s.y2, s.strokeStyle);
-    // }
-
-    // static segment_right(scale: number, p: Picture, s: Segment): Segment {
-        // let t = 1 - scale;
-        // return new Segment(p.w * scale + s.x1 * t, s.y1, p.w * scale + s.x2 * t, s.y2, s.strokeStyle);
     // }
 }

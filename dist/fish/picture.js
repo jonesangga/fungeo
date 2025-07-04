@@ -68,13 +68,11 @@ export class Picture {
         return new Picture(w, h).add_segments(segments);
     }
     rot() {
-        let result = new Picture(this.w, this.h);
-        for (let obj of this.segments) {
-            result.segments.push(this.#segment_ccw(obj));
-        }
-        return result;
+        let segments = this.segments.map(s => this.#segment_rot(s));
+        return new Picture(this.w, this.h)
+            .add_segments(segments);
     }
-    #segment_ccw(s) {
+    #segment_rot(s) {
         let c = this.w / 2;
         let d = this.h / 2;
         let x1 = s.y1 + c - d;
@@ -90,59 +88,39 @@ export class Picture {
         return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
     }
     static above(rtop, rbottom, top, bottom) {
-        let pic = new Picture(top.w, top.h);
         let scale = rtop / (rtop + rbottom);
-        for (let obj of top.segments) {
-            pic.segments.push(Picture.segment_top(scale, obj));
-        }
-        for (let obj of bottom.segments) {
-            pic.segments.push(Picture.segment_bottom(scale, bottom, obj));
-        }
-        return pic;
-    }
-    static beside(rleft, rright, left, right) {
-        let pic = new Picture(left.w, left.h);
-        let scale = rleft / (rleft + rright);
-        for (let obj of left.segments) {
-            pic.segments.push(Picture.segment_left(scale, obj));
-        }
-        for (let obj of right.segments) {
-            pic.segments.push(Picture.segment_right(scale, right, obj));
-        }
-        return pic;
-    }
-    static segment_top(scale, s) {
-        return {
+        let topSegments = top.segments.map(s => ({
             x1: s.x1,
             y1: s.y1 * scale,
             x2: s.x2,
             y2: s.y2 * scale
-        };
-    }
-    static segment_bottom(scale, p, s) {
-        let t = 1 - scale;
-        return {
+        }));
+        let bottomSegments = bottom.segments.map(s => ({
             x1: s.x1,
-            y1: p.h * scale + s.y1 * t,
+            y1: bottom.h * scale + s.y1 * (1 - scale),
             x2: s.x2,
-            y2: p.h * scale + s.y2 * t
-        };
+            y2: bottom.h * scale + s.y2 * (1 - scale)
+        }));
+        return new Picture(top.w, top.h)
+            .add_segments(topSegments)
+            .add_segments(bottomSegments);
     }
-    static segment_left(scale, s) {
-        return {
+    static beside(rleft, rright, left, right) {
+        let scale = rleft / (rleft + rright);
+        let leftSegments = left.segments.map(s => ({
             x1: s.x1 * scale,
             y1: s.y1,
             x2: s.x2 * scale,
             y2: s.y2,
-        };
-    }
-    static segment_right(scale, p, s) {
-        let t = 1 - scale;
-        return {
-            x1: p.w * scale + s.x1 * t,
+        }));
+        let rightSegments = right.segments.map(s => ({
+            x1: left.w * scale + s.x1 * (1 - scale),
             y1: s.y1,
-            x2: p.w * scale + s.x2 * t,
+            x2: left.w * scale + s.x2 * (1 - scale),
             y2: s.y2,
-        };
+        }));
+        return new Picture(left.w, right.h)
+            .add_segments(leftSegments)
+            .add_segments(rightSegments);
     }
 }
