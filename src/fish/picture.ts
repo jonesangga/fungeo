@@ -121,6 +121,10 @@ export class Picture {
                              Picture.beside(1, 1, r, s));
     }
 
+    static cycle(p: Picture): Picture {
+        return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
+    }
+
     static above(rtop: number, rbottom: number, top: Picture, bottom: Picture): Picture {
         let pic = new Picture(top.w, top.h);
         let scale = rtop / (rtop + rbottom);

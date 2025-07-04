@@ -86,6 +86,9 @@ export class Picture {
     static quartet(p, q, r, s) {
         return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
     }
+    static cycle(p) {
+        return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
+    }
     static above(rtop, rbottom, top, bottom) {
         let pic = new Picture(top.w, top.h);
         let scale = rtop / (rtop + rbottom);
