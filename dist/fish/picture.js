@@ -1,7 +1,7 @@
-import { defaultCanvas as canvas } from "../ui/canvas.js";
+import { defaultCanvas } from "../ui/canvas.js";
 import { color } from "../data/constant.js";
 import { Class, FGType } from "../literal/type.js";
-const c = canvas.ctx;
+const c = defaultCanvas.ctx;
 export class PictureT extends Class {
     fields = {};
     methods = {};
@@ -61,7 +61,7 @@ export class Picture {
             c.strokeRect(0, 0, this.w, this.h);
         }
         c.beginPath();
-        for (let s of this.segments) {
+        for (const s of this.segments) {
             c.moveTo(s.x1, s.y1);
             c.lineTo(s.x2, s.y2);
         }
@@ -69,9 +69,9 @@ export class Picture {
         c.restore();
     }
     static resize(pic, w, h) {
-        let scaleX = w / pic.w;
-        let scaleY = h / pic.h;
-        let segments = pic.segments.map(s => ({
+        const scaleX = w / pic.w;
+        const scaleY = h / pic.h;
+        const segments = pic.segments.map(s => ({
             x1: s.x1 * scaleX,
             y1: s.y1 * scaleY,
             x2: s.x2 * scaleX,
@@ -80,18 +80,19 @@ export class Picture {
         return new Picture(w, h).add_segments(segments);
     }
     rot() {
-        let segments = this.segments.map(s => this.#segment_rot(s));
+        const segments = this.segments.map(s => this.#segment_rot(s));
         return new Picture(this.w, this.h)
             .add_segments(segments);
     }
     #segment_rot(s) {
-        let c = this.w / 2;
-        let d = this.h / 2;
-        let x1 = s.y1 + c - d;
-        let y1 = -s.x1 + c + d;
-        let x2 = s.y2 + c - d;
-        let y2 = -s.x2 + c + d;
-        return { x1, y1, x2, y2 };
+        const c = this.w / 2;
+        const d = this.h / 2;
+        return {
+            x1: s.y1 + c - d,
+            y1: -s.x1 + c + d,
+            x2: s.y2 + c - d,
+            y2: -s.x2 + c + d,
+        };
     }
     static quartet(p, q, r, s) {
         return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
@@ -100,14 +101,14 @@ export class Picture {
         return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
     }
     static above(rtop, rbottom, top, bottom) {
-        let scale = rtop / (rtop + rbottom);
-        let topSegments = top.segments.map(s => ({
+        const scale = rtop / (rtop + rbottom);
+        const topSegments = top.segments.map(s => ({
             x1: s.x1,
             y1: s.y1 * scale,
             x2: s.x2,
             y2: s.y2 * scale
         }));
-        let bottomSegments = bottom.segments.map(s => ({
+        const bottomSegments = bottom.segments.map(s => ({
             x1: s.x1,
             y1: bottom.h * scale + s.y1 * (1 - scale),
             x2: s.x2,
@@ -118,14 +119,14 @@ export class Picture {
             .add_segments(bottomSegments);
     }
     static beside(rleft, rright, left, right) {
-        let scale = rleft / (rleft + rright);
-        let leftSegments = left.segments.map(s => ({
+        const scale = rleft / (rleft + rright);
+        const leftSegments = left.segments.map(s => ({
             x1: s.x1 * scale,
             y1: s.y1,
             x2: s.x2 * scale,
             y2: s.y2,
         }));
-        let rightSegments = right.segments.map(s => ({
+        const rightSegments = right.segments.map(s => ({
             x1: left.w * scale + s.x1 * (1 - scale),
             y1: s.y1,
             x2: left.w * scale + s.x2 * (1 - scale),

@@ -6,16 +6,15 @@ const fish = {
     s: [[0, 16, 4, 14], [4, 14, 8, 14], [8, 14, 16, 16], [0, 12, 2, 15], [0, 10, 7, 12], [0, 8, 8, 10], [0, 6, 7, 8], [0, 4, 7, 6], [0, 2, 7, 3], [8, 0, 7, 3], [7, 3, 7, 8], [7, 8, 8, 10], [8, 10, 10, 12], [10, 12, 16, 16], [10, 0, 11, 6], [10, 10, 12, 12], [12, 12, 12, 9], [12, 9, 10, 10], [13, 9, 15, 11], [15, 11, 15, 8], [15, 8, 13, 9], [12, 0, 13, 3], [13, 3, 15, 7], [15, 7, 16, 8], [13, 3, 16, 2], [14, 5, 16, 4], [15, 7, 16, 6]]
 };
 function create(coords) {
-    let unit = new Picture(16, 16);
-    let segments = coords.map(c => ({
+    const segments = coords.map(c => ({
         x1: c[0],
         y1: c[1],
         x2: c[2],
         y2: c[3],
     }));
-    return unit.add_segments(segments);
+    return new Picture(16, 16).add_segments(segments);
 }
-export let fishp = create(fish.p);
-export let fishq = create(fish.q);
-export let fishr = create(fish.r);
-export let fishs = create(fish.s);
+export const fishp = create(fish.p);
+export const fishq = create(fish.q);
+export const fishr = create(fish.r);
+export const fishs = create(fish.s);

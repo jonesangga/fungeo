@@ -1,7 +1,5 @@
-// @jonesangga, 30-04-2025, MIT License.
-//
-// Build-in fish components from paper "Functional Geometry" by Peter Henderson, 1982.
-// The components are Pictures with size 16x16.
+// Fish components from paper "Functional Geometry" by Peter Henderson, 1982.
+// Each component has size 16x16 and contains coordinate [x1, y1, x2, y2] of its segments.
 // You might need to map it into bigger size like
 //
 //     let target = Pic.resize(fishp, 300, 300)
@@ -10,7 +8,8 @@
 
 import { Picture } from "./picture.js"
 
-// From https://frank-buss.de/lisp/functional.html (the y coordinates are flipped).
+// From https://frank-buss.de/lisp/functional.html
+// I flipped the y coordinates to match HTML canvas coordinate.
 const fish = {
     p: [[4,12,6,16],[0,13,3,12],[3,12,0,8],[0,8,0,13],[4,11,7,10],[7,10,4,6],[4,6,4,11],[11,16,10,12],[10,12,8,8],[8,8,4,3],[4,3,0,0],[11,16,14,14],[14,14,16,14],[10,12,13,11],[13,11,16,12],[9,10,12,9],[12,9,16,10],[8,8,12,7],[12,7,16,8],[8,4,16,6],[0,0,6,1],[6,1,8,0],[8,0,12,4],[12,4,16,4],[10,0,12,2],[12,2,16,3],[12,0,13,1],[13,1,16,2],[14,0,16,1]],
     q: [[2,16,4,11],[4,11,4,9],[4,16,6,11],[6,11,6,9],[6,16,8,11],[8,11,8,8],[8,16,10,10],[10,10,10,7],[10,16,14,5],[12,16,13,12],[13,12,16,8],[16,8,15,6],[15,6,16,0],[16,0,12,6],[12,6,6,9],[6,9,4,9],[4,9,0,8],[13,16,16,10],[14,16,16,12],[15,16,16,14],[0,6,7,5],[9,4,10,6],[10,6,12,4],[12,4,9,4],[8,1,9,3],[9,3,11,1],[11,1,8,1],[0,4,3,3],[3,3,7,1],[7,1,8,0],[2,0,3,3],[4,0,5,2],[6,0,7,1], /*my addition*/ [0,0,0,4],[0,8,0,16],[0,16,8,16],[12,16,16,16]],
@@ -19,17 +18,16 @@ const fish = {
 };
 
 function create(coords: number[][]): Picture {
-    let unit = new Picture(16, 16);
-    let segments = coords.map(c => ({
+    const segments = coords.map(c => ({
         x1: c[0],
         y1: c[1],
         x2: c[2],
         y2: c[3],
     }));
-    return unit.add_segments(segments);
+    return new Picture(16, 16).add_segments(segments);
 }
 
-export let fishp = create(fish.p);
-export let fishq = create(fish.q);
-export let fishr = create(fish.r);
-export let fishs = create(fish.s);
+export const fishp = create(fish.p);
+export const fishq = create(fish.q);
+export const fishr = create(fish.r);
+export const fishs = create(fish.s);

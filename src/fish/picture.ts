@@ -1,17 +1,15 @@
-// @jonesangga, 2025, MIT License.
-//
 // TODO: Think about should the size of pics for above() and beside() be the same?
 //       Test this.
-       
+//
 // NOTE: cw_* and ccw_* implementations are actually switched but since canvas use upside down coordinate system
 //       that cancels out.
 
-import { defaultCanvas as canvas } from "../ui/canvas.js"
+import { defaultCanvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
 import { FGCallNative } from "../value.js"
 import { type Type, Class, FGType } from "../literal/type.js"
 
-const c = canvas.ctx;
+const c = defaultCanvas.ctx;
 
 export class PictureT extends Class implements Type {
     fields: Record<string, Type> = {};
@@ -89,7 +87,7 @@ export class Picture {
             c.strokeRect(0, 0, this.w, this.h);
         }
         c.beginPath();
-        for (let s of this.segments) {
+        for (const s of this.segments) {
             c.moveTo(s.x1, s.y1);
             c.lineTo(s.x2, s.y2);
         }
@@ -98,9 +96,9 @@ export class Picture {
     }
 
     static resize(pic: Picture, w: number, h: number): Picture {
-        let scaleX = w / pic.w;
-        let scaleY = h / pic.h;
-        let segments = pic.segments.map(s => ({
+        const scaleX = w / pic.w;
+        const scaleY = h / pic.h;
+        const segments = pic.segments.map(s => ({
             x1: s.x1 * scaleX,
             y1: s.y1 * scaleY,
             x2: s.x2 * scaleX,
@@ -111,7 +109,7 @@ export class Picture {
 
     // TODO: Make the mutable equivalent.
     rot(): Picture {
-        let segments = this.segments.map(s => this.#segment_rot(s));
+        const segments = this.segments.map(s => this.#segment_rot(s));
         return new Picture(this.w, this.h)
                    .add_segments(segments);
     }
@@ -119,13 +117,14 @@ export class Picture {
     // NOTE: This is only correct for square picture, because this will rotate the whole picture
     // instead of rotating elements inside it.
     #segment_rot(s: Segment): Segment {
-        let c = this.w / 2;
-        let d = this.h / 2;
-        let x1 =  s.y1 + c - d;
-        let y1 = -s.x1 + c + d;
-        let x2 =  s.y2 + c - d;
-        let y2 = -s.x2 + c + d;
-        return {x1, y1, x2, y2};
+        const c = this.w / 2;
+        const d = this.h / 2;
+        return {
+            x1:  s.y1 + c - d,
+            y1: -s.x1 + c + d,
+            x2:  s.y2 + c - d,
+            y2: -s.x2 + c + d,
+        };
     }
 
     // Assuming all pictures have same width and height.
@@ -146,16 +145,16 @@ export class Picture {
     // This is under assumption that top and bottom pictures have the same width and height.
     // TODO: Think again.
     static above(rtop: number, rbottom: number, top: Picture, bottom: Picture): Picture {
-        let scale = rtop / (rtop + rbottom);
+        const scale = rtop / (rtop + rbottom);
 
-        let topSegments = top.segments.map(s => ({
+        const topSegments = top.segments.map(s => ({
             x1: s.x1,
             y1: s.y1 * scale,
             x2: s.x2,
             y2: s.y2 * scale
         }));
 
-        let bottomSegments = bottom.segments.map(s => ({
+        const bottomSegments = bottom.segments.map(s => ({
             x1: s.x1,
             y1: bottom.h * scale + s.y1 * (1-scale),
             x2: s.x2,
@@ -170,16 +169,16 @@ export class Picture {
     // This is under assumption that left and right pictures have the same width and height.
     // TODO: Think again.
     static beside(rleft: number, rright: number, left: Picture, right: Picture): Picture {
-        let scale = rleft / (rleft + rright);
+        const scale = rleft / (rleft + rright);
 
-        let leftSegments = left.segments.map(s => ({
+        const leftSegments = left.segments.map(s => ({
             x1: s.x1 * scale,
             y1: s.y1,
             x2: s.x2 * scale,
             y2: s.y2,
         }));
 
-        let rightSegments = right.segments.map(s => ({
+        const rightSegments = right.segments.map(s => ({
             x1: left.w * scale + s.x1 * (1-scale),
             y1: s.y1,
             x2: left.w * scale + s.x2 * (1-scale),
