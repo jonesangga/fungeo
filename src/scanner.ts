@@ -47,7 +47,6 @@ export const enum TokenT {
     String    = 1900,
     StrT      = 1910,
     True      = 2000,
-    Use       = 2050,
     EOF       = 2100,   // Other.
     Error     = 2200,
     Else      = 2300,   // Keywords.
@@ -115,7 +114,6 @@ export const TokenTName: {
     [TokenT.Struct]: "Struct",
     [TokenT.Then]: "Then",
     [TokenT.True]: "True",
-    [TokenT.Use]: "Use",
 };
 
 export type Token = {
@@ -292,7 +290,6 @@ export class Scanner {
             case "struct": return this.token_lexeme( TokenT.Struct );
             case "then":   return this.token_lexeme( TokenT.Then );
             case "true":   return this.token_lexeme( TokenT.True );
-            case "use":    return this.token_lexeme( TokenT.Use );
         }
         return this.token_lexeme(TokenT.Ident);
     }

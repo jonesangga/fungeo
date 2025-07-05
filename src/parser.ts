@@ -5,7 +5,7 @@
 import { type Token, TokenT, Scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode,
          EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode,
-         NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+         NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -80,7 +80,6 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.Struct]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Then]      : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.True]      : {prefix: parse_boolean,    infix: null,            prec: Prec.None},
-    [TokenT.Use]       : {prefix: null,             infix: null,            prec: Prec.None},
 }
 
 //--------------------------------------------------------------------
@@ -242,18 +241,9 @@ function numeric_binary(parser: Parser, lhs: AST): BinaryNode {
 function declaration(parser: Parser): AST {
     if (match(parser, TokenT.Let)) {
         return var_definition(parser);
-    } else if (match(parser, TokenT.Use)) {
-        return parse_use(parser);
     } else {
         return stmt(parser);
     }
-}
-
-function parse_use(parser: Parser): UseNode {
-    let line = parser.prevTok.line;
-    consume(parser, TokenT.Ident, "expect variable name");
-    let name = parser.prevTok.lexeme;
-    return new UseNode(line, name);
 }
 
 // Definition must be followed by initialization.

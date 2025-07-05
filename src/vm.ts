@@ -1,10 +1,10 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { load_module } from "./module_loader.js";
 import { Op, Chunk } from "./chunk.js";
 import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
 import { Names } from "./vmfunction.js";
 import { coreNames } from "./core.js";
+import { extraNames } from "./extra.js";
 import { type Type, FGType, Class } from "./literal/type.js";
 import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
@@ -396,14 +396,6 @@ export function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.Use: {
-                let name  = read_string();
-                console.log(`about to load module ${name}`);
-                if (!load_module(name))
-                    error(`cannot load module ${ name }`);
-                break;
-            }
-
             case Op.New: {
                 let name  = read_string();
                 let type  = (session.pop() as FGType).value;
@@ -519,7 +511,7 @@ type Result<T> =
 export const vm = {
     init(): void {
         session.reset();
-        names = {...coreNames};
+        names = {...coreNames, ...extraNames};
     },
 
     interpret(fn: FGCallUser): Result<string> {

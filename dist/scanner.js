@@ -52,7 +52,6 @@ export const TokenTName = {
     [2910]: "Struct",
     [3000]: "Then",
     [2000]: "True",
-    [2050]: "Use",
 };
 function is_digit(c) {
     return c >= '0' && c <= '9';
@@ -207,7 +206,6 @@ export class Scanner {
             case "struct": return this.token_lexeme(2910);
             case "then": return this.token_lexeme(3000);
             case "true": return this.token_lexeme(2000);
-            case "use": return this.token_lexeme(2050);
         }
         return this.token_lexeme(1730);
     }

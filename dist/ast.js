@@ -296,23 +296,6 @@ export class StringNode {
         return v.visitString(this);
     }
 }
-export class UseNode {
-    line;
-    name;
-    constructor(line, name) {
-        this.line = line;
-        this.name = name;
-    }
-    to_str(level) {
-        return indent(level) + "Use(\n"
-            + indent(level + 2) + this.name
-            + "\n"
-            + indent(level) + ")";
-    }
-    visit(v) {
-        return v.visitUse(this);
-    }
-}
 export class VarDeclNode {
     line;
     name;

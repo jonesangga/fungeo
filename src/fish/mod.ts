@@ -159,7 +159,7 @@ pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
 pictureT.methods["cycle"] = { type: Pic_cycle.sig, value: Pic_cycle };
 pictureT.methods["rot"] = { type: Pic_rot.sig, value: Pic_rot };
 
-export const modNames: Names = {
+export const fishNames: Names = {
     fishp: { type: pictureT, value: fishp },
     fishq: { type: pictureT, value: fishq },
     fishr: { type: pictureT, value: fishr },

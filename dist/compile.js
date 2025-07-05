@@ -37,10 +37,6 @@ class CodeGen {
         let index = makeConstant(new FGString(node.name));
         emitBytes(500, index, node.line);
     }
-    visitUse(node) {
-        let index = makeConstant(new FGString(node.name));
-        emitBytes(1600, index, node.line);
-    }
     visitAssign(node) {
         let index = makeConstant(new FGString(node.left.name));
         node.right.visit(this);

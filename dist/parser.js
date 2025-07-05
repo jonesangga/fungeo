@@ -1,5 +1,5 @@
 import { Scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, UseNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
 const rules = {
     [1180]: { prefix: null, infix: null, prec: 100 },
     [1190]: { prefix: null, infix: null, prec: 220 },
@@ -53,7 +53,6 @@ const rules = {
     [2910]: { prefix: null, infix: null, prec: 100 },
     [3000]: { prefix: null, infix: null, prec: 100 },
     [2000]: { prefix: parse_boolean, infix: null, prec: 100 },
-    [2050]: { prefix: null, infix: null, prec: 100 },
 };
 function error_at_current(parser, message) {
     error_at(parser.currTok, message);
@@ -175,18 +174,9 @@ function declaration(parser) {
     if (match(parser, 2460)) {
         return var_definition(parser);
     }
-    else if (match(parser, 2050)) {
-        return parse_use(parser);
-    }
     else {
         return stmt(parser);
     }
-}
-function parse_use(parser) {
-    let line = parser.prevTok.line;
-    consume(parser, 1730, "expect variable name");
-    let name = parser.prevTok.lexeme;
-    return new UseNode(line, name);
 }
 function var_definition(parser) {
     let line = parser.prevTok.line;

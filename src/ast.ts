@@ -22,7 +22,6 @@ export interface Visitor<T> {
     visitNumber    (node: NumberNode):    T;
     visitSetProp   (node: SetPropNode):   T;
     visitString    (node: StringNode):    T;
-    visitUse       (node: UseNode):       T;
     visitVarDecl   (node: VarDeclNode):   T;
 }
 
@@ -330,22 +329,6 @@ export class StringNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitString(this);
-    }
-}
-
-export class UseNode implements AST {
-    constructor(public line: number,
-                public name: string) {}
-
-    to_str(level: number): string {
-        return indent(level) + "Use(\n"
-            + indent(level + 2) + this.name
-            + "\n"
-            + indent(level) + ")";
-    }
-
-    visit<T>(v: Visitor<T>): T {
-        return v.visitUse(this);
     }
 }
 

@@ -1,6 +1,6 @@
-import { load_module } from "./module_loader.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { coreNames } from "./core.js";
+import { extraNames } from "./extra.js";
 import { defaultCanvas } from "./ui/canvas.js";
 let $ = console.log;
 export class Session {
@@ -244,13 +244,6 @@ export function run(intercept = false) {
                 session.push(a);
                 break;
             }
-            case 1600: {
-                let name = read_string();
-                console.log(`about to load module ${name}`);
-                if (!load_module(name))
-                    error(`cannot load module ${name}`);
-                break;
-            }
             case 1020: {
                 let name = read_string();
                 let type = session.pop().value;
@@ -335,7 +328,7 @@ class RuntimeError extends Error {
 export const vm = {
     init() {
         session.reset();
-        names = { ...coreNames };
+        names = { ...coreNames, ...extraNames };
     },
     interpret(fn) {
         TESTING = false;

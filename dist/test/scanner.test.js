@@ -109,7 +109,6 @@ describe("scanner each token type", () => {
         [2910]: ["struct", { type: 2910, line: 1, lexeme: "struct" }],
         [3000]: ["then", { type: 3000, line: 1, lexeme: "then" }],
         [2000]: ["true", { type: 2000, line: 1, lexeme: "true" }],
-        [2050]: ["use", { type: 2050, line: 1, lexeme: "use" }],
     };
     for (let [input, expected] of Object.values(tests)) {
         it(`scan ${input}`, () => {
