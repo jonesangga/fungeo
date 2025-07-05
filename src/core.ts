@@ -1,6 +1,5 @@
-import { Session } from "./vm.js"
+import { type Names, Session } from "./vm.js"
 import { Canvas, defaultCanvas } from "./ui/canvas.js"
-import { type Names } from "./vmfunction.js"
 import { type GeoObj, FGCallNative, FGNumber } from "./value.js"
 import { Point } from "./geo/point.js"
 import { Segment } from "./geo/segment.js"
@@ -10,7 +9,7 @@ import { FunctionT, OverloadT,
          anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
 
 function _print(session: Session, ver: number): void {
-    let value = session.pop();
+    const value = session.pop();
     session.pop(); // The function.
     session.write( value.to_str() + "\n" );
 }
@@ -21,38 +20,38 @@ const print = new FGCallNative("print", _print,
 );
 
 function _canvas(session: Session, ver: number): void {
-    let h = (session.pop() as FGNumber).value;
-    let w = (session.pop() as FGNumber).value;
+    const h = (session.pop() as FGNumber).value;
+    const w = (session.pop() as FGNumber).value;
     session.pop(); // The function.
     session.push(new Canvas(w, h));
 }
-let canvas = new FGCallNative("canvas", _canvas,
+const canvas = new FGCallNative("canvas", _canvas,
     new OverloadT([
         new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
     ])
 );
 
 function _canvas_place(session: Session, ver: number): void {
-    let canvas = session.pop() as Canvas;
-    let y = (session.pop() as FGNumber).value;
-    let x = (session.pop() as FGNumber).value;
+    const canvas = session.pop() as Canvas;
+    const y = (session.pop() as FGNumber).value;
+    const x = (session.pop() as FGNumber).value;
     session.pop(); // The function.
     session.push(canvas.place(x, y));
 }
-export let canvas_place = new FGCallNative("canvas_place", _canvas_place,
+const canvas_place = new FGCallNative("canvas_place", _canvas_place,
     new OverloadT([
         new FunctionT([numberT, numberT], canvasT, ["x", "y"]),
     ])
 );
 
 function _canvas_resize(session: Session, ver: number): void {
-    let canvas = session.pop() as Canvas;
-    let w = (session.pop() as FGNumber).value;
-    let h = (session.pop() as FGNumber).value;
+    const canvas = session.pop() as Canvas;
+    const w = (session.pop() as FGNumber).value;
+    const h = (session.pop() as FGNumber).value;
     session.pop(); // The function.
     session.push(canvas.resize(w, h));
 }
-export let canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
+const canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
     new OverloadT([
         new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
     ])
@@ -62,12 +61,12 @@ canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
 
 function _draw(session: Session, ver: number): void {
-    let v = session.pop() as GeoObj;
+    const v = session.pop() as GeoObj;
     session.pop(); // The function.
     session.oncanvas.push(v);
     session.render();
 }
-let draw = new FGCallNative("draw", _draw,
+const draw = new FGCallNative("draw", _draw,
     new OverloadT([
         new FunctionT([geoT], nothingT, ["obj"]),
     ])
@@ -78,19 +77,19 @@ function _clear(session: Session): void {
     session.pop(); // The function.
     session.clear();
 }
-let clear = new FGCallNative("clear",  _clear,
+const clear = new FGCallNative("clear",  _clear,
     new OverloadT([
         new FunctionT([], nothingT, []),
     ])
 );
 
 function _pt(session: Session, ver: number): void {
-    let y = (session.pop() as FGNumber).value;
-    let x = (session.pop() as FGNumber).value;
+    const y = (session.pop() as FGNumber).value;
+    const x = (session.pop() as FGNumber).value;
     session.pop(); // The function.
     session.push(new Point(x, y));
 }
-let pt = new FGCallNative("pt", _pt,
+const pt = new FGCallNative("pt", _pt,
     new OverloadT([
         new FunctionT([numberT, numberT], pointT, ["x", "y"]),
     ])
@@ -98,27 +97,27 @@ let pt = new FGCallNative("pt", _pt,
 
 function _circle(session: Session, ver: number): void {
     if (ver === 0) {
-        let r = (session.pop() as FGNumber).value;
-        let y = (session.pop() as FGNumber).value;
-        let x = (session.pop() as FGNumber).value;
+        const r = (session.pop() as FGNumber).value;
+        const y = (session.pop() as FGNumber).value;
+        const x = (session.pop() as FGNumber).value;
         session.pop(); // The function.
         session.push(new Circle(x, y, r));
     }
     else if (ver === 1) {
-        let q = session.pop() as Point;
-        let p = session.pop() as Point;
+        const q = session.pop() as Point;
+        const p = session.pop() as Point;
         session.pop(); // The function.
-        let r = Math.sqrt((q.x - p.x)**2 + (q.y - p.y)**2);
+        const r = Math.sqrt((q.x - p.x)**2 + (q.y - p.y)**2);
         session.push(new Circle(p.x, p.y, r));
     }
     else if (ver === 2) {
-        let r = (session.pop() as FGNumber).value;
-        let p = session.pop() as Point;
+        const r = (session.pop() as FGNumber).value;
+        const p = session.pop() as Point;
         session.pop(); // The function.
         session.push(new Circle(p.x, p.y, r));
     }
 }
-let circle = new FGCallNative("circle", _circle,
+const circle = new FGCallNative("circle", _circle,
     new OverloadT([
         new FunctionT([numberT, numberT, numberT], circleT, ["x", "y", "r"]),
         new FunctionT([pointT, pointT], circleT, ["center", "other"]),
@@ -128,21 +127,21 @@ let circle = new FGCallNative("circle", _circle,
 
 function _segment(session: Session, ver: number): void {
     if (ver === 0) {
-        let y2 = (session.pop() as FGNumber).value;
-        let x2 = (session.pop() as FGNumber).value;
-        let y1 = (session.pop() as FGNumber).value;
-        let x1 = (session.pop() as FGNumber).value;
+        const y2 = (session.pop() as FGNumber).value;
+        const x2 = (session.pop() as FGNumber).value;
+        const y1 = (session.pop() as FGNumber).value;
+        const x1 = (session.pop() as FGNumber).value;
         session.pop(); // The function.
         session.push(new Segment(x1, y1, x2, y2));
     }
     else if (ver === 1) {
-        let q = session.pop() as Point;
-        let p = session.pop() as Point;
+        const q = session.pop() as Point;
+        const p = session.pop() as Point;
         session.pop(); // The function.
         session.push(new Segment(p.x, p.y, q.x, q.y));
     }
 }
-let segment = new FGCallNative("segment", _segment,
+const segment = new FGCallNative("segment", _segment,
     new OverloadT([
         new FunctionT([numberT, numberT, numberT, numberT], segmentT, ["x1", "y1", "x2", "y2"]),
         new FunctionT([pointT, pointT], segmentT, ["p", "q"]),
@@ -151,7 +150,7 @@ let segment = new FGCallNative("segment", _segment,
 
 function _help(session: Session, ver: number): void {
     if (ver === 0) {
-        let value = session.pop();
+        const value = session.pop();
         session.pop(); // The function.
         if (value instanceof FGCallNative) {
             session.write( value.help() );
@@ -165,14 +164,14 @@ function _help(session: Session, ver: number): void {
         session.write( welcome );
     }
 }
-let help = new FGCallNative("help",  _help,
+const help = new FGCallNative("help",  _help,
     new OverloadT([
         new FunctionT([anyT], nothingT, ["command"]),
         new FunctionT([], nothingT, []),
     ])
 );
 
-export let coreNames: Names = {
+export const coreNames: Names = {
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas:  { type: canvas.sig, value: canvas },
     circle:  { type: circle.sig, value: circle },

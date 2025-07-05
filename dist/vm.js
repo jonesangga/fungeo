@@ -1,8 +1,8 @@
+import { __ } from "./common.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { coreNames } from "./core.js";
 import { extraNames } from "./extra.js";
 import { defaultCanvas } from "./ui/canvas.js";
-let $ = console.log;
 export class Session {
     stack = [];
     stackTop = 0;
@@ -35,7 +35,6 @@ export class Session {
     }
 }
 export let session = new Session();
-$(session);
 let frames = [];
 let currFrame;
 let currChunk;
@@ -56,7 +55,7 @@ function read_constant() {
 function read_string() {
     return read_constant().value;
 }
-export function call(fn, argCount) {
+function call(fn, argCount) {
     currFrame = { fn, ip: 0, slots: session.stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
@@ -77,7 +76,7 @@ const gt = (a, b) => a > b;
 const leq = (a, b) => a <= b;
 const geq = (a, b) => a >= b;
 const debug = true;
-export function run(intercept = false) {
+function run(intercept = false) {
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -88,7 +87,7 @@ export function run(intercept = false) {
             }
             str += "\n";
             let [result,] = currChunk.disassemble_instr(currFrame.ip);
-            $(str + result);
+            __(str + result);
         }
         switch (read_byte()) {
             case 100: {
@@ -337,7 +336,6 @@ export const vm = {
         call(fn, 0);
         try {
             run();
-            $(session);
             return { ok: true, value: session.output };
         }
         catch (error) {

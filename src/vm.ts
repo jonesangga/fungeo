@@ -1,17 +1,13 @@
 // @jonesangga, 12-04-2025, MIT License.
 
+import { __ } from "./common.js";
 import { Op, Chunk } from "./chunk.js";
 import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
-import { Names } from "./vmfunction.js";
 import { coreNames } from "./core.js";
 import { extraNames } from "./extra.js";
 import { type Type, FGType, Class } from "./literal/type.js";
 import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
-
-// For quick debugging.
-let $ = console.log;
-// $ = () => {};
 
 export class Session {
     stack: Value[] = [];
@@ -53,11 +49,14 @@ export class Session {
 }
 
 export let session = new Session();
-$(session);
 
 let frames: CallFrame[] = [];
 let currFrame: CallFrame;
 let currChunk: Chunk;
+
+export type Names = {
+    [name: string]: { type: Type, value: Value, mut?: boolean },
+};
 
 export let names: Names = {};
 
@@ -84,7 +83,7 @@ function read_string(): string {
     return (read_constant() as FGString).value;
 }
 
-export function call(fn: FGCallUser, argCount: number) {
+function call(fn: FGCallUser, argCount: number) {
     currFrame = { fn, ip: 0, slots: session.stackTop - argCount };
     currChunk = fn.chunk;
     frames.push(currFrame);
@@ -114,7 +113,7 @@ const geq = (a: NumStr, b: NumStr): boolean => a >= b;
 
 const debug = true;
 
-export function run(intercept: boolean = false): boolean {
+function run(intercept: boolean = false): boolean {
     for (;;) {
         if (debug) {
             let str = "      ";
@@ -125,7 +124,7 @@ export function run(intercept: boolean = false): boolean {
             }
             str += "\n";
             let [result, ] = currChunk.disassemble_instr(currFrame.ip);
-            $(str + result);
+            __(str + result);
         }
 
         switch (read_byte()) {
@@ -523,7 +522,6 @@ export const vm = {
 
         try {
             run();
-            $(session);
             return { ok: true, value: session.output };
         }
         catch (error: unknown) {

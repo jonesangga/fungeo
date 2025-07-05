@@ -1,5 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
+import { type Result } from "./common.js";
 import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { names } from "./vm.js"
@@ -215,10 +216,6 @@ function overload(input: Type[], fn: OverloadT, line: number): [number, Type] {
 
 // TODO: Change this later.
 let tempNames: Record<string, { type: Type, mut?: boolean }> = {};
-
-type Result<T> =
-    | { ok: true, value: T }
-    | { ok: false, error: Error };
 
 export function typecheck(ast: FileNode): Result<typeof tempNames> {
     tempNames = {};         // Reset temporary name table.

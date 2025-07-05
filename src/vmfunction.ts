@@ -1,6 +1,3 @@
-import { type Value } from "./value.js"
-import { type Type } from "./literal/type.js"
-
 // const fillableT = new UnionT([circleT, ellipseT]);
 
 // function _printf(): void {
@@ -488,13 +485,8 @@ import { type Type } from "./literal/type.js"
     // new FunctionT([segmentT], pointT)
 // );
 
-export type Names = {
-    [name: string]: { type: Type, value: Value, mut?: boolean },
-};
-
 // export let nativeNames: Names = {
     // // UI objects.
-    // "canvas": { type: canvasT, value: canvas },
     // "repl":   { type: replT, value: repl },
 
     // // "Push":   { type: Push.sig, value: Push },
@@ -522,7 +514,6 @@ export type Names = {
     // // "Ccw":    { type: Ccw.sig, value: Ccw },
     // // "FlipH":  { type: FlipH.sig, value: FlipH },
     // // "FlipV":  { type: FlipV.sig, value: FlipV },
-    // // "Cycle":  { type: Cycle.sig, value: Cycle },
     // // "R":      { type: R.sig, value: R, methods: {
         // // "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
         // // "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },

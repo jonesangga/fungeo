@@ -1,8 +1,7 @@
-import { Session } from "../vm.js"
+import { type Names, Session } from "../vm.js"
 import { FGCallNative, FGNumber } from "../value.js"
 import { fishp, fishq, fishr, fishs } from "./fish.js"
 import { pictureT, Picture } from "./picture.js"
-import { type Names } from "../vmfunction.js"
 import { FunctionT, OverloadT,
          nothingT, numberT } from "../literal/type.js"
 

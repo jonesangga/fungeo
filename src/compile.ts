@@ -1,5 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 
+import { type Result } from "./common.js";
 import { Op, Chunk } from "./chunk.js"
 import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
@@ -165,10 +166,6 @@ function end_compiler(): FGCallUser {
 
 // TODO: Change this later.
 let tempNames: Record<string, { type: Type, mut?: boolean }> = {};
-
-type Result<T> =
-    | { ok: true, value: T }
-    | { ok: false, error: Error };
 
 export function compile(ast: FileNode, name: typeof tempNames): Result<FGCallUser> {
     tempNames = name;

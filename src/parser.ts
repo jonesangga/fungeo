@@ -2,6 +2,7 @@
 //
 // TODO: Test error messages in file.
 
+import { type Result } from "./common.js";
 import { type Token, TokenT, Scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode,
          EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode,
@@ -307,10 +308,6 @@ function parse_prec(parser: Parser, prec: Prec): AST {
     }
     return lhs;
 }
-
-type Result<T> =
-    | { ok: true,  value: T }
-    | { ok: false, error: Error };
 
 type Parser = {
     scanner: Scanner,

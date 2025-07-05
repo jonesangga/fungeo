@@ -2,31 +2,31 @@ import { FGType, canvasT } from "../literal/type.js";
 export class Canvas {
     w;
     h;
-    kind = 2000;
+    #canvas;
+    ctx;
+    #pixelRatio;
     x = 0;
     y = 0;
-    canvas;
-    ctx;
-    pixelRatio;
     constructor(w = 100, h = 100) {
         this.w = w;
         this.h = h;
-        let canvasElem = document.createElement("canvas");
-        this.ctx = canvasElem.getContext("2d");
-        let pixelRatio = window.devicePixelRatio || 1;
-        document.body.appendChild(canvasElem);
-        canvasElem.style.width = w + "px";
-        canvasElem.style.height = h + "px";
-        canvasElem.width = w * pixelRatio;
-        canvasElem.height = h * pixelRatio;
-        this.ctx.scale(pixelRatio, pixelRatio);
-        canvasElem.style.position = "absolute";
-        canvasElem.style.top = "0px";
-        canvasElem.style.left = "0px";
-        canvasElem.style.border = "1px solid black";
-        canvasElem.style.background = "#fff";
-        this.canvas = canvasElem;
-        this.pixelRatio = pixelRatio;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const pixelRatio = window.devicePixelRatio || 1;
+        document.body.appendChild(canvas);
+        ctx.scale(pixelRatio, pixelRatio);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        canvas.width = w * pixelRatio;
+        canvas.height = h * pixelRatio;
+        canvas.style.position = "absolute";
+        canvas.style.top = "0px";
+        canvas.style.left = "0px";
+        canvas.style.border = "1px solid black";
+        canvas.style.background = "#fff";
+        this.#canvas = canvas;
+        this.ctx = ctx;
+        this.#pixelRatio = pixelRatio;
     }
     typeof() {
         return new FGType(canvasT);
@@ -43,21 +43,21 @@ export class Canvas {
             console.log("invalid place");
             return this;
         }
-        this.canvas.style.left = x + "px";
-        this.canvas.style.top = y + "px";
+        this.#canvas.style.left = x + "px";
+        this.#canvas.style.top = y + "px";
         this.x = x;
         this.y = y;
         return this;
     }
     resize(w, h) {
+        this.#canvas.width = w * this.#pixelRatio;
+        this.#canvas.height = h * this.#pixelRatio;
+        this.#canvas.style.width = w + "px";
+        this.#canvas.style.height = h + "px";
         this.w = w;
         this.h = h;
-        this.canvas.width = this.w * this.pixelRatio;
-        this.canvas.height = this.h * this.pixelRatio;
-        this.canvas.style.width = this.w + "px";
-        this.canvas.style.height = this.h + "px";
-        this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        this.ctx.scale(this.#pixelRatio, this.#pixelRatio);
         return this;
     }
 }
-export let defaultCanvas = new Canvas(300, 300);
+export const defaultCanvas = new Canvas(300, 300);

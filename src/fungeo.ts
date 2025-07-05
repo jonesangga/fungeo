@@ -1,3 +1,4 @@
+import { __ } from "./common.js";
 import "./ui/demo.js"
 import repl from "./ui/repl.js"
 import { defaultCanvas } from "./ui/canvas.js"
@@ -11,30 +12,30 @@ defaultCanvas.place(650, 0);
 vm.init();
 
 function main(source: string): void {
-    let parseR = parse(source);
+    const parseR = parse(source);
     if (!parseR.ok) {
         console.log(parseR.error);
         repl.error(parseR.error.message);
         return;
     }
-    console.log(parseR.value.to_str(0));
-    let typecheckR = typecheck(parseR.value);
+    __(parseR.value.to_str(0));
+
+    const typecheckR = typecheck(parseR.value);
     if (!typecheckR.ok) {
         console.log(typecheckR.error);
         repl.error(typecheckR.error.message);
         return;
     }
-    let compileR = compile(parseR.value, typecheckR.value);
 
+    const compileR = compile(parseR.value, typecheckR.value);
     if (!compileR.ok) {
         console.log(compileR.error);
         repl.error(compileR.error.message);
         return;
     }
+    __(compileR.value.chunk.disassemble());
 
-    console.log(compileR.value.chunk.disassemble());
-
-    let vmR = vm.interpret(compileR.value);
+    const vmR = vm.interpret(compileR.value);
     if (vmR.ok)
         repl.ok(vmR.value);
     else {

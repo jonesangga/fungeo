@@ -1,37 +1,38 @@
 // @jonesangga, 12-04-2025, MIT License.
 
-import { Kind } from "../value.js"
 import { FGType, canvasT } from "../literal/type.js"
 
 export class Canvas {
-    kind: Kind.Canvas = Kind.Canvas;
+    #canvas:      HTMLCanvasElement;
+    readonly ctx: CanvasRenderingContext2D;
+    #pixelRatio:  number;
     x = 0;
     y = 0;
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    pixelRatio: number;
 
     constructor(public w: number = 100,
                 public h: number = 100)
     {
-        let canvasElem = document.createElement("canvas");
-        this.ctx = canvasElem.getContext("2d") as CanvasRenderingContext2D;
-        let pixelRatio = window.devicePixelRatio || 1;
+        const canvas     = document.createElement("canvas");
+        const ctx        = canvas.getContext("2d") as CanvasRenderingContext2D;
+        const pixelRatio = window.devicePixelRatio || 1;
 
-        document.body.appendChild(canvasElem);
-        canvasElem.style.width  = w + "px";
-        canvasElem.style.height = h + "px";
-        canvasElem.width  = w * pixelRatio;
-        canvasElem.height = h * pixelRatio;
-        this.ctx.scale(pixelRatio, pixelRatio);
+        document.body.appendChild(canvas);
+        ctx.scale(pixelRatio, pixelRatio);
 
-        canvasElem.style.position = "absolute";
-        canvasElem.style.top      = "0px";
-        canvasElem.style.left     = "0px";
-        canvasElem.style.border   = "1px solid black";
-        canvasElem.style.background = "#fff";
-        this.canvas = canvasElem;
-        this.pixelRatio = pixelRatio;
+        canvas.style.width      = w + "px";
+        canvas.style.height     = h + "px";
+        canvas.width            = w * pixelRatio;
+        canvas.height           = h * pixelRatio;
+
+        canvas.style.position   = "absolute";
+        canvas.style.top        = "0px";
+        canvas.style.left       = "0px";
+        canvas.style.border     = "1px solid black";
+        canvas.style.background = "#fff";
+
+        this.#canvas     = canvas;
+        this.ctx        = ctx;
+        this.#pixelRatio = pixelRatio;
     }
 
     typeof(): FGType {
@@ -54,23 +55,24 @@ export class Canvas {
             console.log("invalid place");
             return this;
         }
-        this.canvas.style.left = x + "px";
-        this.canvas.style.top  = y + "px";
+        this.#canvas.style.left = x + "px";
+        this.#canvas.style.top  = y + "px";
         this.x = x;
         this.y = y;
         return this;
     }
 
+    // TODO: Check that ctx.scale() compound?
     resize(w: number, h: number): Canvas {
+        this.#canvas.width        = w * this.#pixelRatio;
+        this.#canvas.height       = h * this.#pixelRatio;
+        this.#canvas.style.width  = w + "px";
+        this.#canvas.style.height = h + "px";
         this.w = w;
         this.h = h;
-        this.canvas.width  = this.w * this.pixelRatio;
-        this.canvas.height = this.h * this.pixelRatio;
-        this.canvas.style.width  = this.w + "px";
-        this.canvas.style.height = this.h + "px";
-        this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        this.ctx.scale(this.#pixelRatio, this.#pixelRatio);
         return this;
     }
 }
 
-export let defaultCanvas = new Canvas(300, 300);
+export const defaultCanvas = new Canvas(300, 300);
