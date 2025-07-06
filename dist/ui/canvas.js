@@ -50,6 +50,10 @@ export class Canvas {
         return this;
     }
     resize(w, h) {
+        if (w <= 0 || h <= 0 || w > 1000 || h > 1000) {
+            console.log("invalid size");
+            return this;
+        }
         this.#canvas.width = w * this.#pixelRatio;
         this.#canvas.height = h * this.#pixelRatio;
         this.#canvas.style.width = w + "px";
