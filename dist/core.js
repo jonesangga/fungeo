@@ -34,8 +34,8 @@ const canvas_place = new FGCallNative("canvas_place", _canvas_place, new Overloa
 ]));
 function _canvas_resize(session, ver) {
     const canvas = session.pop();
-    const w = session.pop().value;
     const h = session.pop().value;
+    const w = session.pop().value;
     session.pop();
     session.push(canvas.resize(w, h));
 }

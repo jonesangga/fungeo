@@ -32,7 +32,7 @@ export class Canvas {
         return new FGType(canvasT);
     }
     to_str() {
-        return "canvas";
+        return `Canvas(${this.w}, ${this.h})`;
     }
     clear() {
         this.ctx.fillStyle = "#fff";

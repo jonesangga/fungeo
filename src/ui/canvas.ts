@@ -1,5 +1,3 @@
-// @jonesangga, 12-04-2025, MIT License.
-
 import { FGType, canvasT } from "../literal/type.js"
 
 export class Canvas {
@@ -31,7 +29,7 @@ export class Canvas {
         canvas.style.background = "#fff";
 
         this.#canvas     = canvas;
-        this.ctx        = ctx;
+        this.ctx         = ctx;
         this.#pixelRatio = pixelRatio;
     }
 
@@ -40,7 +38,7 @@ export class Canvas {
     }
 
     to_str(): string {
-        return "canvas";
+        return `Canvas(${this.w}, ${this.h})`;
     }
 
     // NOTE: Make sure there is no transformation.

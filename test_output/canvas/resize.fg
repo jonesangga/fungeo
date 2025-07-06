@@ -1,0 +1,2 @@
+\canvas0.resize(123, 456)
+print(canvas0)
