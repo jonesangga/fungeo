@@ -81,6 +81,14 @@ function _Pic_resize(session) {
 const Pic_resize = new FGCallNative("Pic_resize", _Pic_resize, new OverloadT([
     new FunctionT([pictureT, numberT, numberT], pictureT, ["from", "w", "h"]),
 ]));
+function _Pic_cw(session) {
+    const pic = session.pop();
+    session.pop();
+    session.push(Picture.cw(pic));
+}
+const Pic_cw = new FGCallNative("Pic_cw", _Pic_cw, new OverloadT([
+    new FunctionT([pictureT], pictureT, ["pic"]),
+]));
 function _Pic_ccw(session) {
     const pic = session.pop();
     session.pop();
@@ -116,6 +124,7 @@ pictureT.methods["with_frame"] = { type: Pic_with_frame.sig, value: Pic_with_fra
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
 pictureT.methods["cycle"] = { type: Pic_cycle.sig, value: Pic_cycle };
+pictureT.methods["cw"] = { type: Pic_cw.sig, value: Pic_cw };
 pictureT.methods["ccw"] = { type: Pic_ccw.sig, value: Pic_ccw };
 export const fishNames = {
     fishp: { type: pictureT, value: fishp },

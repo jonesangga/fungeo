@@ -79,6 +79,18 @@ export class Picture {
         }));
         return new Picture(w, h).add_segments(segments);
     }
+    static cw(pic) {
+        const c = pic.w / 2;
+        const d = pic.h / 2;
+        const segments = pic.segments.map(s => ({
+            x1: -s.y1 + c + d,
+            y1: s.x1 + c - d,
+            x2: -s.y2 + c + d,
+            y2: s.x2 + c - d,
+        }));
+        return new Picture(pic.w, pic.h)
+            .add_segments(segments);
+    }
     static ccw(pic) {
         const c = pic.w / 2;
         const d = pic.h / 2;

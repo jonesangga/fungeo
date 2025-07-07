@@ -107,6 +107,22 @@ export class Picture {
         return new Picture(w, h).add_segments(segments);
     }
 
+    // Rotate clockwise (cw).
+    // NOTE: Only correct for square picture, because it will rotate the whole picture instead of elements inside it.
+    // TODO: Make the mutable equivalent.
+    static cw(pic: Picture): Picture {
+        const c = pic.w / 2;
+        const d = pic.h / 2;
+        const segments = pic.segments.map(s => ({
+            x1: -s.y1 + c + d,
+            y1:  s.x1 + c - d,
+            x2: -s.y2 + c + d,
+            y2:  s.x2 + c - d,
+        }));
+        return new Picture(pic.w, pic.h)
+                   .add_segments(segments);
+    }
+
     // Rotate counter clockwise (ccw).
     // NOTE: Only correct for square picture, because it will rotate the whole picture instead of elements inside it.
     // TODO: Make the mutable equivalent.
@@ -186,16 +202,6 @@ export class Picture {
                    .add_segments(rightSegments);
     }
 
-    // cw(): Picture {
-        // let pic = new Picture(this.w, this.h);
-
-        // for (let obj of this.objs) {
-            // pic.objs.push( this.#segment_cw(obj) );
-            // break;
-        // }
-        // return pic;
-    // }
-
     // fliph(): Picture {
         // let pic = new Picture(this.w, this.h);
 
@@ -212,16 +218,6 @@ export class Picture {
             // pic.objs.push( this.#segment_flipv(obj) );
         // }
         // return pic;
-    // }
-
-    // #segment_cw(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let d = this.h / 2;
-        // let x1 = -s.y1 + c + d;
-        // let y1 =  s.x1 + c - d;
-        // let x2 = -s.y2 + c + d;
-        // let y2 =  s.x2 + c - d;
-        // return new Segment(x1, y1, x2, y2, s.strokeStyle);
     // }
 
     // #segment_fliph(s: Segment): Segment {
