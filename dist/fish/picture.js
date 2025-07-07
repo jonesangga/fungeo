@@ -79,26 +79,26 @@ export class Picture {
         }));
         return new Picture(w, h).add_segments(segments);
     }
-    rot() {
-        const segments = this.segments.map(s => this.#segment_rot(s));
-        return new Picture(this.w, this.h)
-            .add_segments(segments);
-    }
-    #segment_rot(s) {
-        const c = this.w / 2;
-        const d = this.h / 2;
-        return {
+    static ccw(pic) {
+        const c = pic.w / 2;
+        const d = pic.h / 2;
+        const segments = pic.segments.map(s => ({
             x1: s.y1 + c - d,
             y1: -s.x1 + c + d,
             x2: s.y2 + c - d,
             y2: -s.x2 + c + d,
-        };
+        }));
+        return new Picture(pic.w, pic.h)
+            .add_segments(segments);
     }
     static quartet(p, q, r, s) {
         return Picture.above(1, 1, Picture.beside(1, 1, p, q), Picture.beside(1, 1, r, s));
     }
     static cycle(p) {
-        return Picture.quartet(p, p.rot().rot().rot(), p.rot(), p.rot().rot());
+        const rot = Picture.ccw(p);
+        const rot2 = Picture.ccw(rot);
+        const rot3 = Picture.ccw(rot2);
+        return Picture.quartet(p, rot3, rot, rot2);
     }
     static above(rtop, rbottom, top, bottom) {
         const scale = rtop / (rtop + rbottom);
