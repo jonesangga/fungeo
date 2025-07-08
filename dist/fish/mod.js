@@ -113,22 +113,44 @@ function _Pic_ccw(session) {
 const Pic_ccw = new FGCallNative("Pic_ccw", _Pic_ccw, new OverloadT([
     new FunctionT([pictureT], pictureT, ["pic"]),
 ]));
-function _Pic_above(session) {
-    const q = session.pop();
-    const p = session.pop();
-    session.pop();
-    session.push(Picture.above(1, 1, p, q));
+function _Pic_above(session, ver) {
+    if (ver === 0) {
+        const p2 = session.pop();
+        const p1 = session.pop();
+        const r2 = session.pop().value;
+        const r1 = session.pop().value;
+        session.pop();
+        session.push(Picture.above(r1, r2, p1, p2));
+    }
+    else if (ver === 1) {
+        const q = session.pop();
+        const p = session.pop();
+        session.pop();
+        session.push(Picture.above(1, 1, p, q));
+    }
 }
 const Pic_above = new FGCallNative("Pic_above", _Pic_above, new OverloadT([
+    new FunctionT([numberT, numberT, pictureT, pictureT], pictureT, ["r1", "r2", "p1", "p2"]),
     new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
 ]));
-function _Pic_beside(session) {
-    const q = session.pop();
-    const p = session.pop();
-    session.pop();
-    session.push(Picture.beside(1, 1, p, q));
+function _Pic_beside(session, ver) {
+    if (ver === 0) {
+        const p2 = session.pop();
+        const p1 = session.pop();
+        const r2 = session.pop().value;
+        const r1 = session.pop().value;
+        session.pop();
+        session.push(Picture.beside(r1, r2, p1, p2));
+    }
+    else if (ver === 1) {
+        const q = session.pop();
+        const p = session.pop();
+        session.pop();
+        session.push(Picture.beside(1, 1, p, q));
+    }
 }
 const Pic_beside = new FGCallNative("Pic_beside", _Pic_beside, new OverloadT([
+    new FunctionT([numberT, numberT, pictureT, pictureT], pictureT, ["r1", "r2", "p1", "p2"]),
     new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
 ]));
 function _Pic_quartet(session) {

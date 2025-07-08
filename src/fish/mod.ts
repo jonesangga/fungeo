@@ -153,26 +153,48 @@ const Pic_ccw = new FGCallNative("Pic_ccw", _Pic_ccw,
     ])
 );
 
-function _Pic_above(session: Session): void {
-    const q = session.pop() as Picture;
-    const p = session.pop() as Picture;
-    session.pop(); // The function.
-    session.push(Picture.above(1, 1, p, q));
+function _Pic_above(session: Session, ver: number): void {
+    if (ver === 0) {
+        const p2 = session.pop() as Picture;
+        const p1 = session.pop() as Picture;
+        const r2 = (session.pop() as FGNumber).value;
+        const r1 = (session.pop() as FGNumber).value;
+        session.pop(); // The function.
+        session.push(Picture.above(r1, r2, p1, p2));
+    }
+    else if (ver === 1) {
+        const q = session.pop() as Picture;
+        const p = session.pop() as Picture;
+        session.pop(); // The function.
+        session.push(Picture.above(1, 1, p, q));
+    }
 }
 const Pic_above = new FGCallNative("Pic_above", _Pic_above,
     new OverloadT([
+        new FunctionT([numberT, numberT, pictureT, pictureT], pictureT, ["r1", "r2", "p1", "p2"]),
         new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
     ])
 );
 
-function _Pic_beside(session: Session): void {
-    const q = session.pop() as Picture;
-    const p = session.pop() as Picture;
-    session.pop(); // The function.
-    session.push(Picture.beside(1, 1, p, q));
+function _Pic_beside(session: Session, ver: number): void {
+    if (ver === 0) {
+        const p2 = session.pop() as Picture;
+        const p1 = session.pop() as Picture;
+        const r2 = (session.pop() as FGNumber).value;
+        const r1 = (session.pop() as FGNumber).value;
+        session.pop(); // The function.
+        session.push(Picture.beside(r1, r2, p1, p2));
+    }
+    else if (ver === 1) {
+        const q = session.pop() as Picture;
+        const p = session.pop() as Picture;
+        session.pop(); // The function.
+        session.push(Picture.beside(1, 1, p, q));
+    }
 }
 const Pic_beside = new FGCallNative("Pic_beside", _Pic_beside,
     new OverloadT([
+        new FunctionT([numberT, numberT, pictureT, pictureT], pictureT, ["r1", "r2", "p1", "p2"]),
         new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
     ])
 );
