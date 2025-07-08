@@ -235,42 +235,6 @@
     // new FunctionT([pictureT, geoT], nothingT)
 // );
 
-// function _Cw(): void {
-    // let pic = session.pop() as Picture;
-    // session.pop();              // The function.
-    // push(pic.cw());
-// }
-// let Cw = new FGCallNative("Cw", _Cw,
-    // new FunctionT([pictureT], pictureT)
-// );
-
-// function _Ccw(): void {
-    // let pic = session.pop() as Picture;
-    // session.pop();              // The function.
-    // push(pic.ccw());
-// }
-// let Ccw = new FGCallNative("Ccw", _Ccw,
-    // new FunctionT([pictureT], pictureT)
-// );
-
-// function _FlipH(): void {
-    // let pic = pop() as Picture;
-    // pop();              // The function.
-    // push(pic.fliph());
-// }
-// let FlipH = new FGCallNative("FlipH", _FlipH,
-    // new FunctionT([pictureT], pictureT)
-// );
-
-// function _FlipV(): void {
-    // let pic = pop() as Picture;
-    // pop();              // The function.
-    // push(pic.flipv());
-// }
-// let FlipV = new FGCallNative("FlipV", _FlipV,
-    // new FunctionT([pictureT], pictureT)
-// );
-
 // TODO: clean Above and Beside later.
 
 // function _Above(): void {
@@ -509,11 +473,6 @@
     // rsegment:  { type: rsegment.sig, value: rsegment },
     // length:    { type: length.sig, value: length },
     // mappic:    { type: mappic.sig, value: mappic },
-    // quartet: { type: quartet.sig, value: quartet },
-    // // "Cw":     { type: Cw.sig, value: Cw },
-    // // "Ccw":    { type: Ccw.sig, value: Ccw },
-    // // "FlipH":  { type: FlipH.sig, value: FlipH },
-    // // "FlipV":  { type: FlipV.sig, value: FlipV },
     // // "R":      { type: R.sig, value: R, methods: {
         // // "FromPoints": { type: R_FromPoints.sig, value: R_FromPoints },
         // // "WithCenter": { type: R_WithCenter.sig, value: R_WithCenter },
