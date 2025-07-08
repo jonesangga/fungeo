@@ -74,6 +74,7 @@ export class Picture {
     }
 
     // TODO: Think if this is necessary. Why not push directly?
+    //       This is usefull for user. Make it static.
     add_segments(segments: Segment[]): Picture {
         this.segments.push(...segments);
         return this;
@@ -95,6 +96,7 @@ export class Picture {
         c.restore();
     }
 
+    // TODO: Make mutable version.
     static resize(pic: Picture, w: number, h: number): Picture {
         const scaleX = w / pic.w;
         const scaleY = h / pic.h;
@@ -105,6 +107,28 @@ export class Picture {
             y2: s.y2 * scaleY,
         }));
         return new Picture(w, h).add_segments(segments);
+    }
+
+    // TODO: Make mutable version.
+    static flipH(pic: Picture): Picture {
+        const segments = pic.segments.map(s => ({
+            x1: -s.x1 + pic.w,
+            y1:  s.y1,
+            x2: -s.x2 + pic.w,
+            y2:  s.y2,
+        }));
+        return new Picture(pic.w, pic.h).add_segments(segments);
+    }
+
+    // TODO: Make mutable version.
+    static flipV(pic: Picture): Picture {
+        const segments = pic.segments.map(s => ({
+            x1:  s.x1,
+            y1: -s.y1 + pic.h,
+            x2:  s.x2,
+            y2: -s.y2 + pic.h,
+        }));
+        return new Picture(pic.w, pic.h).add_segments(segments);
     }
 
     // Rotate clockwise (cw).
@@ -147,6 +171,7 @@ export class Picture {
                              Picture.beside(1, 1, r, s));
     }
 
+    // Assuming all pictures have same width and height.
     static cycle(p: Picture): Picture {
         const rot = Picture.ccw(p)
         const rot2 = Picture.ccw(rot)
@@ -201,36 +226,4 @@ export class Picture {
                    .add_segments(leftSegments)
                    .add_segments(rightSegments);
     }
-
-    // fliph(): Picture {
-        // let pic = new Picture(this.w, this.h);
-
-        // for (let obj of this.objs) {
-            // pic.objs.push( this.#segment_fliph(obj) );
-        // }
-        // return pic;
-    // }
-
-    // flipv(): Picture {
-        // let pic = new Picture(this.w, this.h);
-
-        // for (let obj of this.objs) {
-            // pic.objs.push( this.#segment_flipv(obj) );
-        // }
-        // return pic;
-    // }
-
-    // #segment_fliph(s: Segment): Segment {
-        // let c = this.w / 2;
-        // let x1 = -s.x1 + 2*c;
-        // let x2 = -s.x2 + 2*c;
-        // return new Segment(x1, s.y1, x2, s.y2, s.strokeStyle);
-    // }
-
-    // #segment_flipv(s: Segment): Segment {
-        // let d = this.h / 2;
-        // let y1 = -s.y1 + 2*d;
-        // let y2 = -s.y2 + 2*d;
-        // return new Segment(s.x1, y1, s.x2, y2, s.strokeStyle);
-    // }
 }

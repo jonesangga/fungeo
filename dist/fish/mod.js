@@ -81,6 +81,22 @@ function _Pic_resize(session) {
 const Pic_resize = new FGCallNative("Pic_resize", _Pic_resize, new OverloadT([
     new FunctionT([pictureT, numberT, numberT], pictureT, ["from", "w", "h"]),
 ]));
+function _Pic_flipH(session) {
+    const pic = session.pop();
+    session.pop();
+    session.push(Picture.flipH(pic));
+}
+const Pic_flipH = new FGCallNative("Pic_flipH", _Pic_flipH, new OverloadT([
+    new FunctionT([pictureT], pictureT, ["pic"]),
+]));
+function _Pic_flipV(session) {
+    const pic = session.pop();
+    session.pop();
+    session.push(Picture.flipV(pic));
+}
+const Pic_flipV = new FGCallNative("Pic_flipV", _Pic_flipV, new OverloadT([
+    new FunctionT([pictureT], pictureT, ["pic"]),
+]));
 function _Pic_cw(session) {
     const pic = session.pop();
     session.pop();
@@ -96,6 +112,24 @@ function _Pic_ccw(session) {
 }
 const Pic_ccw = new FGCallNative("Pic_ccw", _Pic_ccw, new OverloadT([
     new FunctionT([pictureT], pictureT, ["pic"]),
+]));
+function _Pic_above(session) {
+    const q = session.pop();
+    const p = session.pop();
+    session.pop();
+    session.push(Picture.above(1, 1, p, q));
+}
+const Pic_above = new FGCallNative("Pic_above", _Pic_above, new OverloadT([
+    new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
+]));
+function _Pic_beside(session) {
+    const q = session.pop();
+    const p = session.pop();
+    session.pop();
+    session.push(Picture.beside(1, 1, p, q));
+}
+const Pic_beside = new FGCallNative("Pic_beside", _Pic_beside, new OverloadT([
+    new FunctionT([pictureT, pictureT], pictureT, ["p", "q"]),
 ]));
 function _Pic_quartet(session) {
     const s = session.pop();
@@ -124,6 +158,10 @@ pictureT.methods["with_frame"] = { type: Pic_with_frame.sig, value: Pic_with_fra
 pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
 pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
 pictureT.methods["cycle"] = { type: Pic_cycle.sig, value: Pic_cycle };
+pictureT.methods["flipH"] = { type: Pic_flipH.sig, value: Pic_flipH };
+pictureT.methods["flipV"] = { type: Pic_flipV.sig, value: Pic_flipV };
+pictureT.methods["above"] = { type: Pic_above.sig, value: Pic_above };
+pictureT.methods["beside"] = { type: Pic_beside.sig, value: Pic_beside };
 pictureT.methods["cw"] = { type: Pic_cw.sig, value: Pic_cw };
 pictureT.methods["ccw"] = { type: Pic_ccw.sig, value: Pic_ccw };
 export const fishNames = {

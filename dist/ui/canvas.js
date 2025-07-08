@@ -14,7 +14,6 @@ export class Canvas {
         const ctx = canvas.getContext("2d");
         const pixelRatio = window.devicePixelRatio || 1;
         document.body.appendChild(canvas);
-        ctx.scale(pixelRatio, pixelRatio);
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
         canvas.width = w * pixelRatio;
@@ -24,6 +23,7 @@ export class Canvas {
         canvas.style.left = "0px";
         canvas.style.border = "1px solid black";
         canvas.style.background = "#fff";
+        ctx.scale(pixelRatio, pixelRatio);
         this.#canvas = canvas;
         this.ctx = ctx;
         this.#pixelRatio = pixelRatio;

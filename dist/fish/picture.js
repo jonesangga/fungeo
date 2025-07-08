@@ -79,6 +79,24 @@ export class Picture {
         }));
         return new Picture(w, h).add_segments(segments);
     }
+    static flipH(pic) {
+        const segments = pic.segments.map(s => ({
+            x1: -s.x1 + pic.w,
+            y1: s.y1,
+            x2: -s.x2 + pic.w,
+            y2: s.y2,
+        }));
+        return new Picture(pic.w, pic.h).add_segments(segments);
+    }
+    static flipV(pic) {
+        const segments = pic.segments.map(s => ({
+            x1: s.x1,
+            y1: -s.y1 + pic.h,
+            x2: s.x2,
+            y2: -s.y2 + pic.h,
+        }));
+        return new Picture(pic.w, pic.h).add_segments(segments);
+    }
     static cw(pic) {
         const c = pic.w / 2;
         const d = pic.h / 2;
