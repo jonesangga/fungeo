@@ -1,0 +1,42 @@
+let p = fishp
+let q = fishq
+let r = fishr
+let s = fishs
+let nil = Pic(16, 16)
+let t = Pic.quartet(p, q, r, s)
+let u = Pic.cycle(Pic.ccw(q))
+let side1 = Pic.quartet(nil, nil, Pic.ccw(t), t)
+let side2 = Pic.quartet(side1, side1, Pic.ccw(t), t)
+let corner1 = Pic.quartet(nil, nil, nil, u)
+let corner2 = Pic.quartet(corner1, side1, Pic.ccw(side1), u)
+
+let corner =
+  Pic.above(1,
+            2,
+            Pic.beside(1,
+                       2,
+                       corner2,
+                       Pic.beside(1,
+                                  1,
+                                  side2,
+                                  side2)),
+            Pic.above(1,
+                      1,
+                      Pic.beside(1,
+                                 2,
+                                 Pic.ccw(side2),
+                                 Pic.beside(1,
+                                            1,
+                                            u,
+                                            Pic.ccw(t))),
+                      Pic.beside(1,
+                                 2,
+                                 Pic.ccw(side2),
+                                 Pic.beside(1,
+                                            1,
+                                            Pic.ccw(t),
+                                            Pic.ccw(q)))))
+
+let squarelimit = Pic.cycle(corner)
+\canvas0.resize(600, 600)
+Pic.resize(squarelimit, 600, 600).draw()

@@ -2,7 +2,7 @@ import repl from "./repl.js"
 import { vm } from "../vm.js"
 
 const files = [
-    ["book 1 prop 1", "demo1.fg"],
+    ["squarelimit", "squarelimit.fg"],
 ];
 
 export let showDemoSelect = false;
