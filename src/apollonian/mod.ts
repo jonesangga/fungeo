@@ -27,6 +27,21 @@ const Apol_draw = new FGCallNative("Apol_draw", _Apol_draw,
     ])
 );
 
+function _Apol_next(session: Session): void {
+    const apol = session.pop() as Apollonian;
+    session.pop(); // The function.
+    session.push(apol.next());
+
+    if (apol.currentlyDrawn) {
+        session.render();
+    }
+}
+const Apol_next = new FGCallNative("Apol_next", _Apol_next,
+    new OverloadT([
+        new FunctionT([], apollonianT, []),
+    ])
+);
+
 function _Apol_enclosing(session: Session): void {
     const r = (session.pop() as FGNumber).value;
     session.pop(); // The function.
@@ -40,6 +55,7 @@ const Apol_enclosing = new FGCallNative("Apol_enclosing", _Apol_enclosing,
 
 apollonianT.methods["enclosing"] = { type: Apol_enclosing.sig, value: Apol_enclosing };
 apollonianT.methods["draw"] = { type: Apol_draw.sig, value: Apol_draw };
+apollonianT.methods["next"] = { type: Apol_next.sig, value: Apol_next };
 
 export const apolNames: Names = {
     Apol: { type: Apol.sig, value: Apol },
