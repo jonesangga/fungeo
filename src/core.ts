@@ -1,12 +1,12 @@
 import { type Names, Session } from "./vm.js"
 import { Canvas, defaultCanvas } from "./ui/canvas.js"
-import { type GeoObj, FGCallNative, FGNumber } from "./value.js"
+import { type GeoObj, FGCallNative, FGNumber, FGString } from "./value.js"
 import { Point } from "./geo/point.js"
 import { Segment } from "./geo/segment.js"
 import { Circle } from "./geo/circle.js"
 import { welcome } from "./data/help.js"
 import { FunctionT, OverloadT,
-         anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js"
+         anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js"
 
 function _print(session: Session, ver: number): void {
     const value = session.pop();
@@ -58,12 +58,21 @@ const canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
 );
 
 function _canvas_save(session: Session, ver: number): void {
-    const canvas = session.pop() as Canvas;
-    session.pop(); // The function.
-    canvas.save();
+    if (ver === 0) {
+        const canvas = session.pop() as Canvas;
+        const filename = (session.pop() as FGString).value;
+        session.pop(); // The function.
+        canvas.save(filename);
+    }
+    else if (ver === 1) {
+        const canvas = session.pop() as Canvas;
+        session.pop(); // The function.
+        canvas.save();
+    }
 }
 const canvas_save = new FGCallNative("canvas_save", _canvas_save,
     new OverloadT([
+        new FunctionT([stringT], nothingT, ["name"]),
         new FunctionT([], nothingT, []),
     ])
 );

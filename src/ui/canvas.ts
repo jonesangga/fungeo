@@ -81,9 +81,9 @@ export class Canvas {
 
     // By default saved as png.
     // TODO: Optional file name.
-    save(): void {
+    save(filename: string = "canvas-save"): void {
         const a = document.createElement("a");
-        a.download = "canvas-save";
+        a.download = filename;
 
         this.canvas.toBlob((blob) => {
             if (blob) {

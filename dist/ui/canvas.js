@@ -63,9 +63,9 @@ export class Canvas {
         this.ctx.scale(this.#pixelRatio, this.#pixelRatio);
         return this;
     }
-    save() {
+    save(filename = "canvas-save") {
         const a = document.createElement("a");
-        a.download = "canvas-save";
+        a.download = filename;
         this.canvas.toBlob((blob) => {
             if (blob) {
                 a.href = URL.createObjectURL(blob);

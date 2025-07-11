@@ -4,7 +4,7 @@ import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
 import { welcome } from "./data/help.js";
-import { FunctionT, OverloadT, anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT } from "./literal/type.js";
+import { FunctionT, OverloadT, anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
 function _print(session, ver) {
     const value = session.pop();
     session.pop();
@@ -43,11 +43,20 @@ const canvas_resize = new FGCallNative("canvas_resize", _canvas_resize, new Over
     new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
 ]));
 function _canvas_save(session, ver) {
-    const canvas = session.pop();
-    session.pop();
-    canvas.save();
+    if (ver === 0) {
+        const canvas = session.pop();
+        const filename = session.pop().value;
+        session.pop();
+        canvas.save(filename);
+    }
+    else if (ver === 1) {
+        const canvas = session.pop();
+        session.pop();
+        canvas.save();
+    }
 }
 const canvas_save = new FGCallNative("canvas_save", _canvas_save, new OverloadT([
+    new FunctionT([stringT], nothingT, ["name"]),
     new FunctionT([], nothingT, []),
 ]));
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
