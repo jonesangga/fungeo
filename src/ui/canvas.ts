@@ -1,7 +1,7 @@
 import { FGType, canvasT } from "../literal/type.js"
 
 export class Canvas {
-    #canvas:      HTMLCanvasElement;
+    readonly canvas:      HTMLCanvasElement;
     readonly ctx: CanvasRenderingContext2D;
     #pixelRatio:  number;
     x = 0;
@@ -30,7 +30,7 @@ export class Canvas {
         // NOTE: This should be done after setting canvas width and height.
         ctx.scale(pixelRatio, pixelRatio);
 
-        this.#canvas     = canvas;
+        this.canvas     = canvas;
         this.ctx         = ctx;
         this.#pixelRatio = pixelRatio;
     }
@@ -55,8 +55,8 @@ export class Canvas {
             console.log("invalid place");
             return this;
         }
-        this.#canvas.style.left = x + "px";
-        this.#canvas.style.top  = y + "px";
+        this.canvas.style.left = x + "px";
+        this.canvas.style.top  = y + "px";
         this.x = x;
         this.y = y;
         return this;
@@ -69,14 +69,28 @@ export class Canvas {
             console.log("invalid size");
             return this;
         }
-        this.#canvas.width        = w * this.#pixelRatio;
-        this.#canvas.height       = h * this.#pixelRatio;
-        this.#canvas.style.width  = w + "px";
-        this.#canvas.style.height = h + "px";
+        this.canvas.width        = w * this.#pixelRatio;
+        this.canvas.height       = h * this.#pixelRatio;
+        this.canvas.style.width  = w + "px";
+        this.canvas.style.height = h + "px";
         this.w = w;
         this.h = h;
         this.ctx.scale(this.#pixelRatio, this.#pixelRatio);
         return this;
+    }
+
+    // By default saved as png.
+    // TODO: Optional file name.
+    save(): void {
+        const a = document.createElement("a");
+        a.download = "canvas-save";
+
+        this.canvas.toBlob((blob) => {
+            if (blob) {
+                a.href = URL.createObjectURL(blob);
+                a.click();
+            }
+        });
     }
 }
 

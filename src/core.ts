@@ -57,8 +57,20 @@ const canvas_resize = new FGCallNative("canvas_resize", _canvas_resize,
     ])
 );
 
+function _canvas_save(session: Session, ver: number): void {
+    const canvas = session.pop() as Canvas;
+    session.pop(); // The function.
+    canvas.save();
+}
+const canvas_save = new FGCallNative("canvas_save", _canvas_save,
+    new OverloadT([
+        new FunctionT([], nothingT, []),
+    ])
+);
+
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
+canvasT.methods["save"] = { type: canvas_save.sig, value: canvas_save };
 
 function _draw(session: Session, ver: number): void {
     const v = session.pop() as GeoObj;

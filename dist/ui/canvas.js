@@ -2,7 +2,7 @@ import { FGType, canvasT } from "../literal/type.js";
 export class Canvas {
     w;
     h;
-    #canvas;
+    canvas;
     ctx;
     #pixelRatio;
     x = 0;
@@ -24,7 +24,7 @@ export class Canvas {
         canvas.style.border = "1px solid black";
         canvas.style.background = "#fff";
         ctx.scale(pixelRatio, pixelRatio);
-        this.#canvas = canvas;
+        this.canvas = canvas;
         this.ctx = ctx;
         this.#pixelRatio = pixelRatio;
     }
@@ -43,8 +43,8 @@ export class Canvas {
             console.log("invalid place");
             return this;
         }
-        this.#canvas.style.left = x + "px";
-        this.#canvas.style.top = y + "px";
+        this.canvas.style.left = x + "px";
+        this.canvas.style.top = y + "px";
         this.x = x;
         this.y = y;
         return this;
@@ -54,14 +54,24 @@ export class Canvas {
             console.log("invalid size");
             return this;
         }
-        this.#canvas.width = w * this.#pixelRatio;
-        this.#canvas.height = h * this.#pixelRatio;
-        this.#canvas.style.width = w + "px";
-        this.#canvas.style.height = h + "px";
+        this.canvas.width = w * this.#pixelRatio;
+        this.canvas.height = h * this.#pixelRatio;
+        this.canvas.style.width = w + "px";
+        this.canvas.style.height = h + "px";
         this.w = w;
         this.h = h;
         this.ctx.scale(this.#pixelRatio, this.#pixelRatio);
         return this;
+    }
+    save() {
+        const a = document.createElement("a");
+        a.download = "canvas-save";
+        this.canvas.toBlob((blob) => {
+            if (blob) {
+                a.href = URL.createObjectURL(blob);
+                a.click();
+            }
+        });
     }
 }
 export const defaultCanvas = new Canvas(300, 300);

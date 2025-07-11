@@ -42,8 +42,17 @@ function _canvas_resize(session, ver) {
 const canvas_resize = new FGCallNative("canvas_resize", _canvas_resize, new OverloadT([
     new FunctionT([numberT, numberT], canvasT, ["w", "h"]),
 ]));
+function _canvas_save(session, ver) {
+    const canvas = session.pop();
+    session.pop();
+    canvas.save();
+}
+const canvas_save = new FGCallNative("canvas_save", _canvas_save, new OverloadT([
+    new FunctionT([], nothingT, []),
+]));
 canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
+canvasT.methods["save"] = { type: canvas_save.sig, value: canvas_save };
 function _draw(session, ver) {
     const v = session.pop();
     session.pop();
