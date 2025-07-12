@@ -1,3 +1,4 @@
 import { apolNames } from "./apollonian/mod.js";
 import { fishNames } from "./fish/mod.js";
-export const extraNames = Object.assign({}, apolNames, fishNames);
+import { sierpNames } from "./sierpinski/mod.js";
+export const extraNames = Object.assign({}, apolNames, fishNames, sierpNames);
