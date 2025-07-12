@@ -4,40 +4,33 @@ This is just my hobby project. This is not intended to be used for serious stuff
 
 Status: Still experimenting. WIP.
 
-- [Live](https://jonesangga.github.io/fungeo/)
+## Usage
 
-Documentation: see below.
+### Online
 
-## Installation
+[jonesangga.github.io/fungeo/](https://jonesangga.github.io/fungeo/)
 
+### Offline
+
+Install.
 ```
 git clone --depth 1 https://github.com/jonesangga/fungeo.git
 cd fungeo
 npm install
 ```
 
-## Usage
-
+Run.
 ```
 npm start
 ```
 
-## Test
+----------------------------------------------------------------------
 
-The directory `test_output` contains test files containing FunGeo source code and the associated
-output files containing the expected output for each test.
+## Core Documentation
 
-```
-npm run testout
-```
+Note: This is not complete.
 
-## Documentation
-
-This is not complete.
-
-### Core
-
-#### Definition
+### Definition
 
 ```
 let a = 10
@@ -47,7 +40,7 @@ let d = true
 let e = [1,2,3]
 ```
 
-#### Comment
+### Comment
 
 ```
 // Single line comment
@@ -58,13 +51,17 @@ let a = 2  // Another comment
 */
 ```
 
-### Modules
+----------------------------------------------------------------------
 
-#### Fish
+## Module Documentation
 
-This module contains my implementation of Functional Geometry
+### Fish
+
+My implementation of Functional Geometry
 [paper](https://dl.acm.org/doi/pdf/10.1145/800068.802148)
 by Peter Henderson.
+
+#### Object and Functions
 
 **Names**
 
@@ -84,10 +81,6 @@ All these methods except `draw()` return `this`.
 - `with_frame()`. Will be drawn with frame.
 - `no_frame()`. Will be drawn without frame.
 - `add_segment(x1: Num, y1: Num, x2: Num, y2: Num)`.
-- `flipH()` TODO.
-- `flipV()` TODO.
-- `cw()` TODO.
-- `ccw()` TODO.
 - `draw()`. Draw to canvas. Next modification to the picture will be updated live in canvas.
 
 **Class methods**
@@ -105,7 +98,8 @@ All these methods return new `Picture`.
 - `Pic.quartet(p: Pic, q: Pic, r: Pic, s: Pic)`. Similar to `Pic.above(Pic.beside(p, q), Pic.beside(r, s))`.
 - `Pic.cycle(p: Pic)`. Similar to `Pic.quartet(p, Pic.cw(p), Pic.cw(Pic.cw(p)), Pic.ccw(p))`.
 - `Pic.resize(p: Pic, w: Num, h: Num)`.
-- `Pic.overlay(p1: Pic, p2: Pic)` TODO.
+
+#### Result
 
 This is to draw the squarelimit. Just paste it to a fresh repl session.
 
@@ -153,6 +147,13 @@ let squarelimit = Pic.cycle(corner)
 \canvas0.resize(600, 600)
 Pic.resize(squarelimit, 600, 600).draw()
 ```
+
+#### TODO
+
+- Add tests.
+- Add `flipH()`, `flipV()`, `cw()`, `ccw()`, `Pic.overlay(p1: Pic, p2: Pic)`.
+
+----------------------------------------------------------------------
 
 ## License
 
