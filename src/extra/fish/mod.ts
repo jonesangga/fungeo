@@ -1,9 +1,9 @@
-import { type Names, Session } from "../vm.js"
-import { FGCallNative, FGNumber } from "../value.js"
+import { type Names, Session } from "../../vm.js"
+import { FGCallNative, FGNumber } from "../../value.js"
 import { fishp, fishq, fishr, fishs } from "./fish.js"
 import { pictureT, Picture } from "./picture.js"
 import { FunctionT, OverloadT,
-         nothingT, numberT } from "../literal/type.js"
+         nothingT, numberT } from "../../literal/type.js"
 
 function _Pic(session: Session): void {
     const w = (session.pop() as FGNumber).value;

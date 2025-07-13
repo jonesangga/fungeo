@@ -1,7 +1,7 @@
-import { defaultCanvas as canvas } from "../ui/canvas.js"
-import { color } from "../data/constant.js"
-import { FGCallNative } from "../value.js"
-import { type Type, Class, FGType } from "../literal/type.js"
+import { defaultCanvas as canvas } from "../../ui/canvas.js"
+import { color } from "../../data/constant.js"
+import { FGCallNative } from "../../value.js"
+import { type Type, Class, FGType } from "../../literal/type.js"
 
 const c = canvas.ctx;
 

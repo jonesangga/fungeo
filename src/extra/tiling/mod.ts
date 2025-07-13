@@ -1,8 +1,8 @@
-import { type Names, Session } from "../vm.js"
-import { FGCallNative } from "../value.js"
+import { type Names, Session } from "../../vm.js"
+import { FGCallNative } from "../../value.js"
 import { Hexagonal, hexagonalT } from "./hexagonal.js"
 import { FunctionT, OverloadT,
-         nothingT } from "../literal/type.js"
+         nothingT } from "../../literal/type.js"
 
 function _Hexa(session: Session): void {
     session.pop(); // The function.

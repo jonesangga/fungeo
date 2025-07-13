@@ -1,8 +1,8 @@
-import { type Names, Session } from "../vm.js"
-import { FGCallNative, FGNumber } from "../value.js"
+import { type Names, Session } from "../../vm.js"
+import { FGCallNative, FGNumber } from "../../value.js"
 import { Sierpinski, sierpinskiT } from "./sierpinski.js"
 import { FunctionT, OverloadT,
-         nothingT, numberT } from "../literal/type.js"
+         nothingT, numberT } from "../../literal/type.js"
 
 function _Sierp(session: Session): void {
     const y3 = (session.pop() as FGNumber).value;

@@ -1,8 +1,8 @@
-import { type Names, Session } from "../vm.js"
-import { FGCallNative, FGNumber } from "../value.js"
+import { type Names, Session } from "../../vm.js"
+import { FGCallNative, FGNumber } from "../../value.js"
 import { Apollonian, apollonianT } from "./apollonian.js"
 import { FunctionT, OverloadT,
-         nothingT, numberT } from "../literal/type.js"
+         nothingT, numberT } from "../../literal/type.js"
 
 function _Apol(session: Session): void {
     session.pop(); // The function.

@@ -4,10 +4,10 @@
 // NOTE: cw and ccw implementations are actually switched but since canvas use upside down coordinate system
 //       that cancels out.
 
-import { defaultCanvas } from "../ui/canvas.js"
-import { color } from "../data/constant.js"
-import { FGCallNative } from "../value.js"
-import { type Type, Class, FGType } from "../literal/type.js"
+import { defaultCanvas } from "../../ui/canvas.js"
+import { color } from "../../data/constant.js"
+import { FGCallNative } from "../../value.js"
+import { type Type, Class, FGType } from "../../literal/type.js"
 
 const c = defaultCanvas.ctx;
 

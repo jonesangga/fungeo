@@ -2,10 +2,10 @@
 // I cannot implement synchronous dynamic import in semantic phase.
 // So just manually comment/uncomment the import lines below.
 
-import { apolNames } from "./apollonian/mod.js";
-import { fishNames } from "./fish/mod.js";
-import { sierpNames } from "./sierpinski/mod.js";
-import { tilingNames } from "./tiling/mod.js";
+import { apolNames } from "./extra/apollonian/mod.js";
+import { fishNames } from "./extra/fish/mod.js";
+import { sierpNames } from "./extra/sierpinski/mod.js";
+import { tilingNames } from "./extra/tiling/mod.js";
 
 export const extraNames = Object.assign(
     {},
