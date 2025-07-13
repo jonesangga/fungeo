@@ -4,7 +4,7 @@
 
 import { Chunk } from "./chunk.js"
 import { Session } from "./vm.js"
-import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT, complexT } from "./literal/type.js"
+import { FGType, Type, OverloadT, CallUserT, ListT, booleanT, numberT, stringT } from "./literal/type.js"
 import Ellipse from "./geo/ellipse.js"
 // import Picture from "./geo/picture.js"
 import { Canvas } from "./ui/canvas.js"
@@ -22,7 +22,6 @@ export const enum Kind {
     CallNative = 400,
     CallUser   = 450,
     Color      = 455,
-    Complex    = 460,
     List       = 470,
     Method     = 480,
     Number     = 500,
@@ -50,7 +49,6 @@ export const KindName: {
     [Kind.Canvas]: "Canvas",
     [Kind.Circle]: "Circle",
     [Kind.Color]: "Color",
-    [Kind.Complex]: "Complex",
     [Kind.Coord]: "Coord",
     [Kind.Ellipse]: "Ellipse",
     [Kind.List]: "List",
@@ -74,6 +72,13 @@ export type Repl = {
     [name: string]: any,
 };
 
+// TODO: This is a hack to support Complex type. Clean up later.
+export interface FGClass {
+    to_str: () => string;
+    typeof: () => FGType;
+}
+
+// TODO: This is a hack to support modules in extra/. Clean up later.
 export interface GeoType {
     draw: () => void;
     to_str: () => string;
@@ -197,51 +202,6 @@ export class FGNumber implements FG {
     }
 }
 
-export class FGComplex implements FG {
-    kind: Kind.Complex = Kind.Complex;
-
-    constructor(
-        public a: number,
-        public b: number
-    ) {}
-
-    to_str(): string {
-        return `${ this.a }+${ this.b }i`;
-    }
-
-    typeof(): FGType {
-        return new FGType(complexT);
-    }
-
-    add(other: FGComplex): FGComplex {
-        return new FGComplex(this.a + other.a, this.b + other.b);
-    }
-    sub(other: FGComplex): FGComplex {
-        return new FGComplex(this.a - other.a, this.b - other.b);
-    }
-    scale(value: number): FGComplex {
-        return new FGComplex(this.a * value, this.b * value);
-    }
-    mul(other: FGComplex): FGComplex {
-        let a = this.a * other.a - this.b * other.b;
-        let b = this.a * other.b + other.a * this.b;
-        return new FGComplex(a, b);
-    }
-    sqrt() {
-        // Convert to polar form
-        let m = Math.sqrt(this.a * this.a + this.b * this.b);
-        let angle = Math.atan2(this.b, this.a);
-        // Calculate square root of magnitude and use half the angle for square root
-        m = Math.sqrt(m);
-        angle = angle / 2;
-        // Back to rectangular form
-        return new FGComplex(m * Math.cos(angle), m * Math.sin(angle));
-    }
-    equal(other: FG): boolean {
-        return false;
-    }
-}
-
 export class FGString implements FG {
     kind: Kind.String = Kind.String;
 
@@ -314,7 +274,7 @@ export class FGStruct implements FG {
     }
 }
 
-type LitObj = FGBoolean | FGCallNative | FGCallUser | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
+type LitObj = FGBoolean | FGCallNative | FGCallUser | FGClass | FGMethod | FGNumber | FGString | FGType | FGList | FGStruct | FGColor;
 type UIObj = Canvas | Repl;
 export type GeoObj = Circle | Coord | Ellipse | Point | Rect | Segment | GeoType;
 export type Value  = GeoObj | LitObj | UIObj;

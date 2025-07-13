@@ -4,7 +4,8 @@ import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
 import { welcome } from "./data/help.js";
-import { FunctionT, OverloadT, anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
+import { Complex } from "./core/complex.js";
+import { FunctionT, OverloadT, anyT, canvasT, circleT, complexT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
 function _print(session, ver) {
     const value = session.pop();
     session.pop();
@@ -154,11 +155,51 @@ const help = new FGCallNative("help", _help, new OverloadT([
     new FunctionT([anyT], nothingT, ["command"]),
     new FunctionT([], nothingT, []),
 ]));
+function _Complex(session) {
+    const im = session.pop().value;
+    const re = session.pop().value;
+    session.pop();
+    session.push(new Complex(re, im));
+}
+const __Complex = new FGCallNative("Complex", _Complex, new OverloadT([
+    new FunctionT([numberT, numberT], complexT, ["re", "im"]),
+]));
+function _Complex_add(session) {
+    const z = session.pop();
+    const w = session.pop();
+    session.pop();
+    session.push(z.add(w));
+}
+const Complex_add = new FGCallNative("Complex_add", _Complex_add, new OverloadT([
+    new FunctionT([complexT], complexT, ["w"]),
+]));
+function _Complex_sub(session) {
+    const z = session.pop();
+    const w = session.pop();
+    session.pop();
+    session.push(z.sub(w));
+}
+const Complex_sub = new FGCallNative("Complex_sub", _Complex_sub, new OverloadT([
+    new FunctionT([complexT], complexT, ["w"]),
+]));
+function _Complex_mul(session) {
+    const z = session.pop();
+    const w = session.pop();
+    session.pop();
+    session.push(z.mul(w));
+}
+const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul, new OverloadT([
+    new FunctionT([complexT], complexT, ["w"]),
+]));
+complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
+complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
+complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
 export const coreNames = {
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas: { type: canvas.sig, value: canvas },
     circle: { type: circle.sig, value: circle },
     clear: { type: clear.sig, value: clear },
+    Complex: { type: __Complex.sig, value: __Complex },
     draw: { type: draw.sig, value: draw },
     help: { type: help.sig, value: help },
     print: { type: print.sig, value: print },

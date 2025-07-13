@@ -1,6 +1,6 @@
 import { defaultCanvas as canvas } from "../../ui/canvas.js";
 import { color, TAU } from "../../data/constant.js";
-import { FGComplex } from "../../value.js";
+import { Complex } from "../../core/complex.js";
 import { Class, FGType } from "../../literal/type.js";
 const c = canvas.ctx;
 class Circle {
@@ -107,9 +107,9 @@ export class Apollonian {
         let k1 = c1.bend;
         let k2 = c2.bend;
         let k3 = c3.bend;
-        let z1 = new FGComplex(c1.x, c1.y);
-        let z2 = new FGComplex(c2.x, c2.y);
-        let z3 = new FGComplex(c3.x, c3.y);
+        let z1 = new Complex(c1.x, c1.y);
+        let z2 = new Complex(c2.x, c2.y);
+        let z3 = new Complex(c3.x, c3.y);
         let zk1 = z1.scale(k1);
         let zk2 = z2.scale(k2);
         let zk3 = z3.scale(k3);
@@ -118,8 +118,8 @@ export class Apollonian {
         root = root.sqrt().scale(2);
         let center1 = sum.add(root).scale(1 / k4);
         let center2 = sum.sub(root).scale(1 / k4);
-        let ca = Circle.bend(center1.a, center1.b, k4);
-        let cb = Circle.bend(center2.a, center2.b, k4);
+        let ca = Circle.bend(center1.re, center1.im, k4);
+        let cb = Circle.bend(center2.re, center2.im, k4);
         let got = [];
         if (is_tangent(c1, c2, c3, ca))
             got.push(ca);

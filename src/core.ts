@@ -5,8 +5,9 @@ import { Point } from "./geo/point.js"
 import { Segment } from "./geo/segment.js"
 import { Circle } from "./geo/circle.js"
 import { welcome } from "./data/help.js"
+import { Complex } from "./core/complex.js"
 import { FunctionT, OverloadT,
-         anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js"
+         anyT, canvasT, circleT, complexT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js"
 
 function _print(session: Session, ver: number): void {
     const value = session.pop();
@@ -192,11 +193,65 @@ const help = new FGCallNative("help",  _help,
     ])
 );
 
+function _Complex(session: Session): void {
+    const im = (session.pop() as FGNumber).value;
+    const re = (session.pop() as FGNumber).value;
+    session.pop(); // The function.
+    session.push(new Complex(re, im));
+}
+// The reason this is named __Complex instead of just Complex is because Complex is already used as imported name.
+const __Complex = new FGCallNative("Complex", _Complex,
+    new OverloadT([
+        new FunctionT([numberT, numberT], complexT, ["re", "im"]),
+    ])
+);
+
+function _Complex_add(session: Session): void {
+    const z = session.pop() as Complex;
+    const w = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(z.add(w));
+}
+const Complex_add = new FGCallNative("Complex_add", _Complex_add,
+    new OverloadT([
+        new FunctionT([complexT], complexT, ["w"]),
+    ])
+);
+
+function _Complex_sub(session: Session): void {
+    const z = session.pop() as Complex;
+    const w = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(z.sub(w));
+}
+const Complex_sub = new FGCallNative("Complex_sub", _Complex_sub,
+    new OverloadT([
+        new FunctionT([complexT], complexT, ["w"]),
+    ])
+);
+
+function _Complex_mul(session: Session): void {
+    const z = session.pop() as Complex;
+    const w = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(z.mul(w));
+}
+const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul,
+    new OverloadT([
+        new FunctionT([complexT], complexT, ["w"]),
+    ])
+);
+
+complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
+complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
+complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
+
 export const coreNames: Names = {
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas:  { type: canvas.sig, value: canvas },
     circle:  { type: circle.sig, value: circle },
     clear:   { type: clear.sig, value: clear },
+    Complex: { type: __Complex.sig, value: __Complex },
     draw:    { type: draw.sig, value: draw },
     help:    { type: help.sig, value: help },
     print:   { type: print.sig, value: print },

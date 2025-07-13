@@ -32,6 +32,11 @@ export interface Type {
     to_str: () => string;
 }
 
+export abstract class Class {
+    abstract fields:  Record<string, Type>;
+    abstract methods: Record<string, { type: Type, value: FGCallNative }>;
+}
+
 export class NeverT implements Type {
     to_str(): string {
         return "Never";
@@ -220,7 +225,10 @@ export class CallUserT implements Type {
     }
 }
 
-export class ComplexT implements Type {
+export class ComplexT extends Class implements Type {
+    fields: Record<string, Type> = {};
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
+
     to_str(): string {
         return "Complex";
     }
@@ -245,11 +253,6 @@ export class StringT implements Type {
     equal(other: Type): boolean {
         return other instanceof StringT;
     }
-}
-
-export abstract class Class {
-    abstract fields:  Record<string, Type>;
-    abstract methods: Record<string, { type: Type, value: FGCallNative }>;
 }
 
 export class CircleT extends Class implements Type {

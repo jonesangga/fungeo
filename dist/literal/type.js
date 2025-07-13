@@ -14,6 +14,8 @@ export class FGType {
         return false;
     }
 }
+export class Class {
+}
 export class NeverT {
     to_str() {
         return "Never";
@@ -162,7 +164,9 @@ export class CallUserT {
         return this.output.equal(other.output);
     }
 }
-export class ComplexT {
+export class ComplexT extends Class {
+    fields = {};
+    methods = {};
     to_str() {
         return "Complex";
     }
@@ -185,8 +189,6 @@ export class StringT {
     equal(other) {
         return other instanceof StringT;
     }
-}
-export class Class {
 }
 export class CircleT extends Class {
     fields = {
