@@ -155,6 +155,89 @@ Pic.resize(squarelimit, 600, 600).draw()
 
 ----------------------------------------------------------------------
 
+### Apollonian
+
+#### Object and Functions
+
+**Names**
+
+- `Apol` class.
+
+**Object methods**
+
+- `draw()`. Draw to canvas. Next modification to the picture will be updated live in canvas.
+
+**Class methods**
+
+All these methods return new `Apol`.
+
+- `Apol.enclosing(r: Num)`. Create new object with radius `r`.
+- `Apol.next()`. Do next iteration.
+
+#### TODO
+
+- Add tests.
+- Set ratio of the first two inner circles.
+- `Apol.prev()` to move to the previous iteration.
+- Support coloring.
+- Implement integer bends variant.
+
+----------------------------------------------------------------------
+
+### Sierpinski
+
+#### Object and Functions
+
+**Names**
+
+- `Sierp` class.
+
+**Constructor**
+
+- `Sierp(x1: Num, y1: Num, x2: Num, y2: Num, x3: Num, y3: Num)`. Create a Siepinski object.
+
+**Object methods**
+
+- `draw()`. Draw to canvas. Next modification to the picture will be updated live in canvas.
+
+**Class methods**
+
+All these methods return new `Sierp`.
+
+- `Sierp.next()`. Do next iteration.
+
+#### TODO
+
+- Add tests.
+- Create object given 3 angles.
+- Don't draw all triangles in every iteraion. Only draw the last iteration.
+
+----------------------------------------------------------------------
+
+### Tiling
+
+#### Object and Functions
+
+**Names**
+
+- `Hexa` class.
+
+**Constructor**
+
+- `Hexa()`. Create a Hexagonal grid object.
+
+**Object methods**
+
+- `draw()`. Draw to canvas. Next modification to the picture will be updated live in canvas.
+
+#### TODO
+
+- Add tests.
+- Add some transformations.
+- Setting visible range.
+
+----------------------------------------------------------------------
+
 ## License
 
 MIT.
