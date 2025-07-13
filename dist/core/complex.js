@@ -1,16 +1,39 @@
-import { FGType, complexT } from "../literal/type.js";
+import { FGType, Class } from "../literal/type.js";
+export class ComplexT extends Class {
+    fields = {};
+    methods = {};
+    to_str() {
+        return "Type Complex";
+    }
+    equal(other) {
+        return other instanceof ComplexT;
+    }
+}
+export const complexT = new ComplexT();
+const complexTValue = new FGType(complexT);
 export class Complex {
     re;
     im;
-    constructor(re, im) {
+    constructor(re, im = 0) {
         this.re = re;
         this.im = im;
     }
     to_str() {
-        return `${this.re}+${this.im}i`;
+        if (this.re !== 0) {
+            if (this.im > 0)
+                return `${this.re} + ${this.im}i`;
+            if (this.im < 0)
+                return `${this.re} - ${-this.im}i`;
+            return this.re + "";
+        }
+        else {
+            if (this.im > 0)
+                return this.im + "i";
+            return "0";
+        }
     }
     typeof() {
-        return new FGType(complexT);
+        return complexTValue;
     }
     add(other) {
         return new Complex(this.re + other.re, this.im + other.im);
@@ -23,17 +46,19 @@ export class Complex {
     }
     mul(other) {
         const re = this.re * other.re - this.im * other.im;
-        const im = this.re * other.im + other.re * this.im;
+        const im = this.re * other.im + this.im * other.re;
         return new Complex(re, im);
     }
     sqrt() {
         let m = Math.sqrt(this.re * this.re + this.im * this.im);
-        let angle = Math.atan2(this.im, this.re);
+        let arg = Math.atan2(this.im, this.re);
         m = Math.sqrt(m);
-        angle = angle / 2;
-        return new Complex(m * Math.cos(angle), m * Math.sin(angle));
+        arg = arg / 2;
+        return new Complex(m * Math.cos(arg), m * Math.sin(arg));
     }
     equal(other) {
-        return this instanceof Complex;
+        return other instanceof Complex &&
+            this.re === other.re &&
+            this.im === other.im;
     }
 }

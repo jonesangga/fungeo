@@ -3,37 +3,82 @@
 import "global-jsdom/register"
 import { describe, it } from "node:test";
 import { equal, fail } from "node:assert/strict";
-
 import { parse } from "../parser.js"
 import { typecheck } from "../typechecker.js";
 import { compile } from "../compile.js"
 import { vm } from "../vm.js"
 
-const tests = [
-    [`let a = Complex(1, 2)
-      print(a)`,
-      `1+2i\n`,
-    ],
-    [`let a = Complex(1, 2)
-      let b = Complex(3, 4)
-      print(a.add(b))`,
-      `4+6i\n`,
-    ],
-    [`let a = Complex(3, 4)
-      let b = Complex(1, 2)
-      print(a.sub(b))`,
-      `2+2i\n`,
-    ],
-    [`let a = Complex(1, 2)
-      let b = Complex(3, 4)
-      print(a.mul(b))`,
-      `-5+10i\n`,
-    ],
-];
+const tests: [string, string, string][] = [[
+    "printing a + bi form",
 
-describe("Testing output", () => {
-    for (const [input, output] of tests) {
-        it("", () => {
+    `let a = Complex(123, 4.56)
+     print(a)`,
+
+    `123 + 4.56i\n`,
+], [
+    "printing a - bi form",
+
+    `let a = Complex(123, -4.56)
+     print(a)`,
+
+    `123 - 4.56i\n`,
+], [
+    "printing a + 0i form",
+
+    `let a = Complex(123, 0)
+     print(a)`,
+
+    `123\n`,
+], [
+    "printing a form",
+
+    `let a = Complex(123)
+     print(a)`,
+
+    `123\n`,
+], [
+    "printing 0 + bi form",
+
+    `let a = Complex(0, 123)
+     print(a)`,
+
+    `123i\n`,
+], [
+    "printing 0 + 0i form",
+
+    `let a = Complex(0, 0)
+     print(a)`,
+
+    `0\n`,
+], [
+    "add",
+
+    `let a = Complex(1, 2)
+     let b = Complex(3, 4)
+     print(a.add(b))`,
+
+    `4 + 6i\n`,
+], [
+    "sub",
+
+    `let a = Complex(1, 2)
+     let b = Complex(3, 4)
+     print(a.sub(b))`,
+
+    `-2 - 2i\n`,
+], [
+    "mul",
+
+    `let a = Complex(1, 2)
+     let b = Complex(3, 4)
+     print(a.mul(b))`,
+
+    `-5 + 10i\n`,
+]];
+
+describe("Complex class", () => {
+    for (const [title, input, output] of tests) {
+        it(title, () => {
             vm.init();
             const parseR = parse(input);
             if (!parseR.ok) fail(parseR.error.message);

@@ -4,8 +4,8 @@ import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
 import { welcome } from "./data/help.js";
-import { Complex } from "./core/complex.js";
-import { FunctionT, OverloadT, anyT, canvasT, circleT, complexT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
+import { Complex, complexT } from "./core/complex.js";
+import { FunctionT, OverloadT, anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
 function _print(session, ver) {
     const value = session.pop();
     session.pop();
@@ -155,14 +155,22 @@ const help = new FGCallNative("help", _help, new OverloadT([
     new FunctionT([anyT], nothingT, ["command"]),
     new FunctionT([], nothingT, []),
 ]));
-function _Complex(session) {
-    const im = session.pop().value;
-    const re = session.pop().value;
-    session.pop();
-    session.push(new Complex(re, im));
+function _Complex(session, ver) {
+    if (ver === 0) {
+        const im = session.pop().value;
+        const re = session.pop().value;
+        session.pop();
+        session.push(new Complex(re, im));
+    }
+    else if (ver === 1) {
+        const re = session.pop().value;
+        session.pop();
+        session.push(new Complex(re));
+    }
 }
 const __Complex = new FGCallNative("Complex", _Complex, new OverloadT([
     new FunctionT([numberT, numberT], complexT, ["re", "im"]),
+    new FunctionT([numberT], complexT, ["re"]),
 ]));
 function _Complex_add(session) {
     const z = session.pop();

@@ -164,16 +164,6 @@ export class CallUserT {
         return this.output.equal(other.output);
     }
 }
-export class ComplexT extends Class {
-    fields = {};
-    methods = {};
-    to_str() {
-        return "Complex";
-    }
-    equal(other) {
-        return other instanceof ComplexT;
-    }
-}
 export class NumberT {
     to_str() {
         return "Num";
@@ -326,7 +316,6 @@ export const anyT = new AnyT();
 export const booleanT = new BooleanT();
 export const colorT = new ColorT();
 export const colorTVal = new FGType(colorT);
-export const complexT = new ComplexT();
 export const callUserT = new CallUserT([new AnyT()], new AnyT());
 export const numberT = new NumberT();
 export const stringT = new StringT();
