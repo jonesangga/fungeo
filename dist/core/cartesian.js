@@ -1,23 +1,36 @@
 import { defaultCanvas as canvas } from "../ui/canvas.js";
 import { color, TAU } from "../data/constant.js";
-import { FGNumber } from "../value.js";
-import { FGType, coordT } from "../literal/type.js";
+import { Complex } from "./complex.js";
+import { FGType, ClassT } from "../literal/type.js";
 const c = canvas.ctx;
 const w = canvas.w;
 const h = canvas.h;
-export class Coord {
+export class CartesianT extends ClassT {
+    fields = {};
+    methods = {};
+    statics = {};
+    to_str() {
+        return "Type Cartesian";
+    }
+    equal(other) {
+        return other instanceof CartesianT;
+    }
+}
+export const cartesianT = new CartesianT();
+const cartesianTValue = new FGType(cartesianT);
+export class Cartesian {
     xl;
     xr;
     yl;
     yr;
     strokeStyle;
     pts = [];
-    field = {};
     #rangeX;
     #rangeY;
     #stepX;
     #stepY;
     #showGrid = true;
+    currentlyDrawn = false;
     constructor(xl = -5, xr = 5, yl = -5, yr = 5, strokeStyle = color.black) {
         this.xl = xl;
         this.xr = xr;
@@ -28,22 +41,24 @@ export class Coord {
         this.#rangeY = yr - yl;
         this.#stepX = w / this.#rangeX;
         this.#stepY = h / this.#rangeY;
-        this.field["xl"] = new FGNumber(this.xl);
-        this.field["xr"] = new FGNumber(this.xr);
-        this.field["yl"] = new FGNumber(this.yl);
-        this.field["yr"] = new FGNumber(this.yr);
     }
     to_str() {
-        return `Coord [${this.xl}, ${this.xr}] [${this.yl}, ${this.yr}]`;
+        return `Cartesian [${this.xl}, ${this.xr}] [${this.yl}, ${this.yr}]`;
     }
     typeof() {
-        return new FGType(coordT);
+        return cartesianTValue;
     }
-    add_pt(x, y, label) {
-        if (typeof label === "string")
-            this.pts.push({ x, y, label });
-        else
-            this.pts.push({ x, y });
+    apply(T) {
+        let res = [];
+        for (let pt of this.pts) {
+            let a = new Complex(pt.x, pt.y);
+            let r = T.mul(a);
+            res.push({ x: r.re, y: r.im });
+        }
+        this.pts.push(...res);
+    }
+    add_pt(x, y) {
+        this.pts.push({ x, y });
         return this;
     }
     hide_grid() {
@@ -88,10 +103,5 @@ export class Coord {
         c.arc(x, y, 5, 0, TAU);
         c.fillStyle = color.black;
         c.fill();
-        if (pt.label) {
-            c.textBaseline = "bottom";
-            c.font = "16px monospace";
-            c.fillText(pt.label, x + 5, y - 5);
-        }
     }
 }

@@ -252,22 +252,6 @@ export class RectT {
         return other instanceof RectT;
     }
 }
-export class CoordT extends ClassT {
-    fields = {
-        xl: numberT,
-        xr: numberT,
-        yl: numberT,
-        yr: numberT,
-    };
-    methods = {};
-    statics = {};
-    to_str() {
-        return "Coord";
-    }
-    equal(other) {
-        return other instanceof CoordT;
-    }
-}
 export class SegmentT extends ClassT {
     fields = {
         x1: numberT,
@@ -332,7 +316,6 @@ export const pointT = new PointT();
 export const richPointT = new RichPointT();
 export const richCircleT = new RichCircleT();
 export const rectT = new RectT();
-export const coordT = new CoordT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();

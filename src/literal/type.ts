@@ -324,23 +324,6 @@ export class RectT implements Type {
     }
 }
 
-export class CoordT extends ClassT {
-    fields: Record<string, Type> = {
-        xl: numberT,
-        xr: numberT,
-        yl: numberT,
-        yr: numberT,
-    };
-    methods: Record<string, { type: Type, value: FGCallNative }> = {};
-    statics: Record<string, { type: Type, value: FGCallNative }> = {};
-    to_str(): string {
-        return "Coord";
-    }
-    equal(other: Type): boolean {
-        return other instanceof CoordT;
-    }
-}
-
 export class SegmentT extends ClassT {
     fields: Record<string, Type> = {
         x1: numberT,
@@ -410,7 +393,6 @@ export const pointT = new PointT();
 export const richPointT = new RichPointT();
 export const richCircleT = new RichCircleT();
 export const rectT = new RectT();
-export const coordT = new CoordT();
 export const segmentT = new SegmentT();
 export const richSegmentT = new RichSegmentT();
 export const canvasT = new CanvasT();

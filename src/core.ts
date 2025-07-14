@@ -6,6 +6,7 @@ import { Segment } from "./geo/segment.js"
 import { Circle } from "./geo/circle.js"
 import { welcome } from "./data/help.js"
 import { Complex, complexT } from "./core/complex.js"
+import { Cartesian, cartesianT } from "./core/cartesian.js"
 import { FunctionT, OverloadT,
          anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js"
 
@@ -303,12 +304,77 @@ complexT.methods["abs"] = { type: Complex_abs.sig, value: Complex_abs };
 complexT.methods["arg"] = { type: Complex_arg.sig, value: Complex_arg };
 complexT.methods["conj"] = { type: Complex_conj.sig, value: Complex_conj };
 
+function _Cart(session: Session): void {
+    let yr = (session.pop() as FGNumber).value;
+    let yl = (session.pop() as FGNumber).value;
+    let xr = (session.pop() as FGNumber).value;
+    let xl = (session.pop() as FGNumber).value;
+    session.pop(); // The function.
+    session.push(new Cartesian(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
+}
+const Cart = new FGCallNative("Cart", _Cart,
+    new OverloadT([
+        new FunctionT([numberT, numberT, numberT, numberT], cartesianT, ["xl", "xr", "yl", "yr"]),
+    ])
+);
+
+function _Cart_draw(session: Session): void {
+    const cart = session.pop() as Cartesian;
+    session.pop(); // The function.
+    session.oncanvas.push(cart);
+    session.render();
+    cart.currentlyDrawn = true;
+}
+const Cart_draw = new FGCallNative("Cart_draw", _Cart_draw,
+    new OverloadT([
+        new FunctionT([], nothingT, []),
+    ])
+);
+
+function _Cart_pt(session: Session): void {
+    let o = session.pop() as Cartesian;
+    let y = (session.pop() as FGNumber).value;
+    let x = (session.pop() as FGNumber).value;
+    session.pop();              // The function.
+    session.push(o.add_pt(x, y));
+
+    if (o.currentlyDrawn) {
+        session.render();
+    }
+}
+const Cart_pt = new FGCallNative("Cart_pt", _Cart_pt,
+    new OverloadT([
+        new FunctionT([numberT, numberT], cartesianT, ["x", "y"]),
+    ])
+);
+
+function _Cart_apply(session: Session): void {
+    let o = session.pop() as Cartesian;
+    let T = session.pop() as Complex;
+    session.pop();              // The function.
+    o.apply(T);
+
+    if (o.currentlyDrawn) {
+        session.render();
+    }
+}
+const Cart_apply = new FGCallNative("Cart_apply", _Cart_apply,
+    new OverloadT([
+        new FunctionT([complexT], nothingT, ["T"]),
+    ])
+);
+
+cartesianT.methods["draw"] =  { type: Cart_draw.sig, value: Cart_draw };
+cartesianT.methods["pt"] =    { type: Cart_pt.sig, value: Cart_pt };
+cartesianT.methods["apply"] = { type: Cart_apply.sig, value: Cart_apply };
+
 export const coreClassNames: ClassNames = {
 };
 
 export const coreNames: Names = {
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas:  { type: canvas.sig, value: canvas },
+    Cart:    { type: Cart.sig, value: Cart },
     circle:  { type: circle.sig, value: circle },
     clear:   { type: clear.sig, value: clear },
     Complex: { type: __Complex.sig, value: __Complex },

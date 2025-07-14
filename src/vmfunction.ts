@@ -224,44 +224,6 @@
     // ])
 // );
 
-// function _coord(session: Session): void {
-    // let yr = (session.pop() as FGNumber).value;
-    // let yl = (session.pop() as FGNumber).value;
-    // let xr = (session.pop() as FGNumber).value;
-    // let xl = (session.pop() as FGNumber).value;
-    // session.pop();              // The function.
-    // session.push(new Coord(Math.floor(xl), Math.ceil(xr), Math.floor(yl), Math.ceil(yr)));
-// }
-// let coord = new FGCallNative("coord", _coord,
-    // new OverloadT([
-        // new FunctionT([numberT, numberT, numberT, numberT], coordT),
-    // ])
-// );
-
-// function _coord_pt(session: Session, ver: number): void {
-    // if (ver === 0) {
-        // let o = session.pop() as Coord;
-        // let label = (session.pop() as FGString).value;
-        // let y = (session.pop() as FGNumber).value;
-        // let x = (session.pop() as FGNumber).value;
-        // session.pop();              // The function.
-        // session.push(o.add_pt(x, y, label));
-    // }
-    // else if (ver === 1) {
-        // let o = session.pop() as Coord;
-        // let y = (session.pop() as FGNumber).value;
-        // let x = (session.pop() as FGNumber).value;
-        // session.pop();              // The function.
-        // session.push(o.add_pt(x, y));
-    // }
-// }
-// export let coord_pt = new FGCallNative("coord_pt", _coord_pt,
-    // new OverloadT([
-        // new FunctionT([numberT, numberT, stringT], coordT),
-        // new FunctionT([numberT, numberT], coordT),
-    // ])
-// );
-
 // function _coord_hide_grid(session: Session, ver: number): void {
     // let o = session.pop() as Coord;
     // session.pop();              // The function.

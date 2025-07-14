@@ -1,63 +1,82 @@
-// @jonesangga, 2025, MIT License.
+// TODO: Refactor
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { type Value, FGNumber } from "../value.js"
-import { FGType, coordT } from "../literal/type.js"
+import { Complex } from "./complex.js"
+import { type Value, FGCallNative } from "../value.js"
+import { type Type, FGType, ClassT } from "../literal/type.js"
 
 const c = canvas.ctx;
 const w = canvas.w;
 const h = canvas.h;
 
+export class CartesianT extends ClassT {
+    fields:  Record<string, Type> = {};
+    methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
+
+    to_str(): string {
+        return "Type Cartesian";
+    }
+
+    equal(other: Type): boolean {
+        return other instanceof CartesianT;
+    }
+}
+
+export const cartesianT = new CartesianT();
+const cartesianTValue = new FGType(cartesianT);
+
 type point = {
     x: number,
     y: number,
-    label?: string,
 };
 
-export class Coord {
+export class Cartesian implements Value {
     pts: point[] = [];
-    field: Record<string, Value> = {};
     #rangeX: number;
     #rangeY: number;
     #stepX: number;
     #stepY: number;
     #showGrid: boolean = true;
+    currentlyDrawn = false;
 
-    constructor( 
-        readonly xl: number = -5,
-        readonly xr: number = 5,
-        readonly yl: number = -5,
-        readonly yr: number = 5,
-        readonly strokeStyle: string = color.black,
-    ) {
+    constructor(readonly xl: number = -5,
+                readonly xr: number = 5,
+                readonly yl: number = -5,
+                readonly yr: number = 5,
+                readonly strokeStyle: string = color.black)
+    {
         this.#rangeX = xr - xl;
         this.#rangeY = yr - yl;
         this.#stepX = w / this.#rangeX;
         this.#stepY = h / this.#rangeY;
-        this.field["xl"] = new FGNumber(this.xl);
-        this.field["xr"] = new FGNumber(this.xr);
-        this.field["yl"] = new FGNumber(this.yl);
-        this.field["yr"] = new FGNumber(this.yr);
     }
 
     to_str(): string {
-        return `Coord [${this.xl}, ${this.xr}] [${this.yl}, ${this.yr}]`;
+        return `Cartesian [${this.xl}, ${this.xr}] [${this.yl}, ${this.yr}]`;
     }
 
     typeof(): FGType {
-        return new FGType(coordT);
+        return cartesianTValue;
     }
 
-    add_pt(x: number, y: number, label?: string): Coord {
-        if (typeof label === "string")
-            this.pts.push({x, y, label});
-        else
-            this.pts.push({x, y});
+    apply(T: Complex): void {
+        let res = [];
+        for (let pt of this.pts) {
+            let a = new Complex(pt.x, pt.y);
+            let r = T.mul(a);
+            res.push({x: r.re, y: r.im});
+        }
+        this.pts.push(...res);
+    }
+
+    add_pt(x: number, y: number): Cartesian {
+        this.pts.push({x, y});
         return this;
     }
 
-    hide_grid(): Coord {
+    hide_grid(): Cartesian {
         this.#showGrid = false;
         return this;
     }
@@ -107,11 +126,5 @@ export class Coord {
         c.arc(x, y, 5, 0, TAU);
         c.fillStyle = color.black;
         c.fill();
-
-        if (pt.label) {
-            c.textBaseline = "bottom";
-            c.font = "16px monospace"
-            c.fillText(pt.label, x + 5, y - 5);
-        }
     }
 }
