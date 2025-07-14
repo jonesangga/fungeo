@@ -5,7 +5,7 @@
 
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import { Kind, FGBoolean, FGCallUser, FGNumber, FGString } from "../value.js"
+import { FGBoolean, FGCallUser, FGNumber, FGString } from "../value.js"
 import { Chunk } from "../chunk.js"
 import { numberT } from "../literal/type.js"
 
@@ -14,7 +14,6 @@ describe("value", () => {
     it("FGBoolean", () => {
         let b = new FGBoolean(false);
 
-        equal(b.kind, Kind.Boolean);
         equal(b.value, false);
         equal(b.to_str(), "false");
     });
@@ -23,7 +22,6 @@ describe("value", () => {
         // let f = () => {return;};
         // let b = new FGCallNative("f", f, [numberT], numberT);
 
-        // equal(b.kind, Kind.CallNative);
         // equal(b.name, "f");
         // deepEqual(b.value, f);
         // equal(b.to_str(), "{fn f}");
@@ -32,7 +30,6 @@ describe("value", () => {
     it("FGCallUser", () => {
         let b = new FGCallUser("testfn", [numberT], numberT, new Chunk(""));
 
-        equal(b.kind, Kind.CallUser);
         equal(b.name, "testfn");
         equal(b.to_str(), "{fn testfn}");
     });
@@ -40,7 +37,6 @@ describe("value", () => {
     it("FGNumber", () => {
         let b = new FGNumber(123);
 
-        equal(b.kind, Kind.Number);
         equal(b.value, 123);
         equal(b.to_str(), "123");
     });
@@ -48,7 +44,6 @@ describe("value", () => {
     it("FGString", () => {
         let b = new FGString("real");
 
-        equal(b.kind, Kind.String);
         equal(b.value, "real");
         equal(b.to_str(), "real");
     });

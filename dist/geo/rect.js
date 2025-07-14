@@ -9,7 +9,6 @@ export default class Rect {
     h;
     strokeStyle;
     fillStyle;
-    kind = 900;
     constructor(x, y, w, h, strokeStyle = color.black, fillStyle = color.nocolor) {
         this.x = x;
         this.y = y;

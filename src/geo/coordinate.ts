@@ -2,7 +2,7 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Value, Kind, FGNumber } from "../value.js"
+import { type Value, FGNumber } from "../value.js"
 import { FGType, coordT } from "../literal/type.js"
 
 const c = canvas.ctx;
@@ -16,7 +16,6 @@ type point = {
 };
 
 export class Coord {
-    kind: Kind.Coord = Kind.Coord;
     pts: point[] = [];
     field: Record<string, Value> = {};
     #rangeX: number;
@@ -26,11 +25,11 @@ export class Coord {
     #showGrid: boolean = true;
 
     constructor( 
-        public xl: number = -5,
-        public xr: number = 5,
-        public yl: number = -5,
-        public yr: number = 5,
-        public strokeStyle: string = color.black,
+        readonly xl: number = -5,
+        readonly xr: number = 5,
+        readonly yl: number = -5,
+        readonly yr: number = 5,
+        readonly strokeStyle: string = color.black,
     ) {
         this.#rangeX = xr - xl;
         this.#rangeY = yr - yl;

@@ -11,7 +11,6 @@ export class Circle {
     r;
     strokeStyle;
     fillStyle;
-    kind = 700;
     bend;
     field = {};
     constructor(x, y, r, strokeStyle = color.black, fillStyle = color.nocolor) {

@@ -4,22 +4,19 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Kind } from "../value.js"
 import { FGType, ellipseT } from "../literal/type.js"
 
 const c = canvas.ctx;
 
 export default class Ellipse {
-    kind: Kind.Ellipse = Kind.Ellipse;
-
     constructor( 
-        public x: number,
-        public y: number,
-        public rx: number,
-        public ry: number,
-        public t: number = 0,
-        public strokeStyle: string = color.black,
-        public fillStyle: string = color.nocolor
+        readonly x: number,
+        readonly y: number,
+        readonly rx: number,
+        readonly ry: number,
+        readonly t: number = 0,
+        readonly strokeStyle: string = color.black,
+        readonly fillStyle: string = color.nocolor
     ) {}
 
     to_str(): string {

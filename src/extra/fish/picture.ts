@@ -43,8 +43,8 @@ export class Picture {
     currentlyDrawn = false;
     frameIncluded = true;
 
-    constructor(public w: number,
-                public h: number) {}
+    constructor(readonly w: number,
+                readonly h: number) {}
 
     to_str(): string {
         return `Picture ${this.w} ${this.h}`;

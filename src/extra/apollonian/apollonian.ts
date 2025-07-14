@@ -10,9 +10,9 @@ class Circle {
     strokeStyle: string = color.black;
     bend: number;
 
-    constructor(public x: number,
-                public y: number,
-                public r: number)
+    constructor(readonly x: number,
+                readonly y: number,
+                readonly r: number)
     {
         this.bend = 1/r;
     }

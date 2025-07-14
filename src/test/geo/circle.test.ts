@@ -2,7 +2,6 @@
 
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import { Kind } from "../../value.js"
 import { color } from "../../data/constant.js"
 import { Circle } from "../../geo/circle.js"
 
@@ -10,7 +9,6 @@ describe("Circle", () => {
     it("create Circle with default color", () => {
         let c = new Circle(10, 20, 30);
 
-        equal(c.kind, Kind.Circle);
         equal(c.x, 10);
         equal(c.y, 20);
         equal(c.r, 30);

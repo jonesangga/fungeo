@@ -2,6 +2,7 @@ import { __ } from "./common.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { coreClassNames, coreNames } from "./core.js";
 import { extraClassNames, extraNames } from "./extra.js";
+import { Class } from "./literal/type.js";
 import { defaultCanvas } from "./ui/canvas.js";
 export class Session {
     stack = [];
@@ -201,20 +202,18 @@ function run(intercept = false) {
                 session.push(value);
                 break;
             }
-            case 520: {
-                let obj = session.pop();
-                let prop = read_string();
-                let value = obj.field[prop];
-                session.push(value);
-                break;
-            }
             case 510: {
                 let obj = session.pop();
                 let prop = read_string();
-                console.log(obj);
-                let fn = obj.typeof().value.methods[prop].value;
-                let method = new FGMethod(fn, obj);
-                session.push(method);
+                let k = obj.typeof().value;
+                if (k instanceof Class) {
+                    let fn = k.methods[prop].value;
+                    let method = new FGMethod(fn, obj);
+                    session.push(method);
+                }
+                else {
+                    error("not a Class instance");
+                }
                 break;
             }
             case 525: {
@@ -224,13 +223,6 @@ function run(intercept = false) {
                 let fn = className.value.statics[prop].value;
                 let method = new FGMethod(fn);
                 session.push(method);
-                break;
-            }
-            case 1430: {
-                let value = session.pop();
-                let obj = session.pop();
-                let prop = read_string();
-                obj.set(prop, value);
                 break;
             }
             case 1000: {

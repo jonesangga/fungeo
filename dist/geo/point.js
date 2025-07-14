@@ -8,7 +8,6 @@ export class Point {
     y;
     lineWidth;
     strokeStyle;
-    kind = 850;
     field = {};
     constructor(x, y, lineWidth = 8, strokeStyle = color.black) {
         this.x = x;

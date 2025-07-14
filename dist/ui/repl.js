@@ -204,7 +204,6 @@ function demo_btn_cb() {
     toggleDemo();
 }
 const repl = {
-    kind: 2500,
     reset() {
         history = [{ code: "" }];
         historyViewIdx = 1;

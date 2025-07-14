@@ -1,4 +1,4 @@
-import { type FG, FGCallNative } from "../value.js";
+import { type Value, FGCallNative } from "../value.js";
 import { type Type, FGType, Class } from "../literal/type.js"
 
 export class ComplexT extends Class implements Type {
@@ -73,7 +73,7 @@ export class Complex {
         return new Complex(m * Math.cos(arg), m * Math.sin(arg));
     }
 
-    equal(other: FG): boolean {
+    equal(other: Value): boolean {
         return other instanceof Complex &&
                this.re === other.re &&
                this.im === other.im;

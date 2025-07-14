@@ -6,17 +6,15 @@
 //
 // TODO: Create ColorLite type alias for string to be used.
 
-import { type FG, Kind } from "../value.js";
+import { type Value } from "../value.js";
 import { FGType, colorTVal } from "./type.js"
 
-export class FGColor implements FG {
-    kind: Kind.Color = Kind.Color;
-
+export class FGColor implements Value {
     constructor(
-        public r: number,
-        public g: number,
-        public b: number,
-        public a: number = 255,
+        readonly r: number,
+        readonly g: number,
+        readonly b: number,
+        readonly a: number = 255,
     ) {}
 
     to_str(): string {

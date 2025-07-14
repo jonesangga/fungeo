@@ -4,15 +4,11 @@
 //       Test it.
 //       Add AliasT for type alias.
 
-import { type FG, Kind } from "../value.js";
+import { type Value } from "../value.js";
 import { FGCallNative } from "../value.js";
 
-export class FGType implements FG {
-    kind: Kind.Type = Kind.Type;
-
-    constructor(
-        public value: Type
-    ) {}
+export class FGType implements Value {
+    constructor(readonly value: Type) {}
 
     to_str(): string {
         return this.value.to_str();
@@ -22,7 +18,7 @@ export class FGType implements FG {
         return this;
     }
 
-    equal(other: FG): boolean {
+    equal(other: Value): boolean {
         return false;
     }
 }
@@ -85,9 +81,7 @@ export class ColorT implements Type {
 }
 
 export class ListT implements Type {
-    constructor(
-        public elType: Type
-    ) {}
+    constructor(readonly elType: Type) {}
     to_str(): string {
         return this.elType.to_str() + "[]";
     }
@@ -99,8 +93,8 @@ export class ListT implements Type {
 
 // export class StructT implements Type {
     // constructor(
-        // // public memberT: Type[]
-        // public members: { [key: string]: Type },
+        // // readonly memberT: Type[]
+        // readonly members: { [key: string]: Type },
     // ) {}
     // to_str(): string {
         // return "{" + Object.entries(this.members).map(([k, v]) => k + ":" + v.to_str()).join(", ") + "}";
@@ -122,9 +116,7 @@ export class ListT implements Type {
 
 // TODO: update to_str()
 export class TupleT implements Type {
-    constructor(
-        public values: Type[]
-    ) {}
+    constructor(readonly values: Type[]) {}
     to_str(): string {
         return "[" + this.values.map(v => v.to_str()).join(", ") + "]";
     }
@@ -135,9 +127,7 @@ export class TupleT implements Type {
 
 // TODO: update to_str()
 export class UnionT implements Type {
-    constructor(
-        public value: Type[]
-    ) {}
+    constructor(readonly value: Type[]) {}
     to_str(): string {
         if (this.value.length === 1) // No need parens.
             return this.value[0].to_str();
@@ -150,9 +140,9 @@ export class UnionT implements Type {
 }
 
 export class FunctionT implements Type {
-    constructor(public input:  Type[],
-                public output: Type,
-                public names:  string[])
+    constructor(readonly input:  Type[],
+                readonly output: Type,
+                readonly names:  string[])
     {
         // if (input.length !== names.length) {
             // throw new Error("input.length !== names.length");
@@ -180,7 +170,7 @@ export class FunctionT implements Type {
 }
 
 export class OverloadT implements Type {
-    constructor(public sigs: FunctionT[]) {}
+    constructor(readonly sigs: FunctionT[]) {}
 
     // TODO: fix this.
     to_str(): string {
@@ -203,8 +193,8 @@ export class OverloadT implements Type {
 }
 
 export class CallUserT implements Type {
-    constructor(public input:  Type[],
-                public output: Type) {}
+    constructor(readonly input:  Type[],
+                readonly output: Type) {}
 
     to_str(): string {
         let input = this.input.map(v => {

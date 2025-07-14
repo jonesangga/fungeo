@@ -5,7 +5,6 @@ import { colorTVal } from "../../literal/type.js";
 describe("Color", () => {
     it("constructor with default opacity", () => {
         let c = new FGColor(10, 20, 30);
-        equal(c.kind, 455);
         equal(c.r, 10);
         equal(c.g, 20);
         equal(c.b, 30);
@@ -13,7 +12,6 @@ describe("Color", () => {
     });
     it("constructor with given opacity", () => {
         let c = new FGColor(10, 20, 30, 40);
-        equal(c.kind, 455);
         equal(c.r, 10);
         equal(c.g, 20);
         equal(c.b, 30);

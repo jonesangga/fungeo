@@ -4,13 +4,12 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Value, Kind, FGNumber } from "../value.js"
+import { type Value, FGNumber } from "../value.js"
 import { FGType, pointT } from "../literal/type.js"
 
 const c = canvas.ctx;
 
 export class Point {
-    kind: Kind.Point = Kind.Point;
     field: Record<string, Value> = {};
 
     constructor( 

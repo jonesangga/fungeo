@@ -10,7 +10,6 @@ export class Segment {
     x2;
     y2;
     strokeStyle;
-    kind = 1000;
     field = {};
     constructor(x1, y1, x2, y2, strokeStyle = color.black) {
         this.x1 = x1;

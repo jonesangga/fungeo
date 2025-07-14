@@ -11,7 +11,6 @@ export class Coord {
     yl;
     yr;
     strokeStyle;
-    kind = 720;
     pts = [];
     field = {};
     #rangeX;

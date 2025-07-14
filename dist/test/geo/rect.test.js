@@ -5,7 +5,6 @@ import Rect from "../../geo/rect.js";
 describe("Rect", () => {
     it("create Rect with default color", () => {
         let r = new Rect(10, 20, 30, 40);
-        equal(r.kind, 900);
         equal(r.x, 10);
         equal(r.y, 20);
         equal(r.w, 30);

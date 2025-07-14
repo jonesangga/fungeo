@@ -5,7 +5,6 @@ import Ellipse from "../../geo/ellipse.js";
 describe("Ellipse", () => {
     it("create Ellipse with default color", () => {
         let e = new Ellipse(10, 20, 30, 40);
-        equal(e.kind, 750);
         equal(e.x, 10);
         equal(e.y, 20);
         equal(e.rx, 30);

@@ -4,7 +4,6 @@ export class FGColor {
     g;
     b;
     a;
-    kind = 455;
     constructor(r, g, b, a = 255) {
         this.r = r;
         this.g = g;

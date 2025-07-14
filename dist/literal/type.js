@@ -1,6 +1,5 @@
 export class FGType {
     value;
-    kind = 650;
     constructor(value) {
         this.value = value;
     }

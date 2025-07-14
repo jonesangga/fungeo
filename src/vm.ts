@@ -6,7 +6,7 @@ import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber
 import { coreClassNames, coreNames } from "./core.js";
 import { extraClassNames, extraNames } from "./extra.js";
 import { type Type, FGType, Class } from "./literal/type.js";
-import { Point } from "./geo/point.js";
+// import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
 
 export class Session {
@@ -349,22 +349,27 @@ function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            // TODO: as Point is a hack because not all GeoObj have 'field' property.
-            case Op.GetProp: {
-                let obj = session.pop() as Point;
-                let prop = read_string();
-                let value = obj.field[prop];
-                session.push(value);
-                break;
-            }
+            // // TODO: as Point is a hack because not all GeoObj have 'field' property.
+            // case Op.GetProp: {
+                // let obj = session.pop() as Point;
+                // let prop = read_string();
+                // let value = obj.field[prop];
+                // session.push(value);
+                // break;
+            // }
 
             case Op.GetMeth: {
                 let obj = session.pop();
                 let prop = read_string();
-                console.log(obj);
-                let fn = obj.typeof().value.methods[prop].value;
-                let method = new FGMethod(fn, obj);
-                session.push(method);
+                let k = obj.typeof().value;
+                if (k instanceof Class) {
+                    let fn = k.methods[prop].value;
+                    let method = new FGMethod(fn, obj);
+                    session.push(method);
+                }
+                else {
+                    error("not a Class instance");
+                }
                 break;
             }
 
@@ -379,13 +384,13 @@ function run(intercept: boolean = false): boolean {
                 break;
             }
 
-            case Op.SetProp: {
-                let value = session.pop();
-                let obj = session.pop() as Point;
-                let prop = read_string();
-                obj.set(prop, value);
-                break;
-            }
+            // case Op.SetProp: {
+                // let value = session.pop();
+                // let obj = session.pop() as Point;
+                // let prop = read_string();
+                // obj.set(prop, value);
+                // break;
+            // }
 
             case Op.Neg: {
                 let a = session.pop() as FGNumber;

@@ -2,7 +2,7 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color, TAU } from "../data/constant.js"
-import { Value, Kind, FGNumber } from "../value.js"
+import { type Value, FGNumber } from "../value.js"
 import { Complex } from "../core/complex.js"
 import { FGType, circleT } from "../literal/type.js"
 import { Point } from "./point.js"
@@ -10,16 +10,15 @@ import { Point } from "./point.js"
 const c = canvas.ctx;
 
 export class Circle {
-    kind: Kind.Circle = Kind.Circle;
     bend?: number;
     field: Record<string, Value> = {};
 
     constructor( 
-        public x: number,
-        public y: number,
-        public r: number,
-        public strokeStyle: string = color.black,
-        public fillStyle: string = color.nocolor
+        readonly x: number,
+        readonly y: number,
+        readonly r: number,
+        readonly strokeStyle: string = color.black,
+        readonly fillStyle: string = color.nocolor
     ) {
         this.field["x"] = new FGNumber(this.x);
         this.field["y"] = new FGNumber(this.y);

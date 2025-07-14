@@ -11,7 +11,6 @@
 //   resultArea: When terminal is hidden, displays the output or error message of the last executed code.
 // Terminal contains all histories, outputs and errors. Hidden by default.
 
-import { Kind, type Repl } from "../value.js";
 import { welcome } from "../data/help.js";
 import { showDemoSelect, toggleDemo } from "./demo.js";
 
@@ -274,9 +273,7 @@ function demo_btn_cb(): void {
 
 //--------------------------------------------------------------------
 
-const repl: Repl = {
-    kind: Kind.Repl,
-
+const repl = {
     reset(): void {
         history = [{ code: "" }];
         historyViewIdx     = 1;

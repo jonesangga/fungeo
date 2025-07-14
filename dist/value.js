@@ -1,31 +1,6 @@
 import { FGType, CallUserT, ListT, booleanT, numberT, stringT } from "./literal/type.js";
-;
-export const KindName = {
-    [200]: "Any",
-    [300]: "Boolean",
-    [400]: "CallNative",
-    [450]: "CallUser",
-    [2000]: "Canvas",
-    [700]: "Circle",
-    [455]: "Color",
-    [720]: "Coord",
-    [750]: "Ellipse",
-    [470]: "List",
-    [480]: "Method",
-    [100]: "Nothing",
-    [500]: "Number",
-    [840]: "Picture",
-    [850]: "Point",
-    [900]: "Rect",
-    [2500]: "Repl",
-    [1000]: "Segment",
-    [600]: "String",
-    [610]: "Struct",
-    [650]: "Type",
-};
 export class FGBoolean {
     value;
-    kind = 300;
     constructor(value) {
         this.value = value;
     }
@@ -36,17 +11,13 @@ export class FGBoolean {
         return new FGType(booleanT);
     }
     equal(other) {
-        if (this.kind !== other.kind)
-            return false;
-        if ("value" in other)
-            return this.value === other.value;
-        return false;
+        return (other instanceof FGBoolean) &&
+            (this.value === other.value);
     }
 }
 export class FGMethod {
     method;
     obj;
-    kind = 480;
     constructor(method, obj) {
         this.method = method;
         this.obj = obj;
@@ -62,7 +33,6 @@ export class FGCallNative {
     name;
     value;
     sig;
-    kind = 400;
     constructor(name, value, sig) {
         this.name = name;
         this.value = value;
@@ -83,7 +53,6 @@ export class FGCallUser {
     input;
     output;
     chunk;
-    kind = 450;
     constructor(name, input, output, chunk) {
         this.name = name;
         this.input = input;
@@ -99,7 +68,6 @@ export class FGCallUser {
 }
 export class FGNumber {
     value;
-    kind = 500;
     constructor(value) {
         this.value = value;
     }
@@ -122,16 +90,12 @@ export class FGNumber {
         return new FGNumber(this.value - other.value);
     }
     equal(other) {
-        if (this.kind !== other.kind)
-            return false;
-        if ("value" in other)
-            return this.value === other.value;
-        return false;
+        return (other instanceof FGNumber) &&
+            (this.value === other.value);
     }
 }
 export class FGString {
     value;
-    kind = 600;
     constructor(value) {
         this.value = value;
     }
@@ -145,17 +109,13 @@ export class FGString {
         return new FGString(this.value + other.value);
     }
     equal(other) {
-        if (this.kind !== other.kind)
-            return false;
-        if ("value" in other)
-            return this.value === other.value;
-        return false;
+        return (other instanceof FGString) &&
+            (this.value === other.value);
     }
 }
 export class FGList {
     value;
     type;
-    kind = 470;
     constructor(value, type) {
         this.value = value;
         this.type = type;
@@ -174,7 +134,6 @@ export class FGList {
 }
 export class FGStruct {
     members;
-    kind = 610;
     constructor(members) {
         this.members = members;
     }

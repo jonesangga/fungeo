@@ -6,13 +6,13 @@ import { type Type, Class, FGType } from "../../literal/type.js"
 const c = canvas.ctx;
 
 class Triangle {
-    constructor(public x1: number,
-                public y1: number,
-                public x2: number,
-                public y2: number,
-                public x3: number,
-                public y3: number,
-                public strokeStyle: string = color.black) {}
+    constructor(readonly x1: number,
+                readonly y1: number,
+                readonly x2: number,
+                readonly y2: number,
+                readonly x3: number,
+                readonly y3: number,
+                readonly strokeStyle: string = color.black) {}
 
     to_str(): string {
         return `Tri ${this.x1} ${this.y1} ${this.x2} ${this.y2} ${this.x3} ${this.y3}`;
@@ -53,12 +53,12 @@ export class Sierpinski {
     tris: Triangle[] = []
     queue: Triangle[] = []
 
-    constructor(public x1: number,
-                public y1: number,
-                public x2: number,
-                public y2: number,
-                public x3: number,
-                public y3: number)
+    constructor(readonly x1: number,
+                readonly y1: number,
+                readonly x2: number,
+                readonly y2: number,
+                readonly x3: number,
+                readonly y3: number)
     {
         this.tris.push(new Triangle(x1, y1, x2, y2, x3, y3));
         this.queue.push(new Triangle(x1, y1, x2, y2, x3, y3));

@@ -2,21 +2,18 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Kind } from "../value.js"
 import { FGType, rectT } from "../literal/type.js"
 
 const c = canvas.ctx;
 
 export default class Rect {
-    kind: Kind.Rect = Kind.Rect;
-
     constructor( 
-        public x: number,
-        public y: number,
-        public w: number,
-        public h: number,
-        public strokeStyle: string = color.black,
-        public fillStyle: string = color.nocolor
+        readonly x: number,
+        readonly y: number,
+        readonly w: number,
+        readonly h: number,
+        readonly strokeStyle: string = color.black,
+        readonly fillStyle: string = color.nocolor
     ) {}
 
     to_str(): string {

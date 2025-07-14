@@ -6,22 +6,21 @@
 
 import { defaultCanvas as canvas } from "../ui/canvas.js"
 import { color } from "../data/constant.js"
-import { Value, Kind, FGNumber } from "../value.js"
+import { type Value, FGNumber } from "../value.js"
 import { Point } from "./point.js"
 import { FGType, segmentT } from "../literal/type.js"
 
 const c = canvas.ctx;
 
 export class Segment {
-    kind: Kind.Segment = Kind.Segment;
     field: Record<string, Value> = {};
 
     constructor( 
-        public x1: number,
-        public y1: number,
-        public x2: number,
-        public y2: number,
-        public strokeStyle: string = color.black
+        readonly x1: number,
+        readonly y1: number,
+        readonly x2: number,
+        readonly y2: number,
+        readonly strokeStyle: string = color.black
     ) {
         this.field["x1"] = new FGNumber(this.x1);
         this.field["y1"] = new FGNumber(this.y1);

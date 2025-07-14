@@ -2,7 +2,6 @@
 
 import { describe, it } from "node:test";
 import { equal } from "node:assert/strict";
-import { Kind } from "../../value.js"
 import { color } from "../../data/constant.js"
 import { Segment } from "../../geo/segment.js"
 
@@ -10,7 +9,6 @@ describe("Segment", () => {
     it("create Segment with default color", () => {
         let seg = new Segment(10, 20, 30, 40);
 
-        equal(seg.kind, Kind.Segment);
         equal(seg.x1, 10);
         equal(seg.y1, 20);
         equal(seg.x2, 30);
@@ -31,7 +29,6 @@ describe("Segment", () => {
 
         let p = seg.midpoint();
 
-        equal(p.kind, Kind.Point);
         equal(p.x, 20);
         equal(p.y, 30);
         equal(p.lineWidth, 5);
