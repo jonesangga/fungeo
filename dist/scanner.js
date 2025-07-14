@@ -9,6 +9,7 @@ export const TokenTName = {
     [50]: "BSlash",
     [1620]: "CircleT",
     [1300]: "Colon",
+    [1305]: "Colon2",
     [100]: "Comma",
     [210]: "Dot",
     [2300]: "Else",
@@ -98,9 +99,14 @@ export class Scanner {
             case ',': return this.token_lexeme(100);
             case '/': return this.token_lexeme(220);
             case '*': return this.token_lexeme(1100);
-            case ':': return this.token_lexeme(1300);
             case '\\': return this.token_lexeme(50);
             case '"': return this.string_();
+            case ':': {
+                if (this.match(':'))
+                    return this.token_lexeme(1305);
+                else
+                    return this.token_lexeme(1300);
+            }
             case '>': {
                 if (this.match('='))
                     return this.token_lexeme(1525);

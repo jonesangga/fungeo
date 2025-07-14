@@ -33,6 +33,7 @@ class Circle {
 export class ApollonianT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
         return "Apollonian";
     }
@@ -49,6 +50,7 @@ export class Apollonian {
     currentlyDrawn = false;
     gasket = [];
     queue = [];
+    constructor() { }
     static enclosing(r) {
         const apol = new Apollonian();
         apol.enclosing_r = r;

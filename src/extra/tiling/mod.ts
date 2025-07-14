@@ -1,4 +1,4 @@
-import { type Names, Session } from "../../vm.js"
+import { type ClassNames, type Names, Session } from "../../vm.js"
 import { FGCallNative } from "../../value.js"
 import { Hexagonal, hexagonalT } from "./hexagonal.js"
 import { FunctionT, OverloadT,
@@ -28,6 +28,9 @@ const Hexa_draw = new FGCallNative("Hexa_draw", _Hexa_draw,
 );
 
 hexagonalT.methods["draw"] = { type: Hexa_draw.sig, value: Hexa_draw };
+
+export const tilingClassNames: ClassNames = {
+};
 
 export const tilingNames: Names = {
     Hexa: { type: Hexa.sig, value: Hexa },

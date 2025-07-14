@@ -2,6 +2,7 @@ import { FGType, Class } from "../literal/type.js";
 export class ComplexT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
         return "Type Complex";
     }

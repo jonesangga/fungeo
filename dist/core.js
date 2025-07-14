@@ -202,6 +202,7 @@ const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul, new OverloadT(
 complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
 complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
 complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
+export const coreClassNames = {};
 export const coreNames = {
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas: { type: canvas.sig, value: canvas },

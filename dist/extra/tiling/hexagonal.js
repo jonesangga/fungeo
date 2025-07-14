@@ -5,8 +5,9 @@ const c = canvas.ctx;
 export class HexagonalT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
-        return "HexagonalT";
+        return "Type Hexagonal";
     }
     equal(other) {
         return other instanceof HexagonalT;

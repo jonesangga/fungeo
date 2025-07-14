@@ -4,6 +4,7 @@ import { type Type, FGType, Class } from "../literal/type.js"
 export class ComplexT extends Class implements Type {
     fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
 
     to_str(): string {
         return "Type Complex";

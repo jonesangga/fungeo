@@ -20,6 +20,7 @@ const Hexa_draw = new FGCallNative("Hexa_draw", _Hexa_draw, new OverloadT([
     new FunctionT([], nothingT, []),
 ]));
 hexagonalT.methods["draw"] = { type: Hexa_draw.sig, value: Hexa_draw };
+export const tilingClassNames = {};
 export const tilingNames = {
     Hexa: { type: Hexa.sig, value: Hexa },
 };

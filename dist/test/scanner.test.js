@@ -65,6 +65,7 @@ describe("scanner each token type", () => {
         [1600]: ["Bool", { type: 1600, line: 1, lexeme: "Bool" }],
         [50]: ["\\", { type: 50, line: 1, lexeme: "\\" }],
         [1300]: [":", { type: 1300, line: 1, lexeme: ":" }],
+        [1305]: ["::", { type: 1305, line: 1, lexeme: "::" }],
         [100]: [",", { type: 100, line: 1, lexeme: "," }],
         [1620]: ["Circle", { type: 1620, line: 1, lexeme: "Circle" }],
         [210]: [".", { type: 210, line: 1, lexeme: "." }],

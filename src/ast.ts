@@ -6,23 +6,24 @@ import { Op } from "./chunk.js"
 import { type Type, numberT, anyT } from "./literal/type.js"
 
 export interface Visitor<T> {
-    visitAssign    (node: AssignNode):    T;
-    visitBinary    (node: BinaryNode):    T;
-    visitBoolean   (node: BooleanNode):   T;
-    visitCall      (node: CallNode):      T;
-    visitCallVoid  (node: CallVoidNode):  T;
-    visitEmptyStmt (node: EmptyStmtNode): T;
-    visitExprStmt  (node: ExprStmtNode):  T;
-    visitFile      (node: FileNode):      T;
-    visitGetProp   (node: GetPropNode):   T;
-    visitIdent     (node: IdentNode):     T;
-    visitIndex     (node: IndexNode):     T;
-    visitList      (node: ListNode):      T;
-    visitNegative  (node: NegativeNode):  T;
-    visitNumber    (node: NumberNode):    T;
-    visitSetProp   (node: SetPropNode):   T;
-    visitString    (node: StringNode):    T;
-    visitVarDecl   (node: VarDeclNode):   T;
+    visitAssign       (node: AssignNode):       T;
+    visitBinary       (node: BinaryNode):       T;
+    visitBoolean      (node: BooleanNode):      T;
+    visitCall         (node: CallNode):         T;
+    visitCallVoid     (node: CallVoidNode):     T;
+    visitEmptyStmt    (node: EmptyStmtNode):    T;
+    visitExprStmt     (node: ExprStmtNode):     T;
+    visitFile         (node: FileNode):         T;
+    visitGetProp      (node: GetPropNode):      T;
+    visitIdent        (node: IdentNode):        T;
+    visitIndex        (node: IndexNode):        T;
+    visitList         (node: ListNode):         T;
+    visitNegative     (node: NegativeNode):     T;
+    visitNumber       (node: NumberNode):       T;
+    visitSetProp      (node: SetPropNode):      T;
+    visitStaticMethod (node: StaticMethodNode): T;
+    visitString       (node: StringNode):       T;
+    visitVarDecl      (node: VarDeclNode):      T;
 }
 
 export interface AST {
@@ -111,7 +112,7 @@ export class BooleanNode implements AST {
 
 export class CallNode implements AST {
     constructor(public line: number,
-                public name: IdentNode | GetPropNode,
+                public name: IdentNode | GetPropNode | StaticMethodNode,
                 public args: AST[],
                 public ver:  number) {}
 
@@ -202,10 +203,9 @@ export class FileNode implements AST {
 // TODO: Think about `kind` later.
 export class GetPropNode implements AST {
     constructor(public line: number,
-                public obj:  AST,
-                public prop: string,
-                // public isField: boolean = true) {}
-                public kind: "field" | "method" | "static" = "field") {}
+                public obj:     AST,
+                public prop:    string,
+                public isField: boolean = true) {}
 
     to_str(level: number): string {
         return indent(level) + "GetProp(\n"
@@ -316,6 +316,25 @@ export class SetPropNode implements AST {
 
     visit<T>(v: Visitor<T>): T {
         return v.visitSetProp(this);
+    }
+}
+
+export class StaticMethodNode implements AST {
+    constructor(public line:   number,
+                public obj:    IdentNode,
+                public method: string) {}
+
+    to_str(level: number): string {
+        return indent(level) + "StaticMethod(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.method
+            + "\n"
+            + indent(level) + ")";
+    }
+
+    visit<T>(v: Visitor<T>): T {
+        return v.visitStaticMethod(this);
     }
 }
 

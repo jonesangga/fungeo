@@ -116,9 +116,8 @@ export class FGBoolean implements FG {
 export class FGMethod implements FG {
     kind: Kind.Method = Kind.Method;
 
-    constructor(public obj:    Value,
-                public method: FGCallNative,
-                public isStatic: boolean = false) {}
+    constructor(public method: FGCallNative,
+                public obj?:   Value) {}
 
     to_str(): string {
         return `Method ${ this.method.name }`;

@@ -187,6 +187,7 @@ export class CircleT extends Class {
         r: numberT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "Circle";
     }
@@ -200,6 +201,7 @@ export class RichCircleT extends Class {
         q: richPointT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "RichCircle";
     }
@@ -221,6 +223,7 @@ export class PointT extends Class {
         y: numberT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "Point";
     }
@@ -234,6 +237,7 @@ export class RichPointT extends Class {
         y: numberT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "RichPoint";
     }
@@ -257,6 +261,7 @@ export class CoordT extends Class {
         yr: numberT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "Coord";
     }
@@ -272,6 +277,7 @@ export class SegmentT extends Class {
         y2: numberT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "Segment";
     }
@@ -285,6 +291,7 @@ export class RichSegmentT extends Class {
         q: richPointT,
     };
     methods = {};
+    statics = {};
     to_str() {
         return "RichSegment";
     }
@@ -295,6 +302,7 @@ export class RichSegmentT extends Class {
 export class CanvasT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
         return "Canvas";
     }

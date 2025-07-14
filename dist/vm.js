@@ -1,7 +1,7 @@
 import { __ } from "./common.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
-import { coreNames } from "./core.js";
-import { extraNames } from "./extra.js";
+import { coreClassNames, coreNames } from "./core.js";
+import { extraClassNames, extraNames } from "./extra.js";
 import { defaultCanvas } from "./ui/canvas.js";
 export class Session {
     stack = [];
@@ -38,6 +38,7 @@ export let session = new Session();
 let frames = [];
 let currFrame;
 let currChunk;
+export let classNames = {};
 export let names = {};
 function error(msg) {
     let line = currChunk.lines[currFrame.ip - 1];
@@ -116,7 +117,7 @@ function run(intercept = false) {
                 if (fn instanceof FGCallNative)
                     fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
-                    if (!fn.isStatic)
+                    if (fn.obj)
                         session.push(fn.obj);
                     fn.method.value(session, ver);
                 }
@@ -212,15 +213,16 @@ function run(intercept = false) {
                 let prop = read_string();
                 console.log(obj);
                 let fn = obj.typeof().value.methods[prop].value;
-                let method = new FGMethod(obj, fn);
+                let method = new FGMethod(fn, obj);
                 session.push(method);
                 break;
             }
             case 525: {
-                let obj = session.pop();
+                let obj = read_string();
                 let prop = read_string();
-                let fn = obj.sig.sigs[0].output.methods[prop].value;
-                let method = new FGMethod(obj, fn, true);
+                let className = classNames[obj];
+                let fn = className.value.statics[prop].value;
+                let method = new FGMethod(fn);
                 session.push(method);
                 break;
             }
@@ -327,6 +329,7 @@ class RuntimeError extends Error {
 export const vm = {
     init() {
         session.reset();
+        classNames = { ...coreClassNames, ...extraClassNames };
         names = { ...coreNames, ...extraNames };
     },
     interpret(fn) {

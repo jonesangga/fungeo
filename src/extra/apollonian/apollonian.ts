@@ -36,8 +36,9 @@ class Circle {
 }
 
 export class ApollonianT extends Class implements Type {
-    fields: Record<string, Type> = {};
+    fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
 
     to_str(): string {
         return "Apollonian";
@@ -57,6 +58,8 @@ export class Apollonian {
     currentlyDrawn = false;
     gasket: Circle[] = []
     queue: Circle[][] = []
+
+    private constructor() {}
 
     static enclosing(r: number): Apollonian {
         const apol = new Apollonian();

@@ -12,12 +12,14 @@ import { type Type, Class, FGType } from "../../literal/type.js"
 const c = defaultCanvas.ctx;
 
 export class PictureT extends Class implements Type {
-    fields: Record<string, Type> = {};
+    fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
 
     to_str(): string {
-        return "Picture";
+        return "Type Picture";
     }
+
     equal(other: Type): boolean {
         return other instanceof PictureT;
     }

@@ -30,12 +30,14 @@ class Triangle {
 }
 
 export class SierpinskiT extends Class implements Type {
-    fields: Record<string, Type> = {};
+    fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
 
     to_str(): string {
-        return "Sierpinski";
+        return "Type Sierpinski";
     }
+
     equal(other: Type): boolean {
         return other instanceof SierpinskiT;
     }

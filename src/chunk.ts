@@ -177,10 +177,16 @@ export class Chunk {
                 return [result, offset + 3];
             }
 
+            case Op.GetStat: {
+                let objId = this.code[offset + 1];
+                let methodId = this.code[offset + 2];
+                result += `${ padr7(name) } ${ padl4(objId) } ${ this.values[objId].to_str() }.${ this.values[methodId].to_str() }\n`;
+                return [result, offset + 3];
+            }
+
             case Op.GetGlob:
             case Op.GetMeth:
             case Op.GetProp:
-            case Op.GetStat:
             case Op.Load:
             case Op.New:
             case Op.Use: {

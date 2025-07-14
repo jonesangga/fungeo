@@ -35,6 +35,7 @@ export interface Type {
 export abstract class Class {
     abstract fields:  Record<string, Type>;
     abstract methods: Record<string, { type: Type, value: FGCallNative }>;
+    abstract statics: Record<string, { type: Type, value: FGCallNative }>;
 }
 
 export class NeverT implements Type {
@@ -250,6 +251,7 @@ export class CircleT extends Class implements Type {
         r: numberT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Circle";
     }
@@ -264,6 +266,7 @@ export class RichCircleT extends Class implements Type {
         q: richPointT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichCircle";
     }
@@ -296,6 +299,7 @@ export class PointT extends Class implements Type {
         y: numberT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Point";
     }
@@ -310,6 +314,7 @@ export class RichPointT extends Class implements Type {
         y: numberT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichPoint";
     }
@@ -335,6 +340,7 @@ export class CoordT extends Class implements Type {
         yr: numberT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Coord";
     }
@@ -351,6 +357,7 @@ export class SegmentT extends Class implements Type {
         y2: numberT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Segment";
     }
@@ -365,6 +372,7 @@ export class RichSegmentT extends Class implements Type {
         q: richPointT,
     };
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "RichSegment";
     }
@@ -376,6 +384,7 @@ export class RichSegmentT extends Class implements Type {
 export class CanvasT extends Class implements Type {
     fields: Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
     to_str(): string {
         return "Canvas";
     }

@@ -1,12 +1,13 @@
 import { FGCallNative } from "../../value.js";
 import { Apollonian, apollonianT } from "./apollonian.js";
 import { FunctionT, OverloadT, nothingT, numberT } from "../../literal/type.js";
-function _Apol(session) {
+function _Apol_enclosing(session) {
+    const r = session.pop().value;
     session.pop();
-    session.push(new Apollonian());
+    session.push(Apollonian.enclosing(r));
 }
-const Apol = new FGCallNative("Apol", _Apol, new OverloadT([
-    new FunctionT([], apollonianT, []),
+const Apol_enclosing = new FGCallNative("Apol_enclosing", _Apol_enclosing, new OverloadT([
+    new FunctionT([numberT], apollonianT, ["r"]),
 ]));
 function _Apol_draw(session) {
     const apol = session.pop();
@@ -29,17 +30,10 @@ function _Apol_next(session) {
 const Apol_next = new FGCallNative("Apol_next", _Apol_next, new OverloadT([
     new FunctionT([], apollonianT, []),
 ]));
-function _Apol_enclosing(session) {
-    const r = session.pop().value;
-    session.pop();
-    session.push(Apollonian.enclosing(r));
-}
-const Apol_enclosing = new FGCallNative("Apol_enclosing", _Apol_enclosing, new OverloadT([
-    new FunctionT([numberT], apollonianT, ["r"]),
-]));
-apollonianT.methods["enclosing"] = { type: Apol_enclosing.sig, value: Apol_enclosing };
+apollonianT.statics["enclosing"] = { type: Apol_enclosing.sig, value: Apol_enclosing };
 apollonianT.methods["draw"] = { type: Apol_draw.sig, value: Apol_draw };
 apollonianT.methods["next"] = { type: Apol_next.sig, value: Apol_next };
-export const apolNames = {
-    Apol: { type: Apol.sig, value: Apol },
+export const apolClassNames = {
+    Apol: { value: apollonianT },
 };
+export const apolNames = {};

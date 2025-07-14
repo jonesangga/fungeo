@@ -44,14 +44,12 @@ export class FGBoolean {
     }
 }
 export class FGMethod {
-    obj;
     method;
-    isStatic;
+    obj;
     kind = 480;
-    constructor(obj, method, isStatic = false) {
-        this.obj = obj;
+    constructor(method, obj) {
         this.method = method;
-        this.isStatic = isStatic;
+        this.obj = obj;
     }
     to_str() {
         return `Method ${this.method.name}`;

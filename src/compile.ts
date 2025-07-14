@@ -3,7 +3,7 @@
 import { type Result } from "./common.js";
 import { Op, Chunk } from "./chunk.js"
 import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
+         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StaticMethodNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { type Value, FGBoolean, FGNumber, FGString, FGCallUser } from "./value.js"
 import { FGType, type Type, nothingT } from "./literal/type.js"
 
@@ -59,12 +59,17 @@ class CodeGen implements Visitor<void> {
     visitGetProp(node: GetPropNode): void {
         node.obj.visit(this);
         let index = makeConstant(new FGString(node.prop));
-        if (node.kind === "field")
+        if (node.isField)
             emitBytes(Op.GetProp, index, node.line);
-        else if (node.kind === "method")
-            emitBytes(Op.GetMeth, index, node.line);
         else
-            emitBytes(Op.GetStat, index, node.line);
+            emitBytes(Op.GetMeth, index, node.line);
+    }
+
+    visitStaticMethod(node: StaticMethodNode): void {
+        let obj = makeConstant(new FGString(node.obj.name));
+        let method = makeConstant(new FGString(node.method));
+        emitBytes(Op.GetStat, obj, node.line);
+        emitByte(method, node.line);
     }
 
     visitSetProp(node: SetPropNode): void {

@@ -115,10 +115,15 @@ export class Chunk {
                 result += `${padr7(name)} ${padl4(index)} ver ${ver}\n`;
                 return [result, offset + 3];
             }
+            case 525: {
+                let objId = this.code[offset + 1];
+                let methodId = this.code[offset + 2];
+                result += `${padr7(name)} ${padl4(objId)} ${this.values[objId].to_str()}.${this.values[methodId].to_str()}\n`;
+                return [result, offset + 3];
+            }
             case 500:
             case 510:
             case 520:
-            case 525:
             case 800:
             case 1020:
             case 1600: {

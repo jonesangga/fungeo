@@ -1,4 +1,4 @@
-import { type Names, Session } from "./vm.js"
+import { type ClassNames, type Names, Session } from "./vm.js"
 import { Canvas, defaultCanvas } from "./ui/canvas.js"
 import { type GeoObj, FGCallNative, FGNumber, FGString } from "./value.js"
 import { Point } from "./geo/point.js"
@@ -78,9 +78,9 @@ const canvas_save = new FGCallNative("canvas_save", _canvas_save,
     ])
 );
 
-canvasT.methods["place"] = { type: canvas_place.sig, value: canvas_place };
+canvasT.methods["place"] =  { type: canvas_place.sig, value: canvas_place };
 canvasT.methods["resize"] = { type: canvas_resize.sig, value: canvas_resize };
-canvasT.methods["save"] = { type: canvas_save.sig, value: canvas_save };
+canvasT.methods["save"] =   { type: canvas_save.sig, value: canvas_save };
 
 function _draw(session: Session, ver: number): void {
     const v = session.pop() as GeoObj;
@@ -253,6 +253,9 @@ const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul,
 complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
 complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
 complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
+
+export const coreClassNames: ClassNames = {
+};
 
 export const coreNames: Names = {
     canvas0: { type: canvasT, value: defaultCanvas },

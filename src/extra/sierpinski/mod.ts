@@ -1,4 +1,4 @@
-import { type Names, Session } from "../../vm.js"
+import { type ClassNames, type Names, Session } from "../../vm.js"
 import { FGCallNative, FGNumber } from "../../value.js"
 import { Sierpinski, sierpinskiT } from "./sierpinski.js"
 import { FunctionT, OverloadT,
@@ -50,6 +50,9 @@ const Sierp_next = new FGCallNative("Sierp_next", _Sierp_next,
 
 sierpinskiT.methods["draw"] = { type: Sierp_draw.sig, value: Sierp_draw };
 sierpinskiT.methods["next"] = { type: Sierp_next.sig, value: Sierp_next };
+
+export const sierpClassNames: ClassNames = {
+};
 
 export const sierpNames: Names = {
     Sierp: { type: Sierp.sig, value: Sierp },

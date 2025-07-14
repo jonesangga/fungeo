@@ -35,8 +35,9 @@ class Triangle {
 export class SierpinskiT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
-        return "Sierpinski";
+        return "Type Sierpinski";
     }
     equal(other) {
         return other instanceof SierpinskiT;

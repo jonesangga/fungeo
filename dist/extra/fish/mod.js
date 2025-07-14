@@ -172,20 +172,23 @@ function _Pic_cycle(session) {
 const Pic_cycle = new FGCallNative("Pic_cycle", _Pic_cycle, new OverloadT([
     new FunctionT([pictureT], pictureT, ["pic"]),
 ]));
+pictureT.statics["resize"] = { type: Pic_resize.sig, value: Pic_resize };
+pictureT.statics["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
+pictureT.statics["cycle"] = { type: Pic_cycle.sig, value: Pic_cycle };
+pictureT.statics["flipH"] = { type: Pic_flipH.sig, value: Pic_flipH };
+pictureT.statics["flipV"] = { type: Pic_flipV.sig, value: Pic_flipV };
+pictureT.statics["above"] = { type: Pic_above.sig, value: Pic_above };
+pictureT.statics["beside"] = { type: Pic_beside.sig, value: Pic_beside };
+pictureT.statics["cw"] = { type: Pic_cw.sig, value: Pic_cw };
+pictureT.statics["ccw"] = { type: Pic_ccw.sig, value: Pic_ccw };
+pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 pictureT.methods["place"] = { type: Pic_place.sig, value: Pic_place };
 pictureT.methods["add_segment"] = { type: Pic_add_segment.sig, value: Pic_add_segment };
-pictureT.methods["draw"] = { type: Pic_draw.sig, value: Pic_draw };
 pictureT.methods["no_frame"] = { type: Pic_no_frame.sig, value: Pic_no_frame };
 pictureT.methods["with_frame"] = { type: Pic_with_frame.sig, value: Pic_with_frame };
-pictureT.methods["resize"] = { type: Pic_resize.sig, value: Pic_resize };
-pictureT.methods["quartet"] = { type: Pic_quartet.sig, value: Pic_quartet };
-pictureT.methods["cycle"] = { type: Pic_cycle.sig, value: Pic_cycle };
-pictureT.methods["flipH"] = { type: Pic_flipH.sig, value: Pic_flipH };
-pictureT.methods["flipV"] = { type: Pic_flipV.sig, value: Pic_flipV };
-pictureT.methods["above"] = { type: Pic_above.sig, value: Pic_above };
-pictureT.methods["beside"] = { type: Pic_beside.sig, value: Pic_beside };
-pictureT.methods["cw"] = { type: Pic_cw.sig, value: Pic_cw };
-pictureT.methods["ccw"] = { type: Pic_ccw.sig, value: Pic_ccw };
+export const fishClassNames = {
+    Pic: { value: pictureT },
+};
 export const fishNames = {
     fishp: { type: pictureT, value: fishp },
     fishq: { type: pictureT, value: fishq },

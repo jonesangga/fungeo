@@ -1,7 +1,6 @@
 // @jonesangga, 12-04-2025, MIT License.
 //
 // TODO: Add TokenT.Pipe later for pipe functionality.
-//       Add TokenT.ColonColon for module import like use fish::Above.
 
 // NOTE: Make sure only add item with length <= 9.
 export const enum TokenT {
@@ -26,6 +25,7 @@ export const enum TokenT {
     Bang      = 1200,
     BangEq    = 1210,
     Colon     = 1300,
+    Colon2    = 1305,
     Eq        = 1500,
     EqEq      = 1505,
     Greater   = 1520,
@@ -71,6 +71,7 @@ export const TokenTName: {
     [TokenT.BSlash]: "BSlash",
     [TokenT.CircleT]: "CircleT",
     [TokenT.Colon]: "Colon",
+    [TokenT.Colon2]: "Colon2",
     [TokenT.Comma]: "Comma",
     [TokenT.Dot]: "Dot",
     [TokenT.Else]: "Else",
@@ -172,10 +173,15 @@ export class Scanner {
             case ',':  return this.token_lexeme( TokenT.Comma );
             case '/':  return this.token_lexeme( TokenT.FSlash );
             case '*':  return this.token_lexeme( TokenT.Star );
-            case ':':  return this.token_lexeme( TokenT.Colon );
             case '\\': return this.token_lexeme( TokenT.BSlash );
             case '"':  return this.string_();
 
+            case ':': {
+                if (this.match(':'))
+                    return this.token_lexeme( TokenT.Colon2 )
+                else
+                    return this.token_lexeme( TokenT.Colon );
+            }
             case '>': {
                 if (this.match('='))
                     return this.token_lexeme( TokenT.GreaterEq )

@@ -5,8 +5,9 @@ const c = defaultCanvas.ctx;
 export class PictureT extends Class {
     fields = {};
     methods = {};
+    statics = {};
     to_str() {
-        return "Picture";
+        return "Type Picture";
     }
     equal(other) {
         return other instanceof PictureT;

@@ -2,8 +2,8 @@
 
 import { type Result } from "./common.js";
 import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
-         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
-import { names } from "./vm.js"
+         IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StaticMethodNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
+import { classNames, names } from "./vm.js"
 import { type Type, Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
@@ -101,68 +101,34 @@ class TypeChecker implements Visitor<Type> {
         return node.expr.visit(this);
     }
 
-    // TODO: Clean up later.
-    visitGetProp(node: GetPropNode): Type {
-        let objType = node.obj.visit(this);
-        console.log(objType);
-        if ((objType instanceof Class)) {
-            if (Object.hasOwn(objType.fields, node.prop)) {
-                node.kind = "field";
-                return objType.fields[node.prop];
+    visitStaticMethod(node: StaticMethodNode): Type {
+        if (Object.hasOwn(classNames, node.obj.name)) {
+            let type = classNames[node.obj.name].value;
+            if (Object.hasOwn(type.statics, node.method)) {
+                return type.statics[node.method].type;
             }
-
-            if (Object.hasOwn(objType.methods, node.prop)) {
-                node.kind = "method";
-                return objType.methods[node.prop].type;
-            }
-
-            error(node.line, `no property ${ node.prop } in object`);
+            error(node.line, `no static ${ node.method } in ${ node.obj.name } class`);
         }
-        else if ((objType instanceof OverloadT)) {
-            // Finding static method.
-            let sigs = objType.sigs;
-            let ver1 = sigs[0];
-            let output = ver1.output;
-
-            if (!(output instanceof Class))
-                error(node.line, "trying to use static method for non class");
-
-            // TODO: Support static field??
-            // if (Object.hasOwn(output.fields, node.prop)) {
-                // node.kind = true;
-                // return output.fields[node.prop];
-            // }
-
-            if (Object.hasOwn(output.methods, node.prop)) {
-                node.kind = "static";
-                return output.methods[node.prop].type;
-            }
-
-            error(node.line, `no property ${ node.prop } in obj`);
-        }
-
-        error(node.line, "argument must be either object propery or static method");
+        error(node.line, `no ${ node.obj.name } class`);
     }
 
+    visitGetProp(node: GetPropNode): Type {
+        let objType = node.obj.visit(this);
+        if (!(objType instanceof Class))
+            error(node.line, "cannot get property of non-class");
 
-    // visitGetProp(node: GetPropNode): Type {
-        // let objType = node.obj.visit(this);
-        // console.log(objType);
-        // if (!(objType instanceof Class))
-            // error(node.line, "cannot get property of non-class");
+        if (Object.hasOwn(objType.fields, node.prop)) {
+            node.isField = true;
+            return objType.fields[node.prop];
+        }
 
-        // if (Object.hasOwn(objType.fields, node.prop)) {
-            // node.isField = true;
-            // return objType.fields[node.prop];
-        // }
+        if (Object.hasOwn(objType.methods, node.prop)) {
+            node.isField = false;
+            return objType.methods[node.prop].type;
+        }
 
-        // if (Object.hasOwn(objType.methods, node.prop)) {
-            // node.isField = false;
-            // return objType.methods[node.prop].type;
-        // }
-
-        // error(node.line, `no property ${ node.prop } in obj`);
-    // }
+        error(node.line, `no property ${ node.prop } in obj`);
+    }
 
     visitSetProp(node: SetPropNode): Type {
         let objType = node.obj.visit(this);
@@ -186,13 +152,14 @@ class TypeChecker implements Visitor<Type> {
 
     visitCall(node: CallNode): Type {
         let fnType = node.name.visit(this);
-        if (!(fnType instanceof OverloadT))
-            error(node.name.line, `${node.name} is not a function`);
-        let input: Type[] = [];
-        node.args.forEach(arg => input.push(arg.visit(this)));
-        let [ver, type] = overload(input, fnType, node.line);
-        node.ver = ver;
-        return type;
+        if (fnType instanceof OverloadT) {
+            let input: Type[] = [];
+            node.args.forEach(arg => input.push(arg.visit(this)));
+            let [ver, type] = overload(input, fnType, node.line);
+            node.ver = ver;
+            return type;
+        }
+        error(node.name.line, `${node.name} is not a function`);
     }
 
     visitCallVoid(node: CallVoidNode): Type {

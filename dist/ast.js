@@ -156,12 +156,12 @@ export class GetPropNode {
     line;
     obj;
     prop;
-    kind;
-    constructor(line, obj, prop, kind = "field") {
+    isField;
+    constructor(line, obj, prop, isField = true) {
         this.line = line;
         this.obj = obj;
         this.prop = prop;
-        this.kind = kind;
+        this.isField = isField;
     }
     to_str(level) {
         return indent(level) + "GetProp(\n"
@@ -280,6 +280,27 @@ export class SetPropNode {
     }
     visit(v) {
         return v.visitSetProp(this);
+    }
+}
+export class StaticMethodNode {
+    line;
+    obj;
+    method;
+    constructor(line, obj, method) {
+        this.line = line;
+        this.obj = obj;
+        this.method = method;
+    }
+    to_str(level) {
+        return indent(level) + "StaticMethod(\n"
+            + this.obj.to_str(level + 2)
+            + "\n"
+            + indent(level + 2) + this.method
+            + "\n"
+            + indent(level) + ")";
+    }
+    visit(v) {
+        return v.visitStaticMethod(this);
     }
 }
 export class StringNode {

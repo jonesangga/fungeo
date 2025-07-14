@@ -6,12 +6,14 @@ import { type Type, Class, FGType } from "../../literal/type.js"
 const c = canvas.ctx;
 
 export class HexagonalT extends Class implements Type {
-    fields: Record<string, Type> = {};
+    fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
+    statics: Record<string, { type: Type, value: FGCallNative }> = {};
 
     to_str(): string {
-        return "HexagonalT";
+        return "Type Hexagonal";
     }
+
     equal(other: Type): boolean {
         return other instanceof HexagonalT;
     }

@@ -6,7 +6,7 @@ import { type Result } from "./common.js";
 import { type Token, TokenT, Scanner } from "./scanner.js"
 import { AST, AssignNode, BinaryOp, BinaryNode, BooleanNode, CallNode, CallVoidNode,
          EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode,
-         NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+         NegativeNode, NumberNode, SetPropNode, StaticMethodNode, StringNode, VarDeclNode } from "./ast.js";
 
 const enum Prec {
     None = 100,
@@ -38,6 +38,7 @@ const rules: { [key in TokenT]: ParseRule } = {
     [TokenT.BSlash]    : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.CircleT]   : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Colon]     : {prefix: null,             infix: null,            prec: Prec.None},
+    [TokenT.Colon2]    : {prefix: null,             infix: static_method,   prec: Prec.Call},
     [TokenT.Comma]     : {prefix: null,             infix: null,            prec: Prec.None},
     [TokenT.Dot]       : {prefix: null,             infix: dot,             prec: Prec.Call},
     [TokenT.Else]      : {prefix: null,             infix: null,            prec: Prec.None},
@@ -159,7 +160,8 @@ function parse_string(parser: Parser): StringNode {
 // TODO: Support parsing the `.` in namespace, like `Seg.FromPoints()`.
 function call(parser: Parser, lhs: AST): CallNode {
     if (!(lhs instanceof IdentNode) &&
-            !(lhs instanceof GetPropNode))
+            !(lhs instanceof GetPropNode) &&
+            !(lhs instanceof StaticMethodNode))
         error(parser, "invalid syntax for function call");
     let line = parser.prevTok.line;
     let args: AST[] = [];
@@ -202,6 +204,17 @@ function assign_var(parser: Parser, lhs: AST): AssignNode {
     let line = parser.prevTok.line;
     let rhs = parse_prec(parser, Prec.Assignment + 1);
     return new AssignNode(line, lhs, rhs);
+}
+
+function static_method(parser: Parser, obj: AST): StaticMethodNode {
+    if (!(obj instanceof IdentNode)) {
+        error(parser, "invalid object");
+    }
+    let line = parser.prevTok.line;
+    consume(parser, TokenT.Ident, "expect property name after '.'");
+    let name = parser.prevTok.lexeme;
+
+    return new StaticMethodNode(line, obj, name);
 }
 
 function dot(parser: Parser, obj: AST): GetPropNode | SetPropNode {

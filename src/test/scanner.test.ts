@@ -85,6 +85,7 @@ describe("scanner each token type", () => {
         [TokenT.BoolT]:     ["Bool", {type: TokenT.BoolT, line: 1, lexeme: "Bool"}],
         [TokenT.BSlash]:    ["\\", {type: TokenT.BSlash, line: 1, lexeme: "\\"}],
         [TokenT.Colon]:     [":", {type: TokenT.Colon, line: 1, lexeme: ":"}],
+        [TokenT.Colon2]:    ["::", {type: TokenT.Colon2, line: 1, lexeme: "::"}],
         [TokenT.Comma]:     [",", {type: TokenT.Comma, line: 1, lexeme: ","}],
         [TokenT.CircleT]:   ["Circle", {type: TokenT.CircleT, line: 1, lexeme: "Circle"}],
         [TokenT.Dot]:       [".", {type: TokenT.Dot, line: 1, lexeme: "."}],

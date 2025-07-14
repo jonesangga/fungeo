@@ -3,8 +3,8 @@
 import { __ } from "./common.js";
 import { Op, Chunk } from "./chunk.js";
 import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
-import { coreNames } from "./core.js";
-import { extraNames } from "./extra.js";
+import { coreClassNames, coreNames } from "./core.js";
+import { extraClassNames, extraNames } from "./extra.js";
 import { type Type, FGType, Class } from "./literal/type.js";
 import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
@@ -54,10 +54,15 @@ let frames: CallFrame[] = [];
 let currFrame: CallFrame;
 let currChunk: Chunk;
 
+export type ClassNames = {
+    [name: string]: { value: Class };
+};
+
 export type Names = {
     [name: string]: { type: Type, value: Value, mut?: boolean },
 };
 
+export let classNames: ClassNames = {};
 export let names: Names = {};
 
 // Throw error and stop the executing bytecode.
@@ -175,7 +180,7 @@ function run(intercept: boolean = false): boolean {
                 if (fn instanceof FGCallNative)
                     fn.value(session, ver);
                 else if (fn instanceof FGMethod) {
-                    if (!fn.isStatic)
+                    if (fn.obj)
                         session.push(fn.obj);
                     fn.method.value(session, ver);
                 }
@@ -358,17 +363,18 @@ function run(intercept: boolean = false): boolean {
                 let prop = read_string();
                 console.log(obj);
                 let fn = obj.typeof().value.methods[prop].value;
-                let method = new FGMethod(obj, fn);
+                let method = new FGMethod(fn, obj);
                 session.push(method);
                 break;
             }
 
             // TODO: Refactor this!!!
             case Op.GetStat: {
-                let obj = session.pop() as FGCallNative;
+                let obj = read_string();
                 let prop = read_string();
-                let fn = (obj.sig.sigs[0].output as unknown as Class).methods[prop].value;
-                let method = new FGMethod(obj, fn, true);
+                let className = classNames[obj];
+                let fn = className.value.statics[prop].value;
+                let method = new FGMethod(fn);
                 session.push(method);
                 break;
             }
@@ -510,6 +516,7 @@ type Result<T> =
 export const vm = {
     init(): void {
         session.reset();
+        classNames = {...coreClassNames, ...extraClassNames};
         names = {...coreNames, ...extraNames};
     },
 

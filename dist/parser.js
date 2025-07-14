@@ -1,5 +1,5 @@
 import { Scanner } from "./scanner.js";
-import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StringNode, VarDeclNode } from "./ast.js";
+import { AssignNode, BinaryNode, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode, IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StaticMethodNode, StringNode, VarDeclNode } from "./ast.js";
 const rules = {
     [1180]: { prefix: null, infix: null, prec: 100 },
     [1190]: { prefix: null, infix: null, prec: 220 },
@@ -10,6 +10,7 @@ const rules = {
     [50]: { prefix: null, infix: null, prec: 100 },
     [1620]: { prefix: null, infix: null, prec: 100 },
     [1300]: { prefix: null, infix: null, prec: 100 },
+    [1305]: { prefix: null, infix: static_method, prec: 600 },
     [100]: { prefix: null, infix: null, prec: 100 },
     [210]: { prefix: null, infix: dot, prec: 600 },
     [2300]: { prefix: null, infix: null, prec: 100 },
@@ -105,7 +106,8 @@ function parse_string(parser) {
 }
 function call(parser, lhs) {
     if (!(lhs instanceof IdentNode) &&
-        !(lhs instanceof GetPropNode))
+        !(lhs instanceof GetPropNode) &&
+        !(lhs instanceof StaticMethodNode))
         error(parser, "invalid syntax for function call");
     let line = parser.prevTok.line;
     let args = [];
@@ -143,6 +145,15 @@ function assign_var(parser, lhs) {
     let line = parser.prevTok.line;
     let rhs = parse_prec(parser, 200 + 1);
     return new AssignNode(line, lhs, rhs);
+}
+function static_method(parser, obj) {
+    if (!(obj instanceof IdentNode)) {
+        error(parser, "invalid object");
+    }
+    let line = parser.prevTok.line;
+    consume(parser, 1730, "expect property name after '.'");
+    let name = parser.prevTok.lexeme;
+    return new StaticMethodNode(line, obj, name);
 }
 function dot(parser, obj) {
     let line = parser.prevTok.line;
