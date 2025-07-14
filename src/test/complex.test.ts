@@ -74,6 +74,35 @@ const tests: [string, string, string][] = [[
      print(a.mul(b))`,
 
     `-5 + 10i\n`,
+], [
+    "div",
+
+    `let a = Complex(5, -1)
+     let b = Complex(-3, 1)
+     print(a.div(b))`,
+
+    `-1.6 - 0.2i\n`,
+], [
+    "abs",
+
+    `let a = Complex(3, 4)
+     print(a.abs())`,
+
+    `5\n`,
+], [
+    "arg",
+
+    `let a = Complex(1, 1)
+     print(a.arg())`,
+
+    `${Math.PI/4}\n`,
+], [
+    "conj",
+
+    `let a = Complex(1, 2)
+     print(a.conj())`,
+
+    `1 - 2i\n`,
 ]];
 
 describe("Complex class", () => {

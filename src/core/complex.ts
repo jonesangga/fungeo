@@ -62,6 +62,27 @@ export class Complex {
         return new Complex(re, im);
     }
 
+    div(other: Complex): Complex {
+        const denom = other.re * other.re + other.im * other.im;
+        if (denom < 10e-10)
+            throw new Error("division by zero");
+        return new Complex(
+            (this.re * other.re + this.im * other.im) / denom,
+            (this.im * other.re - this.re * other.im) / denom);
+    }
+
+    abs(): number {
+        return Math.sqrt(this.re * this.re + this.im * this.im);
+    }
+
+    arg(): number {
+        return Math.atan2(this.im, this.re);
+    }
+
+    conj(): Complex {
+        return new Complex(this.re, -this.im);
+    }
+
     sqrt() {
         // Convert to polar form
         let m = Math.sqrt(this.re * this.re + this.im * this.im);

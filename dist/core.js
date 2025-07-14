@@ -1,5 +1,5 @@
 import { Canvas, defaultCanvas } from "./ui/canvas.js";
-import { FGCallNative } from "./value.js";
+import { FGCallNative, FGNumber } from "./value.js";
 import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
@@ -199,9 +199,46 @@ function _Complex_mul(session) {
 const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul, new OverloadT([
     new FunctionT([complexT], complexT, ["w"]),
 ]));
+function _Complex_div(session) {
+    const z = session.pop();
+    const w = session.pop();
+    session.pop();
+    session.push(z.div(w));
+}
+const Complex_div = new FGCallNative("Complex_div", _Complex_div, new OverloadT([
+    new FunctionT([complexT], complexT, ["w"]),
+]));
+function _Complex_abs(session) {
+    const z = session.pop();
+    session.pop();
+    session.push(new FGNumber(z.abs()));
+}
+const Complex_abs = new FGCallNative("Complex_abs", _Complex_abs, new OverloadT([
+    new FunctionT([], numberT, []),
+]));
+function _Complex_arg(session) {
+    const z = session.pop();
+    session.pop();
+    session.push(new FGNumber(z.arg()));
+}
+const Complex_arg = new FGCallNative("Complex_arg", _Complex_arg, new OverloadT([
+    new FunctionT([], numberT, []),
+]));
+function _Complex_conj(session) {
+    const z = session.pop();
+    session.pop();
+    session.push(z.conj());
+}
+const Complex_conj = new FGCallNative("Complex_conj", _Complex_conj, new OverloadT([
+    new FunctionT([], complexT, []),
+]));
 complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
 complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
 complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
+complexT.methods["div"] = { type: Complex_div.sig, value: Complex_div };
+complexT.methods["abs"] = { type: Complex_abs.sig, value: Complex_abs };
+complexT.methods["arg"] = { type: Complex_arg.sig, value: Complex_arg };
+complexT.methods["conj"] = { type: Complex_conj.sig, value: Complex_conj };
 export const coreClassNames = {};
 export const coreNames = {
     canvas0: { type: canvasT, value: defaultCanvas },

@@ -250,9 +250,58 @@ const Complex_mul = new FGCallNative("Complex_mul", _Complex_mul,
     ])
 );
 
+function _Complex_div(session: Session): void {
+    const z = session.pop() as Complex;
+    const w = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(z.div(w));
+}
+const Complex_div = new FGCallNative("Complex_div", _Complex_div,
+    new OverloadT([
+        new FunctionT([complexT], complexT, ["w"]),
+    ])
+);
+
+function _Complex_abs(session: Session): void {
+    const z = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(new FGNumber(z.abs()));
+}
+const Complex_abs = new FGCallNative("Complex_abs", _Complex_abs,
+    new OverloadT([
+        new FunctionT([], numberT, []),
+    ])
+);
+
+function _Complex_arg(session: Session): void {
+    const z = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(new FGNumber(z.arg()));
+}
+const Complex_arg = new FGCallNative("Complex_arg", _Complex_arg,
+    new OverloadT([
+        new FunctionT([], numberT, []),
+    ])
+);
+
+function _Complex_conj(session: Session): void {
+    const z = session.pop() as Complex;
+    session.pop(); // The function.
+    session.push(z.conj());
+}
+const Complex_conj = new FGCallNative("Complex_conj", _Complex_conj,
+    new OverloadT([
+        new FunctionT([], complexT, []),
+    ])
+);
+
 complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
 complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
 complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
+complexT.methods["div"] = { type: Complex_div.sig, value: Complex_div };
+complexT.methods["abs"] = { type: Complex_abs.sig, value: Complex_abs };
+complexT.methods["arg"] = { type: Complex_arg.sig, value: Complex_arg };
+complexT.methods["conj"] = { type: Complex_conj.sig, value: Complex_conj };
 
 export const coreClassNames: ClassNames = {
 };
