@@ -5,7 +5,7 @@ import { Op, Chunk } from "./chunk.js";
 import { type Value, type Comparable, type GeoObj, FGMethod, FGBoolean, FGNumber, FGString, FGCallNative, FGCallUser, FGList } from "./value.js";
 import { coreClassNames, coreNames } from "./core.js";
 import { extraClassNames, extraNames } from "./extra.js";
-import { type Type, FGType, Class } from "./literal/type.js";
+import { type Type, FGType, ClassT } from "./literal/type.js";
 // import { Point } from "./geo/point.js";
 import { defaultCanvas } from "./ui/canvas.js"
 
@@ -55,7 +55,7 @@ let currFrame: CallFrame;
 let currChunk: Chunk;
 
 export type ClassNames = {
-    [name: string]: { value: Class };
+    [name: string]: { value: ClassT };
 };
 
 export type Names = {
@@ -362,13 +362,13 @@ function run(intercept: boolean = false): boolean {
                 let obj = session.pop();
                 let prop = read_string();
                 let k = obj.typeof().value;
-                if (k instanceof Class) {
+                if (k instanceof ClassT) {
                     let fn = k.methods[prop].value;
                     let method = new FGMethod(fn, obj);
                     session.push(method);
                 }
                 else {
-                    error("not a Class instance");
+                    error("not a ClassT instance");
                 }
                 break;
             }

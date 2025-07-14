@@ -2,7 +2,7 @@ import { defaultCanvas as canvas } from "../../ui/canvas.js"
 import { color, TAU } from "../../data/constant.js"
 import { FGCallNative } from "../../value.js"
 import { Complex } from "../../core/complex.js"
-import { type Type, Class, FGType } from "../../literal/type.js"
+import { type Type, ClassT, FGType } from "../../literal/type.js"
 
 const c = canvas.ctx;
 
@@ -35,7 +35,7 @@ class Circle {
     }
 }
 
-export class ApollonianT extends Class implements Type {
+export class ApollonianT extends ClassT {
     fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
     statics: Record<string, { type: Type, value: FGCallNative }> = {};

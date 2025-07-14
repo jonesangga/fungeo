@@ -28,10 +28,12 @@ export interface Type {
     to_str: () => string;
 }
 
-export abstract class Class {
+export abstract class ClassT implements Type {
     abstract fields:  Record<string, Type>;
     abstract methods: Record<string, { type: Type, value: FGCallNative }>;
     abstract statics: Record<string, { type: Type, value: FGCallNative }>;
+    abstract equal(other: Type): boolean;
+    abstract to_str(): string;
 }
 
 export class NeverT implements Type {
@@ -234,7 +236,7 @@ export class StringT implements Type {
     }
 }
 
-export class CircleT extends Class implements Type {
+export class CircleT extends ClassT {
     fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
@@ -250,7 +252,7 @@ export class CircleT extends Class implements Type {
     }
 }
 
-export class RichCircleT extends Class implements Type {
+export class RichCircleT extends ClassT {
     fields: Record<string, Type> = {
         p: richPointT,
         q: richPointT,
@@ -283,7 +285,7 @@ export class EllipseT implements Type {
     // }
 // }
 
-export class PointT extends Class implements Type {
+export class PointT extends ClassT {
     fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
@@ -298,7 +300,7 @@ export class PointT extends Class implements Type {
     }
 }
 
-export class RichPointT extends Class implements Type {
+export class RichPointT extends ClassT {
     fields: Record<string, Type> = {
         x: numberT,
         y: numberT,
@@ -322,7 +324,7 @@ export class RectT implements Type {
     }
 }
 
-export class CoordT extends Class implements Type {
+export class CoordT extends ClassT {
     fields: Record<string, Type> = {
         xl: numberT,
         xr: numberT,
@@ -339,7 +341,7 @@ export class CoordT extends Class implements Type {
     }
 }
 
-export class SegmentT extends Class implements Type {
+export class SegmentT extends ClassT {
     fields: Record<string, Type> = {
         x1: numberT,
         y1: numberT,
@@ -356,7 +358,7 @@ export class SegmentT extends Class implements Type {
     }
 }
 
-export class RichSegmentT extends Class implements Type {
+export class RichSegmentT extends ClassT {
     fields: Record<string, Type> = {
         p: richPointT,
         q: richPointT,
@@ -371,7 +373,7 @@ export class RichSegmentT extends Class implements Type {
     }
 }
 
-export class CanvasT extends Class implements Type {
+export class CanvasT extends ClassT {
     fields: Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
     statics: Record<string, { type: Type, value: FGCallNative }> = {};

@@ -1,8 +1,8 @@
 import { defaultCanvas } from "../../ui/canvas.js";
 import { color } from "../../data/constant.js";
-import { Class, FGType } from "../../literal/type.js";
+import { ClassT, FGType } from "../../literal/type.js";
 const c = defaultCanvas.ctx;
-export class PictureT extends Class {
+export class PictureT extends ClassT {
     fields = {};
     methods = {};
     statics = {};

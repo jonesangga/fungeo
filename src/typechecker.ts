@@ -4,7 +4,7 @@ import { type Result } from "./common.js";
 import { AssignNode, BinaryNode, binaryTable, BooleanNode, CallNode, CallVoidNode, EmptyStmtNode, ExprStmtNode, FileNode, GetPropNode, IdentNode,
          IndexNode, ListNode, NegativeNode, NumberNode, SetPropNode, StaticMethodNode, StringNode, VarDeclNode, Visitor } from "./ast.js";
 import { classNames, names } from "./vm.js"
-import { type Type, Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
+import { type Type, ClassT, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js"
 
 function error(line: number, message: string): never {
     let result = `type: ${ line }: ${ message }\n`;
@@ -114,7 +114,7 @@ class TypeChecker implements Visitor<Type> {
 
     visitGetProp(node: GetPropNode): Type {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
+        if (!(objType instanceof ClassT))
             error(node.line, "cannot get property of non-class");
 
         if (Object.hasOwn(objType.fields, node.prop)) {
@@ -132,7 +132,7 @@ class TypeChecker implements Visitor<Type> {
 
     visitSetProp(node: SetPropNode): Type {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
+        if (!(objType instanceof ClassT))
             error(node.line, "cannot get property of non-class");
 
         let fields = objType.fields;

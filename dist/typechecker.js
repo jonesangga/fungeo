@@ -1,6 +1,6 @@
 import { binaryTable } from "./ast.js";
 import { classNames, names } from "./vm.js";
-import { Class, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
+import { ClassT, FunctionT, OverloadT, numberT, ListT, stringT, booleanT, nothingT } from "./literal/type.js";
 function error(line, message) {
     let result = `type: ${line}: ${message}\n`;
     throw new Error(result);
@@ -92,7 +92,7 @@ class TypeChecker {
     }
     visitGetProp(node) {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
+        if (!(objType instanceof ClassT))
             error(node.line, "cannot get property of non-class");
         if (Object.hasOwn(objType.fields, node.prop)) {
             node.isField = true;
@@ -106,7 +106,7 @@ class TypeChecker {
     }
     visitSetProp(node) {
         let objType = node.obj.visit(this);
-        if (!(objType instanceof Class))
+        if (!(objType instanceof ClassT))
             error(node.line, "cannot get property of non-class");
         let fields = objType.fields;
         if (!Object.hasOwn(fields, node.prop))

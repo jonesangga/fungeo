@@ -1,5 +1,5 @@
-import { FGType, Class } from "../literal/type.js";
-export class ComplexT extends Class {
+import { FGType, ClassT } from "../literal/type.js";
+export class ComplexT extends ClassT {
     fields = {};
     methods = {};
     statics = {};

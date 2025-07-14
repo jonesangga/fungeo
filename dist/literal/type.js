@@ -13,7 +13,7 @@ export class FGType {
         return false;
     }
 }
-export class Class {
+export class ClassT {
 }
 export class NeverT {
     to_str() {
@@ -179,7 +179,7 @@ export class StringT {
         return other instanceof StringT;
     }
 }
-export class CircleT extends Class {
+export class CircleT extends ClassT {
     fields = {
         x: numberT,
         y: numberT,
@@ -194,7 +194,7 @@ export class CircleT extends Class {
         return other instanceof CircleT;
     }
 }
-export class RichCircleT extends Class {
+export class RichCircleT extends ClassT {
     fields = {
         p: richPointT,
         q: richPointT,
@@ -216,7 +216,7 @@ export class EllipseT {
         return other instanceof EllipseT;
     }
 }
-export class PointT extends Class {
+export class PointT extends ClassT {
     fields = {
         x: numberT,
         y: numberT,
@@ -230,7 +230,7 @@ export class PointT extends Class {
         return other instanceof PointT;
     }
 }
-export class RichPointT extends Class {
+export class RichPointT extends ClassT {
     fields = {
         x: numberT,
         y: numberT,
@@ -252,7 +252,7 @@ export class RectT {
         return other instanceof RectT;
     }
 }
-export class CoordT extends Class {
+export class CoordT extends ClassT {
     fields = {
         xl: numberT,
         xr: numberT,
@@ -268,7 +268,7 @@ export class CoordT extends Class {
         return other instanceof CoordT;
     }
 }
-export class SegmentT extends Class {
+export class SegmentT extends ClassT {
     fields = {
         x1: numberT,
         y1: numberT,
@@ -284,7 +284,7 @@ export class SegmentT extends Class {
         return other instanceof SegmentT;
     }
 }
-export class RichSegmentT extends Class {
+export class RichSegmentT extends ClassT {
     fields = {
         p: richPointT,
         q: richPointT,
@@ -298,7 +298,7 @@ export class RichSegmentT extends Class {
         return other instanceof RichSegmentT;
     }
 }
-export class CanvasT extends Class {
+export class CanvasT extends ClassT {
     fields = {};
     methods = {};
     statics = {};

@@ -1,7 +1,7 @@
 import { defaultCanvas as canvas } from "../../ui/canvas.js";
 import { color, TAU } from "../../data/constant.js";
 import { Complex } from "../../core/complex.js";
-import { Class, FGType } from "../../literal/type.js";
+import { ClassT, FGType } from "../../literal/type.js";
 const c = canvas.ctx;
 class Circle {
     x;
@@ -30,7 +30,7 @@ class Circle {
         return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);
     }
 }
-export class ApollonianT extends Class {
+export class ApollonianT extends ClassT {
     fields = {};
     methods = {};
     statics = {};

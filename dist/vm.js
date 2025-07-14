@@ -2,7 +2,7 @@ import { __ } from "./common.js";
 import { FGMethod, FGBoolean, FGNumber, FGCallNative, FGList } from "./value.js";
 import { coreClassNames, coreNames } from "./core.js";
 import { extraClassNames, extraNames } from "./extra.js";
-import { Class } from "./literal/type.js";
+import { ClassT } from "./literal/type.js";
 import { defaultCanvas } from "./ui/canvas.js";
 export class Session {
     stack = [];
@@ -206,13 +206,13 @@ function run(intercept = false) {
                 let obj = session.pop();
                 let prop = read_string();
                 let k = obj.typeof().value;
-                if (k instanceof Class) {
+                if (k instanceof ClassT) {
                     let fn = k.methods[prop].value;
                     let method = new FGMethod(fn, obj);
                     session.push(method);
                 }
                 else {
-                    error("not a Class instance");
+                    error("not a ClassT instance");
                 }
                 break;
             }

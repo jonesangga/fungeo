@@ -1,7 +1,7 @@
 import { type Value, FGCallNative } from "../value.js";
-import { type Type, FGType, Class } from "../literal/type.js"
+import { type Type, FGType, ClassT } from "../literal/type.js"
 
-export class ComplexT extends Class implements Type {
+export class ComplexT extends ClassT {
     fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
     statics: Record<string, { type: Type, value: FGCallNative }> = {};

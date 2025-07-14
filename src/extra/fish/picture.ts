@@ -7,11 +7,11 @@
 import { defaultCanvas } from "../../ui/canvas.js"
 import { color } from "../../data/constant.js"
 import { FGCallNative } from "../../value.js"
-import { type Type, Class, FGType } from "../../literal/type.js"
+import { type Type, ClassT, FGType } from "../../literal/type.js"
 
 const c = defaultCanvas.ctx;
 
-export class PictureT extends Class implements Type {
+export class PictureT extends ClassT {
     fields:  Record<string, Type> = {};
     methods: Record<string, { type: Type, value: FGCallNative }> = {};
     statics: Record<string, { type: Type, value: FGCallNative }> = {};
