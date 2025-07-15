@@ -38,7 +38,8 @@ export class Cartesian implements Value {
     #rangeY: number;
     #stepX: number;
     #stepY: number;
-    #showGrid: boolean = true;
+    #showGrid: boolean = false;
+    #showAxis: boolean = true;
     currentlyDrawn = false;
 
     constructor(readonly xl: number = -5,
@@ -81,10 +82,30 @@ export class Cartesian implements Value {
         return this;
     }
 
+    viewport(x: number, y: number): [number, number] {
+        x = (x - this.xl) / this.#rangeX * w;
+        y = (y - this.yl) / this.#rangeY * h;
+        return [x, h-y];
+    }
+
     draw(): void {
         let x = 0;
         let y = 0;
         c.strokeStyle = "#222222";
+
+        if (this.#showAxis) {
+            let [x, y] = this.viewport(0, 0);
+            c.beginPath();
+            if (x) {
+                c.moveTo(x, 0);
+                c.lineTo(x, h);
+            }
+            if (y) {
+                c.moveTo(0, y);
+                c.lineTo(w, y);
+            }
+            c.stroke();
+        }
 
         // Draw grid.
         if (this.#showGrid) {
@@ -117,11 +138,7 @@ export class Cartesian implements Value {
     }
 
     #draw_point(pt: point): void {
-        let dx = pt.x - this.xl;
-        let dy = -(pt.y - this.yr);
-        let x = dx * this.#stepX;
-        let y = dy * this.#stepY;
-
+        let [x, y] = this.viewport(pt.x, pt.y);
         c.beginPath();
         c.arc(x, y, 5, 0, TAU);
         c.fillStyle = color.black;

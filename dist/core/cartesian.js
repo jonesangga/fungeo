@@ -29,7 +29,8 @@ export class Cartesian {
     #rangeY;
     #stepX;
     #stepY;
-    #showGrid = true;
+    #showGrid = false;
+    #showAxis = true;
     currentlyDrawn = false;
     constructor(xl = -5, xr = 5, yl = -5, yr = 5, strokeStyle = color.black) {
         this.xl = xl;
@@ -65,10 +66,28 @@ export class Cartesian {
         this.#showGrid = false;
         return this;
     }
+    viewport(x, y) {
+        x = (x - this.xl) / this.#rangeX * w;
+        y = (y - this.yl) / this.#rangeY * h;
+        return [x, h - y];
+    }
     draw() {
         let x = 0;
         let y = 0;
         c.strokeStyle = "#222222";
+        if (this.#showAxis) {
+            let [x, y] = this.viewport(0, 0);
+            c.beginPath();
+            if (x) {
+                c.moveTo(x, 0);
+                c.lineTo(x, h);
+            }
+            if (y) {
+                c.moveTo(0, y);
+                c.lineTo(w, y);
+            }
+            c.stroke();
+        }
         if (this.#showGrid) {
             c.beginPath();
             for (let i = 0; i < (this.xr - this.xl + 1); i++) {
@@ -95,10 +114,7 @@ export class Cartesian {
             pt.y <= this.yr;
     }
     #draw_point(pt) {
-        let dx = pt.x - this.xl;
-        let dy = -(pt.y - this.yr);
-        let x = dx * this.#stepX;
-        let y = dy * this.#stepY;
+        let [x, y] = this.viewport(pt.x, pt.y);
         c.beginPath();
         c.arc(x, y, 5, 0, TAU);
         c.fillStyle = color.black;
