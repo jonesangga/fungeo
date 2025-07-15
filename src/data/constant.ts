@@ -1,3 +1,4 @@
+export const PI = Math.PI;
 export const TAU = 2 * Math.PI;
 
 // These are from raylib.

@@ -4,6 +4,7 @@ import { Point } from "./geo/point.js";
 import { Segment } from "./geo/segment.js";
 import { Circle } from "./geo/circle.js";
 import { welcome } from "./data/help.js";
+import { PI, TAU } from "./data/constant.js";
 import { Complex, complexT } from "./core/complex.js";
 import { Cartesian, cartesianT } from "./core/cartesian.js";
 import { FunctionT, OverloadT, anyT, canvasT, circleT, geoT, nothingT, numberT, pointT, segmentT, stringT } from "./literal/type.js";
@@ -233,6 +234,16 @@ function _Complex_conj(session) {
 const Complex_conj = new FGCallNative("Complex_conj", _Complex_conj, new OverloadT([
     new FunctionT([], complexT, []),
 ]));
+function _Complex_polar(session) {
+    const arg = session.pop().value;
+    const abs = session.pop().value;
+    session.pop();
+    session.push(Complex.polar(abs, arg));
+}
+const Complex_polar = new FGCallNative("Complex_polar", _Complex_polar, new OverloadT([
+    new FunctionT([numberT, numberT], complexT, ["abs", "arg"]),
+]));
+complexT.statics["polar"] = { type: Complex_polar.sig, value: Complex_polar };
 complexT.methods["add"] = { type: Complex_add.sig, value: Complex_add };
 complexT.methods["sub"] = { type: Complex_sub.sig, value: Complex_sub };
 complexT.methods["mul"] = { type: Complex_mul.sig, value: Complex_mul };
@@ -289,8 +300,12 @@ const Cart_apply = new FGCallNative("Cart_apply", _Cart_apply, new OverloadT([
 cartesianT.methods["draw"] = { type: Cart_draw.sig, value: Cart_draw };
 cartesianT.methods["pt"] = { type: Cart_pt.sig, value: Cart_pt };
 cartesianT.methods["apply"] = { type: Cart_apply.sig, value: Cart_apply };
-export const coreClassNames = {};
+export const coreClassNames = {
+    Complex: { value: complexT },
+};
 export const coreNames = {
+    PI: { type: numberT, value: new FGNumber(PI) },
+    TAU: { type: numberT, value: new FGNumber(TAU) },
     canvas0: { type: canvasT, value: defaultCanvas },
     canvas: { type: canvas.sig, value: canvas },
     Cart: { type: Cart.sig, value: Cart },

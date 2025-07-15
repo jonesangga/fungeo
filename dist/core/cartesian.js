@@ -3,8 +3,6 @@ import { color, TAU } from "../data/constant.js";
 import { Complex } from "./complex.js";
 import { FGType, ClassT } from "../literal/type.js";
 const c = canvas.ctx;
-const w = canvas.w;
-const h = canvas.h;
 export class CartesianT extends ClassT {
     fields = {};
     methods = {};
@@ -40,8 +38,8 @@ export class Cartesian {
         this.strokeStyle = strokeStyle;
         this.#rangeX = xr - xl;
         this.#rangeY = yr - yl;
-        this.#stepX = w / this.#rangeX;
-        this.#stepY = h / this.#rangeY;
+        this.#stepX = canvas.w / this.#rangeX;
+        this.#stepY = canvas.h / this.#rangeY;
     }
     to_str() {
         return `Cartesian [${this.xl}, ${this.xr}] [${this.yl}, ${this.yr}]`;
@@ -67,9 +65,9 @@ export class Cartesian {
         return this;
     }
     viewport(x, y) {
-        x = (x - this.xl) / this.#rangeX * w;
-        y = (y - this.yl) / this.#rangeY * h;
-        return [x, h - y];
+        x = (x - this.xl) / this.#rangeX * canvas.w;
+        y = (y - this.yl) / this.#rangeY * canvas.h;
+        return [x, canvas.h - y];
     }
     draw() {
         let x = 0;
@@ -80,11 +78,11 @@ export class Cartesian {
             c.beginPath();
             if (x) {
                 c.moveTo(x, 0);
-                c.lineTo(x, h);
+                c.lineTo(x, canvas.h);
             }
             if (y) {
                 c.moveTo(0, y);
-                c.lineTo(w, y);
+                c.lineTo(canvas.w, y);
             }
             c.stroke();
         }
@@ -92,12 +90,12 @@ export class Cartesian {
             c.beginPath();
             for (let i = 0; i < (this.xr - this.xl + 1); i++) {
                 c.moveTo(x, 0);
-                c.lineTo(x, h);
+                c.lineTo(x, canvas.h);
                 x += this.#stepX;
             }
             for (let i = 0; i < (this.yr - this.yl + 1); i++) {
                 c.moveTo(0, y);
-                c.lineTo(w, y);
+                c.lineTo(canvas.w, y);
                 y += this.#stepY;
             }
             c.stroke();

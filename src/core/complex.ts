@@ -22,6 +22,12 @@ export class Complex {
     constructor(readonly re: number,
                 readonly im: number = 0) {}
 
+    static polar(abs: number, arg: number): Complex {
+        return new Complex(
+            abs * Math.cos(arg),
+            abs * Math.sin(arg));
+    }
+
     to_str(): string {
         if (this.re !== 0) {
             if (this.im > 0)

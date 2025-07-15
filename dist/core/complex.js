@@ -19,6 +19,9 @@ export class Complex {
         this.re = re;
         this.im = im;
     }
+    static polar(abs, arg) {
+        return new Complex(abs * Math.cos(arg), abs * Math.sin(arg));
+    }
     to_str() {
         if (this.re !== 0) {
             if (this.im > 0)
